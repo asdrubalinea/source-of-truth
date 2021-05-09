@@ -1,0 +1,1 @@
+cp *.nix /etc/nixos/
