@@ -97,6 +97,7 @@
     wget vim curl git
     sudo neofetch htop
     chromium keepassxc glxinfo
+    gnome3.gnome-tweaks
   ];
 
   # Some programs need SUID wrappers, can be configured further or are
