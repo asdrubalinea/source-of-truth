@@ -17,6 +17,7 @@
     loader.systemd-boot.enable = true;
     loader.efi.canTouchEfiVariables = true;
     kernelPackages = pkgs.linuxPackages_5_11;
+    extraModulePackages =[ config.boot.kernelPackages.nvidia_x11 ];
   };
   
   networking.hostName = "nixos"; # Define your hostname.
@@ -41,17 +42,17 @@
 
   services.xserver = {
     enable = true;
-    videoDrivers = [ "nvidia" ];
+    videoDrivers = [ "modesetting" "nvidia" ];
 
     displayManager.gdm.enable = true;
     desktopManager.gnome3.enable = true;
 
     config = ''
     Section "OutputClass"
-        Identifier "AMDgpu"
-	MatchDriver "amdgpu"
-	Driver "amdgpu"
-	Option "TearFree" "true"
+      Identifier "AMDgpu"
+      MatchDriver "amdgpu"
+      Driver "amdgpu"
+      Option "TearFree" "true"
     EndSection
     '';
   };
@@ -68,6 +69,16 @@
     opengl = {
       driSupport = true;
       driSupport32Bit = true;
+    };
+
+    nvidia = {
+      prime = {
+        offload.enable = true;
+        amdgpuBusId = "PCI:5:0:0";
+        nvidiaBusId = "PCI:1:0:0";
+      };
+
+      modesetting.enable = true;
     };
   };
   
@@ -108,4 +119,3 @@
   system.stateVersion = "21.05"; # Did you read the comment?
 
 }
-
