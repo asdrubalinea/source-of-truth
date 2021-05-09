@@ -55,7 +55,6 @@
     EndSection
     '';
   };
-  
 
   # Configure keymap in X11
   services.xserver.layout = "it";
@@ -86,7 +85,7 @@
   environment.systemPackages = with pkgs; [
     wget vim curl git
     sudo neofetch htop
-    firefox keepassxc glxinfo
+    chromium keepassxc glxinfo
   ];
 
   # Some programs need SUID wrappers, can be configured further or are
