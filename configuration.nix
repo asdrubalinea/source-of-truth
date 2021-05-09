@@ -17,7 +17,7 @@
     loader.systemd-boot.enable = true;
     loader.efi.canTouchEfiVariables = true;
     kernelPackages = pkgs.linuxPackages_5_11;
-    extraModulePackages =[ config.boot.kernelPackages.nvidia_x11 ];
+    extraModulePackages = [ config.boot.kernelPackages.nvidia_x11 ];
   };
   
   networking.hostName = "nixos"; # Define your hostname.
@@ -42,7 +42,7 @@
 
   services.xserver = {
     enable = true;
-    videoDrivers = [ "modesetting" "nvidia" ];
+    videoDrivers = [ "nvidia" ];
 
     displayManager.gdm.enable = true;
     desktopManager.gnome3.enable = true;
@@ -74,8 +74,8 @@
     nvidia = {
       prime = {
         offload.enable = true;
-        amdgpuBusId = "PCI:5:0:0";
-        nvidiaBusId = "PCI:1:0:0";
+        amdgpuBusId = "PCI:05:0:0";
+        nvidiaBusId = "PCI:01:0:0";
       };
 
       modesetting.enable = true;
