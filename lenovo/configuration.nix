@@ -94,7 +94,7 @@ in
     gnome3.gnome-tweaks
     tdesktop lightdm
     alacritty 
-    vscode
+    vscode openvpn
 
     # Custom scripts
     systemClean
