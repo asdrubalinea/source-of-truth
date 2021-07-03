@@ -5,16 +5,6 @@
 { config, pkgs, ... }:
 
 let
-  # Execute app with prime offloading
-  nvidiaPrime = pkgs.writeScriptBin "prime-run" ''
-    #!${pkgs.stdenv.shell}
-    export __NV_PRIME_RENDER_OFFLOAD=1
-    export __NV_PRIME_RENDER_OFFLOAD_PROVIDER=NVIDIA-G0
-    export __GLX_VENDOR_LIBRARY_NAME=nvidia
-    export __VK_LAYER_NV_optimus=NVIDIA_only
-    exec -a "$0" "$@"
-  '';
-
   # Remove old generations and perform garbage collection
   systemClean = pkgs.writeScriptBin "system-clean" ''
     #!${pkgs.stdenv.shell}
@@ -23,7 +13,9 @@ let
   '';
 in
 {
-  imports = [ ];
+  imports = [
+    ./nvidia-prime.nix
+  ];
 
   nixpkgs.config.allowUnfree = true;
 
@@ -32,14 +24,6 @@ in
     loader.systemd-boot.enable = true;
     loader.efi.canTouchEfiVariables = true;
     kernelPackages = pkgs.linuxPackages_latest;
-    # extraModulePackages = [ config.boot.kernelPackages.nvidia_x11 ];
-    extraModprobeConfig = "options nvidia-drm modeset=1";
-    initrd.kernelModules = [
-      "nvidia"
-      "nvidia_modeset"
-      "nvidia_uvm"
-      "nvidia_drm"
-    ];
   };
   
   networking.hostName = "legion"; # Define your hostname.
@@ -69,8 +53,6 @@ in
     displayManager.gdm.enable = true;
     desktopManager.gnome.enable = true;
 
-    videoDrivers = [ "nvidia" ];
-
     config = ''
         Section "OutputClass"
             Identifier "AMDgpu"
@@ -93,25 +75,6 @@ in
     alsa.enable = true;
     alsa.support32Bit = true;
     pulse.enable = true;
-  };
-
-  hardware = {
-    opengl = {
-      driSupport = true;
-      driSupport32Bit = true;
-    };
-
-    nvidia = {
-      package = config.boot.kernelPackages.nvidiaPackages.beta;
-
-      prime = {
-        offload.enable = true;
-        amdgpuBusId = "PCI:05:0:0";
-        nvidiaBusId = "PCI:01:0:0";
-      };
-
-      modesetting.enable = true;
-    };
   };
   
   # Enable touchpad support (enabled default in most desktopManager).
@@ -136,7 +99,6 @@ in
     vscode
 
     # Custom scripts
-    nvidiaPrime
     systemClean
   ];
 
