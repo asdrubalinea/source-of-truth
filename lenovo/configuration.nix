@@ -4,6 +4,24 @@
 
 { config, pkgs, ... }:
 
+let
+  # Execute app with prime offloading
+  nvidiaPrime = pkgs.writeScriptBin "prime-run" ''
+    #!${pkgs.stdenv.shell}
+    export __NV_PRIME_RENDER_OFFLOAD=1
+    export __NV_PRIME_RENDER_OFFLOAD_PROVIDER=NVIDIA-G0
+    export __GLX_VENDOR_LIBRARY_NAME=nvidia
+    export __VK_LAYER_NV_optimus=NVIDIA_only
+    exec -a "$0" "$@"
+  '';
+
+  # Remove old generations and perform garbage collection
+  systemClean = pkgs.writeScriptBin "system-clean" ''
+    #!${pkgs.stdenv.shell}
+    sudo nix-env -p /nix/var/nix/profiles/system --delete-generations old
+    sudo nix-collect-garbage -d
+  '';
+in
 {
   imports =
     [ # Include the results of the hardware scan.
@@ -50,11 +68,9 @@
 
   services.xserver = {
     enable = true;
-    # displayManager.gdm.enable = true;
-    # desktopManager.gnome.enable = true;
 
-    displayManager.lightdm.enable = true;
-    desktopManager.plasma5.enable = true;
+    displayManager.gdm.enable = true;
+    desktopManager.gnome.enable = true;
 
     videoDrivers = [ "nvidia" ];
 
@@ -73,7 +89,6 @@
   services.xserver.xkbOptions = "eurosign:e";
   
   # Enable sound.
-  # sound.enable = false;
   hardware.pulseaudio.enable = false;
   security.rtkit.enable = true;
   services.pipewire = {
@@ -120,6 +135,12 @@
     networkmanager
     gnome3.gnome-tweaks
     tdesktop lightdm
+    alacritty 
+    vscode
+
+    # Custom scripts
+    nvidiaPrime
+    systemClean
   ];
 
   # Some programs need SUID wrappers, can be configured further or are
