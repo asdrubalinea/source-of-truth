@@ -12,6 +12,8 @@ let
   '';
 in
 {
+  nixpkgs.config.allowUnfree = true;
+
   boot = {
     extraModprobeConfig = "options nvidia-drm modeset=1";
     initrd.kernelModules = [
