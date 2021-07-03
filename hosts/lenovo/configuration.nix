@@ -74,6 +74,9 @@ in
   users.users.giovanni = {
     isNormalUser = true;
     extraGroups = [ "wheel" "networkmanager" ];
+    openssh.authorizedKeys.keys = [
+      (import ../../ssh-keys/lenovo.nix).lenovoKey
+    ];
   };
 
   # List packages installed in system profile. To search, run:

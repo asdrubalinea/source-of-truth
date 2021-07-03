@@ -1,5 +1,3 @@
-{ config, pkgs, ... }:
-
 {
   services.xserver.config = ''
     Section "OutputClass"
