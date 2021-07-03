@@ -14,7 +14,8 @@ let
 in
 {
   imports = [
-    ./nvidia-prime.nix
+    ../../hardware/nvidia-prime.nix
+    ../../hardware/radeon.nix
   ];
 
   # Use the systemd-boot EFI boot loader.
@@ -50,15 +51,6 @@ in
 
     displayManager.gdm.enable = true;
     desktopManager.gnome.enable = true;
-
-    config = ''
-        Section "OutputClass"
-            Identifier "AMDgpu"
-            MatchDriver "amdgpu"
-            Driver "amdgpu"
-            Option "TearFree" "true"
-        EndSection
-    '';
   };
 
   # Configure keymap in X11
