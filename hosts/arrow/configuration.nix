@@ -14,7 +14,7 @@
   # Define on which hard drive you want to install Grub.
   boot.loader.grub.device = "/dev/sda"; # or "nodev" for efi only
 
-  networking.hostName = "nixos"; # Define your hostname.
+  networking.hostName = "arrow"; # Define your hostname.
 
   # Set your time zone.
   time.timeZone = "Europe/Rome";

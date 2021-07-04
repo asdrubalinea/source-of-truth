@@ -4,18 +4,11 @@
 
 { config, pkgs, ... }:
 
-let
-  # Remove old generations and perform garbage collection
-  systemClean = pkgs.writeScriptBin "system-clean" ''
-    #!${pkgs.stdenv.shell}
-    sudo nix-env -p /nix/var/nix/profiles/system --delete-generations old
-    sudo nix-collect-garbage -d
-  '';
-in
 {
   imports = [
     ../../hardware/nvidia-prime.nix
     ../../hardware/radeon.nix
+    ../../scripts/system-clean.nix
   ];
 
   # Use the systemd-boot EFI boot loader.
@@ -25,7 +18,7 @@ in
     kernelPackages = pkgs.linuxPackages_latest;
   };
   
-  networking.hostName = "legion"; # Define your hostname.
+  networking.hostName = "swan"; # Define your hostname.
   networking.networkmanager.enable = true;
 
   # Set your time zone.
@@ -90,9 +83,6 @@ in
     tdesktop lightdm
     alacritty 
     vscode openvpn
-
-    # Custom scripts
-    systemClean
   ];
 
   # Some programs need SUID wrappers, can be configured further or are
