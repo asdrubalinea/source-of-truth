@@ -4,11 +4,16 @@
 
 { config, pkgs, ... }:
 
+let 
+  dwm = (import ../../packages/dwm.nix);
+  dwmblocks = (import ../../packages/dwmblocks.nix);
+in
 {
   imports = [
     ../../hardware/nvidia-prime.nix
     ../../hardware/radeon.nix
     ../../scripts/system-clean.nix
+    ../../scripts/set-brightness.nix
   ];
 
   # Use the systemd-boot EFI boot loader.
@@ -42,8 +47,10 @@
   services.xserver = {
     enable = true;
 
-    displayManager.gdm.enable = true;
-    desktopManager.gnome.enable = true;
+    displayManager.startx.enable = true;
+
+    # displayManager.gdm.enable = true;
+    # desktopManager.gnome.enable = true;
   };
 
   # Configure keymap in X11
@@ -83,6 +90,9 @@
     tdesktop lightdm
     alacritty 
     vscode openvpn
+
+    dwm dwmblocks dmenu
+    feh
   ];
 
   # Some programs need SUID wrappers, can be configured further or are
