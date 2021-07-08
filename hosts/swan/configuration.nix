@@ -16,6 +16,10 @@ in
     ../../scripts/system-upgrade.nix
     ../../scripts/set-brightness.nix
     ../../scripts/battery.nix
+
+    ../../desktop/sound.nix
+    ../../desktop/x11.nix
+    ../../desktop/fonts.nix
   ];
 
   # Use the systemd-boot EFI boot loader.
@@ -45,29 +49,9 @@ in
     keyMap = "it";
   };
 
-
-  services.xserver = {
-    enable = true;
-
-    displayManager.startx.enable = true;
-
-    # displayManager.gdm.enable = true;
-    # desktopManager.gnome.enable = true;
-  };
-
   # Configure keymap in X11
   services.xserver.layout = "it";
   services.xserver.xkbOptions = "eurosign:e";
-  
-  # Enable sound.
-  hardware.pulseaudio.enable = false;
-  security.rtkit.enable = true;
-  services.pipewire = {
-    enable = true;
-    alsa.enable = true;
-    alsa.support32Bit = true;
-    pulse.enable = true;
-  };
   
   # Enable touchpad support (enabled default in most desktopManager).
   services.xserver.libinput.enable = true;
@@ -79,22 +63,6 @@ in
     openssh.authorizedKeys.keys = [
       (import ../../ssh-keys/lenovo.nix).lenovoKey
     ];
-  };
-
-  fonts = {
-    enableDefaultFonts = false;
-    fonts = with pkgs; [ 
-      pkgs.noto-fonts
-      pkgs.fira-code
-    ];
-
-    fontconfig = {
-      defaultFonts = {
-        serif = [ "Noto Serif" ];
-        sansSerif = [ "Noto Sans" ];
-        monospace = [ "Noto Mono" ];
-      };
-    };
   };
 
   # List packages installed in system profile. To search, run:
