@@ -20,6 +20,8 @@ in
     ../../desktop/sound.nix
     ../../desktop/x11.nix
     ../../desktop/fonts.nix
+
+    ../../network/hosts.nix
   ];
 
   # Use the systemd-boot EFI boot loader.
