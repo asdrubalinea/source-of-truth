@@ -13,7 +13,9 @@ in
     ../../hardware/nvidia-prime.nix
     ../../hardware/radeon.nix
     ../../scripts/system-clean.nix
+    ../../scripts/system-upgrade.nix
     ../../scripts/set-brightness.nix
+    ../../scripts/battery.nix
   ];
 
   # Use the systemd-boot EFI boot loader.
@@ -77,6 +79,22 @@ in
     openssh.authorizedKeys.keys = [
       (import ../../ssh-keys/lenovo.nix).lenovoKey
     ];
+  };
+
+  fonts = {
+    enableDefaultFonts = false;
+    fonts = with pkgs; [ 
+      pkgs.noto-fonts
+      pkgs.fira-code
+    ];
+
+    fontconfig = {
+      defaultFonts = {
+        serif = [ "Noto Serif" ];
+        sansSerif = [ "Noto Sans" ];
+        monospace = [ "Noto Mono" ];
+      };
+    };
   };
 
   # List packages installed in system profile. To search, run:
