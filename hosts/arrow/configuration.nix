@@ -6,7 +6,12 @@
 
 {
   imports = [
+    ../../scripts/system-clean.nix
+    ../../scripts/system-upgrade.nix
+
+    ../../network/hosts.nix
   ];
+
 
   # Use the GRUB 2 boot loader.
   boot.loader.grub.enable = true;
