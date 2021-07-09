@@ -50,7 +50,7 @@
 
   # List packages installed in system profile. To search, run:
   # $ nix search wget
-  environment.systemPackages = with pkgs; [ neovim htop git ];
+  environment.systemPackages = with pkgs; [ neovim htop git docker-compose ];
 
   virtualisation.docker.enable = true;
 
@@ -63,6 +63,18 @@
   };
 
   # List services that you want to enable:
+
+  systemd.services.scholarship-watcher = {
+    enable = true;
+    description = "Watch for scholarship updates";
+    unitConfig = {
+      Type = "simple";
+    };
+    serviceConfig = {
+      ExecStart = "/home/giovanni/scholarship-watcher/target/release/scholarship-watcher";
+    };
+    wantedBy = [ "multi-user.target" ];
+  };
 
   # Enable the OpenSSH daemon.
   services.openssh = {
