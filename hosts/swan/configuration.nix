@@ -72,7 +72,8 @@ in
   environment.systemPackages = with pkgs; [
     wget neovim curl git
     sudo neofetch htop
-    firefox keepassxc glxinfo
+    firefox brave
+    keepassxc glxinfo
     networkmanager
     gnome3.gnome-tweaks
     tdesktop lightdm

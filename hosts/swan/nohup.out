@@ -1,8 +1,0 @@
-sh: .local/bin/used-ram-percentage: No such file or directory
-sh: .local/bin/battery: No such file or directory
-sh: .local/bin/used-ram-percentage: No such file or directory
-sh: .local/bin/battery: No such file or directory
-sh: .local/bin/used-ram-percentage: No such file or directory
-sh: .local/bin/battery: No such file or directory
-XIO:  fatal IO error 4 (Interrupted system call) on X server ":0"
-      after 11 requests (11 known processed) with 0 events remaining.
