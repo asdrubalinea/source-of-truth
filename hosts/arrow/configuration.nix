@@ -10,6 +10,8 @@
     ../../scripts/system-upgrade.nix
 
     ../../network/hosts.nix
+
+    ../../services/openvpn-server.nix
   ];
 
 
