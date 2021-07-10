@@ -13,6 +13,7 @@
 
     ../../services/openvpn-server.nix
     ../../services/scholarship-watcher.nix
+    ../../services/nginx.nix
 
     ../../misc/bash-aliases.nix
   ];
