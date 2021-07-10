@@ -12,6 +12,9 @@
     ../../network/hosts.nix
 
     ../../services/openvpn-server.nix
+    ../../services/scholarship-watcher.nix
+
+    ../../misc/bash-aliases.nix
   ];
 
 
@@ -65,18 +68,6 @@
   };
 
   # List services that you want to enable:
-
-  systemd.services.scholarship-watcher = {
-    enable = true;
-    description = "Watch for scholarship updates";
-    unitConfig = {
-      Type = "simple";
-    };
-    serviceConfig = {
-      ExecStart = "/home/giovanni/scholarship-watcher/target/release/scholarship-watcher";
-    };
-    wantedBy = [ "multi-user.target" ];
-  };
 
   # Enable the OpenSSH daemon.
   services.openssh = {

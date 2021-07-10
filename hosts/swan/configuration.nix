@@ -4,10 +4,6 @@
 
 { config, pkgs, ... }:
 
-let 
-  dwm = (import ../../packages/dwm.nix);
-  dwmblocks = (import ../../packages/dwmblocks.nix);
-in
 {
   imports = [
     ../../hardware/nvidia-prime.nix
@@ -20,8 +16,11 @@ in
     ../../desktop/sound.nix
     ../../desktop/x11.nix
     ../../desktop/fonts.nix
+    ../../desktop/dwm.nix
 
     ../../network/hosts.nix
+
+    ../../misc/bash-aliases.nix
   ];
 
   # Use the systemd-boot EFI boot loader.
@@ -79,8 +78,6 @@ in
     tdesktop lightdm
     alacritty 
     vscode openvpn
-
-    dwm dwmblocks dmenu
     feh
   ];
 
@@ -91,13 +88,6 @@ in
     enable = true;
     enableSSHSupport = true;
   };
-
-  programs.bash.shellAliases = {
-    gits = "git status";
-    gitc = "git commit";
-    gitp = "git push";
-  };
-
 
   # This value determines the NixOS release from which the default
   # settings for stateful data, like file locations and database versions
