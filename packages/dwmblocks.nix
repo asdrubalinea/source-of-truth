@@ -1,6 +1,6 @@
 with import <nixpkgs> { };
 
-stdenv.mkDerivation {
+stdenv.mkDerivation rec {
   pname = "dwmblocks";
   version = "latest";
   src = fetchFromGitHub {

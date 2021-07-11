@@ -1,6 +1,6 @@
 with import <nixpkgs> { };
 
-stdenv.mkDerivation {
+stdenv.mkDerivation rec {
   pname = "dwm";
   version = "6.2";
   src = fetchFromGitHub {

@@ -3,7 +3,9 @@
 let 
   dwm = (import ../packages/dwm.nix);
   dwmblocks = (import ../packages/dwmblocks.nix);
+  picom = (import ../packages/picom.nix);
 in
 {
-  environment.systemPackages = with pkgs; [ dwm dwmblocks dmenu ];
+  environment.systemPackages = [ dwm dwmblocks picom pkgs.dmenu ];
+
 }
