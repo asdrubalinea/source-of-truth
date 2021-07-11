@@ -79,6 +79,7 @@
 
     # System utils
     wget neovim curl git sudo neofetch htop dstat
+    barrier
 
     # Browsers
     firefox brave
