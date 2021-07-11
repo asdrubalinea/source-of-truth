@@ -13,17 +13,19 @@
 
     ../../services/openvpn-server.nix
     ../../services/scholarship-watcher.nix
+    ../../services/nginx.nix
 
     ../../misc/bash-aliases.nix
   ];
 
-
-  # Use the GRUB 2 boot loader.
-  boot.loader.grub.enable = true;
-  boot.loader.grub.version = 2;
-  # Define on which hard drive you want to install Grub.
-  boot.loader.grub.device = "/dev/sda"; # or "nodev" for efi only
-  boot.kernelPackages = pkgs.linuxPackages_latest;
+  boot = {
+    # Use the GRUB 2 boot loader.
+    loader.grub.enable = true;
+    loader.grub.version = 2;
+    # Define on which hard drive you want to install Grub.
+    loader.grub.device = "/dev/sda"; # or "nodev" for efi only
+    kernelPackages = pkgs.linuxPackages_latest;
+  };
 
   networking.hostName = "arrow"; # Define your hostname.
 
