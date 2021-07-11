@@ -31,7 +31,7 @@
   };
   
   networking.hostName = "swan"; # Define your hostname.
-  networking.networkmanager.enable = true;
+  networking.networkmanager.enable = false;
 
   # Set your time zone.
   time.timeZone = "Europe/Rome";
@@ -98,8 +98,10 @@
     vscode
 
     # Docker
-    docker docker-compose
+    docker-compose
   ];
+
+  virtualisation.docker.enable = true;
 
   # Some programs need SUID wrappers, can be configured further or are
   # started in user sessions.
