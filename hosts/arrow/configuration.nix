@@ -13,6 +13,7 @@
 
     ../../services/openvpn-server.nix
     ../../services/scholarship-watcher.nix
+    ../../services/website-tracker.nix
     ../../services/nginx.nix
 
     ../../crontabs/auto-upgrade.nix
