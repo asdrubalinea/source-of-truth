@@ -69,17 +69,21 @@
   # List packages installed in system profile. To search, run:
   # $ nix search wget
   environment.systemPackages = with pkgs; [
-    keepassxc glxinfo
-    networkmanager
-    gnome3.gnome-tweaks
-    tdesktop
-    alacritty 
+    # Passwords
+    keepassxc
+
+    # Network
     openvpn
-    feh
+
+    # Social
+    tdesktop
+
+    # Terminals
+    alacritty
 
     # System utils
     wget neovim curl git sudo neofetch htop dstat
-    barrier
+    barrier glxinfo
 
     # Browsers
     firefox brave
@@ -91,7 +95,10 @@
     python310
 
     # IDEs
-    jetbrains.idea-community vscode
+    vscode
+
+    # Docker
+    docker docker-compose
   ];
 
   # Some programs need SUID wrappers, can be configured further or are

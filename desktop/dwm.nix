@@ -6,6 +6,6 @@ let
   picom = (import ../packages/picom.nix);
 in
 {
-  environment.systemPackages = [ dwm dwmblocks picom pkgs.dmenu ];
+  environment.systemPackages = [ dwm dwmblocks picom pkgs.dmenu pkgs.feh ];
 
 }
