@@ -15,7 +15,7 @@
     ../../services/scholarship-watcher.nix
     ../../services/nginx.nix
 
-    ../../crontab/auto-upgrade.nix
+    ../../crontabs/auto-upgrade.nix
 
     ../../misc/bash-aliases.nix
   ];
