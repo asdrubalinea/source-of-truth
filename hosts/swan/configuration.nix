@@ -69,18 +69,28 @@
   # List packages installed in system profile. To search, run:
   # $ nix search wget
   environment.systemPackages = with pkgs; [
-    wget neovim curl git
-    sudo neofetch htop
-    firefox brave
     keepassxc glxinfo
     networkmanager
     gnome3.gnome-tweaks
-    tdesktop lightdm
+    tdesktop
     alacritty 
-    vscode openvpn
+    openvpn
     feh
 
-    rustc cargo
+    # System utils
+    wget neovim curl git sudo neofetch htop dstat
+
+    # Browsers
+    firefox brave
+    
+    # Rust
+    rustc rustup cargo
+
+    # Python
+    python310
+
+    # IDEs
+    jetbrains.idea-community vscode
   ];
 
   # Some programs need SUID wrappers, can be configured further or are
