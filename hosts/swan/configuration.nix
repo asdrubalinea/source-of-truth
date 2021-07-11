@@ -60,7 +60,7 @@
   # Define a user account. Don't forget to set a password with ‘passwd’.
   users.users.giovanni = {
     isNormalUser = true;
-    extraGroups = [ "wheel" "networkmanager" ];
+    extraGroups = [ "wheel" "docker" ];
     openssh.authorizedKeys.keys = [
       (import ../../ssh-keys/lenovo.nix).lenovoKey
     ];
