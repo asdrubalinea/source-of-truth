@@ -9,6 +9,8 @@
     ../../scripts/system-clean.nix
     ../../scripts/system-upgrade.nix
 
+    ../../hardware/nvidia.nix
+
     ../../desktop/sound.nix
     ../../desktop/x11.nix
     ../../desktop/fonts.nix
@@ -18,8 +20,6 @@
 
     ../../misc/bash-aliases.nix
   ];
-
-  nixpkgs.config.allowUnfree = true;
 
   # Use the systemd-boot EFI boot loader.
   boot = {
@@ -57,7 +57,6 @@
 
   # Configure keymap in X11
   services.xserver.layout = "us";
-  services.xserver.videoDrivers = [ "nvidia" ];
   
   # Enable touchpad support (enabled default in most desktopManager).
   services.xserver.libinput.enable = true;

@@ -5,7 +5,7 @@
     enableDefaultFonts = false;
     fonts = with pkgs; [ 
       pkgs.noto-fonts
-      pkgs.fira-code
+      # pkgs.fira-code
     ];
 
     fontconfig = {
