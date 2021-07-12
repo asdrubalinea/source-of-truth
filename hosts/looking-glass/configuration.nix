@@ -36,7 +36,15 @@
   # Per-interface useDHCP will be mandatory in the future, so this generated config
   # replicates the default behaviour.
   networking.useDHCP = false;
-  networking.interfaces.enp3s0.useDHCP = true;
+  networking.interfaces.enp3s0.useDHCP = false;
+
+  networking.interfaces.enp3s0.ipv4.addresses = [ {
+    address = "10.0.0.16";
+    prefixLength = 24;
+  } ];
+  networking.defaultGateway = "10.0.0.1";
+  networking.nameservers = [ "1.1.1.1" ];
+
 
   # Select internationalisation properties.
   i18n.defaultLocale = "en_US.UTF-8";
