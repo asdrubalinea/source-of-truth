@@ -6,19 +6,14 @@
 
 {
   imports = [
-    ../../hardware/nvidia-prime.nix
-    ../../hardware/radeon.nix
     ../../scripts/system-clean.nix
     ../../scripts/system-upgrade.nix
-    ../../scripts/set-brightness.nix
-    ../../scripts/battery.nix
 
-    ../../desktop/sound.nix
-    ../../desktop/x11.nix
-    ../../desktop/fonts.nix
-    ../../desktop/dwm.nix
+    ../../services/nginx.nix
 
     ../../network/hosts.nix
+
+    ../../crontabs/auto-upgrade.nix
 
     ../../misc/bash-aliases.nix
   ];
@@ -30,7 +25,7 @@
     kernelPackages = pkgs.linuxPackages_latest;
   };
   
-  networking.hostName = "swan"; # Define your hostname.
+  networking.hostName = "pearl"; # Define your hostname.
   networking.networkmanager.enable = false;
 
   # Set your time zone.
@@ -40,22 +35,15 @@
   # Per-interface useDHCP will be mandatory in the future, so this generated config
   # replicates the default behaviour.
   networking.useDHCP = false;
-  networking.interfaces.eno1.useDHCP = true;
-  networking.interfaces.wlp4s0.useDHCP = true;
+  # networking.interfaces.eno1.useDHCP = true;
+  # networking.interfaces.wlp4s0.useDHCP = true;
 
   # Select internationalisation properties.
   i18n.defaultLocale = "en_US.UTF-8";
   console = {
     font = "Lat2-Terminus16";
-    keyMap = "it";
+    keyMap = "us";
   };
-
-  # Configure keymap in X11
-  services.xserver.layout = "it";
-  services.xserver.xkbOptions = "eurosign:e";
-  
-  # Enable touchpad support (enabled default in most desktopManager).
-  services.xserver.libinput.enable = true;
 
   # Define a user account. Don't forget to set a password with ‘passwd’.
   users.users.giovanni = {
@@ -69,33 +57,11 @@
   # List packages installed in system profile. To search, run:
   # $ nix search wget
   environment.systemPackages = with pkgs; [
-    # Passwords
-    keepassxc
-
     # Network
     openvpn
 
-    # Social
-    tdesktop
-
-    # Terminals
-    alacritty
-
     # System utils
-    wget neovim curl git sudo neofetch htop dstat
-    barrier glxinfo sshfs
-
-    # Browsers
-    firefox brave
-    
-    # Rust
-    rustc rustup cargo
-
-    # Python
-    python310
-
-    # IDEs
-    vscode
+    wget neovim curl git sudo neofetch htop dstat sshfs
 
     # Docker
     docker-compose
@@ -111,7 +77,7 @@
     enableSSHSupport = true;
   };
 
-  networking.firewall.allowedTCPPorts = [ 24800 ];
+  # networking.firewall.allowedTCPPorts = [ ... ];
   # networking.firewall.allowedUDPPorts = [ ... ];
   networking.firewall.enable = true;
 
