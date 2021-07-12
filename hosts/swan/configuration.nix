@@ -13,7 +13,7 @@
     ../../scripts/set-brightness.nix
     ../../scripts/battery.nix
 
-    ../../desktop/sound.nix
+    ../../desktop/pipewire.nix
     ../../desktop/x11.nix
     ../../desktop/fonts.nix
     ../../desktop/dwm.nix

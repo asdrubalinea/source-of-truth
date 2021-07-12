@@ -11,8 +11,8 @@
 
     ../../hardware/nvidia.nix
 
-    ../../desktop/sound.nix
     ../../desktop/x11.nix
+    ../../desktop/pulseaudio.nix
     ../../desktop/fonts.nix
     ../../desktop/dwm.nix
 
