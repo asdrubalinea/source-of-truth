@@ -13,7 +13,7 @@
 
     ../../services/openvpn-server.nix
     ../../services/scholarship-watcher.nix
-    ../../services/website-tracker.nix
+    # ../../services/website-tracker.nix
     ../../services/nginx.nix
 
     ../../crontabs/auto-upgrade.nix
@@ -60,7 +60,7 @@
 
   # List packages installed in system profile. To search, run:
   # $ nix search wget
-  environment.systemPackages = with pkgs; [ neovim htop git docker-compose ];
+  environment.systemPackages = with pkgs; [ neovim htop git docker-compose screen ];
 
   virtualisation.docker.enable = true;
 
