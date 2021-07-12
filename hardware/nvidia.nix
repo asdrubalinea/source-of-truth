@@ -24,7 +24,7 @@
 
     nvidia = {
       package = config.boot.kernelPackages.nvidiaPackages.beta;
-      modesetting.enable = true;
+      modesetting.enable = false;
     };
   };
 }

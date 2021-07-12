@@ -12,7 +12,7 @@
     ../../hardware/nvidia.nix
 
     ../../desktop/x11.nix
-    ../../desktop/pulseaudio.nix
+    ../../desktop/pipewire.nix
     ../../desktop/fonts.nix
     ../../desktop/dwm.nix
 
@@ -25,7 +25,6 @@
   boot = {
     loader.systemd-boot.enable = true;
     loader.efi.canTouchEfiVariables = true;
-    kernelPackages = pkgs.linuxPackages_latest;
   };
   
   networking.hostName = "looking-glass"; # Define your hostname.
@@ -64,7 +63,7 @@
   # Define a user account. Don't forget to set a password with ‘passwd’.
   users.users.giovanni = {
     isNormalUser = true;
-    extraGroups = [ "wheel" "audio" ];
+    extraGroups = [ "wheel" "audio" "video" "sound" ];
     openssh.authorizedKeys.keys = [
       (import ../../ssh-keys/lenovo.nix).lenovoKey
     ];
