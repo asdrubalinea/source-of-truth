@@ -83,7 +83,8 @@
 
     # System utils
     wget neovim curl git sudo neofetch htop dstat
-    barrier glxinfo sshfs
+    barrier glxinfo sshfs arandr
+    exa pavucontrol fish
 
     # Browsers
     firefox brave
