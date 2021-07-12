@@ -104,7 +104,13 @@
     enableSSHSupport = true;
   };
 
-  networking.firewall.allowedTCPPorts = [ 24800 ];
+  # Enable the OpenSSH daemon.
+  services.openssh = {
+    enable = true;
+    passwordAuthentication = false;
+  };
+
+  networking.firewall.allowedTCPPorts = [ 22 24800 ];
   # networking.firewall.allowedUDPPorts = [ ... ];
   networking.firewall.enable = true;
 
