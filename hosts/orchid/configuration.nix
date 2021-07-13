@@ -9,15 +9,6 @@
     ../../scripts/system-clean.nix
     ../../scripts/system-upgrade.nix
 
-    ../../network/hosts.nix
-
-    ../../services/openvpn-server.nix
-    ../../services/scholarship-watcher.nix
-    ../../services/website-tracker.nix
-    ../../services/nginx.nix
-
-    ../../crontabs/auto-upgrade.nix
-
     ../../misc/bash-aliases.nix
   ];
 
@@ -30,7 +21,7 @@
     kernelPackages = pkgs.linuxPackages_latest;
   };
 
-  networking.hostName = "arrow"; # Define your hostname.
+  networking.hostName = "orchid"; # Define your hostname.
 
   # Set your time zone.
   time.timeZone = "Europe/Rome";
@@ -52,7 +43,7 @@
   # Define a user account. Don't forget to set a password with ‘passwd’.
   users.users.giovanni = {
     isNormalUser = true;
-    extraGroups = [ "wheel" "docker" ];
+    extraGroups = [ "wheel" ];
     openssh.authorizedKeys.keys = [
       (import ../../ssh-keys/lenovo.nix).lenovoKey
     ];
@@ -60,9 +51,7 @@
 
   # List packages installed in system profile. To search, run:
   # $ nix search wget
-  environment.systemPackages = with pkgs; [ neovim htop git docker-compose screen ];
-
-  virtualisation.docker.enable = true;
+  environment.systemPackages = with pkgs; [ neovim htop git screen dstat ];
 
   # Some programs need SUID wrappers, can be configured further or are
   # started in user sessions.
@@ -73,6 +62,7 @@
   };
 
   # List services that you want to enable:
+  services.nginx.enable = true;
 
   # Enable the OpenSSH daemon.
   services.openssh = {
@@ -81,7 +71,7 @@
   };
 
   # Open ports in the firewall.
-  networking.firewall.allowedTCPPorts = [ 22 ];
+  networking.firewall.allowedTCPPorts = [ 22 80 443 ];
   # networking.firewall.allowedUDPPorts = [ ... ];
   networking.firewall.enable = true;
 
