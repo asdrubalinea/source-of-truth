@@ -9,6 +9,8 @@
     ../../scripts/system-clean.nix
     ../../scripts/system-upgrade.nix
 
+    ../../services/php-fpm-insegreto.nix
+
     ../../misc/bash-aliases.nix
   ];
 
@@ -43,7 +45,7 @@
   # Define a user account. Don't forget to set a password with ‘passwd’.
   users.users.giovanni = {
     isNormalUser = true;
-    extraGroups = [ "wheel" ];
+    extraGroups = [ "wheel" "insegreto" ];
     openssh.authorizedKeys.keys = [
       (import ../../ssh-keys/lenovo.nix).lenovoKey
     ];
@@ -51,7 +53,7 @@
 
   # List packages installed in system profile. To search, run:
   # $ nix search wget
-  environment.systemPackages = with pkgs; [ neovim htop git screen dstat ];
+  environment.systemPackages = with pkgs; [ neovim htop git screen dstat pkgs.php80Packages.composer ];
 
   # Some programs need SUID wrappers, can be configured further or are
   # started in user sessions.
@@ -62,7 +64,9 @@
   };
 
   # List services that you want to enable:
-  services.nginx.enable = true;
+  services.redis = {
+    enable = true;
+  };
 
   # Enable the OpenSSH daemon.
   services.openssh = {
