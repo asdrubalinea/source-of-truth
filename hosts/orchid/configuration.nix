@@ -53,7 +53,7 @@
 
   # List packages installed in system profile. To search, run:
   # $ nix search wget
-  environment.systemPackages = with pkgs; [ neovim htop git screen dstat pkgs.php80Packages.composer ];
+  environment.systemPackages = with pkgs; [ neovim htop git screen dstat pkgs.php80Packages.composer pkgs.nodejs ];
 
   # Some programs need SUID wrappers, can be configured further or are
   # started in user sessions.
@@ -66,6 +66,12 @@
   # List services that you want to enable:
   services.redis = {
     enable = true;
+  };
+
+  services.mysql = {
+    enable = true;
+    package = pkgs.mariadb;
+    user = "giovanni";
   };
 
   # Enable the OpenSSH daemon.

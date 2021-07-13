@@ -3,11 +3,10 @@
 let
   app = "insegreto";
   domain = "orchid.asdrubalini.xyz";
-  dataDir = "/home/giovanni/insegreto";
-  user = "giovanni";
+  dataDir = "/home/giovanni/insegreto/";
 in {
   services.phpfpm.pools.${app} = {
-    user = user;
+    user = app;
     settings = {
       "listen.owner" = config.services.nginx.user;
       "pm" = "dynamic";
@@ -34,5 +33,12 @@ in {
       '';
      };
   };
+  users.users.${app} = {
+    isSystemUser = true;
+    createHome = true;
+    home = dataDir;
+    group  = app;
+  };
+  users.groups.${app} = {};
 }
 
