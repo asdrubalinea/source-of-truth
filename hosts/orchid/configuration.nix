@@ -6,32 +6,31 @@
 
 {
   imports = [
-    ../../hardware/nvidia-prime.nix
-    ../../hardware/radeon.nix
     ../../scripts/system-clean.nix
     ../../scripts/system-upgrade.nix
-    ../../scripts/set-brightness.nix
-    ../../scripts/battery.nix
-
-    ../../desktop/pipewire.nix
-    ../../desktop/x11.nix
-    ../../desktop/fonts.nix
-    ../../desktop/dwm.nix
 
     ../../network/hosts.nix
+
+    ../../services/openvpn-server.nix
+    ../../services/scholarship-watcher.nix
+    ../../services/website-tracker.nix
+    ../../services/nginx.nix
+
+    ../../crontabs/auto-upgrade.nix
 
     ../../misc/bash-aliases.nix
   ];
 
-  # Use the systemd-boot EFI boot loader.
   boot = {
-    loader.systemd-boot.enable = true;
-    loader.efi.canTouchEfiVariables = true;
+    # Use the GRUB 2 boot loader.
+    loader.grub.enable = true;
+    loader.grub.version = 2;
+    # Define on which hard drive you want to install Grub.
+    loader.grub.device = "/dev/sda"; # or "nodev" for efi only
     kernelPackages = pkgs.linuxPackages_latest;
   };
-  
-  networking.hostName = "swan"; # Define your hostname.
-  networking.networkmanager.enable = false;
+
+  networking.hostName = "arrow"; # Define your hostname.
 
   # Set your time zone.
   time.timeZone = "Europe/Rome";
@@ -40,8 +39,8 @@
   # Per-interface useDHCP will be mandatory in the future, so this generated config
   # replicates the default behaviour.
   networking.useDHCP = false;
-  networking.interfaces.eno1.useDHCP = true;
-  networking.interfaces.wlp4s0.useDHCP = true;
+  networking.interfaces.ens3.useDHCP = true;
+  networking.interfaces.ens10.useDHCP = true;
 
   # Select internationalisation properties.
   i18n.defaultLocale = "en_US.UTF-8";
@@ -49,13 +48,6 @@
     font = "Lat2-Terminus16";
     keyMap = "it";
   };
-
-  # Configure keymap in X11
-  services.xserver.layout = "it";
-  services.xserver.xkbOptions = "eurosign:e";
-  
-  # Enable touchpad support (enabled default in most desktopManager).
-  services.xserver.libinput.enable = true;
 
   # Define a user account. Don't forget to set a password with ‘passwd’.
   users.users.giovanni = {
@@ -68,51 +60,28 @@
 
   # List packages installed in system profile. To search, run:
   # $ nix search wget
-  environment.systemPackages = with pkgs; [
-    # Passwords
-    keepassxc
-
-    # Network
-    openvpn
-
-    # Social
-    tdesktop
-
-    # Terminals
-    alacritty
-
-    # System utils
-    wget neovim curl git sudo neofetch htop dstat
-    barrier glxinfo sshfs arandr
-    exa pavucontrol fish
-
-    # Browsers
-    firefox brave
-    
-    # Rust
-    rustc rustup cargo
-
-    # Python
-    python310
-
-    # IDEs
-    vscode emacs
-
-    # Docker
-    docker-compose
-  ];
+  environment.systemPackages = with pkgs; [ neovim htop git docker-compose screen ];
 
   virtualisation.docker.enable = true;
 
   # Some programs need SUID wrappers, can be configured further or are
   # started in user sessions.
-  programs.mtr.enable = true;
+  # programs.mtr.enable = true;
   programs.gnupg.agent = {
     enable = true;
     enableSSHSupport = true;
   };
 
-  networking.firewall.allowedTCPPorts = [ 24800 ];
+  # List services that you want to enable:
+
+  # Enable the OpenSSH daemon.
+  services.openssh = {
+    enable = true;
+    passwordAuthentication = false;
+  };
+
+  # Open ports in the firewall.
+  networking.firewall.allowedTCPPorts = [ 22 ];
   # networking.firewall.allowedUDPPorts = [ ... ];
   networking.firewall.enable = true;
 
@@ -125,3 +94,4 @@
   system.stateVersion = "21.05"; # Did you read the comment?
 
 }
+
