@@ -3,7 +3,7 @@
 let
   app = "insegreto";
   domain = "orchid.asdrubalini.xyz";
-  dataDir = "/home/giovanni/insegreto/";
+  dataDir = "/home/giovanni/insegreto/public";
 in {
   services.phpfpm.pools.${app} = {
     user = app;
