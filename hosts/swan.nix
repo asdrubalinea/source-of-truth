@@ -95,11 +95,17 @@
     # Python
     python310
 
+    # Java
+    adoptopenjdk-openj9-bin-16
+
     # IDEs
     vscode emacs
 
     # Docker
     docker-compose
+
+    # Minecraft
+    multimc
   ];
 
   virtualisation.docker.enable = true;
