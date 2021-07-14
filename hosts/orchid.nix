@@ -47,7 +47,7 @@
     isNormalUser = true;
     extraGroups = [ "wheel" "insegreto" ];
     openssh.authorizedKeys.keys = [
-      (import ../../ssh-keys/lenovo.nix).lenovoKey
+      (import ../ssh-keys/lenovo.nix).lenovoKey
     ];
   };
 

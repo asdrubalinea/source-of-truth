@@ -62,7 +62,7 @@
     isNormalUser = true;
     extraGroups = [ "wheel" "docker" ];
     openssh.authorizedKeys.keys = [
-      (import ../../ssh-keys/lenovo.nix).lenovoKey
+      (import ../ssh-keys/lenovo.nix).lenovoKey
     ];
   };
 

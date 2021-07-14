@@ -65,7 +65,7 @@
     isNormalUser = true;
     extraGroups = [ "wheel" "audio" "video" "sound" ];
     openssh.authorizedKeys.keys = [
-      (import ../../ssh-keys/lenovo.nix).lenovoKey
+      (import ../ssh-keys/lenovo.nix).lenovoKey
     ];
   };
 
