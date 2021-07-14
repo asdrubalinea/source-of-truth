@@ -6,21 +6,21 @@
 
 {
   imports = [
-    ../../hardware/nvidia-prime.nix
-    ../../hardware/radeon.nix
-    ../../scripts/system-clean.nix
-    ../../scripts/system-upgrade.nix
-    ../../scripts/set-brightness.nix
-    ../../scripts/battery.nix
+    ../hardware/nvidia-prime.nix
+    ../hardware/radeon.nix
+    ../scripts/system-clean.nix
+    ../scripts/system-upgrade.nix
+    ../scripts/set-brightness.nix
+    ../scripts/battery.nix
 
-    ../../desktop/pipewire.nix
-    ../../desktop/x11.nix
-    ../../desktop/fonts.nix
-    ../../desktop/dwm.nix
+    ../desktop/pipewire.nix
+    ../desktop/x11.nix
+    ../desktop/fonts.nix
+    ../desktop/dwm.nix
 
-    ../../network/hosts.nix
+    ../network/hosts.nix
 
-    ../../misc/bash-aliases.nix
+    ../misc/bash-aliases.nix
   ];
 
   # Use the systemd-boot EFI boot loader.

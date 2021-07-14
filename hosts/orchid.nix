@@ -6,12 +6,12 @@
 
 {
   imports = [
-    ../../scripts/system-clean.nix
-    ../../scripts/system-upgrade.nix
+    ../scripts/system-clean.nix
+    ../scripts/system-upgrade.nix
 
-    ../../services/php-fpm-insegreto.nix
+    ../services/php-fpm-insegreto.nix
 
-    ../../misc/bash-aliases.nix
+    ../misc/bash-aliases.nix
   ];
 
   boot = {

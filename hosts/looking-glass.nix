@@ -6,19 +6,19 @@
 
 {
   imports = [
-    ../../scripts/system-clean.nix
-    ../../scripts/system-upgrade.nix
+    ../scripts/system-clean.nix
+    ../scripts/system-upgrade.nix
 
-    ../../hardware/nvidia.nix
+    ../hardware/nvidia.nix
 
-    ../../desktop/x11.nix
-    ../../desktop/pipewire.nix
-    ../../desktop/fonts.nix
-    ../../desktop/dwm.nix
+    ../desktop/x11.nix
+    ../desktop/pipewire.nix
+    ../desktop/fonts.nix
+    ../desktop/dwm.nix
 
-    ../../network/hosts.nix
+    ../network/hosts.nix
 
-    ../../misc/bash-aliases.nix
+    ../misc/bash-aliases.nix
   ];
 
   # Use the systemd-boot EFI boot loader.

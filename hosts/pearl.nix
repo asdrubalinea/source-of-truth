@@ -6,16 +6,16 @@
 
 {
   imports = [
-    ../../scripts/system-clean.nix
-    ../../scripts/system-upgrade.nix
+    ../scripts/system-clean.nix
+    ../scripts/system-upgrade.nix
 
-    ../../services/nginx.nix
+    ../services/nginx.nix
 
-    ../../network/hosts.nix
+    ../network/hosts.nix
 
-    ../../crontabs/auto-upgrade.nix
+    ../crontabs/auto-upgrade.nix
 
-    ../../misc/bash-aliases.nix
+    ../misc/bash-aliases.nix
   ];
 
   # Use the systemd-boot EFI boot loader.

@@ -6,19 +6,19 @@
 
 {
   imports = [
-    ../../scripts/system-clean.nix
-    ../../scripts/system-upgrade.nix
+    ../scripts/system-clean.nix
+    ../scripts/system-upgrade.nix
 
-    ../../network/hosts.nix
+    ../network/hosts.nix
 
-    ../../services/openvpn-server.nix
-    ../../services/scholarship-watcher.nix
-    ../../services/website-tracker.nix
-    ../../services/nginx.nix
+    ../services/openvpn-server.nix
+    ../services/scholarship-watcher.nix
+    ../services/website-tracker.nix
+    ../services/nginx.nix
 
-    ../../crontabs/auto-upgrade.nix
+    ../crontabs/auto-upgrade.nix
 
-    ../../misc/bash-aliases.nix
+    ../misc/bash-aliases.nix
   ];
 
   boot = {
