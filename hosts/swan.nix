@@ -15,10 +15,11 @@
 
     ../desktop/pipewire.nix
     ../desktop/x11.nix
-    ../desktop/fonts.nix
-    ../desktop/dwm.nix
+    # ../desktop/fonts.nix
+    # ../desktop/dwm.nix
+    ../desktop/gnome.nix
 
-    ../network/hosts.nix
+    # ../network/hosts.nix
 
     ../misc/bash-aliases.nix
   ];
@@ -30,7 +31,7 @@
     kernelPackages = pkgs.linuxPackages_latest;
   };
   
-  networking.hostName = "swan"; # Define your hostname.
+  networking.hostName = "swan";
   networking.networkmanager.enable = false;
 
   # Set your time zone.
@@ -42,6 +43,10 @@
   networking.useDHCP = false;
   networking.interfaces.eno1.useDHCP = true;
   networking.interfaces.wlp4s0.useDHCP = true;
+  networking.wireless = {
+    enable = true;
+    userControlled.enable = true;
+  }
 
   # Select internationalisation properties.
   i18n.defaultLocale = "en_US.UTF-8";
@@ -62,7 +67,7 @@
     isNormalUser = true;
     extraGroups = [ "wheel" "docker" ];
     openssh.authorizedKeys.keys = [
-      (import ../ssh-keys/lenovo.nix).lenovoKey
+      (import ../ssh-keys/swan.nix).lenovoKey
     ];
   };
 
@@ -71,9 +76,6 @@
   environment.systemPackages = with pkgs; [
     # Passwords
     keepassxc
-
-    # Network
-    openvpn
 
     # Social
     tdesktop
@@ -84,28 +86,22 @@
     # System utils
     wget neovim curl git sudo neofetch htop dstat
     barrier glxinfo sshfs arandr
-    exa pavucontrol fish
+    exa pavucontrol
 
     # Browsers
     firefox brave
     
     # Rust
-    rustc rustup cargo
+    rustup
 
     # Python
     python310
-
-    # Java
-    adoptopenjdk-openj9-bin-16
 
     # IDEs
     vscode emacs
 
     # Docker
     docker-compose
-
-    # Minecraft
-    multimc
   ];
 
   virtualisation.docker.enable = true;
@@ -118,7 +114,9 @@
     enableSSHSupport = true;
   };
 
-  networking.firewall.allowedTCPPorts = [ 24800 ];
+  networking.firewall.allowedTCPPorts = [
+    24800 # Barrier
+  ];
   # networking.firewall.allowedUDPPorts = [ ... ];
   networking.firewall.enable = true;
 
