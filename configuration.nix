@@ -1,28 +1,15 @@
-# Edit this configuration file to define what should be installed on
-# your system.  Help is available in the configuration.nix(5) man page
-# and in the NixOS manual (accessible by running ‘nixos-help’).
-
 { config, pkgs, ... }:
 
 {
-  imports = [
-    ../hardware/nvidia-prime.nix
-    ../hardware/radeon.nix
-    ../scripts/system-clean.nix
-    ../scripts/system-upgrade.nix
-    ../scripts/set-brightness.nix
-    ../scripts/battery.nix
+  imports =
+    [ # Include the results of the hardware scan.
+      ./hardware-configuration.nix
 
-    ../desktop/pipewire.nix
-    # ../desktop/x11.nix
-    # ../desktop/fonts.nix
-    # ../desktop/dwm.nix
-    # ../desktop/gnome.nix
+      ./hardware/radeon.nix
+      ./hardware/nvidia-prime.nix
 
-    # ../network/hosts.nix
-
-    ../misc/bash-aliases.nix
-  ];
+      ./desktop/gnome.nix
+    ];
 
   # Use the systemd-boot EFI boot loader.
   boot = {
@@ -30,25 +17,25 @@
     loader.efi.canTouchEfiVariables = true;
     kernelPackages = pkgs.linuxPackages_latest;
   };
-  
-  networking.hostName = "swan";
+
+  networking.hostName = "swan"; # Define your hostname.
+  networking.wireless.enable = true;  # Enables wireless support via wpa_supplicant.
+  networking.wireless.userControlled.enable = true;
   networking.networkmanager.enable = false;
 
   # Set your time zone.
   time.timeZone = "Europe/Rome";
-
-  # hardware.bluetooth.enable = false;
 
   # The global useDHCP flag is deprecated, therefore explicitly set to false here.
   # Per-interface useDHCP will be mandatory in the future, so this generated config
   # replicates the default behaviour.
   networking.useDHCP = false;
   networking.interfaces.eno1.useDHCP = true;
-  #networking.interfaces.wlp4s0.useDHCP = true;
-  #networking.wireless = {
-  #  enable = true;
-  #  userControlled.enable = true;
-  #};
+  networking.interfaces.wlp4s0.useDHCP = true;
+
+  # Configure network proxy if necessary
+  # networking.proxy.default = "http://user:password@proxy:port/";
+  # networking.proxy.noProxy = "127.0.0.1,localhost,internal.domain";
 
   # Select internationalisation properties.
   i18n.defaultLocale = "en_US.UTF-8";
@@ -57,25 +44,30 @@
     keyMap = "it";
   };
 
+  # Enable the X11 windowing system.
+  services.xserver.enable = true;
+
   # Configure keymap in X11
   services.xserver.layout = "it";
   services.xserver.xkbOptions = "eurosign:e";
-  
+
+  # Enable CUPS to print documents.
+  # services.printing.enable = true;
+
+  # Enable sound.
+  sound.enable = true;
+  hardware.pulseaudio.enable = true;
+
   # Enable touchpad support (enabled default in most desktopManager).
   services.xserver.libinput.enable = true;
 
   # Define a user account. Don't forget to set a password with ‘passwd’.
   users.users.giovanni = {
     isNormalUser = true;
-    extraGroups = [ "wheel" "docker" ];
-    openssh.authorizedKeys.keys = [
-      (import ../ssh-keys/swan.nix).key
-    ];
+    extraGroups = [ "wheel" ]; # Enable ‘sudo’ for the user.
   };
 
-  services.xserver.enable = true;
-  services.xserver.displayManager.gdm.enable = true;
-  services.xserver.desktopManager.gnome.enable = true;
+  nixpkgs.config.allowUnfree = true;
 
   # List packages installed in system profile. To search, run:
   # $ nix search wget
@@ -92,10 +84,10 @@
     # System utils
     wget neovim curl git sudo neofetch htop dstat
     barrier glxinfo sshfs arandr
-    exa pavucontrol
+    exa pavucontrol pciutils
 
     # Browsers
-    firefox brave
+    firefox
     
     # Rust
     rustup
@@ -112,19 +104,25 @@
 
   virtualisation.docker.enable = true;
 
+
   # Some programs need SUID wrappers, can be configured further or are
   # started in user sessions.
-  programs.mtr.enable = true;
-  programs.gnupg.agent = {
-    enable = true;
-    enableSSHSupport = true;
-  };
+  # programs.mtr.enable = true;
+  # programs.gnupg.agent = {
+  #   enable = true;
+  #   enableSSHSupport = true;
+  # };
 
-  networking.firewall.allowedTCPPorts = [
-    24800 # Barrier
-  ];
+  # List services that you want to enable:
+
+  # Enable the OpenSSH daemon.
+  # services.openssh.enable = true;
+
+  # Open ports in the firewall.
+  # networking.firewall.allowedTCPPorts = [ ... ];
   # networking.firewall.allowedUDPPorts = [ ... ];
-  networking.firewall.enable = true;
+  # Or disable the firewall altogether.
+  # networking.firewall.enable = false;
 
   # This value determines the NixOS release from which the default
   # settings for stateful data, like file locations and database versions
@@ -132,6 +130,6 @@
   # this value at the release version of the first install of this system.
   # Before changing this value read the documentation for this option
   # (e.g. man configuration.nix or on https://nixos.org/nixos/options.html).
-  system.stateVersion = "21.05"; # Did you read the comment?
+  system.stateVersion = "21.11"; # Did you read the comment?
 }
 

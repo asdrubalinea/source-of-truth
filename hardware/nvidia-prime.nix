@@ -27,24 +27,12 @@ in
 
   services.xserver.videoDrivers = [ "nvidia" ];
 
-  hardware = {
-    opengl = {
-      driSupport = true;
-      driSupport32Bit = true;
-    };
-
-    nvidia = {
-      package = config.boot.kernelPackages.nvidiaPackages.beta;
-      powerManagement.enable = true;
-
-      prime = {
-        offload.enable = true;
-        amdgpuBusId = "PCI:05:0:0";
-        nvidiaBusId = "PCI:01:0:0";
-      };
-
-      modesetting.enable = true;
-    };
+  hardware.nvidia.package = config.boot.kernelPackages.nvidiaPackages.beta;
+  hardware.nvidia.modesetting.enable = true;
+  hardware.nvidia.prime = {
+    offload.enable = true;
+    amdgpuBusId = "PCI:6:0:0";
+    nvidiaBusId = "PCI:1:0:0";
   };
 
   environment.systemPackages = with pkgs; [
