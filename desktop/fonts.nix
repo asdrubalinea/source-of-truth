@@ -4,15 +4,14 @@
   fonts = {
     enableDefaultFonts = false;
     fonts = with pkgs; [ 
-      pkgs.noto-fonts
-      pkgs.fira-code
+      cascadia-code
     ];
 
     fontconfig = {
       defaultFonts = {
-        serif = [ "Noto Serif" ];
-        sansSerif = [ "Noto Sans" ];
-        monospace = [ "Noto Mono" ];
+        serif = [ "Cascadia Code" ];
+        sansSerif = [ "Cascadia Code" ];
+        monospace = [ "Cascadia Code" ];
       };
     };
   };

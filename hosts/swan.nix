@@ -6,14 +6,20 @@
       ../hardware/radeon.nix
       ../hardware/nvidia-prime.nix
 
-      ../desktop/gnome.nix
+      ../desktop/sway.nix
+      ../desktop/fonts.nix
+
+      ../scripts/brightness.nix
+
+      ../services/redshift.nix
+
+      ../network/hosts.nix
     ];
 
-  # Use the systemd-boot EFI boot loader.
   boot = {
     loader.systemd-boot.enable = true;
     loader.efi.canTouchEfiVariables = true;
-    kernelPackages = pkgs.linuxPackages_latest;
+    kernelPackages = pkgs.linuxPackages_zen;
   };
 
   networking.hostName = "swan"; # Define your hostname.
@@ -31,10 +37,6 @@
   networking.interfaces.eno1.useDHCP = true;
   networking.interfaces.wlp4s0.useDHCP = true;
 
-  # Configure network proxy if necessary
-  # networking.proxy.default = "http://user:password@proxy:port/";
-  # networking.proxy.noProxy = "127.0.0.1,localhost,internal.domain";
-
   # Select internationalisation properties.
   i18n.defaultLocale = "en_US.UTF-8";
   console = {
@@ -42,15 +44,9 @@
     keyMap = "it";
   };
 
-  # Enable the X11 windowing system.
-  services.xserver.enable = true;
-
   # Configure keymap in X11
   services.xserver.layout = "it";
   services.xserver.xkbOptions = "eurosign:e";
-
-  # Enable CUPS to print documents.
-  # services.printing.enable = true;
 
   # Enable sound.
   sound.enable = true;
@@ -96,30 +92,21 @@
 
     # Docker
     docker-compose
+
+    spotify
   ];
 
+  virtualisation.virtualbox.host.enable = true;
+  virtualisation.virtualbox.host.enableExtensionPack = true;
+  users.extraGroups.vboxusers.members = [ "giovanni" ];
+
   virtualisation.docker.enable = true;
-
-  # Some programs need SUID wrappers, can be configured further or are
-  # started in user sessions.
-  # programs.mtr.enable = true;
-  # programs.gnupg.agent = {
-  #   enable = true;
-  #   enableSSHSupport = true;
-  # };
-
-  # List services that you want to enable:
-
-  # Enable the OpenSSH daemon.
-  # services.openssh.enable = true;
 
   # Open ports in the firewall.
   networking.firewall.allowedTCPPorts = [
     24800 # Barrier
   ];
   # networking.firewall.allowedUDPPorts = [ ... ];
-  # Or disable the firewall altogether.
-  # networking.firewall.enable = false;
 
   # This value determines the NixOS release from which the default
   # settings for stateful data, like file locations and database versions
