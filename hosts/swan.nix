@@ -8,6 +8,7 @@
 
       ../desktop/sway.nix
       ../desktop/fonts.nix
+      ../desktop/pipewire.nix
 
       ../scripts/brightness.nix
 
@@ -44,17 +45,6 @@
     keyMap = "it";
   };
 
-  # Configure keymap in X11
-  services.xserver.layout = "it";
-  services.xserver.xkbOptions = "eurosign:e";
-
-  # Enable sound.
-  sound.enable = true;
-  hardware.pulseaudio.enable = true;
-
-  # Enable touchpad support (enabled default in most desktopManager).
-  services.xserver.libinput.enable = true;
-
   # Define a user account. Don't forget to set a password with ‘passwd’.
   users.users.giovanni = {
     isNormalUser = true;
@@ -74,12 +64,13 @@
     alacritty
 
     # System utils
-    wget neovim curl git sudo neofetch htop dstat
-    barrier glxinfo sshfs arandr
-    exa pavucontrol pciutils
+    wget curl git sudo neofetch htop dstat
+    barrier glxinfo sshfs
+    pavucontrol pciutils
+    gparted
 
     # Browsers
-    firefox
+    firefox ungoogled-chromium
     
     # Rust
     rustup
@@ -88,24 +79,18 @@
     python310
 
     # IDEs
-    vscode emacs
+    vscode emacs neovim
 
     # Docker
     docker-compose
 
-    spotify
+    # Multimedia
+    mpv
   ];
-
-  virtualisation.virtualbox.host.enable = true;
-  virtualisation.virtualbox.host.enableExtensionPack = true;
-  users.extraGroups.vboxusers.members = [ "giovanni" ];
 
   virtualisation.docker.enable = true;
 
-  # Open ports in the firewall.
-  networking.firewall.allowedTCPPorts = [
-    24800 # Barrier
-  ];
+  # networking.firewall.allowedTCPPorts = [ ...];
   # networking.firewall.allowedUDPPorts = [ ... ];
 
   # This value determines the NixOS release from which the default
