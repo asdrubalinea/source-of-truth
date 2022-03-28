@@ -6,5 +6,6 @@
     gitc = "git commit";
     gitp = "git push";
     gita = "git add";
+    ls = "exa";
   };
 }

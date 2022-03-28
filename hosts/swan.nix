@@ -11,10 +11,14 @@
       ../desktop/pipewire.nix
 
       ../scripts/brightness.nix
+      ../scripts/system-clean.nix
+      ../scripts/system-upgrade.nix
 
-      ../services/redshift.nix
+      ../services/ssh-secure.nix
 
       ../network/hosts.nix
+
+      ../misc/bash-aliases.nix
     ];
 
   boot = {
@@ -38,6 +42,15 @@
   networking.interfaces.eno1.useDHCP = true;
   networking.interfaces.wlp4s0.useDHCP = true;
 
+  system.activationScripts = {
+    rfkillUnblockWlan = {
+      text = ''
+        rfkill unblock wlan
+      '';
+      deps = [];
+    };
+  };
+
   # Select internationalisation properties.
   i18n.defaultLocale = "en_US.UTF-8";
   console = {
@@ -50,6 +63,8 @@
     isNormalUser = true;
     extraGroups = [ "wheel" ]; # Enable ‘sudo’ for the user.
   };
+
+  security.sudo.wheelNeedsPassword = false;
 
   nixpkgs.config.allowUnfree = true;
 
@@ -65,15 +80,14 @@
 
     # System utils
     wget curl git sudo neofetch htop dstat
-    barrier glxinfo sshfs
-    pavucontrol pciutils
-    gparted
+    glxinfo sshfs pavucontrol pciutils
+    gparted file exa grim
 
     # Browsers
     firefox ungoogled-chromium
     
     # Rust
-    rustup
+    rustup rust-analyzer
 
     # Python
     python310
@@ -86,9 +100,24 @@
 
     # Multimedia
     mpv
+
+    quickemu
+
+    wpa_supplicant_gui
   ];
 
   virtualisation.docker.enable = true;
+
+  nix = {
+    package = pkgs.nixFlakes;
+    extraOptions = ''
+      experimental-features = nix-command flakes
+    '';
+   };
+
+  users.users."giovanni".openssh.authorizedKeys.keys = [
+    (import ../ssh-keys/looking-glass.nix).key
+  ];
 
   # networking.firewall.allowedTCPPorts = [ ...];
   # networking.firewall.allowedUDPPorts = [ ... ];
