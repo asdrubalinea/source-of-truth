@@ -32,6 +32,11 @@
   networking.wireless.userControlled.enable = true;
   networking.networkmanager.enable = false;
 
+  services.logind.extraConfig = ''
+    # don’t shutdown when power button is short-pressed
+    HandlePowerKey=ignore
+  '';
+
   # Set your time zone.
   time.timeZone = "Europe/Rome";
 
@@ -84,7 +89,7 @@
     gparted file exa grim
 
     # Browsers
-    firefox ungoogled-chromium
+    firefox google-chrome
     
     # Rust
     rustup rust-analyzer

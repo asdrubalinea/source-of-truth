@@ -1,8 +1,6 @@
 { pkgs, config, ... }:
 
 {
-  programs.qt5ct.enable = true;
-
   programs.sway = {
     enable = true;
     wrapperFeatures.gtk = true; # so that gtk works properly
