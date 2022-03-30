@@ -8,7 +8,7 @@ let
     pushd /home/giovanni/.dotfiles
 
     nix flake update
-    home-manager switch --flake '.#g'
+    home-manager switch --flake '.#giovanni'
 
     popd
   '';

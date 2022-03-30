@@ -4,6 +4,14 @@
   wayland.windowManager.sway = {
     enable = true;
     wrapperFeatures.gtk = true;
+
+    config = null;
+    extraConfig = builtins.readFile ./sway/config;
+  };
+
+  xdg.configFile."waybar" = {
+    source = ./waybar;
+    recursive = true;
   };
 
   home.packages = with pkgs; [
