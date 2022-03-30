@@ -29,7 +29,7 @@
     homeConfigurations.${username} = home-manager.lib.homeManagerConfiguration {
         configuration = import ./homes/swan.nix;
 
-        inherit system username;
+        inherit system pkgs username;
         homeDirectory = "/home/${username}";
         stateVersion = "22.05";
       };

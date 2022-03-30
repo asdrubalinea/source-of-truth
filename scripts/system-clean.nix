@@ -11,5 +11,5 @@ let
   '';
 in
 {
-  environment.systemPackages = [ systemClean ];
+  home.packages = [ systemClean ];
 }

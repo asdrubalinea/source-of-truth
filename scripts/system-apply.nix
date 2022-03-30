@@ -3,16 +3,16 @@
 
 let
   # TODO: don't hardcode giovanni here
-  applyUser = pkgs.writeScriptBin "apply-user" ''
+  systemApply = pkgs.writeScriptBin "system-apply" ''
     #!${pkgs.stdenv.shell}
     pushd /home/giovanni/.dotfiles/
 
     nix flake update
-    home-manager switch --flake '.#giovanni'
+    nixos-rebuild switch --flake '.#'
 
     popd
   '';
 in
 {
-  environment.systemPackages = [ applyUser ];
+  home.packages = [ systemApply ];
 }

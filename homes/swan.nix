@@ -1,6 +1,18 @@
 { config, pkgs, ... }:
 
 {
+  imports =
+    [
+      ../desktop/sway.nix
+
+      ../scripts/brightness.nix
+      ../scripts/system-clean.nix
+      ../scripts/system-apply.nix
+      ../scripts/user-apply.nix
+
+      # ../misc/bash-aliases.nix
+    ];
+
   # Let Home Manager install and manage itself.
   programs.home-manager.enable = true;
 

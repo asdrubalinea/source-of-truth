@@ -5,22 +5,12 @@
     [
       ../hardware/radeon.nix
       ../hardware/nvidia-prime.nix
-
-      ../desktop/sway.nix
+      ../hardware/pipewire.nix
       ../desktop/fonts.nix
-      ../desktop/pipewire.nix
-
-      ../scripts/brightness.nix
-      ../scripts/system-clean.nix
-
-      # ../scripts/apply-system.nix
-      # ../scripts/apply-user.nix
 
       ../services/ssh-secure.nix
 
       ../network/hosts.nix
-
-      ../misc/bash-aliases.nix
     ];
 
   # Hardware

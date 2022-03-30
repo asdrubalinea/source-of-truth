@@ -9,5 +9,5 @@ let
   '';
 in
 {
-  environment.systemPackages = with pkgs; [ brightness ];
+  home.packages = [ brightness ];
 }
