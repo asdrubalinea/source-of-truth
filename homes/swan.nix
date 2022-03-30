@@ -10,7 +10,7 @@
       ../scripts/system-apply.nix
       ../scripts/user-apply.nix
 
-      # ../misc/bash-aliases.nix
+      ../misc/bash-aliases.nix
     ];
 
   # Let Home Manager install and manage itself.
@@ -24,7 +24,7 @@
     tdesktop
 
     # Terminals
-    alacritty
+    alacritty kitty
 
     # System utils
     neofetch htop dstat
