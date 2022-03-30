@@ -3,7 +3,7 @@
 {
   imports =
     [
-      ../desktop/sway.nix
+      # ../desktop/sway.nix
 
       ../scripts/brightness.nix
       ../scripts/system-clean.nix

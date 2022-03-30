@@ -7,6 +7,7 @@
       ../hardware/nvidia-prime.nix
       ../hardware/pipewire.nix
       ../desktop/fonts.nix
+      ../desktop/gnome.nix
 
       ../services/ssh-secure.nix
 
@@ -39,7 +40,9 @@
 
   swapDevices = [ ];
 
-  hardware.cpu.amd.updateMicrocode = lib.mkDefault config.hardware.enableRedistributableFirmware;
+  # hardware.cpu.amd.updateMicrocode = lib.mkDefault config.hardware.enableRedistributableFirmware;
+  hardware.enableRedistributableFirmware = true;
+  hardware.enableAllFirmware = true;
 
   boot = {
     loader.systemd-boot.enable = true;
@@ -92,7 +95,7 @@
     '';
    };
 
-  # users.users."giovanni".openssh.authorizedKeys.keys = [
+  # users.users."g".openssh.authorizedKeys.keys = [
     # (import ../ssh-keys/looking-glass.nix).key
   # ];
 
