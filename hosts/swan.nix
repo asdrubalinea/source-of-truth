@@ -1,4 +1,4 @@
-{ config, pkgs, ... }:
+{ config, pkgs, lib, ... }:
 
 {
   imports =
@@ -12,7 +12,9 @@
 
       ../scripts/brightness.nix
       ../scripts/system-clean.nix
-      ../scripts/system-upgrade.nix
+
+      # ../scripts/apply-system.nix
+      # ../scripts/apply-user.nix
 
       ../services/ssh-secure.nix
 
@@ -20,6 +22,34 @@
 
       ../misc/bash-aliases.nix
     ];
+
+  # Hardware
+  # TODO: change filesystems from UUID to by-label
+  boot.initrd.availableKernelModules = [ "xhci_pci" "nvme" "ahci" "uas" "usb_storage" "usbhid" "sd_mod" ];
+  boot.initrd.kernelModules = [ ];
+  boot.kernelModules = [ "kvm-amd" ];
+  boot.extraModulePackages = [ ];
+
+  fileSystems."/" =
+    { device = "/dev/disk/by-uuid/ee359a3f-dc30-4349-908c-db37fbe916cd";
+      fsType = "btrfs";
+      options = [ "subvol=@" ];
+    };
+
+  fileSystems."/home" =
+    { device = "/dev/disk/by-uuid/ee359a3f-dc30-4349-908c-db37fbe916cd";
+      fsType = "btrfs";
+      options = [ "subvol=@home" ];
+    };
+
+  fileSystems."/boot" =
+    { device = "/dev/disk/by-uuid/9BDC-A196";
+      fsType = "vfat";
+    };
+
+  swapDevices = [ ];
+
+  hardware.cpu.amd.updateMicrocode = lib.mkDefault config.hardware.enableRedistributableFirmware;
 
   boot = {
     loader.systemd-boot.enable = true;
@@ -32,8 +62,8 @@
   networking.wireless.userControlled.enable = true;
   networking.networkmanager.enable = false;
 
+  # Ignore power button
   services.logind.extraConfig = ''
-    # don’t shutdown when power button is short-pressed
     HandlePowerKey=ignore
   '';
 
@@ -46,15 +76,6 @@
   networking.useDHCP = false;
   networking.interfaces.eno1.useDHCP = true;
   networking.interfaces.wlp4s0.useDHCP = true;
-
-  system.activationScripts = {
-    rfkillUnblockWlan = {
-      text = ''
-        rfkill unblock wlan
-      '';
-      deps = [];
-    };
-  };
 
   # Select internationalisation properties.
   i18n.defaultLocale = "en_US.UTF-8";
@@ -71,44 +92,9 @@
 
   security.sudo.wheelNeedsPassword = false;
 
-  nixpkgs.config.allowUnfree = true;
-
   environment.systemPackages = with pkgs; [
-    # Passwords
-    keepassxc
-
-    # Social
-    tdesktop
-
-    # Terminals
-    alacritty
-
     # System utils
-    wget curl git sudo neofetch htop dstat
-    glxinfo sshfs pavucontrol pciutils
-    gparted file exa grim
-
-    # Browsers
-    firefox google-chrome
-    
-    # Rust
-    rustup rust-analyzer
-
-    # Python
-    python310
-
-    # IDEs
-    vscode emacs neovim
-
-    # Docker
-    docker-compose
-
-    # Multimedia
-    mpv
-
-    quickemu
-
-    wpa_supplicant_gui
+    wget curl git sudo
   ];
 
   virtualisation.docker.enable = true;
@@ -120,18 +106,12 @@
     '';
    };
 
-  users.users."giovanni".openssh.authorizedKeys.keys = [
-    (import ../ssh-keys/looking-glass.nix).key
-  ];
+  # users.users."giovanni".openssh.authorizedKeys.keys = [
+    # (import ../ssh-keys/looking-glass.nix).key
+  # ];
 
   # networking.firewall.allowedTCPPorts = [ ...];
   # networking.firewall.allowedUDPPorts = [ ... ];
 
-  # This value determines the NixOS release from which the default
-  # settings for stateful data, like file locations and database versions
-  # on your system were taken. It‘s perfectly fine and recommended to leave
-  # this value at the release version of the first install of this system.
-  # Before changing this value read the documentation for this option
-  # (e.g. man configuration.nix or on https://nixos.org/nixos/options.html).
-  system.stateVersion = "21.11"; # Did you read the comment?
+  system.stateVersion = "22.05";
 }
