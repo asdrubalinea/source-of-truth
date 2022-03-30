@@ -74,7 +74,6 @@
     keyMap = "it";
   };
 
-  # Define a user account. Don't forget to set a password with ‘passwd’.
   users.users.giovanni = {
     isNormalUser = true;
     extraGroups = [ "wheel" ]; # Enable ‘sudo’ for the user.
@@ -82,10 +81,7 @@
 
   security.sudo.wheelNeedsPassword = false;
 
-  environment.systemPackages = with pkgs; [
-    # System utils
-    wget curl git sudo
-  ];
+  environment.systemPackages = with pkgs; [ git sudo ];
 
   virtualisation.docker.enable = true;
 
