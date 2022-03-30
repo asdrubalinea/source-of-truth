@@ -29,6 +29,7 @@ in
 
   hardware = {
     opengl = {
+      enable = true;
       driSupport = true;
       driSupport32Bit = true;
     };
@@ -47,7 +48,5 @@ in
     };
    };
 
-  environment.systemPackages = with pkgs; [
-    nvidiaPrime
-  ];
+  environment.systemPackages = [ nvidiaPrime ];
 }

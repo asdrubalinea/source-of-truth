@@ -7,7 +7,7 @@
       ../hardware/nvidia-prime.nix
       ../hardware/pipewire.nix
       ../desktop/fonts.nix
-      ../desktop/gnome.nix
+      # ../desktop/plasma.nix
 
       ../services/ssh-secure.nix
 

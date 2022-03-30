@@ -8,7 +8,7 @@ set $up k
 set $right l
 
 set $term "alacritty"
-set $menu dmenu_path | dmenu | xargs swaymsg exec --
+set $menu bemenu-run -i --tb='#222222' --tf='#bbbbbb' --fb='#222222' --nb='#222222' --nf='#bbbbbb' --hb='#005577' --hf='#eeeeee' -p ''
 
 set $volup "pamixer -ui 1"
 set $voldown "pamixer -ud 1"

@@ -24,7 +24,7 @@
     tdesktop
 
     # Terminals
-    alacritty kitty
+    alacritty
 
     # System utils
     neofetch htop dstat
@@ -32,7 +32,7 @@
     gparted file exa grim
 
     # Browsers
-    firefox google-chrome
+    firefox google-chrome chromium
     
     # Rust
     rustup rust-analyzer
@@ -53,4 +53,6 @@
 
     wpa_supplicant_gui
   ];
+
+  nixpkgs.config.chromium.commandLineArgs = "--enable-features=UseOzonePlatform --ozone-platform=wayland";
 }
