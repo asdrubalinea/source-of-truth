@@ -6,8 +6,10 @@ let
     #!${pkgs.stdenv.shell}
     nix-env -p /nix/var/nix/profiles/system --delete-generations old
     nix-collect-garbage -d
+    nix-store --gc
+    nix-store --optimize
   '';
 in
 {
-    environment.systemPackages = with pkgs; [ systemClean ];
+  home.packages = [ systemClean ];
 }

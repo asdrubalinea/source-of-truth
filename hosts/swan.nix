@@ -1,21 +1,48 @@
-{ config, pkgs, ... }:
+{ config, pkgs, lib, ... }:
 
 {
   imports =
     [
       ../hardware/radeon.nix
       ../hardware/nvidia-prime.nix
-
-      ../desktop/sway.nix
+      ../hardware/pipewire.nix
       ../desktop/fonts.nix
-      ../desktop/pipewire.nix
+      ../desktop/gnome.nix
 
-      ../scripts/brightness.nix
-
-      ../services/redshift.nix
+      ../services/ssh-secure.nix
 
       ../network/hosts.nix
     ];
+
+  # Hardware
+  # TODO: change filesystems from UUID to by-label
+  boot.initrd.availableKernelModules = [ "xhci_pci" "nvme" "ahci" "uas" "usb_storage" "usbhid" "sd_mod" ];
+  boot.initrd.kernelModules = [ ];
+  boot.kernelModules = [ "kvm-amd" ];
+  boot.extraModulePackages = [ ];
+
+  fileSystems."/" =
+    { device = "/dev/disk/by-uuid/ee359a3f-dc30-4349-908c-db37fbe916cd";
+      fsType = "btrfs";
+      options = [ "subvol=@" ];
+    };
+
+  fileSystems."/home" =
+    { device = "/dev/disk/by-uuid/ee359a3f-dc30-4349-908c-db37fbe916cd";
+      fsType = "btrfs";
+      options = [ "subvol=@home" ];
+    };
+
+  fileSystems."/boot" =
+    { device = "/dev/disk/by-uuid/9BDC-A196";
+      fsType = "vfat";
+    };
+
+  swapDevices = [ ];
+
+  # hardware.cpu.amd.updateMicrocode = lib.mkDefault config.hardware.enableRedistributableFirmware;
+  hardware.enableRedistributableFirmware = true;
+  hardware.enableAllFirmware = true;
 
   boot = {
     loader.systemd-boot.enable = true;
@@ -27,6 +54,11 @@
   networking.wireless.enable = true;  # Enables wireless support via wpa_supplicant.
   networking.wireless.userControlled.enable = true;
   networking.networkmanager.enable = false;
+
+  # Ignore power button
+  services.logind.extraConfig = ''
+    HandlePowerKey=ignore
+  '';
 
   # Set your time zone.
   time.timeZone = "Europe/Rome";
@@ -45,59 +77,30 @@
     keyMap = "it";
   };
 
-  # Define a user account. Don't forget to set a password with ‘passwd’.
   users.users.giovanni = {
     isNormalUser = true;
     extraGroups = [ "wheel" ]; # Enable ‘sudo’ for the user.
   };
 
-  nixpkgs.config.allowUnfree = true;
+  security.sudo.wheelNeedsPassword = false;
 
-  environment.systemPackages = with pkgs; [
-    # Passwords
-    keepassxc
-
-    # Social
-    tdesktop
-
-    # Terminals
-    alacritty
-
-    # System utils
-    wget curl git sudo neofetch htop dstat
-    barrier glxinfo sshfs
-    pavucontrol pciutils
-    gparted
-
-    # Browsers
-    firefox ungoogled-chromium
-    
-    # Rust
-    rustup
-
-    # Python
-    python310
-
-    # IDEs
-    vscode emacs neovim
-
-    # Docker
-    docker-compose
-
-    # Multimedia
-    mpv
-  ];
+  environment.systemPackages = with pkgs; [ git sudo ];
 
   virtualisation.docker.enable = true;
+
+  nix = {
+    package = pkgs.nixFlakes;
+    extraOptions = ''
+      experimental-features = nix-command flakes
+    '';
+   };
+
+  # users.users."g".openssh.authorizedKeys.keys = [
+    # (import ../ssh-keys/looking-glass.nix).key
+  # ];
 
   # networking.firewall.allowedTCPPorts = [ ...];
   # networking.firewall.allowedUDPPorts = [ ... ];
 
-  # This value determines the NixOS release from which the default
-  # settings for stateful data, like file locations and database versions
-  # on your system were taken. It‘s perfectly fine and recommended to leave
-  # this value at the release version of the first install of this system.
-  # Before changing this value read the documentation for this option
-  # (e.g. man configuration.nix or on https://nixos.org/nixos/options.html).
-  system.stateVersion = "21.11"; # Did you read the comment?
+  system.stateVersion = "22.05";
 }
