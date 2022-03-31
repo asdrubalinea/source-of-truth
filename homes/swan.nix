@@ -29,7 +29,7 @@
     # System utils
     neofetch htop dstat
     glxinfo sshfs pavucontrol pciutils
-    gparted file exa grim
+    file exa grim
 
     # Browsers
     firefox google-chrome chromium

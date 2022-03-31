@@ -66,12 +66,12 @@ gaps inner 12
 ## Input ##
 
 input "1739:32552:MSFT0001:00_06CB:7F28_Touchpad" {
-    left_handed enabled
+    left_handed disabled
     tap enabled
     natural_scroll disabled
     dwt enabled
     accel_profile "adaptive" # disable mouse acceleration (enabled by default; to set it manually, use "adaptive" instead of "flat")
-    pointer_accel 0.1 # set mouse sensitivity (between -1 and 1)
+    pointer_accel -0.1 # set mouse sensitivity (between -1 and 1)
 }
 
 input * {

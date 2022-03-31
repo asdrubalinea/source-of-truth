@@ -7,7 +7,6 @@
       ../hardware/nvidia-prime.nix
       ../hardware/pipewire.nix
       ../desktop/fonts.nix
-      # ../desktop/plasma.nix
 
       ../services/ssh-secure.nix
 
@@ -82,6 +81,18 @@
     extraGroups = [ "wheel" ]; # Enable ‘sudo’ for the user.
   };
 
+  # Screen sharing
+  xdg = {
+    portal = {
+      enable = true;
+      extraPortals = with pkgs; [
+        xdg-desktop-portal-wlr
+        xdg-desktop-portal-gtk
+      ];
+      gtkUsePortal = true;
+    };
+  };
+
   security.sudo.wheelNeedsPassword = false;
 
   environment.systemPackages = with pkgs; [ git sudo ];
@@ -95,7 +106,7 @@
     '';
    };
 
-  # users.users."g".openssh.authorizedKeys.keys = [
+  # users.users."giovanni".openssh.authorizedKeys.keys = [
     # (import ../ssh-keys/looking-glass.nix).key
   # ];
 
