@@ -30,6 +30,7 @@
     neofetch htop dstat
     glxinfo sshfs pavucontrol pciutils
     file exa grim
+    gnome.gnome-disk-utility
 
     # Browsers
     firefox google-chrome chromium
