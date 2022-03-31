@@ -14,6 +14,8 @@
     recursive = true;
   };
 
+  home.file.".wallpaper-new".source = import ./wallpaper;
+
   home.packages = with pkgs; [
     swaylock
     swayidle
