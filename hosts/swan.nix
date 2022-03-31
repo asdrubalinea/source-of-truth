@@ -9,6 +9,7 @@
       ../desktop/fonts.nix
 
       ../services/ssh-secure.nix
+      ../services/redshift.nix
 
       ../network/hosts.nix
     ];
@@ -95,7 +96,7 @@
 
   security.sudo.wheelNeedsPassword = false;
 
-  environment.systemPackages = with pkgs; [ git sudo ];
+  environment.systemPackages = with pkgs; [ git sudo polkit_gnome ];
 
   virtualisation.docker.enable = true;
 
@@ -105,6 +106,9 @@
       experimental-features = nix-command flakes
     '';
    };
+
+  # Polkit
+  security.polkit.enable = true;
 
   # users.users."giovanni".openssh.authorizedKeys.keys = [
     # (import ../ssh-keys/looking-glass.nix).key
