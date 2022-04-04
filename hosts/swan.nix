@@ -27,22 +27,30 @@
   boot.supportedFilesystems = [ "zfs" ];
 
   fileSystems."/" =
-    { device = "/dev/disk/by-uuid/ee359a3f-dc30-4349-908c-db37fbe916cd";
-      fsType = "btrfs";
-      options = [ "subvol=@" ];
-    };
-
-  fileSystems."/home" =
-    { device = "/dev/disk/by-uuid/ee359a3f-dc30-4349-908c-db37fbe916cd";
-      fsType = "btrfs";
-      options = [ "subvol=@home" ];
+    { device = "rpool/local/root";
+      fsType = "zfs";
     };
 
   fileSystems."/boot" =
-    { device = "/dev/disk/by-uuid/9BDC-A196";
+    { device = "/dev/disk/by-uuid/12D7-5038";
       fsType = "vfat";
     };
-  
+
+  fileSystems."/nix" =
+    { device = "rpool/local/nix";
+      fsType = "zfs";
+    };
+
+  fileSystems."/home" =
+    { device = "rpool/safe/home";
+      fsType = "zfs";
+    };
+
+  fileSystems."/persist" =
+    { device = "rpool/safe/persist";
+      fsType = "zfs";
+    };
+
   services.zfs.autoScrub.enable = true;
 
   swapDevices = [ ];
@@ -54,7 +62,10 @@
   boot = {
     loader = {
       systemd-boot.enable = true;
-      grub.copyKernels = true; # For better ZFS compatibility
+      grub = {
+        copyKernels = true; # For better ZFS compatibility
+	enableCryptodisk = true;
+      };
     };
     loader.efi.canTouchEfiVariables = true;
     kernelPackages = pkgs.linuxPackages_zen;
@@ -64,11 +75,16 @@
   networking.wireless.enable = true;  # Enables wireless support via wpa_supplicant.
   networking.wireless.userControlled.enable = true;
   networking.networkmanager.enable = false;
-  networking.hostId = "ea0b4bc4";
+  networking.hostId = "ea0b4bc7";
 
   # Ignore power button
   services.logind.extraConfig = ''
     HandlePowerKey=ignore
+  '';
+
+  # Erase your darlings.
+  boot.initrd.postDeviceCommands = lib.mkAfter ''
+    zfs rollback -r rpool/local/root@blank
   '';
 
   # Set your time zone.
@@ -91,6 +107,7 @@
   users.users.giovanni = {
     isNormalUser = true;
     extraGroups = [ "wheel" ]; # Enable ‘sudo’ for the user.
+    hashedPassword = "$6$zoryNxhYWhQmxGPf$zRNZH/JU0/WeYcHjQhc8r/KUOYNbqzGT0a8Xh/Mb2s2GHZ1verBK1dCJrJWZoREnWGZ4E6nzdCAhDKOCwylk/1";
   };
 
   # Screen sharing
