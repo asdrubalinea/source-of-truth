@@ -4,6 +4,7 @@
   imports =
     [
       ../desktop/sway
+      ../desktop/alacritty
 
       ../scripts/brightness.nix
       ../scripts/system-clean.nix
@@ -22,9 +23,6 @@
 
     # Social
     tdesktop
-
-    # Terminals
-    alacritty
 
     # System utils
     neofetch htop dstat
