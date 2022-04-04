@@ -20,6 +20,11 @@
   boot.initrd.kernelModules = [ ];
   boot.kernelModules = [ "kvm-amd" ];
   boot.extraModulePackages = [ ];
+  boot.zfs = {
+    enableUnstable = true;
+    forceImportAll = false;
+  };
+  boot.supportedFilesystems = [ "zfs" ];
 
   fileSystems."/" =
     { device = "/dev/disk/by-uuid/ee359a3f-dc30-4349-908c-db37fbe916cd";
@@ -37,6 +42,8 @@
     { device = "/dev/disk/by-uuid/9BDC-A196";
       fsType = "vfat";
     };
+  
+  services.zfs.autoScrub.enable = true;
 
   swapDevices = [ ];
 
@@ -45,7 +52,10 @@
   hardware.enableAllFirmware = true;
 
   boot = {
-    loader.systemd-boot.enable = true;
+    loader = {
+      systemd-boot.enable = true;
+      grub.copyKernels = true; # For better ZFS compatibility
+    };
     loader.efi.canTouchEfiVariables = true;
     kernelPackages = pkgs.linuxPackages_zen;
   };
@@ -54,6 +64,7 @@
   networking.wireless.enable = true;  # Enables wireless support via wpa_supplicant.
   networking.wireless.userControlled.enable = true;
   networking.networkmanager.enable = false;
+  networking.hostId = "ea0b4bc4";
 
   # Ignore power button
   services.logind.extraConfig = ''
@@ -96,7 +107,7 @@
 
   security.sudo.wheelNeedsPassword = false;
 
-  environment.systemPackages = with pkgs; [ git sudo polkit_gnome ];
+  environment.systemPackages = with pkgs; [ git sudo polkit_gnome zfs ];
 
   virtualisation.docker.enable = true;
 
