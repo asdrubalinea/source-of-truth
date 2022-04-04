@@ -15,7 +15,6 @@
     ];
 
   # Hardware
-  # TODO: change filesystems from UUID to by-label
   boot.initrd.availableKernelModules = [ "xhci_pci" "nvme" "ahci" "uas" "usb_storage" "usbhid" "sd_mod" ];
   boot.initrd.kernelModules = [ ];
   boot.kernelModules = [ "kvm-amd" ];
@@ -24,6 +23,7 @@
     enableUnstable = true;
     forceImportAll = false;
   };
+
   boot.supportedFilesystems = [ "zfs" ];
 
   fileSystems."/" =
@@ -32,7 +32,7 @@
     };
 
   fileSystems."/boot" =
-    { device = "/dev/disk/by-uuid/12D7-5038";
+    { device = "/dev/disk/by-uuid/CA3A-6C8E";
       fsType = "vfat";
     };
 
@@ -42,29 +42,33 @@
     };
 
   fileSystems."/home" =
-    { device = "rpool/safe/home";
+    { device = "data/safe/home";
       fsType = "zfs";
     };
 
   fileSystems."/persist" =
-    { device = "rpool/safe/persist";
+    { device = "data/safe/persist";
       fsType = "zfs";
     };
 
   services.zfs.autoScrub.enable = true;
 
-  swapDevices = [ ];
+  swapDevices =
+    [ { device = "/dev/disk/by-uuid/041b137f-c9a8-460f-9f6f-1abf3c3aee22"; }
+    ];
 
   # hardware.cpu.amd.updateMicrocode = lib.mkDefault config.hardware.enableRedistributableFirmware;
   hardware.enableRedistributableFirmware = true;
   hardware.enableAllFirmware = true;
+
+  nixpkgs.config.allowUnfree = true;
 
   boot = {
     loader = {
       systemd-boot.enable = true;
       grub = {
         copyKernels = true; # For better ZFS compatibility
-	enableCryptodisk = true;
+        enableCryptodisk = true;
       };
     };
     loader.efi.canTouchEfiVariables = true;
@@ -147,3 +151,4 @@
 
   system.stateVersion = "22.05";
 }
+
