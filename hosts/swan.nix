@@ -23,6 +23,7 @@
     enableUnstable = true;
     forceImportAll = false;
   };
+  boot.kernelParams = [ "zfs.zfs_arc_max=1073741824" ]; # 1 GiB
 
   boot.supportedFilesystems = [ "zfs" ];
 
@@ -90,6 +91,12 @@
   boot.initrd.postDeviceCommands = lib.mkAfter ''
     zfs rollback -r rpool/local/root@blank
   '';
+
+  services.zfs.autoSnapshot = {
+    enable = true;
+    frequent = 8; # keep the latest eight 15-minute snapshots (instead of four)
+    monthly = 1;  # keep only one monthly snapshot (instead of twelve)
+  };
 
   # Set your time zone.
   time.timeZone = "Europe/Rome";
