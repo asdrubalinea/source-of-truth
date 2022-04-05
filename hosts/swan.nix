@@ -27,6 +27,9 @@
 
   boot.supportedFilesystems = [ "zfs" ];
 
+  # Enable nested virtualization
+  boot.extraModprobeConfig = "options kvm_intel nested=1";
+
   fileSystems."/" =
     { device = "rpool/local/root";
       fsType = "zfs";
@@ -54,9 +57,7 @@
 
   services.zfs.autoScrub.enable = true;
 
-  swapDevices =
-    [ { device = "/dev/disk/by-uuid/041b137f-c9a8-460f-9f6f-1abf3c3aee22"; }
-    ];
+  swapDevices = [ { device = "/dev/disk/by-uuid/041b137f-c9a8-460f-9f6f-1abf3c3aee22"; } ];
 
   # hardware.cpu.amd.updateMicrocode = lib.mkDefault config.hardware.enableRedistributableFirmware;
   hardware.enableRedistributableFirmware = true;
@@ -117,7 +118,7 @@
 
   users.users.giovanni = {
     isNormalUser = true;
-    extraGroups = [ "wheel" ]; # Enable ‘sudo’ for the user.
+    extraGroups = [ "wheel" "libvirtd" ]; # Enable ‘sudo’ for the user.
     hashedPassword = "$6$zoryNxhYWhQmxGPf$zRNZH/JU0/WeYcHjQhc8r/KUOYNbqzGT0a8Xh/Mb2s2GHZ1verBK1dCJrJWZoREnWGZ4E6nzdCAhDKOCwylk/1";
   };
 
@@ -138,6 +139,7 @@
   environment.systemPackages = with pkgs; [ git sudo polkit_gnome zfs ];
 
   virtualisation.docker.enable = true;
+  virtualisation.libvirtd.enable = true;
 
   nix = {
     package = pkgs.nixFlakes;

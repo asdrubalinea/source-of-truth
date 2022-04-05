@@ -48,7 +48,8 @@
     # Multimedia
     mpv
 
-    quickemu
+    # Virt
+    quickemu virt-manager
 
     wpa_supplicant_gui
   ];
