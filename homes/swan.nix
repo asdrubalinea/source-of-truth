@@ -34,7 +34,10 @@
     firefox google-chrome chromium
     
     # Rust
-    rustup rust-analyzer
+    rust-analyzer
+
+    # Nix
+    nixfmt
 
     # Python
     python310
