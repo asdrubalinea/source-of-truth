@@ -59,7 +59,7 @@
 
   swapDevices = [ { device = "/dev/disk/by-uuid/041b137f-c9a8-460f-9f6f-1abf3c3aee22"; } ];
 
-  # hardware.cpu.amd.updateMicrocode = lib.mkDefault config.hardware.enableRedistributableFirmware;
+  hardware.cpu.amd.updateMicrocode = lib.mkDefault config.hardware.enableRedistributableFirmware;
   hardware.enableRedistributableFirmware = true;
   hardware.enableAllFirmware = true;
 
@@ -116,10 +116,15 @@
     keyMap = "it";
   };
 
-  users.users.giovanni = {
-    isNormalUser = true;
-    extraGroups = [ "wheel" "libvirtd" ]; # Enable ‘sudo’ for the user.
-    hashedPassword = "$6$zoryNxhYWhQmxGPf$zRNZH/JU0/WeYcHjQhc8r/KUOYNbqzGT0a8Xh/Mb2s2GHZ1verBK1dCJrJWZoREnWGZ4E6nzdCAhDKOCwylk/1";
+  users = {
+    mutableUsers = false;
+    extraUsers.root.hashedPassword = (import ../passwords).password;
+
+    users.giovanni = {
+      isNormalUser = true;
+      extraGroups = [ "wheel" "libvirtd" ];
+      hashedPassword = (import ../passwords).password;
+    };
   };
 
   # Screen sharing
