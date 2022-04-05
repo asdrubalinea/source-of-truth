@@ -43,6 +43,8 @@
 
     # Rust
     rust-analyzer
+    rustup
+    llvmPackages.clangUseLLVM
 
     # Nix
     nixfmt
