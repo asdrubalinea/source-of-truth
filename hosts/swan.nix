@@ -77,8 +77,8 @@
     kernelPackages = pkgs.linuxPackages_zen;
   };
 
-  networking.hostName = "swan"; # Define your hostname.
-  networking.wireless.enable = true;  # Enables wireless support via wpa_supplicant.
+  networking.hostName = "swan";
+  networking.wireless.enable = true;
   networking.wireless.userControlled.enable = true;
   networking.networkmanager.enable = false;
   networking.hostId = "ea0b4bc7";
@@ -145,6 +145,7 @@
 
   virtualisation.docker.enable = true;
   virtualisation.libvirtd.enable = true;
+  services.tlp.enable = true;
 
   nix = {
     package = pkgs.nixFlakes;
@@ -165,4 +166,3 @@
 
   system.stateVersion = "22.05";
 }
-
