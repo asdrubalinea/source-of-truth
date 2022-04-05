@@ -8,30 +8,31 @@
   };
 
   outputs = { nixpkgs, home-manager, ... }:
-  let
-    system = "x86_64-linux";
-    username = "giovanni";
-    pkgs = import nixpkgs {
-      inherit system;
-      config = { allowUnfree = true; };
-    };
-
-    lib = nixpkgs.lib;
-  in {
-    nixosConfigurations = {
-      swan = lib.nixosSystem {
+    let
+      system = "x86_64-linux";
+      username = "giovanni";
+      pkgs = import nixpkgs {
         inherit system;
-
-        modules = [ ./hosts/swan.nix ];
+        config = { allowUnfree = true; };
       };
-    };
 
-    homeConfigurations.${username} = home-manager.lib.homeManagerConfiguration {
-        configuration = import ./homes/swan.nix;
+      lib = nixpkgs.lib;
+    in {
+      nixosConfigurations = {
+        swan = lib.nixosSystem {
+          inherit system;
 
-        inherit system pkgs username;
-        homeDirectory = "/home/${username}";
-        stateVersion = "22.05";
+          modules = [ ./hosts/swan.nix ];
+        };
       };
+
+      homeConfigurations.${username} =
+        home-manager.lib.homeManagerConfiguration {
+          configuration = import ./homes/swan.nix;
+
+          inherit system pkgs username;
+          homeDirectory = "/home/${username}";
+          stateVersion = "22.05";
+        };
     };
 }

@@ -11,7 +11,7 @@ in {
   networking.nat = {
     enable = true;
     externalInterface = "ens3";
-    internalInterfaces  = [ vpn-dev ];
+    internalInterfaces = [ vpn-dev ];
   };
   networking.firewall.trustedInterfaces = [ vpn-dev ];
   networking.firewall.allowedUDPPorts = [ port ];

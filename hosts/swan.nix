@@ -1,21 +1,21 @@
 { config, pkgs, lib, ... }:
 
 {
-  imports =
-    [
-      ../hardware/radeon.nix
-      ../hardware/nvidia-prime.nix
-      ../hardware/pipewire.nix
-      ../desktop/fonts.nix
+  imports = [
+    ../hardware/radeon.nix
+    ../hardware/nvidia-prime.nix
+    ../hardware/pipewire.nix
+    ../desktop/fonts.nix
 
-      ../services/ssh-secure.nix
-      ../services/redshift.nix
+    ../services/ssh-secure.nix
+    ../services/redshift.nix
 
-      ../network/hosts.nix
-    ];
+    ../network/hosts.nix
+  ];
 
   # Hardware
-  boot.initrd.availableKernelModules = [ "xhci_pci" "nvme" "ahci" "uas" "usb_storage" "usbhid" "sd_mod" ];
+  boot.initrd.availableKernelModules =
+    [ "xhci_pci" "nvme" "ahci" "uas" "usb_storage" "usbhid" "sd_mod" ];
   boot.initrd.kernelModules = [ ];
   boot.kernelModules = [ "kvm-amd" ];
   boot.extraModulePackages = [ ];
@@ -30,39 +30,41 @@
   # Enable nested virtualization
   boot.extraModprobeConfig = "options kvm_amd nested=1";
 
-  fileSystems."/" =
-    { device = "rpool/local/root";
-      fsType = "zfs";
-    };
+  fileSystems."/" = {
+    device = "rpool/local/root";
+    fsType = "zfs";
+  };
 
-  fileSystems."/boot" =
-    { device = "/dev/disk/by-uuid/8977-F6B5";
-      fsType = "vfat";
-    };
+  fileSystems."/boot" = {
+    device = "/dev/disk/by-uuid/8977-F6B5";
+    fsType = "vfat";
+  };
 
-  fileSystems."/nix" =
-    { device = "rpool/local/nix";
-      fsType = "zfs";
-    };
+  fileSystems."/nix" = {
+    device = "rpool/local/nix";
+    fsType = "zfs";
+  };
 
-  fileSystems."/home" =
-    { device = "data0/safe/home";
-      fsType = "zfs";
-    };
+  fileSystems."/home" = {
+    device = "data0/safe/home";
+    fsType = "zfs";
+  };
 
-  fileSystems."/persist" =
-    { device = "data0/safe/persist";
-      fsType = "zfs";
-    };
+  fileSystems."/persist" = {
+    device = "data0/safe/persist";
+    fsType = "zfs";
+  };
 
-  swapDevices = [ { device = "/dev/disk/by-uuid/cda0c9ea-4923-40dd-87b1-f17e712df3f7"; } ];
+  swapDevices =
+    [{ device = "/dev/disk/by-uuid/cda0c9ea-4923-40dd-87b1-f17e712df3f7"; }];
 
   services.zfs.autoScrub = {
     enable = true;
     interval = "Sun, 01:00";
   };
 
-  hardware.cpu.amd.updateMicrocode = lib.mkDefault config.hardware.enableRedistributableFirmware;
+  hardware.cpu.amd.updateMicrocode =
+    lib.mkDefault config.hardware.enableRedistributableFirmware;
   hardware.enableRedistributableFirmware = true;
   hardware.enableAllFirmware = true;
 
@@ -106,7 +108,7 @@
   services.zfs.autoSnapshot = {
     enable = true;
     frequent = 8; # keep the latest eight 15-minute snapshots (instead of four)
-    monthly = 1;  # keep only one monthly snapshot (instead of twelve)
+    monthly = 1; # keep only one monthly snapshot (instead of twelve)
   };
 
   # Set your time zone.
@@ -150,13 +152,13 @@
     extraOptions = ''
       experimental-features = nix-command flakes
     '';
-   };
+  };
 
   # Polkit
   security.polkit.enable = true;
 
   # users.users."giovanni".openssh.authorizedKeys.keys = [
-    # (import ../ssh-keys/looking-glass.nix).key
+  # (import ../ssh-keys/looking-glass.nix).key
   # ];
 
   # networking.firewall.allowedTCPPorts = [ ...];

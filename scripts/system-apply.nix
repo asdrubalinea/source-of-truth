@@ -1,4 +1,3 @@
-
 { config, pkgs, ... }:
 
 let
@@ -12,7 +11,4 @@ let
 
     popd
   '';
-in
-{
-  home.packages = [ systemApply ];
-}
+in { home.packages = [ systemApply ]; }

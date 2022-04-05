@@ -10,18 +10,13 @@ let
     export __VK_LAYER_NV_optimus=NVIDIA_only
     exec -a "$0" "$@"
   '';
-in
-{
+in {
   nixpkgs.config.allowUnfree = true;
 
   boot = {
     extraModprobeConfig = "options nvidia-drm modeset=1";
-    initrd.kernelModules = [
-      "nvidia"
-      "nvidia_modeset"
-      "nvidia_uvm"
-      "nvidia_drm"
-    ];
+    initrd.kernelModules =
+      [ "nvidia" "nvidia_modeset" "nvidia_uvm" "nvidia_drm" ];
 
   };
 
@@ -46,7 +41,7 @@ in
 
       modesetting.enable = true;
     };
-   };
+  };
 
   environment.systemPackages = [ nvidiaPrime ];
 }

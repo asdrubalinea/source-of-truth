@@ -8,12 +8,13 @@
     # TODO: convert config into Nix lang
     config = null;
     # config = {
-      # startup = [
-        # { command = "${pkgs.polkit_gnome}/libexec/polkit-gnome-authentication-agent-1"; always = true; }
-      # ];
+    # startup = [
+    # { command = "${pkgs.polkit_gnome}/libexec/polkit-gnome-authentication-agent-1"; always = true; }
+    # ];
     # };
 
-    extraConfig = (builtins.readFile ./sway/config) + "exec_always ${pkgs.polkit_gnome}/libexec/polkit-gnome-authentication-agent-1";
+    extraConfig = (builtins.readFile ./sway/config)
+      + "exec_always ${pkgs.polkit_gnome}/libexec/polkit-gnome-authentication-agent-1";
   };
 
   xdg.configFile."waybar" = {

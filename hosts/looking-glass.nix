@@ -26,7 +26,7 @@
     loader.systemd-boot.enable = true;
     loader.efi.canTouchEfiVariables = true;
   };
-  
+
   networking.hostName = "looking-glass"; # Define your hostname.
   networking.networkmanager.enable = false;
 
@@ -39,13 +39,12 @@
   networking.useDHCP = false;
   networking.interfaces.enp3s0.useDHCP = false;
 
-  networking.interfaces.enp3s0.ipv4.addresses = [ {
+  networking.interfaces.enp3s0.ipv4.addresses = [{
     address = "10.0.0.16";
     prefixLength = 24;
-  } ];
+  }];
   networking.defaultGateway = "10.0.0.1";
   networking.nameservers = [ "1.1.1.1" ];
-
 
   # Select internationalisation properties.
   i18n.defaultLocale = "en_US.UTF-8";
@@ -56,7 +55,7 @@
 
   # Configure keymap in X11
   services.xserver.layout = "us";
-  
+
   # Enable touchpad support (enabled default in most desktopManager).
   services.xserver.libinput.enable = true;
 
@@ -64,9 +63,7 @@
   users.users.giovanni = {
     isNormalUser = true;
     extraGroups = [ "wheel" "audio" "video" "sound" ];
-    openssh.authorizedKeys.keys = [
-      (import ../ssh-keys/lenovo.nix).lenovoKey
-    ];
+    openssh.authorizedKeys.keys = [ (import ../ssh-keys/lenovo.nix).lenovoKey ];
   };
 
   # List packages installed in system profile. To search, run:
@@ -85,12 +82,25 @@
     alacritty
 
     # System utils
-    wget neovim curl git sudo neofetch htop dstat
-    barrier glxinfo sshfs arandr
-    exa pavucontrol fish
+    wget
+    neovim
+    curl
+    git
+    sudo
+    neofetch
+    htop
+    dstat
+    barrier
+    glxinfo
+    sshfs
+    arandr
+    exa
+    pavucontrol
+    fish
 
     # Browsers
-    firefox brave
+    firefox
+    brave
 
     # Python
     python310

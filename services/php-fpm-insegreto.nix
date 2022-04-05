@@ -31,14 +31,14 @@ in {
         include ${pkgs.nginx}/conf/fastcgi_params;
         include ${pkgs.nginx}/conf/fastcgi.conf;
       '';
-     };
+    };
   };
   users.users.${app} = {
     isSystemUser = true;
     createHome = true;
     home = dataDir;
-    group  = app;
+    group = app;
   };
-  users.groups.${app} = {};
+  users.groups.${app} = { };
 }
 

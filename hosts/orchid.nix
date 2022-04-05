@@ -46,14 +46,20 @@
   users.users.giovanni = {
     isNormalUser = true;
     extraGroups = [ "wheel" "insegreto" ];
-    openssh.authorizedKeys.keys = [
-      (import ../ssh-keys/lenovo.nix).lenovoKey
-    ];
+    openssh.authorizedKeys.keys = [ (import ../ssh-keys/lenovo.nix).lenovoKey ];
   };
 
   # List packages installed in system profile. To search, run:
   # $ nix search wget
-  environment.systemPackages = with pkgs; [ neovim htop git screen dstat pkgs.php80Packages.composer pkgs.nodejs ];
+  environment.systemPackages = with pkgs; [
+    neovim
+    htop
+    git
+    screen
+    dstat
+    pkgs.php80Packages.composer
+    pkgs.nodejs
+  ];
 
   # Some programs need SUID wrappers, can be configured further or are
   # started in user sessions.
@@ -64,9 +70,7 @@
   };
 
   # List services that you want to enable:
-  services.redis = {
-    enable = true;
-  };
+  services.redis = { enable = true; };
 
   services.mysql = {
     enable = true;

@@ -3,9 +3,7 @@
 {
   fonts = {
     enableDefaultFonts = false;
-    fonts = with pkgs; [ 
-      cascadia-code
-    ];
+    fonts = with pkgs; [ cascadia-code ];
 
     fontconfig = {
       defaultFonts = {

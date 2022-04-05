@@ -8,7 +8,5 @@
     longitude = 9.19;
   };
 
-  services.redshift = {
-    enable = true;
-  };
+  services.redshift = { enable = true; };
 }

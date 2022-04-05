@@ -24,7 +24,7 @@
     loader.efi.canTouchEfiVariables = true;
     kernelPackages = pkgs.linuxPackages_latest;
   };
-  
+
   networking.hostName = "pearl"; # Define your hostname.
   networking.networkmanager.enable = false;
 
@@ -49,9 +49,7 @@
   users.users.giovanni = {
     isNormalUser = true;
     extraGroups = [ "wheel" "docker" ];
-    openssh.authorizedKeys.keys = [
-      (import ../ssh-keys/lenovo.nix).lenovoKey
-    ];
+    openssh.authorizedKeys.keys = [ (import ../ssh-keys/lenovo.nix).lenovoKey ];
   };
 
   # List packages installed in system profile. To search, run:
@@ -61,7 +59,15 @@
     openvpn
 
     # System utils
-    wget neovim curl git sudo neofetch htop dstat sshfs
+    wget
+    neovim
+    curl
+    git
+    sudo
+    neofetch
+    htop
+    dstat
+    sshfs
 
     # Docker
     docker-compose

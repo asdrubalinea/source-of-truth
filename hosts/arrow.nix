@@ -53,14 +53,18 @@
   users.users.giovanni = {
     isNormalUser = true;
     extraGroups = [ "wheel" "docker" ];
-    openssh.authorizedKeys.keys = [
-      (import ../ssh-keys/lenovo.nix).lenovoKey
-    ];
+    openssh.authorizedKeys.keys = [ (import ../ssh-keys/lenovo.nix).lenovoKey ];
   };
 
   # List packages installed in system profile. To search, run:
   # $ nix search wget
-  environment.systemPackages = with pkgs; [ neovim htop git docker-compose screen ];
+  environment.systemPackages = with pkgs; [
+    neovim
+    htop
+    git
+    docker-compose
+    screen
+  ];
 
   virtualisation.docker.enable = true;
 
