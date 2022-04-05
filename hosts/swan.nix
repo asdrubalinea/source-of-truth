@@ -23,12 +23,12 @@
     enableUnstable = true;
     forceImportAll = false;
   };
-  boot.kernelParams = [ "zfs.zfs_arc_max=1073741824" ]; # 1 GiB
+  boot.kernelParams = [ "zfs.zfs_arc_max=1073741824" "nohibernate" ]; # 1 GiB
 
   boot.supportedFilesystems = [ "zfs" ];
 
   # Enable nested virtualization
-  boot.extraModprobeConfig = "options kvm_intel nested=1";
+  boot.extraModprobeConfig = "options kvm_amd nested=1";
 
   fileSystems."/" =
     { device = "rpool/local/root";
@@ -36,7 +36,7 @@
     };
 
   fileSystems."/boot" =
-    { device = "/dev/disk/by-uuid/CA3A-6C8E";
+    { device = "/dev/disk/by-uuid/8977-F6B5";
       fsType = "vfat";
     };
 
@@ -46,18 +46,21 @@
     };
 
   fileSystems."/home" =
-    { device = "data/safe/home";
+    { device = "data0/safe/home";
       fsType = "zfs";
     };
 
   fileSystems."/persist" =
-    { device = "data/safe/persist";
+    { device = "data0/safe/persist";
       fsType = "zfs";
     };
 
-  services.zfs.autoScrub.enable = true;
+  swapDevices = [ { device = "/dev/disk/by-uuid/cda0c9ea-4923-40dd-87b1-f17e712df3f7"; } ];
 
-  swapDevices = [ { device = "/dev/disk/by-uuid/041b137f-c9a8-460f-9f6f-1abf3c3aee22"; } ];
+  services.zfs.autoScrub = {
+    enable = true;
+    interval = "Sun, 01:00";
+  };
 
   hardware.cpu.amd.updateMicrocode = lib.mkDefault config.hardware.enableRedistributableFirmware;
   hardware.enableRedistributableFirmware = true;
@@ -76,6 +79,13 @@
     loader.efi.canTouchEfiVariables = true;
     kernelPackages = pkgs.linuxPackages_zen;
   };
+
+  # Autostart sway
+  environment.loginShellInit = ''
+    if [ -z $DISPLAY ] && [ "$(tty)" = "/dev/tty1" ]; then
+      exec sway
+    fi
+  '';
 
   networking.hostName = "swan";
   networking.wireless.enable = true;
@@ -124,18 +134,6 @@
       isNormalUser = true;
       extraGroups = [ "wheel" "libvirtd" ];
       hashedPassword = (import ../passwords).password;
-    };
-  };
-
-  # Screen sharing
-  xdg = {
-    portal = {
-      enable = true;
-      extraPortals = with pkgs; [
-        xdg-desktop-portal-wlr
-        xdg-desktop-portal-gtk
-      ];
-      gtkUsePortal = true;
     };
   };
 
