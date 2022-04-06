@@ -62,6 +62,10 @@
 
     # Multimedia
     mpv
+    feh
+    ncdu
+    gnome.nautilus
+    gnome.eog
 
     # Virt
     quickemu
