@@ -82,13 +82,6 @@
     kernelPackages = pkgs.linuxPackages_zen;
   };
 
-  # Autostart sway
-  environment.loginShellInit = ''
-    if [ -z $DISPLAY ] && [ "$(tty)" = "/dev/tty1" ]; then
-      exec sway
-    fi
-  '';
-
   networking.hostName = "swan";
   networking.wireless.enable = true;
   networking.wireless.userControlled.enable = true;
@@ -141,7 +134,13 @@
 
   security.sudo.wheelNeedsPassword = false;
 
-  environment.systemPackages = with pkgs; [ git sudo polkit_gnome zfs ];
+  environment.systemPackages = with pkgs; [
+    git
+    sudo
+    polkit_gnome
+    zfs
+    gnome.gnome-keyring
+  ];
 
   virtualisation.docker.enable = true;
   virtualisation.libvirtd.enable = true;
