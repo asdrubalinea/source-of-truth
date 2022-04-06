@@ -134,13 +134,7 @@
 
   security.sudo.wheelNeedsPassword = false;
 
-  environment.systemPackages = with pkgs; [
-    git
-    sudo
-    polkit_gnome
-    zfs
-    gnome.gnome-keyring
-  ];
+  environment.systemPackages = with pkgs; [ git sudo polkit_gnome zfs ];
 
   virtualisation.docker.enable = true;
   virtualisation.libvirtd.enable = true;
