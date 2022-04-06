@@ -8,7 +8,6 @@
     ../desktop/fonts.nix
 
     ../services/ssh-secure.nix
-    ../services/redshift.nix
 
     ../network/hosts.nix
   ];
