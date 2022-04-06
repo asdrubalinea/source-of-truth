@@ -24,6 +24,12 @@
 
           modules = [ ./hosts/swan.nix ];
         };
+
+        staff = lib.nixosSystem {
+          inherit system;
+
+          modules = [ ./hosts/staff.nix ];
+        };
       };
 
       homeConfigurations.${username} =
