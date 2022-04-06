@@ -15,6 +15,8 @@
 
     extraConfig = (builtins.readFile ./sway/config)
       + "exec_always ${pkgs.polkit_gnome}/libexec/polkit-gnome-authentication-agent-1";
+
+    extraOptions = [ "--unsupported-gpu" ];
   };
 
   xdg.configFile."waybar" = {
@@ -25,13 +27,12 @@
   home.file.".wallpaper".source = ./wallpaper;
 
   home.packages = with pkgs; [
+    waybar
     swaylock
     swayidle
     wl-clipboard
     mako # notification daemon
-    alacritty # Alacritty is the default terminal in the config
     bemenu
-    waybar
-    wlsunset
+    # wlsunset
   ];
 }

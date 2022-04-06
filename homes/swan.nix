@@ -38,8 +38,6 @@
 
     # Browsers
     firefox
-    google-chrome
-    chromium
 
     # Rust
     rust-analyzer
