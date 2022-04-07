@@ -158,7 +158,7 @@
     };
     environment.BORG_RSH = "ssh -i /persist/borg/ssh_key -p 23";
     compression = "zstd,1";
-    startAt = "weekly";
+    startAt = "daily";
 
     preHook = ''
       ${pkgs.zfs}/bin/zfs destroy data0/safe/persist@borg || true
