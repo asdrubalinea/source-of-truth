@@ -103,7 +103,6 @@
     monthly = 1; # keep only one monthly snapshot (instead of twelve)
   };
 
-  # Set your time zone.
   time.timeZone = "Europe/Rome";
 
   # The global useDHCP flag is deprecated, therefore explicitly set to false here.
@@ -135,7 +134,13 @@
 
   security.sudo.wheelNeedsPassword = false;
 
-  environment.systemPackages = with pkgs; [ git sudo polkit_gnome zfs ];
+  environment.systemPackages = with pkgs; [
+    git
+    sudo
+    polkit_gnome
+    zfs
+    libnotify
+  ];
 
   virtualisation.docker.enable = true;
   virtualisation.libvirtd.enable = true;
@@ -150,6 +155,7 @@
 
   services.borgbackup.jobs."swan" = {
     paths = [ "/tmp/borg/persist" "/tmp/borg/home" ];
+    exclude = [ "'**/.cache'" "'**/target'" "'**/node_modules'" ];
 
     repo = "u298408@u298408.your-storagebox.de:swan";
     encryption = {
