@@ -2,10 +2,12 @@
   description = "NixOS configurations for Asdrubalini";
 
   inputs = {
+    # Commit with error:
+    # nixpkgs.url =
+    # "github:nixos/nixpkgs/b4729bad3d1c1c78dbd47634a1efba388c89dbbb";
     nixpkgs.url =
       "github:nixos/nixpkgs/bc4b9eef3ce3d5a90d8693e8367c9cbfc9fc1e13";
-    home-manager.url =
-      "github:nix-community/home-manager/07b941f0c45ac4af6732d96f4cb6142824eee3df";
+    home-manager.url = "github:nix-community/home-manager";
     home-manager.inputs.nixpkgs.follows = "nixpkgs";
   };
 

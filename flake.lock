@@ -17,7 +17,6 @@
       "original": {
         "owner": "nix-community",
         "repo": "home-manager",
-        "rev": "07b941f0c45ac4af6732d96f4cb6142824eee3df",
         "type": "github"
       }
     },
