@@ -38,6 +38,7 @@
 
     # Browsers
     firefox
+    chromium
 
     # Rust
     rust-analyzer
@@ -70,6 +71,8 @@
     virt-manager
 
     wpa_supplicant_gui
+
+    ciscoPacketTracer8
   ];
 
   nixpkgs.config.chromium.commandLineArgs =

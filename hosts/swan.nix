@@ -116,7 +116,9 @@
   # Select internationalisation properties.
   i18n.defaultLocale = "en_US.UTF-8";
   console = {
-    font = "Lat2-Terminus16";
+    earlySetup = true;
+    font = "${pkgs.terminus_font}/share/consolefonts/ter-132n.psf.gz";
+    packages = with pkgs; [ terminus_font ];
     keyMap = "it";
   };
 
@@ -143,6 +145,36 @@
     package = pkgs.nixFlakes;
     extraOptions = ''
       experimental-features = nix-command flakes
+    '';
+  };
+
+  services.borgbackup.jobs."swan" = {
+    paths = [ "/tmp/borg/persist" "/tmp/borg/home" ];
+
+    repo = "u298408@u298408.your-storagebox.de:swan";
+    encryption = {
+      mode = "repokey-blake2";
+      passCommand = "cat /persist/borg/passphrase";
+    };
+    environment.BORG_RSH = "ssh -i /persist/borg/ssh_key -p 23";
+    compression = "zstd,1";
+    startAt = "weekly";
+
+    preHook = ''
+      ${pkgs.zfs}/bin/zfs destroy data0/safe/persist@borg || true
+      ${pkgs.zfs}/bin/zfs destroy data0/safe/home@borg || true
+
+      ${pkgs.zfs}/bin/zfs snapshot data0/safe/persist@borg
+      ${pkgs.zfs}/bin/zfs snapshot data0/safe/home@borg
+
+      mkdir -p /tmp/borg/{persist,home}
+      /run/wrappers/bin/mount -t zfs data0/safe/persist@borg /tmp/borg/persist
+      /run/wrappers/bin/mount -t zfs data0/safe/home@borg /tmp/borg/home
+    '';
+
+    postHook = ''
+      ${pkgs.zfs}/bin/zfs destroy -f data0/safe/persist@borg
+      ${pkgs.zfs}/bin/zfs destroy -f data0/safe/home@borg
     '';
   };
 
