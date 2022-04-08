@@ -8,6 +8,7 @@
     ../desktop/fonts.nix
 
     ../services/ssh-secure.nix
+    ../scripts/wait-ac.nix
 
     ../network/hosts.nix
   ];
@@ -51,6 +52,11 @@
 
   fileSystems."/persist" = {
     device = "data0/safe/persist";
+    fsType = "zfs";
+  };
+
+  fileSystems."/mnt/docker" = {
+    device = "rpool/local/docker";
     fsType = "zfs";
   };
 
@@ -127,7 +133,7 @@
 
     users.giovanni = {
       isNormalUser = true;
-      extraGroups = [ "wheel" "libvirtd" ];
+      extraGroups = [ "wheel" "libvirtd" "docker" ];
       hashedPassword = (import ../passwords).password;
     };
   };
@@ -142,7 +148,10 @@
     libnotify
   ];
 
-  virtualisation.docker.enable = true;
+  virtualisation.docker = {
+    enable = true;
+    extraOptions = "--data-root=/mnt/docker";
+  };
   virtualisation.libvirtd.enable = true;
   services.tlp.enable = true;
 
@@ -155,7 +164,15 @@
 
   services.borgbackup.jobs."swan" = {
     paths = [ "/tmp/borg/persist" "/tmp/borg/home" ];
-    exclude = [ "'**/.cache'" "'**/target'" "'**/node_modules'" ];
+    exclude = [
+      "**/.cache"
+      "**/target"
+      "**/node_modules"
+      "*.iso"
+      "*.qcow2"
+      "*.vdi"
+      "*.vmdk"
+    ];
 
     repo = "u298408@u298408.your-storagebox.de:swan";
     encryption = {
@@ -165,8 +182,11 @@
     environment.BORG_RSH = "ssh -i /persist/borg/ssh_key -p 23";
     compression = "zstd,1";
     startAt = "daily";
+    extraCreateArgs = "--verbose --stats --checkpoint-interval 600";
 
     preHook = ''
+      wait-ac
+
       ${pkgs.zfs}/bin/zfs destroy data0/safe/persist@borg || true
       ${pkgs.zfs}/bin/zfs destroy data0/safe/home@borg || true
 
@@ -176,9 +196,13 @@
       mkdir -p /tmp/borg/{persist,home}
       /run/wrappers/bin/mount -t zfs data0/safe/persist@borg /tmp/borg/persist
       /run/wrappers/bin/mount -t zfs data0/safe/home@borg /tmp/borg/home
+
+      ${pkgs.libnotify}/bin/notify-send "Backup started" "Daily Borg backup has just started"
     '';
 
     postHook = ''
+      ${pkgs.libnotify}/bin/notify-send "Backup terminated" "Daily Borg backup has just terminated"
+
       ${pkgs.zfs}/bin/zfs destroy -f data0/safe/persist@borg
       ${pkgs.zfs}/bin/zfs destroy -f data0/safe/home@borg
     '';
