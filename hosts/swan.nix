@@ -163,46 +163,61 @@
   };
 
   services.borgbackup.jobs."swan" = {
-    paths = [ "/tmp/borg/persist" "/tmp/borg/home" ];
     exclude = [
-      "**/.cache"
-      "**/target"
       "**/node_modules"
+      "**/.cache"
+      "**/cache2"
+      "**/Cache"
+      "**/.config/Code/CachedData"
+      "**/venv"
+      "**/.venv"
+      "**/target"
+
+      # Dont backup VMs
       "*.iso"
       "*.qcow2"
       "*.vdi"
       "*.vmdk"
     ];
 
-    repo = "u298408@u298408.your-storagebox.de:swan";
+    repo = "ssh://u298408@u298408.your-storagebox.de:23/./backups/swan-test";
     encryption = {
       mode = "repokey-blake2";
       passCommand = "cat /persist/borg/passphrase";
     };
-    environment.BORG_RSH = "ssh -i /persist/borg/ssh_key -p 23";
+    environment.BORG_RSH =
+      "ssh -i /persist/borg/ssh_key -o StrictHostKeyChecking=no";
     compression = "zstd,1";
-    startAt = "daily";
-    extraCreateArgs = "--verbose --stats --checkpoint-interval 600";
+    startAt = "weekly";
+    extraCreateArgs = "--stats --list";
+    extraArgs = "--verbose";
 
     preHook = ''
-      wait-ac
+      # wait-ac
 
-      ${pkgs.zfs}/bin/zfs destroy data0/safe/persist@borg || true
-      ${pkgs.zfs}/bin/zfs destroy data0/safe/home@borg || true
+      if [[ $(${pkgs.zfs}/bin/zfs list | grep data0/safe@borg-post) ]]; then
+        # borg-post already exists, replace it with borg-pre and create a new borg-post
+        ${pkgs.zfs}/bin/zfs destroy -f data0/safe@borg-pre
+        ${pkgs.zfs}/bin/zfs rename data0/safe@borg-post data0/safe@borg-pre
+        ${pkgs.zfs}/bin/zfs snapshot -r data0/safe@borg-post
+      else
 
-      ${pkgs.zfs}/bin/zfs snapshot data0/safe/persist@borg
-      ${pkgs.zfs}/bin/zfs snapshot data0/safe/home@borg
+      fi
 
-      mkdir -p /tmp/borg/{persist,home}
-      /run/wrappers/bin/mount -t zfs data0/safe/persist@borg /tmp/borg/persist
-      /run/wrappers/bin/mount -t zfs data0/safe/home@borg /tmp/borg/home
+      mkdir -p /tmp/borg/
+      /run/wrappers/bin/mount -t zfs data0/safe@borg-post /tmp/borg/
+    '';
 
-      ${pkgs.libnotify}/bin/notify-send "Backup started" "Daily Borg backup has just started"
+    dumpCommand = ''
+      zfs diff data0/safe@borg-pre data0/safe@borg-post |
+
+      # Filter files
+      awk '$0 ~ "F"' |
+
+      awk '{ print $3 }
     '';
 
     postHook = ''
-      ${pkgs.libnotify}/bin/notify-send "Backup terminated" "Daily Borg backup has just terminated"
-
       ${pkgs.zfs}/bin/zfs destroy -f data0/safe/persist@borg
       ${pkgs.zfs}/bin/zfs destroy -f data0/safe/home@borg
     '';
