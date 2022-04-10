@@ -37,7 +37,7 @@
     gnome.gnome-disk-utility
 
     # Browsers
-    firefox
+    firefox-wayland
     ungoogled-chromium
 
     # Rust

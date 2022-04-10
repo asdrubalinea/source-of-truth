@@ -3,8 +3,8 @@
 {
   wayland.windowManager.sway = {
     enable = true;
-    package = pkgs.sway;
     wrapperFeatures.gtk = true;
+    extraOptions = [ "--unsupported-gpu" ];
 
     # TODO: convert config into Nix lang
     config = null;
