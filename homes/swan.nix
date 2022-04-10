@@ -1,6 +1,6 @@
 { config, pkgs, ... }:
 
-let lenopow = pkgs.callPackage ./packages/lenopow.nix { };
+let lenopow = pkgs.callPackage ../packages/lenopow.nix { };
 in {
   imports = [
     ../desktop/sway
