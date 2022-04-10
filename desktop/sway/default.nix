@@ -14,7 +14,6 @@ let
     fi
   '';
 in {
-  # imports = [ ../../scripts/screen-toggle.nix ];
 
   wayland.windowManager.sway = {
     enable = true;
@@ -58,7 +57,7 @@ in {
     swayidle
     wl-clipboard
     mako
-    bemenu
+    rofi-wayland
     wlsunset
 
     screen-toggle
