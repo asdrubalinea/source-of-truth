@@ -5,7 +5,7 @@
     ../hardware/radeon.nix
     ../hardware/nvidia-prime.nix
     ../hardware/pipewire.nix
-    ../desktop/fonts.nix
+    ../desktop/fonts.nix # TODO: enable in home-manager
 
     ../services/ssh-secure.nix
     ../scripts/wait-ac.nix
@@ -68,9 +68,7 @@
     interval = "Sun, 01:00";
   };
 
-  hardware.cpu.amd.updateMicrocode =
-    lib.mkDefault config.hardware.enableRedistributableFirmware;
-  hardware.enableRedistributableFirmware = true;
+  hardware.cpu.amd.updateMicrocode = true;
   hardware.enableAllFirmware = true;
 
   nixpkgs.config.allowUnfree = true;
@@ -165,22 +163,28 @@
   services.borgbackup.jobs."swan" = {
     exclude = [
       "**/node_modules"
-      "**/.cache"
       "**/cache2"
       "**/Cache"
-      "**/.config/Code/CachedData"
       "**/venv"
       "**/.venv"
       "**/target"
+
+      "**/.rustup"
+      "**/.cargo"
+      "**/.config"
+      "**/.cache"
+      "**/.local"
 
       # Dont backup VMs
       "*.iso"
       "*.qcow2"
       "*.vdi"
       "*.vmdk"
+
+      "*.deb"
     ];
 
-    repo = "ssh://u298408@u298408.your-storagebox.de:23/./backups/swan-test";
+    repo = "ssh://u298408@u298408.your-storagebox.de:23/./backups/swan";
     encryption = {
       mode = "repokey-blake2";
       passCommand = "cat /persist/borg/passphrase";
@@ -195,36 +199,38 @@
     preHook = ''
       # wait-ac
 
-      if [[ $(${pkgs.zfs}/bin/zfs list | grep data0/safe@borg-post) ]]; then
-        # borg-post already exists, replace it with borg-pre and create a new borg-post
-        ${pkgs.zfs}/bin/zfs destroy -f data0/safe@borg-pre
-        ${pkgs.zfs}/bin/zfs rename data0/safe@borg-post data0/safe@borg-pre
-        ${pkgs.zfs}/bin/zfs snapshot -r data0/safe@borg-post
-      else
-
+      if [[ $(${pkgs.zfs}/bin/zfs list | grep data0/safe@borg) ]]; then
+        /run/wrappers/bin/umount /tmp/borg/home || true
+        /run/wrappers/bin/umount /tmp/borg/persist || true
+        ${pkgs.zfs}/bin/zfs destroy -r data0/safe@borg
       fi
 
-      mkdir -p /tmp/borg/
-      /run/wrappers/bin/mount -t zfs data0/safe@borg-post /tmp/borg/
+      ${pkgs.zfs}/bin/zfs snapshot -r data0/safe@borg
+
+      mkdir -p /tmp/borg/{home,persist}
+      /run/wrappers/bin/mount -t zfs data0/safe/home@borg /tmp/borg/home
+      /run/wrappers/bin/mount -t zfs data0/safe/persist@borg /tmp/borg/persist
     '';
 
-    dumpCommand = ''
-      zfs diff data0/safe@borg-pre data0/safe@borg-post |
-
-      # Filter files
-      awk '$0 ~ "F"' |
-
-      awk '{ print $3 }
-    '';
+    paths = [ "/tmp/borg/" ];
 
     postHook = ''
-      ${pkgs.zfs}/bin/zfs destroy -f data0/safe/persist@borg
-      ${pkgs.zfs}/bin/zfs destroy -f data0/safe/home@borg
+      /run/wrappers/bin/umount /tmp/borg/home
+      /run/wrappers/bin/umount /tmp/borg/persist
+      ${pkgs.zfs}/bin/zfs destroy -r data0/safe@borg
     '';
   };
 
   # Polkit
   security.polkit.enable = true;
+
+  services.dbus.enable = true;
+  xdg.portal = {
+    enable = true;
+    wlr.enable = true;
+    extraPortals = [ pkgs.xdg-desktop-portal-gtk ];
+    gtkUsePortal = true;
+  };
 
   # users.users."giovanni".openssh.authorizedKeys.keys = [
   # (import ../ssh-keys/looking-glass.nix).key

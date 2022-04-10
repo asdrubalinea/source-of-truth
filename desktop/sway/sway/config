@@ -217,5 +217,3 @@ bar {
 # exec "udiskie -a -n -T -F --no-terminal"
 # exec nightlight
 exec mako
-
-# exec wlsunset

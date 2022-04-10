@@ -38,7 +38,7 @@
 
     # Browsers
     firefox
-    chromium
+    ungoogled-chromium
 
     # Rust
     rust-analyzer
@@ -75,6 +75,6 @@
     ciscoPacketTracer8
   ];
 
-  nixpkgs.config.chromium.commandLineArgs =
+  nixpkgs.config.ungoogled-chromium.commandLineArgs =
     "--enable-features=UseOzonePlatform --ozone-platform=wayland";
 }
