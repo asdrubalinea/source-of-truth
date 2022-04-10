@@ -11,8 +11,6 @@ stdenv.mkDerivation rec {
     sha256 = "sha256-aOXk616dRDPfDD+ObJ0OUgCSJHXMv8sZvh7+C7CgP8E=";
   };
 
-  nativeBuildInputs = [ ];
-
   installPhase = ''
     install -Dm755 -t "$out/bin" lenopow
   '';
