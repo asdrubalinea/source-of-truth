@@ -193,7 +193,7 @@
       "ssh -i /persist/borg/ssh_key -o StrictHostKeyChecking=no";
     compression = "zstd,1";
     startAt = "weekly";
-    extraCreateArgs = "--stats --list";
+    extraCreateArgs = "--stats";
     extraArgs = "--verbose";
 
     preHook = ''

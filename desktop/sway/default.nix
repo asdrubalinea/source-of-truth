@@ -16,7 +16,7 @@
 
     extraConfig = (builtins.readFile ./sway/config)
       + "exec_always ${pkgs.polkit_gnome}/libexec/polkit-gnome-authentication-agent-1"
-      + "exec ${pkgs.wlsunset} -l 45.27 -L 9.09";
+      + "exec ${pkgs.wlsunset}/bin/wlsunset -l 45.27 -L 9.09";
   };
 
   xdg.configFile."waybar" = {

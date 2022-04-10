@@ -2,8 +2,10 @@
   description = "NixOS configurations for Asdrubalini";
 
   inputs = {
-    nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
-    home-manager.url = "github:nix-community/home-manager";
+    nixpkgs.url =
+      "github:nixos/nixpkgs/42948b300670223ca8286aaf916bc381f66a5313"; # Pinned from nixos-unstable
+    home-manager.url =
+      "github:nix-community/home-manager/f911ebbec927e8e9b582f2e32e2b35f730074cfc";
     home-manager.inputs.nixpkgs.follows = "nixpkgs";
   };
 
