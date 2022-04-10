@@ -1,6 +1,7 @@
 { config, pkgs, ... }:
 
-{
+let lenopow = pkgs.callPackage ./packages/lenopow.nix { };
+in {
   imports = [
     ../desktop/sway
     ../desktop/alacritty
@@ -38,7 +39,7 @@
 
     # Browsers
     firefox
-    ungoogled-chromium
+    chromium
 
     # Rust
     rust-analyzer
@@ -73,6 +74,9 @@
     wpa_supplicant_gui
 
     ciscoPacketTracer8
+
+    pcmanfm
+    lenopow
   ];
 
   fonts.fontconfig.enable = true;
