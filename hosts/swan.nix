@@ -5,7 +5,7 @@
     ../hardware/radeon.nix
     ../hardware/nvidia-prime.nix
     ../hardware/pipewire.nix
-    ../desktop/fonts.nix # TODO: enable in home-manager
+    ../desktop/fonts.nix
 
     ../services/ssh-secure.nix
     ../scripts/wait-ac.nix

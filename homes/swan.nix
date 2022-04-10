@@ -37,7 +37,7 @@
     gnome.gnome-disk-utility
 
     # Browsers
-    firefox-wayland
+    firefox
     ungoogled-chromium
 
     # Rust
@@ -74,6 +74,8 @@
 
     ciscoPacketTracer8
   ];
+
+  fonts.fontconfig.enable = true;
 
   nixpkgs.config.ungoogled-chromium.commandLineArgs =
     "--enable-features=UseOzonePlatform --ozone-platform=wayland";
