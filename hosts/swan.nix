@@ -1,6 +1,7 @@
 { config, pkgs, lib, ... }:
 
-{
+let wait-ac = (pkgs.callPackage ../scripts/wait-ac.nix { }).wait-ac;
+in {
   imports = [
     ../hardware/radeon.nix
     ../hardware/nvidia-prime.nix
@@ -8,7 +9,6 @@
     ../desktop/fonts.nix
 
     ../services/ssh-secure.nix
-    ../scripts/wait-ac.nix
 
     ../network/hosts.nix
   ];
@@ -139,11 +139,12 @@
   security.sudo.wheelNeedsPassword = false;
 
   environment.systemPackages = with pkgs; [
-    git
-    sudo
     polkit_gnome
     zfs
     libnotify
+    neovim
+    wait-ac
+    git
   ];
 
   virtualisation.docker = {
@@ -197,7 +198,7 @@
     extraArgs = "--verbose";
 
     preHook = ''
-      # wait-ac
+      ${wait-ac}/bin/wait-ac
 
       if [[ $(${pkgs.zfs}/bin/zfs list | grep data0/safe@borg) ]]; then
         /run/wrappers/bin/umount /tmp/borg/home || true

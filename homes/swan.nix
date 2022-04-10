@@ -36,6 +36,8 @@ in {
     exa
     grim
     gnome.gnome-disk-utility
+    sudo
+    git
 
     # Browsers
     firefox
@@ -67,7 +69,7 @@ in {
     gnome.nautilus
     gnome.eog
 
-    # Virt
+    # Virtual
     quickemu
     virt-manager
 
