@@ -233,14 +233,14 @@ in {
     gtkUsePortal = true;
   };
 
-  # services.xserver.enable = true;
-  # services.xserver.desktopManager.pantheon.enable = true;
-  # services.pantheon.apps.enable = true;
-  # programs.pantheon-tweaks.enable = true;
-  # services.xserver.displayManager = {
-  # lightdm.enable = true;
-  # sessionPackages = with pkgs; [ sway ];
-  # };
+  #services.xserver.enable = true;
+  #services.xserver.desktopManager.pantheon.enable = true;
+  #services.pantheon.apps.enable = true;
+  #programs.pantheon-tweaks.enable = true;
+  #services.xserver.displayManager = {
+  #lightdm.enable = true;
+  #sessionPackages = with pkgs; [ sway ];
+  #};
 
   # users.users."giovanni".openssh.authorizedKeys.keys = [
   # (import ../ssh-keys/looking-glass.nix).key

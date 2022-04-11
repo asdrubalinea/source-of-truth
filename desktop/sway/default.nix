@@ -49,6 +49,11 @@ in {
     recursive = true;
   };
 
+  xdg.configFile."rofi" = {
+    source = ./rofi;
+    recursive = true;
+  };
+
   home.file.".wallpaper".source = ./wallpaper;
 
   home.packages = with pkgs; [
@@ -59,6 +64,7 @@ in {
     mako
     rofi-wayland
     wlsunset
+    grim
 
     screen-toggle
 

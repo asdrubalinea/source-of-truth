@@ -4,7 +4,9 @@
   services.openssh = {
     enable = true;
     passwordAuthentication = false;
-    permitRootLogin = "no";
+    permitRootLogin = "prohibit-password";
     kbdInteractiveAuthentication = false;
   };
+
+  services.fail2ban.enable = true;
 }

@@ -38,6 +38,9 @@ in {
     gnome.gnome-disk-utility
     sudo
     git
+    bat
+    jq
+    aws
 
     # Browsers
     firefox
@@ -45,8 +48,6 @@ in {
 
     # Rust
     rust-analyzer
-    rustup
-    llvmPackages.clangUseLLVM
 
     # Nix
     nixfmt
@@ -79,9 +80,12 @@ in {
 
     pcmanfm
     lenopow
+    zathura
   ];
 
   fonts.fontconfig.enable = true;
+
+  services.gnome-keyring.enable = true;
 
   nixpkgs.config.ungoogled-chromium.commandLineArgs =
     "--enable-features=UseOzonePlatform --ozone-platform=wayland";
