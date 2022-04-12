@@ -13,6 +13,9 @@ let
       echo 0 > /tmp/lcd
     fi
   '';
+
+  cfg = config.wayland.windowManager.sway.config;
+  wallpaper = "${config.xdg.configHome}/wallpaper";
 in {
 
   wayland.windowManager.sway = {
@@ -20,29 +23,182 @@ in {
     wrapperFeatures.gtk = true;
     extraOptions = [ "--unsupported-gpu" ];
 
-    # TODO: convert config into Nix lang
-    config = null;
-    # config = {
-    # startup = [
-    # {
-    # command =
-    # "${pkgs.polkit_gnome}/libexec/polkit-gnome-authentication-agent-1";
-    # always = true;
-    # }
-    # {
-    # command = "${pkgs.wlsunset}/bin/wlsunset -l 45.27 -L 9.09";
-    # always = false;
-    # }
-    # ];
-    # };
+    config = {
+      modifier = "Mod4";
+      terminal = "alacritty";
+      menu = "rofi -show run";
 
-    extraConfig = (builtins.readFile ./sway/config) + ''
-      bindsym XF86Calculator exec ${screen-toggle}/bin/screen-toggle
+      left = "h";
+      down = "j";
+      up = "k";
+      right = "l";
 
-      exec_always ${pkgs.polkit_gnome}/libexec/polkit-gnome-authentication-agent-1
-      exec ${pkgs.wlsunset}/bin/wlsunset -l 45.27 -L 9.09
-      exec ${pkgs.mako}/bin/mako
-    '';
+      output = { "*" = { bg = "${wallpaper} fill"; }; };
+
+      colors = {
+        focused = rec {
+          border = "#50fa7b";
+          background = "#50fa7b";
+          text = "#8be9fd";
+          indicator = "#50fa7b";
+          childBorder = background;
+        };
+
+        focusedInactive = rec {
+          border = "#171717";
+          background = "#171717";
+          text = "#8be9fd";
+          indicator = "#171717";
+          childBorder = background;
+        };
+
+        unfocused = rec {
+          border = "#171717";
+          background = "#171717";
+          text = "#8be9fd";
+          indicator = "#8be9fd";
+          childBorder = background;
+        };
+
+        urgent = rec {
+          border = "#50fa7b";
+          background = "#50fa7b";
+          text = "#8be9fd";
+          indicator = "#171717";
+          childBorder = background;
+        };
+      };
+
+      input = {
+        "1739:32552:MSFT0001:00_06CB:7F28_Touchpad" = {
+          left_handed = "disabled";
+          tap = "enabled";
+          natural_scroll = "disabled";
+          dwt = "enabled";
+          accel_profile = "adaptive";
+          pointer_accel = "-0.1";
+        };
+
+        "*" = { xkb_layout = "it"; };
+      };
+
+      gaps.inner = 12;
+      window.border = 1;
+      floating.border = 1;
+
+      keybindings = {
+        # Basics
+        "${cfg.modifier}+Return" = "exec ${cfg.terminal}";
+        "${cfg.modifier}+c" = "exec ${pkgs.firefox}/bin/firefox";
+        "${cfg.modifier}+q" = "kill";
+        "${cfg.modifier}+d" = "exec ${cfg.menu}";
+        "${cfg.modifier}+Shift+c" = "reload";
+        "${cfg.modifier}+Shift+e" =
+          "exec swaynag -t warning -m 'You pressed the exit shortcut. Do you really want to exit sway? This will end your Wayland session.' -b 'Yes, exit sway' 'swaymsg exit'";
+
+        # Focus
+        "${cfg.modifier}+${cfg.left}" = "focus left";
+        "${cfg.modifier}+${cfg.down}" = "focus down";
+        "${cfg.modifier}+${cfg.up}" = "focus up";
+        "${cfg.modifier}+${cfg.right}" = "focus right";
+
+        "${cfg.modifier}+Left" = "focus left";
+        "${cfg.modifier}+Down" = "focus down";
+        "${cfg.modifier}+Up" = "focus up";
+        "${cfg.modifier}+Right" = "focus right";
+
+        # Moving
+        "${cfg.modifier}+Shift+${cfg.left}" = "move left";
+        "${cfg.modifier}+Shift+${cfg.down}" = "move down";
+        "${cfg.modifier}+Shift+${cfg.up}" = "move up";
+        "${cfg.modifier}+Shift+${cfg.right}" = "move right";
+
+        "${cfg.modifier}+Shift+Left" = "move left";
+        "${cfg.modifier}+Shift+Down" = "move down";
+        "${cfg.modifier}+Shift+Up" = "move up";
+        "${cfg.modifier}+Shift+Right" = "move right";
+
+        # Workspaces
+        "${cfg.modifier}+1" = "workspace number 1";
+        "${cfg.modifier}+2" = "workspace number 2";
+        "${cfg.modifier}+3" = "workspace number 3";
+        "${cfg.modifier}+4" = "workspace number 4";
+        "${cfg.modifier}+5" = "workspace number 5";
+        "${cfg.modifier}+6" = "workspace number 6";
+        "${cfg.modifier}+7" = "workspace number 7";
+        "${cfg.modifier}+8" = "workspace number 8";
+        "${cfg.modifier}+9" = "workspace number 9";
+        "${cfg.modifier}+0" = "workspace number 10";
+
+        "${cfg.modifier}+Shift+1" = "move container to workspace number 1";
+        "${cfg.modifier}+Shift+2" = "move container to workspace number 2";
+        "${cfg.modifier}+Shift+3" = "move container to workspace number 3";
+        "${cfg.modifier}+Shift+4" = "move container to workspace number 4";
+        "${cfg.modifier}+Shift+5" = "move container to workspace number 5";
+        "${cfg.modifier}+Shift+6" = "move container to workspace number 6";
+        "${cfg.modifier}+Shift+7" = "move container to workspace number 7";
+        "${cfg.modifier}+Shift+8" = "move container to workspace number 8";
+        "${cfg.modifier}+Shift+9" = "move container to workspace number 9";
+        "${cfg.modifier}+Shift+0" = "move container to workspace number 10";
+
+        # Splits
+        "${cfg.modifier}+b" = "splith";
+        "${cfg.modifier}+v" = "splitv";
+
+        # Layouts
+        "${cfg.modifier}+s" = "layout stacking";
+        "${cfg.modifier}+t" = "layout tabbed";
+        "${cfg.modifier}+e" = "layout toggle split";
+        "${cfg.modifier}+f" = "fullscreen toggle";
+
+        "${cfg.modifier}+a" = "focus parent";
+
+        "${cfg.modifier}+Shift+space" = "floating toggle";
+        "${cfg.modifier}+space" = "focus mode_toggle";
+
+        # Scratchpad
+        "${cfg.modifier}+Shift+minus" = "move scratchpad";
+        "${cfg.modifier}+minus" = "scratchpad show";
+
+        # Resize mode
+        "${cfg.modifier}+r" = "mode resize";
+
+        # Media keys
+        "XF86Calculator" = "exec ${screen-toggle}/bin/screen-toggle";
+      };
+
+      window.commands = [{
+        criteria = { app_id = "mpv"; };
+        command = "floating enable, move position center";
+      }];
+
+      focus = { followMouse = true; };
+
+      bars = [{ command = "waybar"; }];
+
+      assigns = {
+        "9" = [{ app_id = "keepassxc"; }];
+        "10" = [{ app_id = "telegram-desktop"; }];
+      };
+
+      startup = [
+        {
+          command =
+            "${pkgs.polkit_gnome}/libexec/polkit-gnome-authentication-agent-1";
+          always = true;
+        }
+
+        {
+          command = "${pkgs.wlsunset}/bin/wlsunset -l 45.27 -L 9.09";
+          always = false;
+        }
+
+        {
+          command = "${pkgs.mako}/bin/mako";
+          always = false;
+        }
+      ];
+    };
   };
 
   xdg.configFile."waybar" = {
@@ -55,7 +211,7 @@ in {
     recursive = true;
   };
 
-  home.file.".wallpaper".source = ./wallpaper;
+  xdg.configFile."wallpaper".source = ./wallpaper;
 
   home.packages = with pkgs; [
     waybar
