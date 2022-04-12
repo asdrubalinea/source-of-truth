@@ -1,5 +1,3 @@
-## Variables ###
-
 set $mod Mod4
 
 set $left h
@@ -8,36 +6,22 @@ set $up k
 set $right l
 
 set $term "alacritty"
-set $menu rofi -show run
+set $menu "rofi -show run"
+set $browser "firefox"
 
 output * bg ~/.wallpaper fill
 
-# Start flavours
-## Base16 paradise
-# Author: Manas140
+# Set colors
+set $bg #171717
+set $fg #8be9fd
+set $br #50fa7b
+set $ia #232425
 
-set $base00 #151515
-set $base01 #1f1f1f
-set $base02 #282828
-set $base03 #3b3b3b
-set $base04 #e8e3e3
-set $base05 #e8e3e3
-set $base06 #e8e3e3
-set $base07 #e8e3e3
-set $base08 #b66467
-set $base09 #d9bc8c
-set $base0A #d9bc8c
-set $base0B #8c977d
-set $base0C #8aa6a2
-set $base0D #8da3b9
-set $base0E #a988b0
-set $base0F #d9bc8c
-# End flavours
-
-client.focused          $base05 $base0B $base00 $base0B $base0B
-client.focused_inactive $base01 $base01 $base05 $base03 $base01
-client.unfocused        $base01 $base00 $base05 $base01 $base01
-client.urgent           $base08 $base08 $base00 $base08 $base08
+# class                 border  backgr. text    indicator child_border
+client.focused          $br     $br     $fg     $br       $br
+client.focused_inactive $bg     $bg     $fg     $bg       $bg
+client.unfocused        $bg     $bg     $fg     $fg       $bg
+client.urgent           $br     $br     $fg     $bg       $br
 
 default_border pixel 1
 default_floating_border pixel 1
@@ -64,15 +48,11 @@ floating_modifier $mod normal
 ## Core Keybinds ##
 
 bindsym $mod+Return exec $term
-bindsym $mod+c exec firefox
+bindsym $mod+c exec $browser
 bindsym $mod+q kill
 bindsym $mod+d exec $menu
 bindsym $mod+Shift+c reload
 bindsym $mod+Shift+e exec swaynag -t warning -m 'Exit sway and logout?' -b 'Yes' 'swaymsg exit'
-
-bindsym $mod+p exec "grimshot --notify save output $XDG_SCREENSHOTS_DIR/Screenshot_$(date '+%Y%m%d-%H%M%S').png"
-bindsym $mod+Shift+p exec "grimshot --notify save area $XDG_SCREENSHOTS_DIR/Screenshot_$(date '+%Y%m%d-%H%M%S').png"
-bindsym $mod+Shift+Alt+p exec "grimshot --notify save window $XDG_SCREENSHOTS_DIR/Screenshot_$(date '+%Y%m%d-%H%M%S').png"
 
 ## Movement ##
 
@@ -144,13 +124,7 @@ bindsym $mod+r mode "resize"
 
 ## Rules ##
 
-# workspace 1 - Code
-assign [app_id="code"] 3
-
-# workspace 3 - Browser
-assign [app_id="firefox"] 3
-
-# workspace 10 - telegram
+assign [app_id="keepassxc"] 9
 assign [app_id="telegram-desktop"] 10
 
 # floats, positions, sizes
@@ -160,5 +134,3 @@ for_window [app_id="mpv"] floating enable, move position center
 bar {
   swaybar_command waybar
 }
-
-exec mako
