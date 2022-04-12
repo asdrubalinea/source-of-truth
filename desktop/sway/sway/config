@@ -11,17 +11,11 @@ set $browser "firefox"
 
 output * bg ~/.wallpaper fill
 
-# Set colors
-set $bg #171717
-set $fg #8be9fd
-set $br #50fa7b
-set $ia #232425
-
-# class                 border  backgr. text    indicator child_border
-client.focused          $br     $br     $fg     $br       $br
-client.focused_inactive $bg     $bg     $fg     $bg       $bg
-client.unfocused        $bg     $bg     $fg     $fg       $bg
-client.urgent           $br     $br     $fg     $bg       $br
+# class                 border      backgr.     indicator   child_border
+client.focused          #50fa7b     #50fa7b     #8be9fd     #50fa7b       #50fa7b
+client.focused_inactive #171717     #171717     #8be9fd     #171717       #171717
+client.unfocused        #171717     #171717     #8be9fd     #8be9fd       #171717
+client.urgent           #50fa7b     #50fa7b     #8be9fd     #171717       #50fa7b
 
 default_border pixel 1
 default_floating_border pixel 1
