@@ -40,14 +40,10 @@ in {
     git
     bat
     jq
-    aws
 
     # Browsers
     firefox
     chromium
-
-    # Rust
-    rust-analyzer
 
     # Nix
     nixfmt
@@ -68,18 +64,19 @@ in {
     ncdu
     gnome.nautilus
     gnome.eog
+    zathura
+    # pcmanfm
 
     # Virtual
     quickemu
     virt-manager
 
+    # Misc
     wpa_supplicant_gui
-
     ciscoPacketTracer8
 
-    pcmanfm
+    # Custom
     lenopow
-    zathura
   ];
 
   programs.vscode = {
