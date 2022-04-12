@@ -56,7 +56,6 @@ in {
     python310
 
     # IDEs
-    vscode
     emacs
     neovim
 
@@ -83,10 +82,21 @@ in {
     zathura
   ];
 
+  programs.vscode = {
+    enable = true;
+    extensions = with pkgs.vscode-extensions; [
+      dracula-theme.theme-dracula
+      vscodevim.vim
+
+      matklad.rust-analyzer
+      bungcip.better-toml
+    ];
+  };
+
   fonts.fontconfig.enable = true;
 
   services.gnome-keyring.enable = true;
 
-  nixpkgs.config.ungoogled-chromium.commandLineArgs =
+  nixpkgs.config.chromium.commandLineArgs =
     "--enable-features=UseOzonePlatform --ozone-platform=wayland";
 }
