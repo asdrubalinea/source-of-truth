@@ -9,4 +9,4 @@ let
 
     popd
   '';
-in { home.packages = [ systemApply ]; }
+in { environment.systemPackages = [ systemApply ]; }

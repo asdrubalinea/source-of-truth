@@ -1,6 +1,17 @@
 { config, pkgs, ... }:
 
-let lenopow = pkgs.callPackage ../packages/lenopow.nix { };
+let
+  lenopow = pkgs.callPackage ../packages/lenopow.nix { };
+
+  userApply = pkgs.writeScriptBin "user-apply" ''
+    #!${pkgs.stdenv.shell}
+    pushd /persist/configs/
+
+    home-manager switch --flake '.#giovanni-swan'
+
+    popd
+  '';
+
 in {
   imports = [
     ../desktop/sway
@@ -8,8 +19,6 @@ in {
 
     ../scripts/brightness.nix
     ../scripts/system-clean.nix
-    ../scripts/system-apply.nix
-    ../scripts/user-apply.nix
 
     ../misc/bash-aliases.nix
   ];
@@ -78,6 +87,7 @@ in {
 
     # Custom
     lenopow
+    userApply
   ];
 
   programs.vscode = {

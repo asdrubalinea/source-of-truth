@@ -11,6 +11,8 @@ in {
     ../services/ssh-secure.nix
 
     ../network/hosts.nix
+
+    ../scripts/system-apply.nix
   ];
 
   # Hardware
