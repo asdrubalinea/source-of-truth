@@ -89,7 +89,7 @@ in {
       keybindings = {
         # Basics
         "${cfg.modifier}+Return" = "exec ${cfg.terminal}";
-        "${cfg.modifier}+c" = "exec ${pkgs.firefox}/bin/firefox";
+        "${cfg.modifier}+c" = "exec ${pkgs.librewolf}/bin/librewolf";
         "${cfg.modifier}+q" = "kill";
         "${cfg.modifier}+d" = "exec ${cfg.menu}";
         "${cfg.modifier}+Shift+c" = "reload";
