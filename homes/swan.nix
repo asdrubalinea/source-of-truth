@@ -44,7 +44,7 @@ in {
 
     # Browsers
     firefox
-    chromium
+    ungoogled-chromium
     librewolf
 
     # Nix
@@ -95,6 +95,6 @@ in {
 
   services.gnome-keyring.enable = true;
 
-  nixpkgs.config.chromium.commandLineArgs =
+  nixpkgs.config.ungoogled-chromium.commandLineArgs =
     "--enable-features=UseOzonePlatform --ozone-platform=wayland";
 }

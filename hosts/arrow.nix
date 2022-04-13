@@ -20,26 +20,6 @@
   boot.kernelModules = [ ];
   boot.extraModulePackages = [ ];
 
-  fileSystems."/" = {
-    device = "tank/local/root";
-    fsType = "zfs";
-  };
-
-  fileSystems."/home" = {
-    device = "tank/local/home";
-    fsType = "zfs";
-  };
-
-  fileSystems."/boot" = {
-    device = "tank/local/boot";
-    fsType = "zfs";
-  };
-
-  fileSystems."/nix" = {
-    device = "tank/local/nix";
-    fsType = "zfs";
-  };
-
   hardware.cpu.intel.updateMicrocode =
     lib.mkDefault config.hardware.enableRedistributableFirmware;
 
