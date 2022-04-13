@@ -10,11 +10,36 @@
 
   time.timeZone = "Europe/Rome";
 
-  # networking.useDHCP = false;
-  # networking.interfaces.eno1.useDHCP = true;
-  # networking.interfaces.wlp4s0.useDHCP = true;
+  networking.useDHCP = false;
+  networking.interfaces.ens3.useDHCP = true;
+  networking.interfaces.ens10.useDHCP = true;
 
-  # Select internationalisation properties.
+  boot.initrd.availableKernelModules =
+    [ "ata_piix" "virtio_pci" "virtio_scsi" "xhci_pci" "sd_mod" "sr_mod" ];
+  boot.initrd.kernelModules = [ ];
+  boot.kernelModules = [ ];
+  boot.extraModulePackages = [ ];
+
+  fileSystems."/" = {
+    device = "tank/local/root";
+    fsType = "zfs";
+  };
+
+  fileSystems."/home" = {
+    device = "tank/local/home";
+    fsType = "zfs";
+  };
+
+  fileSystems."/boot" = {
+    device = "tank/local/boot";
+    fsType = "zfs";
+  };
+
+  fileSystems."/nix" = {
+    device = "tank/local/nix";
+    fsType = "zfs";
+  };
+
   i18n.defaultLocale = "en_US.UTF-8";
   console = {
     earlySetup = true;
