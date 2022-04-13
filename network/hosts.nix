@@ -1,5 +1,5 @@
 {
   networking.extraHosts = ''
-    157.90.171.243  arrow
+    167.235.22.240  arrow
   '';
 }
