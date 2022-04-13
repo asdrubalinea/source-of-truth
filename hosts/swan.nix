@@ -151,6 +151,7 @@ in {
   security.doas.extraRules = [{
     users = [ "giovanni" ];
     keepEnv = true;
+    noPass = true;
   }];
 
   environment.systemPackages = with pkgs; [
