@@ -46,7 +46,6 @@ in {
     exa
     grim
     gnome.gnome-disk-utility
-    sudo
     git
     bat
     jq

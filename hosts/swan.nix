@@ -145,7 +145,10 @@ in {
     };
   };
 
-  security.sudo.wheelNeedsPassword = false;
+  security.doas = {
+    enable = true;
+    wheelNeedsPassword = false;
+  };
 
   environment.systemPackages = with pkgs; [
     polkit_gnome
