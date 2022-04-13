@@ -1,12 +1,15 @@
 { config, pkgs, lib, modulesPath, ... }:
 
-{
+let
+  systemApply = (pkgs.callPackage ../scripts/system-apply.nix {
+    configPath = "/etc/nixos/nixos-config";
+  }).systemApply;
+
+in {
   imports = [
     (modulesPath + "/profiles/qemu-guest.nix")
     ../services/ssh-secure.nix
     ../network/hosts.nix
-
-    ../scripts/system-apply.nix
   ];
 
   nixpkgs.config.allowUnfree = true;

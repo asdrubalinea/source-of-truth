@@ -1,6 +1,12 @@
 { config, pkgs, lib, ... }:
 
-let wait-ac = (pkgs.callPackage ../scripts/wait-ac.nix { }).wait-ac;
+let
+  wait-ac = (pkgs.callPackage ../scripts/wait-ac.nix { }).wait-ac;
+
+  systemApply = (pkgs.callPackage ../scripts/system-apply.nix {
+    configPath = "/persist/configs";
+  }).systemApply;
+
 in {
   imports = [
     ../hardware/radeon.nix
@@ -11,8 +17,6 @@ in {
     ../services/ssh-secure.nix
 
     ../network/hosts.nix
-
-    ../scripts/system-apply.nix
   ];
 
   # Hardware
@@ -150,6 +154,7 @@ in {
     neovim
     wait-ac
     git
+    systemApply
   ];
 
   virtualisation.docker = {
