@@ -1,7 +1,7 @@
 { config, pkgs, ... }:
 
 {
-  programs.bash.shellAliases = {
+  programs.fish.shellAliases = {
     gits = "git status";
     gitc = "git commit";
     gitp = "git push";

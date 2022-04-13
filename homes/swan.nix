@@ -20,11 +20,13 @@ in {
     ../scripts/brightness.nix
     ../scripts/system-clean.nix
 
-    ../misc/bash-aliases.nix
+    ../misc/aliases.nix
   ];
 
   # Let Home Manager install and manage itself.
   programs.home-manager.enable = true;
+
+  programs.fish.enable = true;
 
   home.packages = with pkgs; [
     # Passwords

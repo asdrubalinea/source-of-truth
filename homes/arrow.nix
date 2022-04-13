@@ -16,7 +16,7 @@ in {
   imports = [
     ../scripts/system-clean.nix
 
-    ../misc/bash-aliases.nix
+    ../misc/aliases.nix
   ];
 
   # Let Home Manager install and manage itself.

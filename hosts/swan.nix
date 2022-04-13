@@ -142,6 +142,7 @@ in {
       isNormalUser = true;
       extraGroups = [ "wheel" "libvirtd" "docker" ];
       hashedPassword = (import ../passwords).password;
+      shell = pkgs.fish;
     };
   };
 
