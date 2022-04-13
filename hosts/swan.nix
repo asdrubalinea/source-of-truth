@@ -145,10 +145,13 @@ in {
     };
   };
 
-  security.doas = {
-    enable = true;
-    wheelNeedsPassword = false;
-  };
+  security.sudo.enable = false;
+  security.doas.enable = true;
+
+  security.doas.extraRules = [{
+    users = [ "giovanni" ];
+    keepEnv = true;
+  }];
 
   environment.systemPackages = with pkgs; [
     polkit_gnome
