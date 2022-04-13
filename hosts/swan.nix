@@ -91,6 +91,9 @@ in {
   networking.networkmanager.enable = false;
   networking.hostId = "ea0b4bc7";
 
+  hardware.bluetooth.enable = true;
+  services.blueman.enable = true;
+
   # Ignore power button
   services.logind.extraConfig = ''
     HandlePowerKey=ignore

@@ -26,6 +26,7 @@ in {
 
     # System utils
     neofetch
+    pfetch
     htop
     dstat
     glxinfo
@@ -44,6 +45,7 @@ in {
     # Browsers
     firefox
     chromium
+    librewolf
 
     # Nix
     nixfmt
