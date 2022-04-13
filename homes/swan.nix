@@ -67,7 +67,6 @@ in {
     gnome.nautilus
     gnome.eog
     zathura
-    # pcmanfm
 
     # Virtual
     quickemu

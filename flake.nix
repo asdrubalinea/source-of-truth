@@ -30,6 +30,12 @@
 
           modules = [ ./hosts/staff.nix ];
         };
+
+        arrow = lib.nixosSystem {
+          inherit system;
+
+          modules = [ ./hosts/arrow.nix ];
+        };
       };
 
       homeConfigurations.${username} =
