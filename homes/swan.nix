@@ -27,6 +27,9 @@ in {
   programs.home-manager.enable = true;
 
   programs.fish.enable = true;
+  programs.fish.shellInit = ''
+    set fish_greeting
+  '';
 
   home.packages = with pkgs; [
     # Passwords

@@ -29,7 +29,10 @@ in {
     enableUnstable = true;
     forceImportAll = false;
   };
-  boot.kernelParams = [ "zfs.zfs_arc_max=1073741824" "nohibernate" ]; # 1 GiB
+  boot.kernelParams = [
+    "zfs.zfs_arc_max=1073741824" # 1 GiB
+    "nohibernate"
+  ];
 
   boot.supportedFilesystems = [ "zfs" ];
 
@@ -63,6 +66,11 @@ in {
 
   fileSystems."/mnt/docker" = {
     device = "rpool/local/docker";
+    fsType = "zfs";
+  };
+
+  fileSystems."/var/lib/libvirt" = {
+    device = "rpool/local/libvirt";
     fsType = "zfs";
   };
 

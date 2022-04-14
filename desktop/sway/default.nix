@@ -39,32 +39,32 @@ in {
         focused = rec {
           border = "#50fa7b";
           background = "#50fa7b";
-          text = "#8be9fd";
+          text = "#50fa7b";
           indicator = "#50fa7b";
           childBorder = background;
         };
 
         focusedInactive = rec {
-          border = "#171717";
-          background = "#171717";
+          border = "#8be9fd";
+          background = "#8be9fd";
           text = "#8be9fd";
-          indicator = "#171717";
+          indicator = "#8be9fd";
           childBorder = background;
         };
 
         unfocused = rec {
-          border = "#171717";
-          background = "#171717";
+          border = "#8be9fd";
+          background = "#8be9fd";
           text = "#8be9fd";
           indicator = "#8be9fd";
           childBorder = background;
         };
 
         urgent = rec {
-          border = "#50fa7b";
-          background = "#50fa7b";
-          text = "#8be9fd";
-          indicator = "#171717";
+          border = "#ff5555";
+          background = "#ff5555";
+          text = "#ff5555";
+          indicator = "#ff5555";
           childBorder = background;
         };
       };
@@ -197,6 +197,15 @@ in {
           command = "${pkgs.mako}/bin/mako";
           always = false;
         }
+
+        {
+          command = ''
+            ${pkgs.swayidle}/bin/swayidle -w \
+              timeout 600 'swaymsg "output * dpms off"' \
+              resume 'swaymsg "output * dpms on"'
+          '';
+          always = false;
+        }
       ];
     };
   };
@@ -215,7 +224,6 @@ in {
 
   home.packages = with pkgs; [
     waybar
-    swaylock
     swayidle
     wl-clipboard
     mako
