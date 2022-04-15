@@ -1,8 +1,6 @@
 { config, pkgs, lib, ... }:
 
 let
-  wait-ac = (pkgs.callPackage ../scripts/wait-ac.nix { }).wait-ac;
-
   systemApply = (pkgs.callPackage ../scripts/system-apply.nix {
     configPath = "/persist/configs";
   }).systemApply;
@@ -15,6 +13,7 @@ in {
     ../desktop/fonts.nix
 
     ../services/ssh-secure.nix
+    ../services/borg-backup.nix
 
     ../network/hosts.nix
   ];
@@ -168,7 +167,6 @@ in {
     zfs
     libnotify
     neovim
-    wait-ac
     git
 
     systemApply
@@ -188,69 +186,17 @@ in {
     '';
   };
 
-  services.borgbackup.jobs."swan" = {
-    exclude = [
-      "**/node_modules"
-      "**/cache2"
-      "**/Cache"
-      "**/venv"
-      "**/.venv"
-      "**/target"
-
-      "**/.rustup"
-      "**/.cargo"
-      "**/.config"
-      "**/.cache"
-      "**/.local"
-
-      # Dont backup VMs
-      "*.iso"
-      "*.qcow2"
-      "*.vdi"
-      "*.vmdk"
-
-      "*.deb"
-    ];
-
-    repo = "ssh://u298408@u298408.your-storagebox.de:23/./backups/swan";
-    encryption = {
-      mode = "repokey-blake2";
-      passCommand = "cat /persist/borg/passphrase";
-    };
-    environment.BORG_RSH =
-      "ssh -i /persist/borg/ssh_key -o StrictHostKeyChecking=no";
-    compression = "zstd,1";
-    startAt = "weekly";
-    extraCreateArgs = "--stats";
-    extraArgs = "--verbose";
-
-    preHook = ''
-      ${wait-ac}/bin/wait-ac
-
-      if [[ $(${pkgs.zfs}/bin/zfs list | grep data0/safe@borg) ]]; then
-        /run/wrappers/bin/umount /tmp/borg/home || true
-        /run/wrappers/bin/umount /tmp/borg/persist || true
-        ${pkgs.zfs}/bin/zfs destroy -r data0/safe@borg
-      fi
-
-      ${pkgs.zfs}/bin/zfs snapshot -r data0/safe@borg
-
-      mkdir -p /tmp/borg/{home,persist}
-      /run/wrappers/bin/mount -t zfs data0/safe/home@borg /tmp/borg/home
-      /run/wrappers/bin/mount -t zfs data0/safe/persist@borg /tmp/borg/persist
-    '';
-
-    paths = [ "/tmp/borg/" ];
-
-    postHook = ''
-      /run/wrappers/bin/umount /tmp/borg/home
-      /run/wrappers/bin/umount /tmp/borg/persist
-      ${pkgs.zfs}/bin/zfs destroy -r data0/safe@borg
-    '';
-  };
-
   # Polkit
   security.polkit.enable = true;
+
+  services.borg-backup = {
+    enable = true;
+    name = "swan";
+
+    repo = "ssh://u298408@u298408.your-storagebox.de:23/./backups/swan";
+    ssh_key_file = "/persist/borg/ssh_key";
+    password_file = "/persist/borg/passphrase";
+  };
 
   services.dbus.enable = true;
   xdg.portal = {
