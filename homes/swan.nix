@@ -16,6 +16,7 @@ in {
   imports = [
     ../desktop/sway
     ../desktop/alacritty
+    ../desktop/neovim
 
     ../scripts/brightness.nix
     ../scripts/system-clean.nix

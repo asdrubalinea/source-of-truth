@@ -5,9 +5,10 @@
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
     home-manager.url = "github:nix-community/home-manager";
     home-manager.inputs.nixpkgs.follows = "nixpkgs";
+    rust-overlay.url = "github:oxalica/rust-overlay";
   };
 
-  outputs = { nixpkgs, home-manager, ... }:
+  outputs = { nixpkgs, home-manager, rust-overlay, ... }:
     let
       system = "x86_64-linux";
       username = "giovanni";
@@ -22,7 +23,18 @@
         swan = lib.nixosSystem {
           inherit system;
 
-          modules = [ ./hosts/swan.nix ];
+          modules = [
+            ./hosts/swan.nix
+
+            # Rust
+            ({ pkgs, ... }: {
+              nixpkgs.overlays = [ rust-overlay.overlay ];
+              environment.systemPackages = with pkgs; [
+                rust-bin.stable.latest.default
+                rust-analyzer
+              ];
+            })
+          ];
         };
 
         staff = lib.nixosSystem {

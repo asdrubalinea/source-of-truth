@@ -162,7 +162,6 @@ in {
   environment.systemPackages = with pkgs; [
     polkit_gnome
     zfs
-    libnotify
     neovim
     git
     nix-index
