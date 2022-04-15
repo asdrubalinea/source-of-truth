@@ -119,8 +119,8 @@ in {
 
   services.zfs.autoSnapshot = {
     enable = true;
-    frequent = 8; # keep the latest eight 15-minute snapshots (instead of four)
-    monthly = 1; # keep only one monthly snapshot (instead of twelve)
+    frequent = 10; # keep the latest ten 15-minute snapshots
+    monthly = 4; # keep only four monthly snapshot
   };
 
   time.timeZone = "Europe/Rome";
@@ -177,7 +177,7 @@ in {
     extraOptions = "--data-root=/mnt/docker";
   };
   virtualisation.libvirtd.enable = true;
-  # services.tlp.enable = true;
+  services.tlp.enable = true;
 
   nix = {
     package = pkgs.nixFlakes;

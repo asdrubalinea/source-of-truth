@@ -173,7 +173,6 @@ in {
       }];
 
       focus = { followMouse = true; };
-
       bars = [{ command = "waybar"; }];
 
       assigns = {
@@ -223,13 +222,14 @@ in {
   xdg.configFile."wallpaper".source = ./wallpaper;
 
   home.packages = with pkgs; [
-    waybar
     swayidle
-    wl-clipboard
-    mako
-    rofi-wayland
-    wlsunset
+    xwayland # for legacy apps
+    waybar # status bar
+    mako # notification daemon
     grim
+    wlsunset
+    rofi-wayland
+    wl-clipboard
 
     screen-toggle
 
