@@ -2,13 +2,13 @@
 
 stdenv.mkDerivation rec {
   pname = "lenopow";
-  version = "c2a29a38aee4014ef58fd4f20894c13768eeca61";
+  version = "607d46a2f4d0c12762d8f2e078938d93b79e8122";
 
   src = fetchFromGitHub {
     owner = "asdrubalini";
     repo = "lenopow";
     rev = version;
-    sha256 = "sha256-aOXk616dRDPfDD+ObJ0OUgCSJHXMv8sZvh7+C7CgP8E=";
+    sha256 = "sha256-hO5e8UQosQXFpHfYg3DWPp472VMndIVCfXU1ZovcQu8=";
   };
 
   installPhase = ''
