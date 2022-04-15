@@ -170,6 +170,7 @@ in {
     neovim
     wait-ac
     git
+
     systemApply
   ];
 
@@ -178,7 +179,7 @@ in {
     extraOptions = "--data-root=/mnt/docker";
   };
   virtualisation.libvirtd.enable = true;
-  services.tlp.enable = true;
+  # services.tlp.enable = true;
 
   nix = {
     package = pkgs.nixFlakes;
@@ -259,18 +260,10 @@ in {
     gtkUsePortal = true;
   };
 
-  #services.xserver.enable = true;
-  #services.xserver.desktopManager.pantheon.enable = true;
-  #services.pantheon.apps.enable = true;
-  #programs.pantheon-tweaks.enable = true;
-  #services.xserver.displayManager = {
-  #lightdm.enable = true;
-  #sessionPackages = with pkgs; [ sway ];
-  #};
+  # services.xserver.displayManager.sessionPackages = with pkgs; [ sway ];
 
-  # users.users."giovanni".openssh.authorizedKeys.keys = [
-  # (import ../ssh-keys/looking-glass.nix).key
-  # ];
+  # users.users."giovanni".openssh.authorizedKeys.keys =
+  # [ (import ../ssh-keys/looking-glass.nix).key ];
 
   # networking.firewall.allowedTCPPorts = [ ...];
   # networking.firewall.allowedUDPPorts = [ ... ];

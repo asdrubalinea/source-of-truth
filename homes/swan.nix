@@ -54,6 +54,7 @@ in {
     git
     bat
     jq
+    wdisplays
 
     # Browsers
     firefox
