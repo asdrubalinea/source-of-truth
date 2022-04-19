@@ -166,6 +166,7 @@ in {
     git
     nix-index
     swtpm
+    win-virtio
 
     systemApply
   ];
@@ -174,7 +175,19 @@ in {
     enable = true;
     extraOptions = "--data-root=/mnt/docker";
   };
-  virtualisation.libvirtd.enable = true;
+
+  virtualisation.libvirtd = {
+    enable = true;
+    qemu = {
+      swtpm.enable = true;
+      ovmf.enable = true;
+      ovmf.package = pkgs.OVMFFull;
+    };
+  };
+
+  environment.sessionVariables.VAGRANT_DEFAULT_PROVIDER = [ "libvirt" ];
+  environment.sessionVariables.LIBVIRT_DEFAULT_URI = [ "qemu:///system" ];
+
   services.tlp.enable = true;
 
   nix = {
@@ -210,10 +223,10 @@ in {
     sessionPackages = with pkgs; [ sway ];
   };
 
-  # users.users."giovanni".openssh.authorizedKeys.keys =
-  # [ (import ../ssh-keys/looking-glass.nix).key ];
+  users.users."giovanni".openssh.authorizedKeys.keys =
+    [ (import ../ssh-keys/looking-glass.nix).key ];
 
-  # networking.firewall.allowedTCPPorts = [ ...];
+  # networking.firewall.allowedTCPPorts = [ ... ];
   # networking.firewall.allowedUDPPorts = [ ... ];
 
   system.stateVersion = "22.05";

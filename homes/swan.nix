@@ -92,6 +92,8 @@ in {
     wpa_supplicant_gui
     ciscoPacketTracer8
 
+    teams
+
     # Custom
     lenopow
     userApply
