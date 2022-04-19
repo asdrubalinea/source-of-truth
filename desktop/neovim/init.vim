@@ -20,7 +20,7 @@ cnoremap <c-v> <c-r>+
 inoremap <c-r> <c-v>
 
 " Neovide font
-set guifont=Code\ New\ Roman:h24
+set guifont=Cascadia\ Code:h24
 
 set nocompatible               " be improved, required
 filetype off                   " required

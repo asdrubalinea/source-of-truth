@@ -7,5 +7,6 @@
     gitp = "git push";
     gita = "git add";
     ls = "exa";
+    nv = "nvim";
   };
 }

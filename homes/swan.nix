@@ -56,6 +56,7 @@ in {
     bat
     jq
     wdisplays
+    unzip
 
     # Browsers
     firefox
@@ -110,7 +111,4 @@ in {
   fonts.fontconfig.enable = true;
 
   services.gnome-keyring.enable = true;
-
-  nixpkgs.config.ungoogled-chromium.commandLineArgs =
-    "--enable-features=UseOzonePlatform --ozone-platform=wayland";
 }

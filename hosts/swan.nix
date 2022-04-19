@@ -113,9 +113,9 @@ in {
   '';
 
   # Erase your darlings.
-  boot.initrd.postDeviceCommands = lib.mkAfter ''
-    zfs rollback -r rpool/local/root@blank
-  '';
+  # boot.initrd.postDeviceCommands = lib.mkAfter ''
+  # zfs rollback -r rpool/local/root@blank
+  # '';
 
   services.zfs.autoSnapshot = {
     enable = true;
@@ -165,6 +165,7 @@ in {
     neovim
     git
     nix-index
+    swtpm
 
     systemApply
   ];
@@ -203,7 +204,11 @@ in {
     gtkUsePortal = true;
   };
 
-  # services.xserver.displayManager.sessionPackages = with pkgs; [ sway ];
+  services.xserver.desktopManager.mate.enable = true;
+  services.xserver.displayManager = {
+    gdm.enable = true;
+    sessionPackages = with pkgs; [ sway ];
+  };
 
   # users.users."giovanni".openssh.authorizedKeys.keys =
   # [ (import ../ssh-keys/looking-glass.nix).key ];
