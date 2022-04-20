@@ -57,6 +57,8 @@ in {
     jq
     wdisplays
     unzip
+    ripgrep
+    libsForQt5.okular
 
     # Browsers
     firefox
@@ -91,8 +93,6 @@ in {
     # Misc
     wpa_supplicant_gui
     ciscoPacketTracer8
-
-    teams
 
     # Custom
     lenopow
