@@ -63,6 +63,7 @@ in {
     # Browsers
     firefox
     ungoogled-chromium
+    google-chrome
     librewolf
 
     # Nix
@@ -86,6 +87,7 @@ in {
     gnome.eog
     zathura
     libsForQt5.okular
+    libreoffice-fresh
 
     # Virtual
     quickemu
@@ -98,6 +100,7 @@ in {
     teams
 
     (sdrpp.override { sdrplay_source = true; })
+    gnuradio
     bottles
 
     # Custom
