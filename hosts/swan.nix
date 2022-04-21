@@ -195,6 +195,8 @@ in {
 
   services.tlp.enable = true;
 
+  services.sdrplayApi.enable = true;
+
   nix = {
     package = pkgs.nixFlakes;
     extraOptions = ''
