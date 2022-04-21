@@ -166,7 +166,6 @@ in {
     git
     nix-index
     swtpm
-    win-virtio
 
     systemApply
   ];
@@ -175,6 +174,12 @@ in {
     enable = true;
     extraOptions = "--data-root=/mnt/docker";
   };
+
+  virtualisation.virtualbox.host.enable = true;
+  users.extraGroups.vboxusers.members = [ "giovanni" ];
+  virtualisation.virtualbox.host.enableExtensionPack = true;
+
+  virtualisation.spiceUSBRedirection.enable = true;
 
   virtualisation.libvirtd = {
     enable = true;

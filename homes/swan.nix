@@ -58,7 +58,7 @@ in {
     wdisplays
     unzip
     ripgrep
-    libsForQt5.okular
+    usbutils
 
     # Browsers
     firefox
@@ -85,6 +85,7 @@ in {
     gnome.nautilus
     gnome.eog
     zathura
+    libsForQt5.okular
 
     # Virtual
     quickemu
@@ -93,6 +94,11 @@ in {
     # Misc
     wpa_supplicant_gui
     ciscoPacketTracer8
+
+    teams
+
+    (sdrpp.override { sdrplay_source = true; })
+    bottles
 
     # Custom
     lenopow
