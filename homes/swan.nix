@@ -12,6 +12,13 @@ let
     popd
   '';
 
+  systemApply = (pkgs.callPackage ../scripts/system-apply.nix {
+    configPath = "/persist/configs";
+  }).systemApply;
+
+  dump1090_sdrplay = pkgs.callPackage ../packages/sdrplay/dump1090.nix { };
+  rsp_tcp_sdrplay = pkgs.callPackage ../packages/sdrplay/rsp_tcp.nix { };
+
 in {
   imports = [
     ../desktop/sway
@@ -97,15 +104,19 @@ in {
     wpa_supplicant_gui
     ciscoPacketTracer8
 
-    teams
-
+    # Software Defined Radio
     (sdrpp.override { sdrplay_source = true; })
     gnuradio
-    bottles
+    sdrangel
+    dump1090_sdrplay
+
+    # Games
+    polymc
 
     # Custom
     lenopow
     userApply
+    systemApply
   ];
 
   programs.vscode = {

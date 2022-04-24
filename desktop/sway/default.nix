@@ -90,6 +90,7 @@ in {
         # Basics
         "${cfg.modifier}+Return" = "exec ${cfg.terminal}";
         "${cfg.modifier}+c" = "exec ${pkgs.librewolf}/bin/librewolf";
+        "${cfg.modifier}+o" = "exec ${pkgs.emacs}/bin/emacs";
         "${cfg.modifier}+q" = "kill";
         "${cfg.modifier}+d" = "exec ${cfg.menu}";
         "${cfg.modifier}+Shift+c" = "reload";

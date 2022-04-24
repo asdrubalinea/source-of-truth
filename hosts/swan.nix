@@ -1,11 +1,6 @@
 { config, pkgs, lib, ... }:
 
-let
-  systemApply = (pkgs.callPackage ../scripts/system-apply.nix {
-    configPath = "/persist/configs";
-  }).systemApply;
-
-in {
+{
   imports = [
     ../hardware/radeon.nix
     ../hardware/nvidia-prime.nix
@@ -150,7 +145,7 @@ in {
     };
   };
 
-  security.sudo.enable = false;
+  security.sudo.enable = true;
   security.doas.enable = true;
 
   security.doas.extraRules = [{
@@ -166,8 +161,6 @@ in {
     git
     nix-index
     swtpm
-
-    systemApply
   ];
 
   virtualisation.docker = {
@@ -175,9 +168,9 @@ in {
     extraOptions = "--data-root=/mnt/docker";
   };
 
-  virtualisation.virtualbox.host.enable = true;
-  users.extraGroups.vboxusers.members = [ "giovanni" ];
-  virtualisation.virtualbox.host.enableExtensionPack = true;
+  # virtualisation.virtualbox.host.enable = true;
+  # users.extraGroups.vboxusers.members = [ "giovanni" ];
+  # virtualisation.virtualbox.host.enableExtensionPack = true;
 
   virtualisation.spiceUSBRedirection.enable = true;
 
@@ -232,6 +225,8 @@ in {
 
   users.users."giovanni".openssh.authorizedKeys.keys =
     [ (import ../ssh-keys/looking-glass.nix).key ];
+
+  programs.steam.enable = true;
 
   # networking.firewall.allowedTCPPorts = [ ... ];
   # networking.firewall.allowedUDPPorts = [ ... ];

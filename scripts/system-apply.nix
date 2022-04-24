@@ -4,7 +4,7 @@
     #!${pkgs.stdenv.shell}
     pushd ${configPath}
 
-    nixos-rebuild switch --flake '.#'
+    nixos-rebuild switch --flake '.#' --use-remote-sudo
 
     popd
   '';
