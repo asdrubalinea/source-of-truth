@@ -26,6 +26,7 @@ in {
     ../desktop/sway
     ../desktop/alacritty
     ../desktop/neovim
+    ../desktop/emacs
 
     ../scripts/brightness.nix
     ../scripts/system-clean.nix
@@ -89,10 +90,6 @@ in {
 
     # Python
     python310
-
-    # IDEs
-    emacs
-    neovim
 
     # Docker
     docker-compose
