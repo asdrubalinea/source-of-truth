@@ -19,6 +19,8 @@ let
   dump1090_sdrplay = pkgs.callPackage ../packages/sdrplay/dump1090.nix { };
   rsp_tcp_sdrplay = pkgs.callPackage ../packages/sdrplay/rsp_tcp.nix { };
 
+  # rkvm = pkgs.callPackage ../packages/rkvm.nix { };
+
 in {
   imports = [
     ../desktop/sway
@@ -34,9 +36,12 @@ in {
   # Let Home Manager install and manage itself.
   programs.home-manager.enable = true;
 
+  programs.home-manager.path = "/persist/configs";
+
   programs.fish.enable = true;
   programs.fish.shellInit = ''
     set fish_greeting
+    fish_add_path ~/.emacs.d/bin
   '';
 
   home.packages = with pkgs; [
@@ -66,12 +71,18 @@ in {
     unzip
     ripgrep
     usbutils
+    openssl
+
+    coreutils
+    fd
+    clang
 
     # Browsers
     firefox
     ungoogled-chromium
     google-chrome
     librewolf
+    tor-browser-bundle-bin
 
     # Nix
     nixfmt

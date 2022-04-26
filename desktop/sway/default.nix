@@ -190,7 +190,7 @@ in {
 
         {
           command = "${pkgs.wlsunset}/bin/wlsunset -l 45.27 -L 9.09";
-          always = false;
+          always = true;
         }
 
         {
