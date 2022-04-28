@@ -19,7 +19,7 @@ let
   dump1090_sdrplay = pkgs.callPackage ../packages/sdrplay/dump1090.nix { };
   rsp_tcp_sdrplay = pkgs.callPackage ../packages/sdrplay/rsp_tcp.nix { };
 
-  # rkvm = pkgs.callPackage ../packages/rkvm.nix { };
+  rkvm = pkgs.callPackage ../packages/rkvm { };
 
 in {
   imports = [
@@ -124,7 +124,7 @@ in {
     # Games
     polymc
 
-    # rkvm
+    rkvm
 
     # Custom
     lenopow
