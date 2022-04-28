@@ -75,6 +75,7 @@ in {
     openssl
     curl
     wget
+    traceroute
 
     coreutils
     fd

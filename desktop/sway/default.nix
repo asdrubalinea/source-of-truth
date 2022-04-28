@@ -37,26 +37,26 @@ in {
 
       colors = {
         focused = rec {
-          border = "#50fa7b";
-          background = "#50fa7b";
-          text = "#50fa7b";
-          indicator = "#50fa7b";
+          border = "#a9b665";
+          background = "#a9b665";
+          text = "#a9b665";
+          indicator = "#a9b665";
           childBorder = background;
         };
 
         focusedInactive = rec {
-          border = "#8be9fd";
-          background = "#8be9fd";
-          text = "#8be9fd";
-          indicator = "#8be9fd";
+          border = "#7daea3";
+          background = "#7daea3";
+          text = "#7daea3";
+          indicator = "#7daea3";
           childBorder = background;
         };
 
         unfocused = rec {
-          border = "#8be9fd";
-          background = "#8be9fd";
-          text = "#8be9fd";
-          indicator = "#8be9fd";
+          border = "#7daea3";
+          background = "#7daea3";
+          text = "#7daea3";
+          indicator = "#7daea3";
           childBorder = background;
         };
 
