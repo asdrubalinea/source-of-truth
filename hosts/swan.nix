@@ -217,11 +217,11 @@
     gtkUsePortal = true;
   };
 
-  services.xserver.desktopManager.mate.enable = true;
-  services.xserver.displayManager = {
-    gdm.enable = true;
-    sessionPackages = with pkgs; [ sway ];
-  };
+  # services.xserver.desktopManager.mate.enable = true;
+  #services.xserver.displayManager = {
+  #  gdm.enable = true;
+  #  sessionPackages = with pkgs; [ sway ];
+  #};
 
   users.users."giovanni".openssh.authorizedKeys.keys =
     [ (import ../ssh-keys/looking-glass.nix).key ];

@@ -10,7 +10,7 @@
         "format": "bat: {capacity}%",
     },
     "clock": {
-        "format-alt": "clk: {:%a, %d. %b  %H:%M}"
+        "format": "clk: {:%a, %d. %b  %H:%M}"
     }
 }
 

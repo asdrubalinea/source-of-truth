@@ -16,6 +16,7 @@ let
 
   cfg = config.wayland.windowManager.sway.config;
   wallpaper = "${config.xdg.configHome}/wallpaper";
+  
 in {
 
   wayland.windowManager.sway = {
@@ -233,9 +234,5 @@ in {
     wl-clipboard
 
     screen-toggle
-
-    # TODO: activate theme
-    # https://discourse.nixos.org/t/some-lose-ends-for-sway-on-nixos-which-we-should-fix/17728/2
-    dracula-theme
   ];
 }
