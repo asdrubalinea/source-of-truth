@@ -73,6 +73,8 @@ in {
     ripgrep
     usbutils
     openssl
+    curl
+    wget
 
     coreutils
     fd
@@ -120,6 +122,8 @@ in {
 
     # Games
     polymc
+
+    # rkvm
 
     # Custom
     lenopow
