@@ -91,7 +91,7 @@ in {
         # Basics
         "${cfg.modifier}+Return" = "exec ${cfg.terminal}";
         "${cfg.modifier}+c" = "exec ${pkgs.librewolf}/bin/librewolf";
-        "${cfg.modifier}+o" = "exec ${pkgs.emacs}/bin/emacs";
+        "${cfg.modifier}+o" = "exec ${pkgs.emacs}/bin/emacsclient --create-frame";
         "${cfg.modifier}+q" = "kill";
         "${cfg.modifier}+d" = "exec ${cfg.menu}";
         "${cfg.modifier}+Shift+c" = "reload";
@@ -228,11 +228,19 @@ in {
     xwayland # for legacy apps
     waybar # status bar
     mako # notification daemon
-    grim
+    grim # screenshot
     wlsunset
     rofi-wayland
     wl-clipboard
 
+    hicolor-icon-theme
+
     screen-toggle
   ];
+
+  # Handle external displays
+  services.kanshi = {
+    enable = true;
+  };
+  
 }

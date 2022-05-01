@@ -19,7 +19,7 @@ let
   dump1090_sdrplay = pkgs.callPackage ../packages/sdrplay/dump1090.nix { };
   rsp_tcp_sdrplay = pkgs.callPackage ../packages/sdrplay/rsp_tcp.nix { };
 
-  rkvm = pkgs.callPackage ../packages/rkvm { };
+  # rkvm = pkgs.callPackage ../packages/rkvm { };
 
 in {
   imports = [
@@ -42,7 +42,6 @@ in {
   programs.fish.enable = true;
   programs.fish.shellInit = ''
     set fish_greeting
-    fish_add_path ~/.emacs.d/bin
   '';
 
   home.packages = with pkgs; [
@@ -76,6 +75,7 @@ in {
     curl
     wget
     traceroute
+    zip
 
     coreutils
     fd
@@ -124,12 +124,17 @@ in {
     # Games
     polymc
 
-    rkvm
+    # rkvm
 
     # Custom
     lenopow
     userApply
     systemApply
+
+    # Themes
+    gruvbox-dark-gtk
+    kde-gruvbox
+    gruvbox-dark-icons-gtk
   ];
 
   programs.vscode = {

@@ -79,6 +79,8 @@
   hardware.cpu.amd.updateMicrocode = true;
   hardware.enableAllFirmware = true;
 
+  services.emacs.enable = true;
+
   nixpkgs.config.allowUnfree = true;
 
   boot = {
@@ -99,8 +101,8 @@
   networking.networkmanager.enable = false;
   networking.hostId = "ea0b4bc7";
 
-  hardware.bluetooth.enable = true;
-  services.blueman.enable = true;
+  # hardware.bluetooth.enable = true;
+  # services.blueman.enable = true;
 
   # Ignore power button
   services.logind.extraConfig = ''
@@ -113,7 +115,7 @@
   '';
 
   services.zfs.autoSnapshot = {
-    enable = true;
+  enable = true;
     frequent = 10; # keep the latest ten 15-minute snapshots
     monthly = 4; # keep only four monthly snapshot
   };
@@ -159,7 +161,6 @@
     zfs
     neovim
     git
-    nix-index
     swtpm
   ];
 
@@ -217,7 +218,8 @@
     gtkUsePortal = true;
   };
 
-  # services.xserver.desktopManager.mate.enable = true;
+  #services.xserver.enable = true;
+  #services.xserver.desktopManager.plasma5.enable = true;
   #services.xserver.displayManager = {
   #  gdm.enable = true;
   #  sessionPackages = with pkgs; [ sway ];
@@ -228,7 +230,7 @@
 
   programs.steam.enable = true;
 
-  networking.firewall.allowedTCPPorts = [ 5258 ];
+  # networking.firewall.allowedTCPPorts = [ ... ];
   # networking.firewall.allowedUDPPorts = [ ... ];
 
   system.stateVersion = "22.05";

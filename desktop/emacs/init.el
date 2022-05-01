@@ -1,3 +1,4 @@
+;; Emacs Straight
 (defvar bootstrap-version)
 (let ((bootstrap-file
        (expand-file-name "straight/repos/straight.el/bootstrap.el" user-emacs-directory))
@@ -16,8 +17,13 @@
 
 (straight-use-package 'use-package)
 
+;; Store backups to hidden directory
+(setq backup-directory-alist `(("." . "~/.emacs.bak")))
+
+(setq org-support-shift-select t)
+
 ;; Set default font face
-(set-face-attribute 'default nil :font "Fira Code" :height 170)
+(set-face-attribute 'default nil :font "Operator Mono Medium" :height 175)
 
 ;; Disable the menu bar
 (menu-bar-mode -1)
@@ -79,3 +85,23 @@
 (use-package rust-mode
   :straight t
   :ensure t)
+
+;; Org mode
+(use-package org-contrib
+  :straight t
+  :ensure t)
+
+;; this is required to highlight code blocks properly
+(use-package htmlize
+  :straight t
+  :ensure t)
+
+(use-package ivy
+  :straight t
+  :ensure t
+  :config
+    (ivy-mode)
+    (setq ivy-use-virtual-buffers t)
+    (setq enable-recursive-minibuffers t)
+  )
+

@@ -1,15 +1,18 @@
 { config, pkgs, ... }:
 
+let
+  operator-mono = pkgs.callPackage ../packages/operator-mono.nix { };
+in
 {
   fonts = {
     enableDefaultFonts = false;
-    fonts = with pkgs; [ cascadia-code fira-code ];
+    fonts = with pkgs; [ operator-mono cascadia-code fira-code ];
 
     fontconfig = {
       defaultFonts = {
-        serif = [ "Cascadia Code" ];
-        sansSerif = [ "Cascadia Code" ];
-        monospace = [ "Cascadia Code" ];
+        serif = [ "Operator Mono Medium" ];
+        sansSerif = [ "Operator Mono Medium" ];
+        monospace = [ "Operator Mono Medium" ];
       };
     };
   };
