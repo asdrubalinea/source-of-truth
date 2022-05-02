@@ -76,9 +76,11 @@ in {
     traceroute
     zip
 
+    ffmpeg
+    obs-studio
+
     coreutils
     fd
-    clang
 
     # Browsers
     firefox

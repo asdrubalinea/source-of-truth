@@ -219,7 +219,7 @@
   #services.xserver.desktopManager.plasma5.enable = true;
   #services.xserver.displayManager = {
   #  gdm.enable = true;
-  #  sessionPackages = with pkgs; [ sway ];
+  #  sessionPackages = with pkgs; [ unstable.sway ];
   #};
 
   users.users."giovanni".openssh.authorizedKeys.keys =
