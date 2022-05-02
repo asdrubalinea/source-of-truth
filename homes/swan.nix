@@ -44,7 +44,7 @@ in {
     set fish_greeting
   '';
 
-  home.packages = with pkgs; [
+  home.packages = with pkgs.unstable; [
     # Passwords
     keepassxc
 
@@ -62,7 +62,6 @@ in {
     pciutils
     file
     exa
-    grim
     gnome.gnome-disk-utility
     git
     bat
@@ -139,7 +138,7 @@ in {
 
   programs.vscode = {
     enable = true;
-    extensions = with pkgs.vscode-extensions; [
+    extensions = with pkgs.unstable.vscode-extensions; [
       dracula-theme.theme-dracula
       vscodevim.vim
 

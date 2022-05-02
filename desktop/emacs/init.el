@@ -17,31 +17,49 @@
 
 (straight-use-package 'use-package)
 
-;; Store backups to hidden directory
-(setq backup-directory-alist `(("." . "~/.emacs.bak")))
+(use-package emacs
+  :config
+  (setq user-full-name "Asdrubalini")
+  (setq ring-bell-function 'ignore)
+  (setq-default default-directory "/persist/")
+  (setq frame-resize-pixelwise t)
+  (setq scroll-conservatively 101) ; > 100
+  (setq scroll-preserve-screen-position t)
+  (setq auto-window-vscroll nil)
+  (setq load-prefer-newer t)
+  (setq inhibit-compacting-font-caches t)
+  (setq echo-keystrokes 0.02)
+  (tool-bar-mode -1)
+  (menu-bar-mode -1)
+  (setq-default line-spacing 3)
+  (setq-default indent-tabs-mode nil)
+  ;; Set default font face
+  (set-face-attribute 'default nil :font "Operator Mono Medium" :height 175)
+  (setq org-support-shift-select t)
+  ;; Enable line numbering by default
+  (global-display-line-numbers-mode t)
+  (setq inhibit-startup-screen t))
 
-(setq org-support-shift-select t)
+;; Inhibit scratch message
+(use-package "startup"
+  :ensure nil
+  :config
+  (setq initial-scratch-message ""))
 
-;; Set default font face
-(set-face-attribute 'default nil :font "Operator Mono Medium" :height 175)
+;; Inhibit scroll bar
+(use-package scroll-bar
+  :ensure nil
+  :config
+  (scroll-bar-mode -1))
 
-;; Disable the menu bar
-(menu-bar-mode -1)
+(use-package files
+  :ensure nil
+  :config
+  (setq confirm-kill-processes nil)
+  (setq create-lockfiles nil) ; don't create .# files (crashes 'npm start')
+  (setq backup-directory-alist `(("." . "~/.emacs.bak"))))
 
-;; Disable the tool bar
-(tool-bar-mode -1)
-
-;; Disable the scroll bars
-(scroll-bar-mode -1)
-
-;; Disable the scroll bars
-(scroll-bar-mode -1)
-
-;; Enable line numbering by default
-(global-display-line-numbers-mode t)
-
-(setq inhibit-startup-screen t)
-
+;; Evil mode
 (use-package evil
   :straight t
   :ensure t
@@ -58,11 +76,8 @@
   :straight t
   :ensure t
   :config
-  ;; Global settings (defaults)
-  (setq doom-themes-enable-bold t    ; if nil, bold is universally disabled
-        doom-themes-enable-italic t) ; if nil, italics is universally disabled
-  ;; (load-theme 'doom-moonlight t)
-  (load-theme 'doom-gruvbox t)
+  ;; (load-theme 'doom-challenger-deep t)
+  (load-theme 'doom-dark+ t)
 
   ;; Enable flashing mode-line on errors
   (doom-themes-visual-bell-config)
@@ -91,7 +106,7 @@
   :straight t
   :ensure t)
 
-;; this is required to highlight code blocks properly
+;; This is required to highlight code blocks properly
 (use-package htmlize
   :straight t
   :ensure t)
@@ -105,3 +120,33 @@
     (setq enable-recursive-minibuffers t)
   )
 
+;; Magit
+(use-package magit
+  :straight t
+  :ensure t)
+
+(use-package paren
+  :straight t
+  :ensure t
+  :init (setq show-paren-delay 0)
+  :config (show-paren-mode +1))
+
+(use-package elec-pair
+  :straight t
+  :ensure t
+  :hook (prog-mode . electric-pair-mode))
+
+(use-package whitespace
+  :straight t
+  :ensure t
+  :hook (before-save . whitespace-cleanup))
+
+(use-package centaur-tabs
+  :straight t
+  :ensure t
+  :demand
+  :config
+  (centaur-tabs-mode t)
+  :bind
+  ("C-<prior>" . centaur-tabs-backward)
+  ("C-<next>" . centaur-tabs-forward))

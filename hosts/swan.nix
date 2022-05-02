@@ -7,7 +7,6 @@
     ../hardware/pipewire.nix
     ../desktop/fonts.nix
 
-    ../services/ssh-secure.nix
     ../services/borg-backup.nix
 
     ../network/hosts.nix
@@ -79,8 +78,6 @@
   hardware.cpu.amd.updateMicrocode = true;
   hardware.enableAllFirmware = true;
 
-  services.emacs.enable = true;
-
   nixpkgs.config.allowUnfree = true;
 
   boot = {
@@ -101,8 +98,8 @@
   networking.networkmanager.enable = false;
   networking.hostId = "ea0b4bc7";
 
-  # hardware.bluetooth.enable = true;
-  # services.blueman.enable = true;
+  hardware.bluetooth.enable = true;
+  services.blueman.enable = true;
 
   # Ignore power button
   services.logind.extraConfig = ''

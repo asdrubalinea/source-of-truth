@@ -16,7 +16,7 @@ let
 
   cfg = config.wayland.windowManager.sway.config;
   wallpaper = "${config.xdg.configHome}/wallpaper";
-  
+
 in {
 
   wayland.windowManager.sway = {
@@ -90,8 +90,8 @@ in {
       keybindings = {
         # Basics
         "${cfg.modifier}+Return" = "exec ${cfg.terminal}";
-        "${cfg.modifier}+c" = "exec ${pkgs.librewolf}/bin/librewolf";
-        "${cfg.modifier}+o" = "exec ${pkgs.emacs}/bin/emacsclient --create-frame";
+        "${cfg.modifier}+c" = "exec ${pkgs.unstable.librewolf}/bin/librewolf";
+        "${cfg.modifier}+o" = "exec ${pkgs.unstable.emacs}/bin/emacsclient --create-frame";
         "${cfg.modifier}+q" = "kill";
         "${cfg.modifier}+d" = "exec ${cfg.menu}";
         "${cfg.modifier}+Shift+c" = "reload";
@@ -223,9 +223,9 @@ in {
 
   xdg.configFile."wallpaper".source = ./wallpaper;
 
-  home.packages = with pkgs; [
+  home.packages = with pkgs.unstable; [
     swayidle
-    xwayland # for legacy apps
+    # xwayland # for legacy apps
     waybar # status bar
     mako # notification daemon
     grim # screenshot
@@ -242,5 +242,5 @@ in {
   services.kanshi = {
     enable = true;
   };
-  
+
 }
