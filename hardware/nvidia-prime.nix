@@ -11,13 +11,11 @@ let
     exec -a "$0" "$@"
   '';
 in {
-  nixpkgs.config.allowUnfree = true;
 
   boot = {
     extraModprobeConfig = "options nvidia-drm modeset=1";
     initrd.kernelModules =
       [ "nvidia" "nvidia_modeset" "nvidia_uvm" "nvidia_drm" ];
-
   };
 
   services.xserver.videoDrivers = [ "nvidia" ];

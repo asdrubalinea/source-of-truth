@@ -89,7 +89,7 @@
       };
     };
     loader.efi.canTouchEfiVariables = true;
-    kernelPackages = pkgs.linuxPackages_zen;
+    kernelPackages = pkgs.stable.linuxPackages_zen;
   };
 
   networking.hostName = "swan";
@@ -98,7 +98,11 @@
   networking.networkmanager.enable = false;
   networking.hostId = "ea0b4bc7";
 
-  hardware.bluetooth.enable = true;
+  # Bluetooth
+  hardware.bluetooth = {
+    enable = true;
+    package = pkgs.stable.bluez;
+  };
   services.blueman.enable = true;
 
   # Ignore power button

@@ -4,6 +4,6 @@
   home.file.".emacs.d/init.el".source = ./init.el;
   programs.emacs = {
     enable = true;
-    package = pkgs.unstable.emacs;
+    package = pkgs.emacs;
   };
 }

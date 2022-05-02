@@ -3,7 +3,7 @@
     "home-manager": {
       "inputs": {
         "nixpkgs": [
-          "nixpkgs-unstable"
+          "nixpkgs"
         ]
       },
       "locked": {
@@ -22,6 +22,22 @@
     },
     "nixpkgs": {
       "locked": {
+        "lastModified": 1651007983,
+        "narHash": "sha256-GNay7yDPtLcRcKCNHldug85AhAvBpTtPEJWSSDYBw8U=",
+        "owner": "nixos",
+        "repo": "nixpkgs",
+        "rev": "e10da1c7f542515b609f8dfbcf788f3d85b14936",
+        "type": "github"
+      },
+      "original": {
+        "owner": "nixos",
+        "ref": "nixos-unstable",
+        "repo": "nixpkgs",
+        "type": "github"
+      }
+    },
+    "nixpkgs-stable": {
+      "locked": {
         "lastModified": 1651310835,
         "narHash": "sha256-MLk/zsLlbPhwFucxL64Fr+oIrvQC2/76Ap2F7ekbPNI=",
         "owner": "nixos",
@@ -38,31 +54,15 @@
     },
     "nixpkgs-trunk": {
       "locked": {
-        "lastModified": 1651508308,
-        "narHash": "sha256-Bu4GVsM+XditZs9JoosArj60fPipIeFvUcRWYUDlRY4=",
+        "lastModified": 1651512845,
+        "narHash": "sha256-k2Mw4U3Bq0ZGOlqTFOtlwxpW0DDMxQfbulJqg0ZfoYA=",
         "owner": "nixos",
         "repo": "nixpkgs",
-        "rev": "fa86dc70893ccc3836b6ac90c70bcde59647724b",
+        "rev": "b521c51c8322c897c0d5cf2168a29ba1e1222d76",
         "type": "github"
       },
       "original": {
         "owner": "nixos",
-        "repo": "nixpkgs",
-        "type": "github"
-      }
-    },
-    "nixpkgs-unstable": {
-      "locked": {
-        "lastModified": 1651007983,
-        "narHash": "sha256-GNay7yDPtLcRcKCNHldug85AhAvBpTtPEJWSSDYBw8U=",
-        "owner": "nixos",
-        "repo": "nixpkgs",
-        "rev": "e10da1c7f542515b609f8dfbcf788f3d85b14936",
-        "type": "github"
-      },
-      "original": {
-        "owner": "nixos",
-        "ref": "nixos-unstable",
         "repo": "nixpkgs",
         "type": "github"
       }
@@ -71,8 +71,8 @@
       "inputs": {
         "home-manager": "home-manager",
         "nixpkgs": "nixpkgs",
-        "nixpkgs-trunk": "nixpkgs-trunk",
-        "nixpkgs-unstable": "nixpkgs-unstable"
+        "nixpkgs-stable": "nixpkgs-stable",
+        "nixpkgs-trunk": "nixpkgs-trunk"
       }
     }
   },

@@ -44,7 +44,7 @@ in {
     set fish_greeting
   '';
 
-  home.packages = with pkgs.unstable; [
+  home.packages = with pkgs; [
     # Passwords
     keepassxc
 
@@ -140,7 +140,7 @@ in {
 
   programs.vscode = {
     enable = true;
-    extensions = with pkgs.unstable.vscode-extensions; [
+    extensions = with pkgs.vscode-extensions; [
       dracula-theme.theme-dracula
       vscodevim.vim
 
