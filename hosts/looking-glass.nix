@@ -8,6 +8,7 @@
   imports = [
     ../scripts/system-clean.nix
     ../scripts/system-upgrade.nix
+    ../services/ssh-secure.nix
 
     ../hardware/nvidia.nix
 

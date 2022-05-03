@@ -141,12 +141,9 @@
   :ensure t
   :hook (before-save . whitespace-cleanup))
 
-(use-package centaur-tabs
-  :straight t
-  :ensure t
-  :demand
+(use-package dired
+  :ensure nil
+  :hook ((dired-mode . dired-hide-details-mode)
+         (dired-mode . hl-line-mode))
   :config
-  (centaur-tabs-mode t)
-  :bind
-  ("C-<prior>" . centaur-tabs-backward)
-  ("C-<next>" . centaur-tabs-forward))
+  (put 'dired-find-alternate-file 'disabled nil))

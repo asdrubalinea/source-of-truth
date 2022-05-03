@@ -89,7 +89,7 @@
       };
     };
     loader.efi.canTouchEfiVariables = true;
-    kernelPackages = pkgs.stable.linuxPackages_zen;
+    kernelPackages = pkgs.linuxPackages_zen;
   };
 
   networking.hostName = "swan";
@@ -166,7 +166,7 @@
   ];
 
   virtualisation.docker = {
-    enable = true;
+    enable = false;
     extraOptions = "--data-root=/mnt/docker";
   };
 

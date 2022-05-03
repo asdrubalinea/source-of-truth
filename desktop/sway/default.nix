@@ -22,7 +22,6 @@ in {
   wayland.windowManager.sway = {
     enable = true;
     wrapperFeatures.gtk = true;
-    package = pkgs.sway;
     extraOptions = [ "--unsupported-gpu" ];
 
     config = {
