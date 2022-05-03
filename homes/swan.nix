@@ -76,9 +76,10 @@ in {
     traceroute
     zip
     nixos-shell
-
     coreutils
     fd
+    git-crypt
+    gnupg
 
     # Browsers
     firefox
@@ -105,7 +106,6 @@ in {
     zathura
     libsForQt5.okular
     libreoffice-fresh
-    git-crypt
 
     # Virtual
     quickemu
