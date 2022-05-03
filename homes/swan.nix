@@ -75,9 +75,7 @@ in {
     wget
     traceroute
     zip
-
-    ffmpeg
-    obs-studio
+    nixos-shell
 
     coreutils
     fd

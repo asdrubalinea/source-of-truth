@@ -77,7 +77,7 @@
   :ensure t
   :config
   ;; (load-theme 'doom-challenger-deep t)
-  (load-theme 'doom-dark+ t)
+  (load-theme 'doom-one t)
 
   ;; Enable flashing mode-line on errors
   (doom-themes-visual-bell-config)
