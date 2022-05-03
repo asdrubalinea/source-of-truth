@@ -12,6 +12,10 @@ let
     popd
   '';
 
+  systemApply = (pkgs.callPackage ../scripts/system-apply.nix {
+    configPath = "/etc/nixos/nixos-config";
+  }).systemApply;
+
 in {
   imports = [
     ../scripts/system-clean.nix
@@ -37,9 +41,13 @@ in {
     bat
     jq
 
+    git-crypt
+    gnupg
+
     # IDEs
     neovim
 
     userApply
+    systemApply
   ];
 }
