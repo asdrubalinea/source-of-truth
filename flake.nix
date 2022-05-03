@@ -35,11 +35,26 @@
 
           modules = [ ./hosts/swan.nix ];
         };
+
+        arrow = lib.nixosSystem {
+          inherit system pkgs;
+
+          modules = [ ./hosts/arrow.nix ];
+        };
       };
 
       homeConfigurations.giovanni-swan =
         home-manager.lib.homeManagerConfiguration {
           configuration = import ./homes/swan.nix;
+
+          inherit system pkgs username;
+          homeDirectory = "/home/${username}";
+          stateVersion = "22.05";
+        };
+
+      homeConfigurations.giovanni-arrow =
+        home-manager.lib.homeManagerConfiguration {
+          configuration = import ./homes/arrow.nix;
 
           inherit system pkgs username;
           homeDirectory = "/home/${username}";
