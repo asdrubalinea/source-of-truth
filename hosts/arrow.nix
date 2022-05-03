@@ -5,10 +5,13 @@ let
     configPath = "/etc/nixos/nixos-config";
   }).systemApply;
 
+  limbo = pkgs.callPackage ../packages/secrets/limbo.nix { };
+
 in {
   imports = [
     (modulesPath + "/profiles/qemu-guest.nix")
     ../services/ssh-secure.nix
+
     ../network/hosts.nix
   ];
 
@@ -60,7 +63,12 @@ in {
 
   security.sudo.wheelNeedsPassword = false;
 
-  environment.systemPackages = with pkgs; [ neovim git ];
+  environment.systemPackages = with pkgs; [
+    neovim
+    git
+
+    limbo
+  ];
 
   nix = {
     package = pkgs.nixFlakes;

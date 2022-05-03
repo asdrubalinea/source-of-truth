@@ -147,3 +147,8 @@
          (dired-mode . hl-line-mode))
   :config
   (put 'dired-find-alternate-file 'disabled nil))
+
+(use-package helm
+  :straight t
+  :ensure t
+  (helm-mode 1))
