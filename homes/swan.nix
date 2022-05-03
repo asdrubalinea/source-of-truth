@@ -107,6 +107,7 @@ in {
     zathura
     libsForQt5.okular
     libreoffice-fresh
+    git-crypt
 
     # Virtual
     quickemu

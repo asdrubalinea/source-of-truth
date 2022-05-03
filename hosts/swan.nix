@@ -163,6 +163,7 @@
     neovim
     git
     swtpm
+    git-crypt
   ];
 
   virtualisation.docker = {
