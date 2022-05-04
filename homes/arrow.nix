@@ -31,6 +31,12 @@ in {
     dstat
     sshfs
     git
+    file
+    screen
+
+    # Multimedia
+    trunk.yt-dlp
+    ffmpeg
 
     git-crypt
     gnupg
