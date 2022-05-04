@@ -1,11 +1,9 @@
 { config, pkgs, ... }:
 
 let
-  lenopow = pkgs.callPackage ../packages/lenopow.nix { };
-
   userApply = pkgs.writeScriptBin "user-apply" ''
     #!${pkgs.stdenv.shell}
-    pushd /persist/configs/
+    pushd /etc/nixos/nixos-config
 
     home-manager switch --flake '.#giovanni-arrow'
 
@@ -18,9 +16,9 @@ let
 
 in {
   imports = [
-    ../scripts/system-clean.nix
-
     ../misc/aliases.nix
+
+    ../scripts/system-clean.nix
   ];
 
   # Let Home Manager install and manage itself.

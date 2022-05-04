@@ -1,10 +1,6 @@
 { config, pkgs, lib, modulesPath, ... }:
 
 let
-  systemApply = (pkgs.callPackage ../scripts/system-apply.nix {
-    configPath = "/etc/nixos/nixos-config";
-  }).systemApply;
-
   limbo = pkgs.callPackage ../packages/secrets/limbo.nix { };
 
 in {
