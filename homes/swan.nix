@@ -21,7 +21,8 @@ let
 
   # rkvm = pkgs.callPackage ../packages/rkvm { };
 
-in {
+in
+{
   imports = [
     ../desktop/sway
     ../desktop/alacritty
@@ -89,7 +90,7 @@ in {
     tor-browser-bundle-bin
 
     # Nix
-    nixfmt
+    nixpkgs-fmt
 
     # Python
     python310

@@ -3,11 +3,14 @@
 let
   limbo = pkgs.callPackage ../packages/secrets/limbo.nix { };
 
-in {
+in
+{
   imports = [
     (modulesPath + "/profiles/qemu-guest.nix")
     ../services/ssh-secure.nix
     ../services/secrets/limbo.nix
+
+    ../mounts/secrets/hetzner-nas.nix
 
     ../network/hosts.nix
   ];
