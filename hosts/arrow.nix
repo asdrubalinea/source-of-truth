@@ -56,12 +56,12 @@ in {
 
     users.giovanni = {
       isNormalUser = true;
-      extraGroups = [ "wheel" "libvirtd" "docker" ];
+      extraGroups = [ "wheel" ];
       hashedPassword = (import ../passwords).password;
     };
   };
 
-  security.sudo.wheelNeedsPassword = false;
+  security.sudo.wheelNeedsPassword = true;
 
   environment.systemPackages = with pkgs; [
     neovim
@@ -80,7 +80,7 @@ in {
   users.users."giovanni".openssh.authorizedKeys.keys =
     [ (import ../ssh-keys/swan.nix).key ];
 
-  # networking.firewall.allowedTCPPorts = [ ...];
+  # networking.firewall.allowedTCPPorts = [ ... ];
   # networking.firewall.allowedUDPPorts = [ ... ];
 
   system.stateVersion = "22.05";

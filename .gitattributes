@@ -1,1 +1,2 @@
 packages/secrets/** filter=git-crypt diff=git-crypt
+services/secrets/** filter=git-crypt diff=git-crypt
