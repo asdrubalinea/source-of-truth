@@ -5,12 +5,11 @@ let
     configPath = "/etc/nixos/nixos-config";
   }).systemApply;
 
-  limbo = pkgs.callPackage ../packages/secrets/limbo.nix { };
-
 in {
   imports = [
     (modulesPath + "/profiles/qemu-guest.nix")
     ../services/ssh-secure.nix
+    ../services/secrets/limbo.nix
 
     ../network/hosts.nix
   ];
@@ -66,9 +65,9 @@ in {
   environment.systemPackages = with pkgs; [
     neovim
     git
-
-    limbo
   ];
+
+  services.limbo.enable = true;
 
   nix = {
     package = pkgs.nixFlakes;
