@@ -33,6 +33,12 @@ in
     sshfs
     git
     ncdu
+    file
+    screen
+
+    # Multimedia
+    trunk.yt-dlp
+    ffmpeg
 
     git-crypt
     gnupg
