@@ -151,4 +151,5 @@
 (use-package helm
   :straight t
   :ensure t
+  :init
   (helm-mode 1))
