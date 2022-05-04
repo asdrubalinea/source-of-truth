@@ -26,18 +26,11 @@ in {
 
   home.packages = with pkgs; [
     # System utils
-    neofetch
     pfetch
     htop
     dstat
     sshfs
-    pciutils
-    file
-    exa
-    sudo
     git
-    bat
-    jq
 
     git-crypt
     gnupg
