@@ -14,7 +14,8 @@ let
     configPath = "/etc/nixos/nixos-config";
   }).systemApply;
 
-in {
+in
+{
   imports = [
     ../misc/aliases.nix
 
@@ -31,6 +32,7 @@ in {
     dstat
     sshfs
     git
+    ncdu
 
     git-crypt
     gnupg
