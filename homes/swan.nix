@@ -82,6 +82,9 @@ in
     git-crypt
     gnupg
 
+    cmake
+    gnumake
+
     # Browsers
     firefox
     ungoogled-chromium
