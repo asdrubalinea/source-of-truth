@@ -6,7 +6,9 @@
     gitc = "git commit";
     gitp = "git push";
     gita = "git add";
+    gitd = "git diff";
     ls = "exa";
     nv = "nvim";
+    please = "doas";
   };
 }
