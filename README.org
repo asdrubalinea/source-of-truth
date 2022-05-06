@@ -1,4 +1,5 @@
-# nix-config
+#+title: nix-config
+** Asdrubalini's NixOS configs
 
 - The Swan -> Lenovo Legion laptop
 - The Arrow -> VPS Server

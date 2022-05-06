@@ -140,7 +140,7 @@ in
     gruvbox-dark-gtk
     kde-gruvbox
     gruvbox-dark-icons-gtk
-  ];
+  ]
 
   programs.vscode = {
     enable = true;
