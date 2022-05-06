@@ -90,6 +90,7 @@ in {
       keybindings = {
         # Basics
         "${cfg.modifier}+Return" = "exec ${cfg.terminal}";
+        "${cfg.modifier}+Shift+Return" = "exec ${cfg.terminal} -t Scratch";
         "${cfg.modifier}+c" = "exec ${pkgs.librewolf}/bin/librewolf";
         "${cfg.modifier}+o" = "exec ${pkgs.emacs}/bin/emacsclient --create-frame";
         "${cfg.modifier}+q" = "kill";
@@ -169,10 +170,16 @@ in {
         "XF86Calculator" = "exec ${screen-toggle}/bin/screen-toggle";
       };
 
-      window.commands = [{
-        criteria = { app_id = "mpv"; };
-        command = "floating enable, move position center";
-      }];
+      window.commands = [
+        {
+          criteria = { app_id = "mpv"; };
+          command = "floating enable, move position center";
+        }
+        {
+          criteria = { title = "Scratch"; };
+          command = "floating enable, move position center";
+        }
+      ];
 
       focus = { followMouse = true; };
       bars = [{ command = "waybar"; }];

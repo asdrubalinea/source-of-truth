@@ -43,6 +43,7 @@ in
   programs.fish.enable = true;
   programs.fish.shellInit = ''
     set fish_greeting
+    fish_add_path ~/.emacs.d/bin
   '';
 
   home.packages = with pkgs; [
@@ -81,6 +82,7 @@ in
     fd
     git-crypt
     gnupg
+    fzf
 
     cmake
     gnumake
@@ -122,7 +124,6 @@ in
     # Software Defined Radio
     (sdrpp.override { sdrplay_source = true; })
     gnuradio
-    sdrangel
     dump1090_sdrplay
 
     # Games
