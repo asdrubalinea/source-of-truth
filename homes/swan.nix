@@ -92,7 +92,7 @@ in
     ungoogled-chromium
     google-chrome
     librewolf
-    tor-browser-bundle-bin
+    stable.tor-browser-bundle-bin
 
     # Nix
     nixpkgs-fmt
@@ -140,7 +140,7 @@ in
     gruvbox-dark-gtk
     kde-gruvbox
     gruvbox-dark-icons-gtk
-  ]
+  ];
 
   programs.vscode = {
     enable = true;
