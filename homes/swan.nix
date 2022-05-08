@@ -100,6 +100,15 @@ in
     # Python
     python310
 
+    # Rust
+    rustup
+
+    # Haskell
+    stack
+    ghc
+    ghcid
+    cabal-install
+
     # Docker
     docker-compose
 

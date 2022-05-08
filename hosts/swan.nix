@@ -116,7 +116,7 @@
   '';
 
   services.zfs.autoSnapshot = {
-  enable = true;
+    enable = true;
     frequent = 10; # keep the latest ten 15-minute snapshots
     monthly = 4; # keep only four monthly snapshot
   };
