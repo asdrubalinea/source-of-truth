@@ -6,7 +6,7 @@
 
 (setq org-directory "~/org/")
 
-(setq doom-font (font-spec :family "Fira Code" :size 20 :weight 'semi-light))
+(setq doom-font (font-spec :family "Fira Code" :size 22 :weight 'semi-light))
 
 ;; Neotree
 (setq neo-theme (if (display-graphic-p) 'icons 'arrow))
