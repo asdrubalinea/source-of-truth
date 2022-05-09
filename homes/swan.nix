@@ -134,6 +134,7 @@ in
     (sdrpp.override { sdrplay_source = true; })
     gnuradio
     dump1090_sdrplay
+    custom.sdrangel
 
     # Games
     polymc

@@ -6,12 +6,14 @@
     nixpkgs-stable.url = "github:nixos/nixpkgs/nixos-21.11";
     nixpkgs-trunk.url = "github:nixos/nixpkgs";
 
-    # nixpkgs.url = "path:/persist/src/nixpkgs";
+    # nixpkgs-custom.url = "path:/persist/src/nixpkgs";
+    nixpkgs-custom.url = "github:asdrubalini/nixpkgs";
+
     home-manager.url = "github:nix-community/home-manager";
     home-manager.inputs.nixpkgs.follows = "nixpkgs";
   };
 
-  outputs = { self, nixpkgs, nixpkgs-stable, nixpkgs-trunk, home-manager, ... }:
+  outputs = { self, nixpkgs, nixpkgs-stable, nixpkgs-trunk, nixpkgs-custom, home-manager, ... }:
     let
       system = "x86_64-linux";
       username = "giovanni";
@@ -19,6 +21,7 @@
       multiChannelOverlay = final: prev: {
         stable = import nixpkgs-stable { system = final.system; config = final.config; };
         trunk = import nixpkgs-trunk { system = final.system; config = final.config; };
+        custom = import nixpkgs-custom { system = final.system; config = final.config; };
       };
 
       pkgs = import nixpkgs {

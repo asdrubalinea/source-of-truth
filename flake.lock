@@ -36,6 +36,21 @@
         "type": "github"
       }
     },
+    "nixpkgs-custom": {
+      "locked": {
+        "lastModified": 1652103959,
+        "narHash": "sha256-4JBAVsx5DFaESgkL+liJDW+q8BPdMIXwq+mf+GOoYXs=",
+        "owner": "asdrubalini",
+        "repo": "nixpkgs",
+        "rev": "14dababd5306aa1e7b12b18550fc036862eb7b11",
+        "type": "github"
+      },
+      "original": {
+        "owner": "asdrubalini",
+        "repo": "nixpkgs",
+        "type": "github"
+      }
+    },
     "nixpkgs-stable": {
       "locked": {
         "lastModified": 1652020977,
@@ -54,11 +69,11 @@
     },
     "nixpkgs-trunk": {
       "locked": {
-        "lastModified": 1652054090,
-        "narHash": "sha256-kUPaPoAOpBGar5V1iqSkdti35oFt/9ZAEuPhXCBqUMU=",
+        "lastModified": 1652103387,
+        "narHash": "sha256-F6M9Bt+rFOJzwaLvwxFGRQPFcacHWiM/L3PPav+IRaQ=",
         "owner": "nixos",
         "repo": "nixpkgs",
-        "rev": "d82115927c10d02422c4c2259c9c7207758b3152",
+        "rev": "15c43ea9ee953eb7a7dd6420c32de1f244702010",
         "type": "github"
       },
       "original": {
@@ -71,6 +86,7 @@
       "inputs": {
         "home-manager": "home-manager",
         "nixpkgs": "nixpkgs",
+        "nixpkgs-custom": "nixpkgs-custom",
         "nixpkgs-stable": "nixpkgs-stable",
         "nixpkgs-trunk": "nixpkgs-trunk"
       }
