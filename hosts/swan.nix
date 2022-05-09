@@ -220,12 +220,12 @@
     gtkUsePortal = true;
   };
 
-  services.xserver.enable = true;
-  services.xserver.desktopManager.plasma5.enable = true;
-  services.xserver.displayManager = {
-    gdm.enable = true;
-    sessionPackages = with pkgs; [ sway ];
-  };
+  #services.xserver.enable = true;
+  #services.xserver.desktopManager.plasma5.enable = true;
+  #services.xserver.displayManager = {
+  #  gdm.enable = true;
+  #  sessionPackages = with pkgs; [ sway ];
+  #};
 
   users.users."giovanni".openssh.authorizedKeys.keys =
     [ (import ../ssh-keys/looking-glass.nix).key ];
