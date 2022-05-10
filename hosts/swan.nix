@@ -167,13 +167,13 @@
   ];
 
   virtualisation.docker = {
-    enable = false;
+    enable = true;
     extraOptions = "--data-root=/mnt/docker";
   };
 
-  # virtualisation.virtualbox.host.enable = true;
-  # users.extraGroups.vboxusers.members = [ "giovanni" ];
-  # virtualisation.virtualbox.host.enableExtensionPack = true;
+  #virtualisation.virtualbox.host.enable = true;
+  #users.extraGroups.vboxusers.members = [ "giovanni" ];
+  #virtualisation.virtualbox.host.enableExtensionPack = true;
 
   virtualisation.spiceUSBRedirection.enable = true;
 

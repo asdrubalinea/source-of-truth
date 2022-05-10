@@ -101,7 +101,7 @@ in
     python310
 
     # Rust
-    rustup
+    rust-analyzer
 
     # Haskell
     stack
