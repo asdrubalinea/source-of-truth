@@ -88,10 +88,10 @@ in
     gnumake
 
     # Browsers
-    firefox
-    ungoogled-chromium
-    google-chrome
-    librewolf
+    stable.firefox
+    stable.ungoogled-chromium
+    stable.google-chrome
+    stable.librewolf
     stable.tor-browser-bundle-bin
 
     # Nix
