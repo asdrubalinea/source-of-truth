@@ -91,7 +91,7 @@ in {
         # Basics
         "${cfg.modifier}+Return" = "exec ${cfg.terminal}";
         "${cfg.modifier}+Shift+Return" = "exec ${cfg.terminal} -t Scratch";
-        "${cfg.modifier}+c" = "exec ${pkgs.librewolf}/bin/librewolf";
+        "${cfg.modifier}+c" = "exec ${pkgs.chromium}/bin/chromium";
         "${cfg.modifier}+o" = "exec ${pkgs.emacs}/bin/emacsclient --create-frame";
         "${cfg.modifier}+q" = "kill";
         "${cfg.modifier}+d" = "exec ${cfg.menu}";

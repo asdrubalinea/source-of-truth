@@ -19,6 +19,8 @@ let
   dump1090_sdrplay = pkgs.callPackage ../packages/sdrplay/dump1090.nix { };
   rsp_tcp_sdrplay = pkgs.callPackage ../packages/sdrplay/rsp_tcp.nix { };
 
+  opcua-client-gui = pkgs.callPackage ../packages/opcua-client-gui.nix { };
+
   # rkvm = pkgs.callPackage ../packages/rkvm { };
 
 in
@@ -88,10 +90,10 @@ in
     gnumake
 
     # Browsers
-    stable.firefox
-    stable.ungoogled-chromium
-    stable.google-chrome
-    stable.librewolf
+    firefox
+    google-chrome
+    chromium
+    # stable.librewolf
     stable.tor-browser-bundle-bin
 
     # Nix
@@ -145,6 +147,7 @@ in
     lenopow
     userApply
     systemApply
+    opcua-client-gui
 
     # Themes
     gruvbox-dark-gtk
@@ -152,16 +155,16 @@ in
     gruvbox-dark-icons-gtk
   ];
 
-  programs.vscode = {
-    enable = true;
-    extensions = with pkgs.vscode-extensions; [
-      dracula-theme.theme-dracula
-      vscodevim.vim
+  #programs.vscode = {
+    #enable = true;
+    #extensions = with pkgs.vscode-extensions; [
+      #dracula-theme.theme-dracula
+      #vscodevim.vim
 
-      matklad.rust-analyzer
-      bungcip.better-toml
-    ];
-  };
+      #matklad.rust-analyzer
+      #bungcip.better-toml
+    #];
+  #};
 
   fonts.fontconfig.enable = true;
 
