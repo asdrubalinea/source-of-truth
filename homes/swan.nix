@@ -19,7 +19,7 @@ let
   dump1090_sdrplay = pkgs.callPackage ../packages/sdrplay/dump1090.nix { };
   rsp_tcp_sdrplay = pkgs.callPackage ../packages/sdrplay/rsp_tcp.nix { };
 
-  opcua-client-gui = pkgs.callPackage ../packages/opcua-client-gui.nix { };
+  # opcua-client-gui = pkgs.callPackage ../packages/opcua-client-gui.nix { };
 
   # rkvm = pkgs.callPackage ../packages/rkvm { };
 
@@ -111,6 +111,9 @@ in
     ghcid
     cabal-install
 
+    # Common-Lisp
+    sbcl
+
     # Docker
     docker-compose
 
@@ -147,7 +150,7 @@ in
     lenopow
     userApply
     systemApply
-    opcua-client-gui
+    # opcua-client-gui
 
     # Themes
     gruvbox-dark-gtk
