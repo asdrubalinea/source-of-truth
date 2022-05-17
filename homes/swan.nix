@@ -18,6 +18,7 @@ let
 
   dump1090_sdrplay = pkgs.callPackage ../packages/sdrplay/dump1090.nix { };
   rsp_tcp_sdrplay = pkgs.callPackage ../packages/sdrplay/rsp_tcp.nix { };
+  rtl_airband = pkgs.callPackage ../packages/sdrplay/rtl_airband.nix { };
 
   # opcua-client-gui = pkgs.callPackage ../packages/opcua-client-gui.nix { };
 
@@ -140,6 +141,8 @@ in
     gnuradio
     dump1090_sdrplay
     custom.sdrangel
+    rtl_airband
+    (soapysdr.override { extraPackages = [ soapysdrplay ]; })
 
     # Games
     polymc
@@ -159,14 +162,14 @@ in
   ];
 
   #programs.vscode = {
-    #enable = true;
-    #extensions = with pkgs.vscode-extensions; [
-      #dracula-theme.theme-dracula
-      #vscodevim.vim
+  #enable = true;
+  #extensions = with pkgs.vscode-extensions; [
+  #dracula-theme.theme-dracula
+  #vscodevim.vim
 
-      #matklad.rust-analyzer
-      #bungcip.better-toml
-    #];
+  #matklad.rust-analyzer
+  #bungcip.better-toml
+  #];
   #};
 
   fonts.fontconfig.enable = true;
