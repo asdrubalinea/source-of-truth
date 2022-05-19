@@ -4,8 +4,8 @@ let
   networkIp = "10.0.73.1/24";
   networkSubnet = "10.0.73.0/24";
   interface = "ens3";
-
-in {
+in
+{
   # Enable NAT
   networking.nat = {
     enable = true;
@@ -42,7 +42,7 @@ in {
 
       peers = [
         {
-          publicKey = "SK7+J09aRkZQ703YExwacoZN/sVdG72Oyj/7RFIBb1E=";
+          publicKey = "WH5zXNV+U/mUz3/vbrd5WgurBZy6n3fkYrzMUmhO8S4=";
           allowedIPs = [ "10.0.73.2/32" ];
         }
       ];

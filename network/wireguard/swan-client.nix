@@ -2,7 +2,8 @@
 
 let
   networkIp = "10.0.73.2/24";
-in {
+in
+{
   networking.firewall = {
     allowedUDPPorts = [ 51820 ];
   };
@@ -21,7 +22,7 @@ in {
 
         {
           # Public key of the server.
-          publicKey = "8I433B1dtVxm2lOy2QjcedGMoK7FabJFAUTiCh0Mg1U=";
+          publicKey = "ygKPWc+fRtax9gmPrLVlbp+QhERsaQkClFQkVKmR6Tc=";
 
           # Forward all the traffic via VPN.
           allowedIPs = [ "0.0.0.0/0" ];
