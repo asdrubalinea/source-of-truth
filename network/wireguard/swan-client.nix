@@ -2,6 +2,7 @@
 
 let
   networkIp = "10.0.73.2/24";
+  networkSubnet = "10.0.73.0/24";
 in
 {
   networking.firewall = {
@@ -25,7 +26,7 @@ in
           publicKey = "ygKPWc+fRtax9gmPrLVlbp+QhERsaQkClFQkVKmR6Tc=";
 
           # Forward all the traffic via VPN.
-          allowedIPs = [ "0.0.0.0/0" ];
+          allowedIPs = [ networkSubnet ];
 
           # Set this to the server IP and port.
           endpoint = "arrow:51820";

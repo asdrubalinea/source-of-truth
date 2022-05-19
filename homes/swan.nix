@@ -19,6 +19,7 @@ let
   dump1090_sdrplay = pkgs.callPackage ../packages/sdrplay/dump1090.nix { };
   rsp_tcp_sdrplay = pkgs.callPackage ../packages/sdrplay/rsp_tcp.nix { };
   rtl_airband = pkgs.callPackage ../packages/sdrplay/rtl_airband.nix { };
+  guglielmo = pkgs.callPackage ../packages/sdrplay/guglielmo.nix { };
 
   # opcua-client-gui = pkgs.callPackage ../packages/opcua-client-gui.nix { };
 
@@ -87,6 +88,7 @@ in
     gnupg
     fzf
     wireguard-tools
+    ipcalc
 
     cmake
     gnumake
@@ -140,10 +142,12 @@ in
     # Software Defined Radio
     (sdrpp.override { sdrplay_source = true; })
     gnuradio
+    rsp_tcp_sdrplay
     dump1090_sdrplay
     custom.sdrangel
     rtl_airband
     (soapysdr.override { extraPackages = [ soapysdrplay ]; })
+    guglielmo
 
     # Games
     polymc

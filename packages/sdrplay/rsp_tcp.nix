@@ -22,7 +22,7 @@ stdenv.mkDerivation rec {
     '';
     homepage = "https://github.com/SDRplay/RSPTCPServer";
     license = licenses.unfree;
-    maintainers = [ asdrubalini ];
+    maintainers = [ ];
     platforms = platforms.linux;
   };
 }
