@@ -13,6 +13,7 @@ in
     ../mounts/secrets/hetzner-nas.nix
 
     ../network/hosts.nix
+    ../network/wireguard/arrow-server.nix
   ];
 
   nixpkgs.config.allowUnfree = true;

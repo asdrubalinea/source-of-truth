@@ -10,6 +10,7 @@
     ../services/borg-backup.nix
 
     ../network/hosts.nix
+    ../network/wireguard/swan-client.nix
   ];
 
   # Hardware

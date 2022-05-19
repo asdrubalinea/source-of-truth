@@ -86,6 +86,7 @@ in
     git-crypt
     gnupg
     fzf
+    wireguard-tools
 
     cmake
     gnumake

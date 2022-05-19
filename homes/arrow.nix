@@ -35,6 +35,7 @@ in
     ncdu
     file
     screen
+    wireguard-tools
 
     # Multimedia
     trunk.yt-dlp
