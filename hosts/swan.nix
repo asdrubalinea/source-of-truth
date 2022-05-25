@@ -233,7 +233,7 @@
 
   programs.steam.enable = true;
 
-  # networking.firewall.allowedTCPPorts = [ ... ];
+  networking.firewall.allowedTCPPorts = [ 8000 ];
   # networking.firewall.allowedUDPPorts = [ ... ];
 
   system.stateVersion = "22.05";

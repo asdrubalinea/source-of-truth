@@ -47,6 +47,8 @@ in
     # IDEs
     neovim
 
+    android-tools
+
     userApply
     systemApply
   ];

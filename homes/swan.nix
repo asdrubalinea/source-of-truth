@@ -97,7 +97,7 @@ in
     firefox
     google-chrome
     chromium
-    # stable.librewolf
+    librewolf
     stable.tor-browser-bundle-bin
 
     # Nix
@@ -130,6 +130,7 @@ in
     zathura
     libsForQt5.okular
     libreoffice-fresh
+    trunk.yt-dlp
 
     # Virtual
     quickemu
