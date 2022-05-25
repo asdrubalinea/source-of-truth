@@ -131,6 +131,7 @@ in
     libsForQt5.okular
     libreoffice-fresh
     trunk.yt-dlp
+    # teams
 
     # Virtual
     quickemu
@@ -154,6 +155,7 @@ in
     polymc
 
     # rkvm
+    obs-studio
 
     # Custom
     lenopow

@@ -26,7 +26,7 @@ in
           publicKey = "ygKPWc+fRtax9gmPrLVlbp+QhERsaQkClFQkVKmR6Tc=";
 
           # Forward all the traffic via VPN.
-          allowedIPs = [ networkSubnet ];
+          allowedIPs = [ "0.0.0.0/0" ];
 
           # Set this to the server IP and port.
           endpoint = "arrow:51820";
