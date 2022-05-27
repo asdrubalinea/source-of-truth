@@ -6,12 +6,12 @@
     ../hardware/nvidia-prime.nix
     ../hardware/pipewire.nix
     ../desktop/fonts.nix
-    ../desktop/gnome.nix
+    #../desktop/gnome.nix
 
     ../services/borg-backup.nix
 
     ../network/hosts.nix
-    ../network/wireguard/swan-client.nix
+    # ../network/wireguard/swan-client.nix
   ];
 
   # Hardware
@@ -127,6 +127,10 @@
 
   networking.useDHCP = false;
   networking.interfaces.eno1.useDHCP = true;
+  # networking.interfaces.eno1.ipv4.addresses = [{
+  # address = "172.22.50.70";
+  # prefixLength = 24;
+  # }];
   networking.interfaces.wlp4s0.useDHCP = true;
 
   # Select internationalisation properties.
@@ -191,7 +195,7 @@
   environment.sessionVariables.VAGRANT_DEFAULT_PROVIDER = [ "libvirt" ];
   environment.sessionVariables.LIBVIRT_DEFAULT_URI = [ "qemu:///system" ];
 
-  # services.tlp.enable = true;
+  services.tlp.enable = true;
 
   services.sdrplayApi.enable = true;
 
@@ -218,15 +222,22 @@
   xdg.portal = {
     enable = true;
     wlr.enable = true;
-    # extraPortals = [ pkgs.xdg-desktop-portal-gtk ];
+    extraPortals = [ pkgs.xdg-desktop-portal-gtk ];
     gtkUsePortal = true;
   };
 
-  #services.xserver.enable = true;
-  #services.xserver.desktopManager.plasma5.enable = true;
-  #services.xserver.displayManager = {
-  #lightdm.enable = true;
-  #sessionPackages = with pkgs; [ sway ];
+  #services.xserver = {
+  #enable = true;
+
+  #windowManager.awesome = {
+  #enable = true;
+  #};
+
+  #displayManager = {
+  #sddm.enable = true;
+  #defaultSession = "none+awesome";
+  ##sessionPackages = with pkgs; [ sway ];
+  #};
   #};
 
   users.users."giovanni".openssh.authorizedKeys.keys =

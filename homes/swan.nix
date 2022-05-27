@@ -21,14 +21,18 @@ let
   rtl_airband = pkgs.callPackage ../packages/sdrplay/rtl_airband.nix { };
   guglielmo = pkgs.callPackage ../packages/sdrplay/guglielmo.nix { };
 
-  # opcua-client-gui = pkgs.callPackage ../packages/opcua-client-gui.nix { };
-
   # rkvm = pkgs.callPackage ../packages/rkvm { };
+
+  sdrpp_patched = pkgs.sdrpp.overrideAttrs (attrs: {
+    patches = attrs.patches ++ [ ../patches/sdrpp/add-radiomicrophones.patch ];
+  });
 
 in
 {
   imports = [
     ../desktop/sway
+    ../desktop/rofi
+    # ../desktop/awesome
     ../desktop/alacritty
     ../desktop/neovim
     ../desktop/emacs
@@ -59,7 +63,7 @@ in
 
     # System utils
     neofetch
-    pfetch
+    # pfetch
     htop
     dstat
     glxinfo
@@ -90,8 +94,8 @@ in
     wireguard-tools
     ipcalc
 
-    cmake
-    gnumake
+    # cmake
+    # gnumake
 
     # Browsers
     firefox
@@ -110,13 +114,13 @@ in
     rust-analyzer
 
     # Haskell
-    stack
-    ghc
-    ghcid
-    cabal-install
+    # stack
+    # ghc
+    # ghcid
+    # cabal-install
 
     # Common-Lisp
-    sbcl
+    # sbcl
 
     # Docker
     docker-compose
@@ -129,7 +133,8 @@ in
     gnome.eog
     zathura
     libsForQt5.okular
-    libreoffice-fresh
+    # libreoffice-fresh
+    onlyoffice-bin
     trunk.yt-dlp
     # teams
 
@@ -142,14 +147,14 @@ in
     ciscoPacketTracer8
 
     # Software Defined Radio
-    (sdrpp.override { sdrplay_source = true; })
-    gnuradio
-    rsp_tcp_sdrplay
+    (sdrpp_patched.override { sdrplay_source = true; })
+    # gnuradio
+    # rsp_tcp_sdrplay
     dump1090_sdrplay
-    custom.sdrangel
-    rtl_airband
-    (soapysdr.override { extraPackages = [ soapysdrplay ]; })
-    guglielmo
+    # custom.sdrangel
+    # rtl_airband
+    # (soapysdr.override { extraPackages = [ soapysdrplay ]; })
+    # guglielmo
 
     # Games
     polymc
@@ -169,16 +174,19 @@ in
     gruvbox-dark-icons-gtk
   ];
 
-  #programs.vscode = {
-  #enable = true;
-  #extensions = with pkgs.vscode-extensions; [
-  #dracula-theme.theme-dracula
-  #vscodevim.vim
+  programs.vscode = {
+    enable = true;
+    extensions = with pkgs.trunk.vscode-extensions; [
+      dracula-theme.theme-dracula
+      jdinhlife.gruvbox
 
-  #matklad.rust-analyzer
-  #bungcip.better-toml
-  #];
-  #};
+      vscodevim.vim
+
+      rust-lang.rust-analyzer
+      bungcip.better-toml
+      serayuzgur.crates
+    ];
+  };
 
   fonts.fontconfig.enable = true;
 

@@ -17,7 +17,8 @@ let
   cfg = config.wayland.windowManager.sway.config;
   wallpaper = "${config.xdg.configHome}/wallpaper";
 
-in {
+in
+{
 
   wayland.windowManager.sway = {
     enable = true;
@@ -220,11 +221,6 @@ in {
 
   xdg.configFile."waybar" = {
     source = ./waybar;
-    recursive = true;
-  };
-
-  xdg.configFile."rofi" = {
-    source = ./rofi;
     recursive = true;
   };
 
