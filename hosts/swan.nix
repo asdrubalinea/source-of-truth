@@ -6,7 +6,7 @@
     ../hardware/nvidia-prime.nix
     ../hardware/pipewire.nix
     ../desktop/fonts.nix
-    #../desktop/gnome.nix
+    # ../desktop/gnome.nix
 
     ../services/borg-backup.nix
 
@@ -226,26 +226,26 @@
     gtkUsePortal = true;
   };
 
-  #services.xserver = {
-  #enable = true;
+  # services.xserver = {
+  # enable = true;
 
-  #windowManager.awesome = {
-  #enable = true;
-  #};
+  # windowManager.awesome = {
+  # enable = true;
+  # };
 
-  #displayManager = {
-  #sddm.enable = true;
-  #defaultSession = "none+awesome";
-  ##sessionPackages = with pkgs; [ sway ];
-  #};
-  #};
+  # displayManager = {
+  # sddm.enable = true;
+  # # defaultSession = "none+awesome";
+  # sessionPackages = with pkgs; [ sway ];
+  # };
+  # };
 
   users.users."giovanni".openssh.authorizedKeys.keys =
     [ (import ../ssh-keys/looking-glass.nix).key ];
 
   programs.steam.enable = true;
 
-  networking.firewall.allowedTCPPorts = [ 8000 ];
+  networking.firewall.allowedTCPPorts = [ 8000 24800 ];
   # networking.firewall.allowedUDPPorts = [ ... ];
 
   system.stateVersion = "22.05";

@@ -6,7 +6,7 @@ in
 {
   fonts = {
     enableDefaultFonts = false;
-    fonts = with pkgs; [ operator-mono cascadia-code fira-code ];
+    fonts = with pkgs; [ operator-mono cascadia-code fira-code agave ];
 
     fontconfig = {
       defaultFonts = {

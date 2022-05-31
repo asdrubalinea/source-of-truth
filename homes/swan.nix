@@ -97,6 +97,8 @@ in
     # cmake
     # gnumake
 
+    barrier
+
     # Browsers
     stable.firefox
     stable.google-chrome
@@ -137,6 +139,7 @@ in
     onlyoffice-bin
     trunk.yt-dlp
     # teams
+    discord
 
     # Virtual
     quickemu
