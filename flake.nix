@@ -3,7 +3,7 @@
 
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
-    nixpkgs-stable.url = "github:nixos/nixpkgs/nixos-21.11";
+    nixpkgs-stable.url = "github:nixos/nixpkgs/nixos-22.05";
     nixpkgs-trunk.url = "github:nixos/nixpkgs";
 
     # nixpkgs-custom.url = "path:/persist/src/nixpkgs";
@@ -31,7 +31,8 @@
       };
 
       lib = nixpkgs.lib;
-    in {
+    in
+    {
       nixosConfigurations = {
         swan = lib.nixosSystem {
           inherit system pkgs;

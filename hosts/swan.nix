@@ -91,7 +91,7 @@
       };
     };
     loader.efi.canTouchEfiVariables = true;
-    kernelPackages = pkgs.linuxPackages_zen;
+    # kernelPackages = pkgs.linuxPackages_zen;
   };
 
   networking.hostName = "swan";
@@ -188,7 +188,7 @@
     qemu = {
       swtpm.enable = true;
       ovmf.enable = true;
-      ovmf.package = pkgs.OVMFFull;
+      ovmf.packages = [ pkgs.OVMFFull ];
     };
   };
 

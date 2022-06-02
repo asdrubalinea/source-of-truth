@@ -103,7 +103,7 @@ in
     stable.firefox
     stable.google-chrome
     stable.chromium
-    trunk.librewolf
+    stable.librewolf
     stable.tor-browser-bundle-bin
 
     # Nix
