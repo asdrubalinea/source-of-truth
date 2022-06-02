@@ -84,5 +84,14 @@ in
   # networking.firewall.allowedTCPPorts = [ ... ];
   # networking.firewall.allowedUDPPorts = [ ... ];
 
+  services.nginx = {
+    enable = true;
+    virtualHosts."asdrubalini.xyz" = {
+      enableACME = true;
+      forceSSL = true;
+      root = "/mnt/hetzner-nas/public/";
+    };
+  };
+
   system.stateVersion = "22.05";
 }
