@@ -18,8 +18,18 @@
   boot.initrd.availableKernelModules =
     [ "xhci_pci" "nvme" "ahci" "uas" "usb_storage" "usbhid" "sd_mod" ];
   boot.initrd.kernelModules = [ ];
-  boot.kernelModules = [ "kvm-amd" ];
-  boot.extraModulePackages = [ ];
+  boot.kernelModules = [
+    "kvm-amd"
+    # Virtual Camera
+    "v4l2loopback"
+    # Virtual Microphone, built-in
+    "snd-aloop"
+  ];
+
+  # Make some extra kernel modules available to NixOS
+  boot.extraModulePackages = with config.boot.kernelPackages;
+    [ v4l2loopback.out ];
+
   boot.zfs = {
     enableUnstable = true;
     forceImportAll = false;
@@ -32,7 +42,10 @@
   boot.supportedFilesystems = [ "zfs" ];
 
   # Enable nested virtualization
-  boot.extraModprobeConfig = "options kvm_amd nested=1";
+  boot.extraModprobeConfig = ''
+    options kvm_amd nested=1
+    options v4l2loopback exclusive_caps=1 card_label="Virtual Camera"
+  '';
 
   fileSystems."/" = {
     device = "rpool/local/root";
@@ -170,6 +183,8 @@
     git
     swtpm
     git-crypt
+
+    linuxPackages.v4l2loopback
   ];
 
   virtualisation.docker = {
