@@ -148,7 +148,7 @@
 
     users.giovanni = {
       isNormalUser = true;
-      extraGroups = [ "wheel" "libvirtd" "docker" ];
+      extraGroups = [ "wheel" "libvirtd" "docker" "jackaudio" ];
       hashedPassword = (import ../passwords).password;
       shell = pkgs.fish;
     };

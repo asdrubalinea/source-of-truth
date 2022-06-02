@@ -140,6 +140,7 @@ in
     trunk.yt-dlp
     # teams
     discord
+    carla
 
     # Virtual
     quickemu
