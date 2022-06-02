@@ -87,8 +87,8 @@ in
   services.nginx = {
     enable = true;
     virtualHosts."asdrubalini.xyz" = {
-      #enableACME = true;
-      #forceSSL = true;
+      enableACME = true;
+      forceSSL = true;
       root = "/mnt/hetzner-nas/public/";
     };
   };
