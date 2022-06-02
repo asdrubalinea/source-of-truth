@@ -81,7 +81,7 @@ in
   users.users."giovanni".openssh.authorizedKeys.keys =
     [ (import ../ssh-keys/swan.nix).key ];
 
-  # networking.firewall.allowedTCPPorts = [ ... ];
+  networking.firewall.allowedTCPPorts = [ 80 443 ];
   # networking.firewall.allowedUDPPorts = [ ... ];
 
   services.nginx = {
