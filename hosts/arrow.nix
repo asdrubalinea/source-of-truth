@@ -93,7 +93,10 @@ in
     };
   };
 
-  security.acme.acceptTerms = true;
+  security.acme = {
+    acceptTerms = true;
+    defaults.email = "asdrubalini@mail.com";
+  };
 
   system.stateVersion = "22.05";
 }
