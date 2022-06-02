@@ -93,5 +93,7 @@ in
     };
   };
 
+  security.acme.acceptTerms = true;
+
   system.stateVersion = "22.05";
 }
