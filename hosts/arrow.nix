@@ -9,6 +9,7 @@ in
     (modulesPath + "/profiles/qemu-guest.nix")
     ../services/ssh-secure.nix
     ../services/secrets/limbo.nix
+    ../services/secrets/the-lamp-post.nix
 
     ../mounts/secrets/hetzner-nas.nix
 
@@ -70,6 +71,7 @@ in
   ];
 
   services.limbo.enable = true;
+  services.the-lamp-post.enable = true;
 
   nix = {
     package = pkgs.nixFlakes;
