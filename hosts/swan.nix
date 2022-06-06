@@ -241,19 +241,14 @@
     gtkUsePortal = true;
   };
 
-  # services.xserver = {
-  # enable = true;
+  services.xserver = {
+    enable = true;
 
-  # windowManager.awesome = {
-  # enable = true;
-  # };
-
-  # displayManager = {
-  # sddm.enable = true;
-  # # defaultSession = "none+awesome";
-  # sessionPackages = with pkgs; [ sway ];
-  # };
-  # };
+    displayManager = {
+      startx.enable = true;
+      defaultSession = "none+xmonad";
+    };
+  };
 
   users.users."giovanni".openssh.authorizedKeys.keys =
     [ (import ../ssh-keys/looking-glass.nix).key ];

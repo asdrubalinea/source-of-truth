@@ -20,6 +20,7 @@ let
   rsp_tcp_sdrplay = pkgs.callPackage ../packages/sdrplay/rsp_tcp.nix { };
   rtl_airband = pkgs.callPackage ../packages/sdrplay/rtl_airband.nix { };
   guglielmo = pkgs.callPackage ../packages/sdrplay/guglielmo.nix { };
+  soapysdr = pkgs.soapysdr.override { extraPackages = [ pkgs.soapysdrplay ]; };
 
   # rkvm = pkgs.callPackage ../packages/rkvm { };
 
@@ -32,7 +33,7 @@ in
   imports = [
     ../desktop/sway
     ../desktop/rofi
-    # ../desktop/awesome
+    ../desktop/xmonad
     ../desktop/alacritty
     ../desktop/neovim
     ../desktop/emacs
@@ -152,12 +153,12 @@ in
 
     # Software Defined Radio
     (sdrpp_patched.override { sdrplay_source = true; })
-    # gnuradio
+    #gnuradio
     # rsp_tcp_sdrplay
-    dump1090_sdrplay
-    # custom.sdrangel
+    #dump1090_sdrplay
+    #custom.sdrangel
     # rtl_airband
-    # (soapysdr.override { extraPackages = [ soapysdrplay ]; })
+    #soapysdr
     # guglielmo
 
     # Games
@@ -176,6 +177,7 @@ in
     gruvbox-dark-gtk
     kde-gruvbox
     gruvbox-dark-icons-gtk
+    kde-gtk-config
   ];
 
   programs.vscode = {
