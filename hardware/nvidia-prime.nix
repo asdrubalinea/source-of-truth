@@ -10,7 +10,8 @@ let
     export __VK_LAYER_NV_optimus=NVIDIA_only
     exec -a "$0" "$@"
   '';
-in {
+in
+{
 
   boot = {
     extraModprobeConfig = "options nvidia-drm modeset=1";
@@ -28,7 +29,7 @@ in {
     };
 
     nvidia = {
-      # package = config.boot.kernelPackages.nvidiaPackages.beta;
+      package = config.boot.kernelPackages.nvidiaPackages.beta;
       powerManagement.enable = true;
 
       prime = {

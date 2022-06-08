@@ -173,8 +173,6 @@ in
     systemApply
     # opcua-client-gui
 
-    the-lamp-post
-
     # Themes
     gruvbox-dark-gtk
     kde-gruvbox
