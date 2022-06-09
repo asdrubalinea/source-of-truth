@@ -4,6 +4,7 @@
   imports = [
     ../hardware/radeon.nix
     ../hardware/nvidia-prime.nix
+    # ../hardware/nvidia.nix
     ../hardware/pipewire.nix
     ../desktop/fonts.nix
     # ../desktop/gnome.nix
@@ -237,16 +238,20 @@
   xdg.portal = {
     enable = true;
     wlr.enable = true;
-    extraPortals = [ pkgs.xdg-desktop-portal-gtk ];
+    extraPortals = [ pkgs.xdg-desktop-portal-gnome ];
     gtkUsePortal = true;
   };
 
   services.xserver = {
     enable = true;
 
+    desktopManager = {
+      plasma5.enable = true;
+    };
+
     displayManager = {
-      startx.enable = true;
-      defaultSession = "none+xmonad";
+      lightdm.enable = true;
+      # startx.enable = true;
     };
   };
 

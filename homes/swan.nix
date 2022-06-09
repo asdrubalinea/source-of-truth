@@ -33,7 +33,7 @@ in
   imports = [
     ../desktop/sway
     ../desktop/rofi
-    ../desktop/xmonad
+    ../desktop/dwm
     ../desktop/alacritty
     ../desktop/neovim
     ../desktop/emacs

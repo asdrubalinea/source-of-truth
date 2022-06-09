@@ -1,7 +1,6 @@
 { config, pkgs, ... }:
 
 {
-  nixpkgs.config.allowUnfree = true;
 
   boot = {
     extraModprobeConfig = "options nvidia-drm modeset=1";
@@ -13,13 +12,16 @@
 
   hardware = {
     opengl = {
+      enable = true;
       driSupport = true;
       driSupport32Bit = true;
     };
 
     nvidia = {
       package = config.boot.kernelPackages.nvidiaPackages.beta;
-      modesetting.enable = false;
+      powerManagement.enable = true;
+
+      modesetting.enable = true;
     };
   };
 }
