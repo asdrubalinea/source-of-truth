@@ -81,7 +81,10 @@ in
   };
 
   users.users."giovanni".openssh.authorizedKeys.keys =
-    [ (import ../ssh-keys/swan.nix).key ];
+    [
+      (import ../ssh-keys/swan.nix).key
+      (import ../ssh-keys/windows11.nix).key
+    ];
 
   networking.firewall.allowedTCPPorts = [ 80 443 ];
   # networking.firewall.allowedUDPPorts = [ ... ];
