@@ -47,22 +47,32 @@
         };
       };
 
-      homeConfigurations.giovanni-swan =
-        home-manager.lib.homeManagerConfiguration {
-          configuration = import ./homes/swan.nix;
+      homeConfigurations = {
+        giovanni-swan =
+          home-manager.lib.homeManagerConfiguration {
+            inherit pkgs;
+            modules = [
+              ./homes/swan.nix
+              {
+                home = {
+                  username = "giovanni";
+                  homeDirectory = "/home/${username}";
+                  stateVersion = "22.05";
+                };
+              }
+            ];
+          };
 
-          inherit system pkgs username;
-          homeDirectory = "/home/${username}";
-          stateVersion = "22.05";
-        };
+        # giovanni-arrow =
+          # home-manager.lib.homeManagerConfiguration {
+            # configuration = import ./homes/arrow.nix;
+#
+            # inherit system pkgs username;
+            # homeDirectory = "/home/${username}";
+            # stateVersion = "22.05";
+          # };
 
-      homeConfigurations.giovanni-arrow =
-        home-manager.lib.homeManagerConfiguration {
-          configuration = import ./homes/arrow.nix;
+      };
 
-          inherit system pkgs username;
-          homeDirectory = "/home/${username}";
-          stateVersion = "22.05";
-        };
     };
 }

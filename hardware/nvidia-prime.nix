@@ -33,7 +33,7 @@ in
       powerManagement.enable = true;
 
       prime = {
-        offload.enable = false;
+        offload.enable = true;
         amdgpuBusId = "PCI:6:0:0";
         nvidiaBusId = "PCI:1:0:0";
       };

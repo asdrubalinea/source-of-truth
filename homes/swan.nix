@@ -32,8 +32,10 @@ in
 {
   imports = [
     ../desktop/sway
+    # ../desktop/i3
     ../desktop/rofi
-    ../desktop/dwm
+    # ../desktop/dwm
+    ../desktop/xmonad
     ../desktop/alacritty
     ../desktop/neovim
     ../desktop/emacs
@@ -106,6 +108,7 @@ in
     stable.chromium
     stable.librewolf
     stable.tor-browser-bundle-bin
+    stable.brave
 
     # Nix
     nixpkgs-fmt
@@ -174,10 +177,10 @@ in
     # opcua-client-gui
 
     # Themes
-    gruvbox-dark-gtk
-    kde-gruvbox
-    gruvbox-dark-icons-gtk
-    kde-gtk-config
+    #gruvbox-dark-gtk
+    #kde-gruvbox
+    #gruvbox-dark-icons-gtk
+    #kde-gtk-config
   ];
 
   programs.vscode = {

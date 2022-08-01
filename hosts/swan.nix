@@ -3,8 +3,8 @@
 {
   imports = [
     ../hardware/radeon.nix
-    ../hardware/nvidia-prime.nix
-    # ../hardware/nvidia.nix
+    # ../hardware/nvidia-prime.nix
+    ../hardware/nvidia.nix
     ../hardware/pipewire.nix
     ../desktop/fonts.nix
     # ../desktop/gnome.nix
@@ -211,7 +211,7 @@
   environment.sessionVariables.VAGRANT_DEFAULT_PROVIDER = [ "libvirt" ];
   environment.sessionVariables.LIBVIRT_DEFAULT_URI = [ "qemu:///system" ];
 
-  services.tlp.enable = true;
+  #services.tlp.enable = true;
 
   services.sdrplayApi.enable = true;
 
@@ -246,12 +246,11 @@
     enable = true;
 
     desktopManager = {
-      plasma5.enable = true;
+      pantheon.enable = true;
     };
 
     displayManager = {
-      lightdm.enable = true;
-      # startx.enable = true;
+      sddm.enable = true;
     };
   };
 

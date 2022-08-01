@@ -1,6 +1,13 @@
-{ config, pkgs, ... }:
+{ config, lib, pkgs, ... }:
 
 {
+  specialisation = {
+    external-display.configuration = {
+      system.nixos.tags = [ "external-display" ];
+      hardware.nvidia.prime.offload.enable = lib.mkForce false;
+      hardware.nvidia.powerManagement.enable = lib.mkForce false;
+    };
+  };
 
   boot = {
     extraModprobeConfig = "options nvidia-drm modeset=1";
@@ -20,8 +27,8 @@
     nvidia = {
       package = config.boot.kernelPackages.nvidiaPackages.beta;
       powerManagement.enable = true;
-
       modesetting.enable = true;
     };
   };
+
 }

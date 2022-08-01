@@ -21,10 +21,10 @@ in
   home.packages = with pkgs; [
     # mako # notification daemon
     xmobar
-    polybar
     haskellPackages.haskell-language-server
     haskellPackages.hoogle
     cabal-install
     stack
+    feh
   ];
 }
