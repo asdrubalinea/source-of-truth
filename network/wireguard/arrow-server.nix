@@ -1,9 +1,10 @@
 { config, lib, pkgs, ... }:
 
 let
-  networkIp = "10.0.73.1/24";
-  networkSubnet = "10.0.73.0/24";
+  networkIp = "10.0.64.1/24";
+  networkSubnet = "10.0.64.0/24";
   interface = "ens3";
+  listenPort = 51820;
 in
 {
   # Enable NAT
@@ -15,7 +16,7 @@ in
 
   # Allow wireguard to pass through firewall
   networking.firewall = {
-    allowedUDPPorts = [ 51820 ];
+    allowedUDPPorts = [ listenPort ];
   };
 
   networking.wireguard.interfaces = {
@@ -24,7 +25,8 @@ in
       ips = [ networkIp ];
 
       # The port that WireGuard listens to. Must be accessible by the client.
-      listenPort = 51820;
+      # inherit listenPort;
+      listenPort = listenPort;
 
       # This allows the wireguard server to route your traffic to the internet and hence be like a VPN
       # For this to work you have to set the dnsserver IP of your router (or dnsserver of choice) in your clients
@@ -42,18 +44,13 @@ in
 
       peers = [
         {
-          publicKey = "WH5zXNV+U/mUz3/vbrd5WgurBZy6n3fkYrzMUmhO8S4=";
-          allowedIPs = [ "10.0.73.2/32" ];
+          publicKey = "HydrAcOg1rk1BL/xjlEkVwxjOsps1crFKMnvmFyNNDU=";
+          allowedIPs = [ "10.0.64.2/32" ];
         }
 
         {
-          publicKey = "WH5zXNV+U/mUz3/vbrd5WgurBZy6n3fkYrzMUmhO8S4=";
-          allowedIPs = [ "10.0.73.3/32" ];
-        }
-
-        {
-          publicKey = "dzWhclRc3fHZzwX7jYcCPCZDF4Gkp0gzhjX70fVtZ18=";
-          allowedIPs = [ "10.0.73.4/32" ];
+          publicKey = "IyBZU6xWEXLRIulxyfcXmpAKuNXH+6ydeqhH1iOHhgk=";
+          allowedIPs = [ "10.0.64.3/32" ];
         }
       ];
 

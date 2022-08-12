@@ -85,18 +85,9 @@ in
       (import ../ssh-keys/swan.nix).key
       (import ../ssh-keys/the-hydra.nix).key
     ];
-
-  networking.firewall.allowedTCPPorts = [ 80 443 ];
+  
+  # networking.firewall.allowedTCPPorts = [ 80 443 ];
   # networking.firewall.allowedUDPPorts = [ ... ];
-
-  services.nginx = {
-    enable = true;
-    virtualHosts."asdrubalini.xyz" = {
-      enableACME = true;
-      forceSSL = true;
-      root = "/mnt/hetzner-nas/public/";
-    };
-  };
 
   security.acme = {
     acceptTerms = true;

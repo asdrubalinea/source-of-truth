@@ -28,6 +28,7 @@ in
   home.packages = with pkgs; [
     # System utils
     pfetch
+    neofetch
     htop
     dstat
     sshfs
