@@ -65,10 +65,10 @@ in
 
   security.sudo.wheelNeedsPassword = true;
 
-  environment.systemPackages = with pkgs; [
-    neovim
-    git
-  ];
+  environment.systemPackages = with pkgs; [ git ];
+
+  programs.neovim.enable = true;
+  programs.neovim.viAlias = true;
 
   services.limbo.enable = true;
   services.the-lamp-post.enable = true;
@@ -86,13 +86,18 @@ in
       (import ../ssh-keys/the-hydra.nix).key
     ];
   
-  # networking.firewall.allowedTCPPorts = [ 80 443 ];
+  networking.firewall.allowedTCPPorts = [ 80 443 ];
   # networking.firewall.allowedUDPPorts = [ ... ];
 
-  security.acme = {
-    acceptTerms = true;
-    defaults.email = "asdrubalini@mail.com";
-  };
+  programs.mosh.enable = true;
+
+  #services.nextcloud = {
+  #  enable = true;
+  #  package = pkgs.nextcloud24;
+  #  hostName = "asdrubalini.xyz";
+  #  https = true;
+  #  config.adminpassFile = "/home/nextcloud/admin-pass";
+  #};
 
   system.stateVersion = "22.05";
 }

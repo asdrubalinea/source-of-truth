@@ -52,6 +52,11 @@ in
           publicKey = "IyBZU6xWEXLRIulxyfcXmpAKuNXH+6ydeqhH1iOHhgk=";
           allowedIPs = [ "10.0.64.3/32" ];
         }
+
+        {
+          publicKey = "iPad9SmsHPzxLOyEEAqJaZOdhXN0+6L4xkfzkLcl8k0=";
+          allowedIPs = [ "10.0.64.4/32" ];
+        }
       ];
 
     };
