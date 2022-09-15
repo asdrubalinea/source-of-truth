@@ -72,6 +72,11 @@ in
 
   services.limbo.enable = true;
   services.the-lamp-post.enable = true;
+  services.iperf3 = {
+    enable = true;
+    openFirewall = true;
+    verbose = true;
+  };
 
   nix = {
     package = pkgs.nixFlakes;
