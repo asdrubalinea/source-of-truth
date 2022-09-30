@@ -45,6 +45,12 @@
 
           modules = [ ./hosts/arrow.nix ];
         };
+
+        test = lib.nixosSystem {
+          inherit system pkgs;
+
+          modules = [ ./containers/test.nix ];
+        };
       };
 
       homeConfigurations = {
