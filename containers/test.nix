@@ -12,19 +12,6 @@
 
   time.timeZone = "Europe/Rome";
 
-  users = {
-    mutableUsers = false;
-    extraUsers.root.hashedPassword = (import ../passwords).password;
-
-    users.giovanni = {
-      isNormalUser = true;
-      extraGroups = [ "wheel" ];
-      hashedPassword = (import ../passwords).password;
-    };
-  };
-
-  security.sudo.wheelNeedsPassword = true;
-
   environment.systemPackages = with pkgs; [ git ];
 
   programs.neovim.enable = true;
