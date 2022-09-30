@@ -2,7 +2,8 @@
 
 {
   imports = [
-    <nixpkgs/nixos/modules/virtualisation/lxc-container.nix>
+    ./common.nix
+    
     ../network/wireguard/arrow-server.nix
   ];
 
