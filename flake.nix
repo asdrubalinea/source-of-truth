@@ -49,7 +49,7 @@
         router = lib.nixosSystem {
           inherit system pkgs;
 
-          modules = [ ./hosts/arrow.nix ];
+          modules = [ ./hosts/router.nix ];
         };
 
         test = lib.nixosSystem {
