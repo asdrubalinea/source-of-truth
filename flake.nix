@@ -90,6 +90,21 @@
             ];
           };
 
+        giovanni-router =
+          home-manager.lib.homeManagerConfiguration {
+            inherit pkgs;
+            modules = [
+              ./homes/router.nix
+              {
+                home = {
+                  username = "giovanni";
+                  homeDirectory = "/home/${username}";
+                  stateVersion = "22.05";
+                };
+              }
+            ];
+          };
+
       };
 
     };
