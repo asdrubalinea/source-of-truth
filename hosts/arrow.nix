@@ -79,7 +79,7 @@ in
   };
 
   nix = {
-    package = pkgs.nixFlakes;
+    # package = pkgs.nixFlakes;
     extraOptions = ''
       experimental-features = nix-command flakes
     '';
@@ -93,6 +93,13 @@ in
   
   networking.firewall.allowedTCPPorts = [ 80 443 ];
   # networking.firewall.allowedUDPPorts = [ ... ];
+
+  services.caddy = {
+    enable = true;
+    virtualHosts."asdrubalini.xyz".extraConfig = ''
+      respond "I'm still working!"
+    '';
+  };
 
   programs.mosh.enable = true;
 
