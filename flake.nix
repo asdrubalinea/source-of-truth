@@ -46,6 +46,12 @@
           modules = [ ./hosts/arrow.nix ];
         };
 
+        router = lib.nixosSystem {
+          inherit system pkgs;
+
+          modules = [ ./hosts/arrow.nix ];
+        };
+
         test = lib.nixosSystem {
           inherit system pkgs;
 
