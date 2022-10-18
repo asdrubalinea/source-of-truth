@@ -50,11 +50,15 @@
     interfaces.enp6s18.useDHCP = lib.mkDefault true;
   };
 
-
   hardware.cpu.intel.updateMicrocode = lib.mkDefault config.hardware.enableRedistributableFirmware;
+
+  # Use the systemd-boot EFI boot loader.
+  boot.loader.systemd-boot.enable = true;
+  boot.loader.efi.canTouchEfiVariables = true;
 
   nixpkgs.config.allowUnfree = true;
   networking.hostName = "router";
+  time.timeZone = "Europe/Rome";
 
   i18n.defaultLocale = "en_US.UTF-8";
   console = {
