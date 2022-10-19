@@ -100,6 +100,7 @@
   users.users."giovanni".openssh.authorizedKeys.keys =
     [
       (import ../ssh-keys/the-hydra.nix).key
+      (import ../ssh-keys/proxmox.nix).key
     ];
   
   # networking.firewall.allowedTCPPorts = [ ... ];
