@@ -89,19 +89,16 @@ in
     [
       (import ../ssh-keys/swan.nix).key
       (import ../ssh-keys/the-hydra.nix).key
+      (import ../ssh-keys/router.nix).key
     ];
   
   networking.firewall.allowedTCPPorts = [ 80 443 ];
   # networking.firewall.allowedUDPPorts = [ ... ];
 
-  services.caddy = {
-    enable = true;
-    virtualHosts."asdrubalini.xyz".extraConfig = ''
-      respond "I'm still working!"
-    '';
-  };
-
   programs.mosh.enable = true;
+
+  nix.sshServe.enable = true;
+  nix.sshServe.keys = [ (import ../ssh-keys/router.nix).key ];
 
   #services.nextcloud = {
   #  enable = true;
