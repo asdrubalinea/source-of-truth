@@ -3,7 +3,7 @@
 let
   userApply = pkgs.writeScriptBin "user-apply" ''
     #!${pkgs.stdenv.shell}
-    pushd /etc/nixos/nixos-config
+    pushd /etc/nixos/source-of-truth
 
     home-manager switch --flake '.#giovanni-router'
 
