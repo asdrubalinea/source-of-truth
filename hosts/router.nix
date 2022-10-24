@@ -6,10 +6,21 @@
     ../services/ssh-secure.nix
   ];
 
-  boot.initrd.availableKernelModules = [ "uhci_hcd" "ehci_pci" "ahci" "virtio_pci" "sr_mod" "virtio_blk" ];
-  boot.initrd.kernelModules = [ ];
-  boot.kernelModules = [ ];
-  boot.extraModulePackages = [ ];
+  boot = {
+    initrd.availableKernelModules = [ "uhci_hcd" "ehci_pci" "ahci" "virtio_pci" "sr_mod" "virtio_blk" ];
+    initrd.kernelModules = [ ];
+    kernelModules = [ ];
+    extraModulePackages = [ ];
+
+    kernelPackages = pkgs.linuxPackages_5_15;
+
+    kernelPatches = [ {
+      name = "bnx2x hsgmii";
+      # patch = ../patches/bnx2x_router.patch;
+      patch = null;
+    } ];
+
+  };
 
   fileSystems."/" =
     { device = "/dev/disk/by-uuid/a00746d8-02d2-4b0b-8226-3745c33918c8";
@@ -37,21 +48,39 @@
   swapDevices = [ ];
 
   networking = {
-    interfaces.enp1s0f0.useDHCP = lib.mkDefault true;
+    interfaces.enp1s0f0.useDHCP = true;
 
     interfaces.enp1s0f1.ipv4.addresses = [ {
       address = "10.0.0.1";
       prefixLength = 20;
     } ];
 
-    defaultGateway = "10.0.0.200";
-    nameservers = ["10.0.0.3"];
+    interfaces.enp6s18.useDHCP = true;
 
-    interfaces.enp6s18.useDHCP = lib.mkDefault true;
+    defaultGateway = "10.0.0.200";
+    nameservers = [ "10.0.0.3" ];
   };
 
-  hardware.cpu.intel.updateMicrocode = lib.mkDefault config.hardware.enableRedistributableFirmware;
-  hardware.enableAllFirmware = true;
+  hardware.cpu.intel.updateMicrocode = config.hardware.enableRedistributableFirmware;
+  hardware.enableRedistributableFirmware = true;
+
+  hardware.firmware = with pkgs; [
+    broadcom-bt-firmware
+    # b43Firmware_5_1_138
+    # b43Firmware_6_30_163_46
+    # xow_dongle-firmware
+    linux-firmware
+    # intel2200BGFirmware
+    rtl8192su-firmware
+    rt5677-firmware
+    rtl8723bs-firmware
+    rtl8761b-firmware
+    rtw88-firmware
+    zd1211fw
+    # alsa-firmware
+    # sof-firmware
+    # libreelec-dvb-firmware
+  ];
 
   # Use the systemd-boot EFI boot loader.
   boot.loader.systemd-boot.enable = true;
@@ -79,7 +108,7 @@
     };
   };
 
-  environment.systemPackages = with pkgs; [ git ];
+  environment.systemPackages = with pkgs; [ ];
 
   programs.neovim.enable = true;
   programs.neovim.viAlias = true;
@@ -91,7 +120,10 @@
   };
 
   nix = {
-    # package = pkgs.nixFlakes;
+    settings = {
+      # substituters = [ "ssh://asdrubalini.xyz" ];
+    };
+
     extraOptions = ''
       experimental-features = nix-command flakes
     '';

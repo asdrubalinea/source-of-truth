@@ -17,28 +17,24 @@ let
 in
 {
   imports = [
-    ../misc/aliases.nix
-
     ../scripts/system-clean.nix
   ];
 
   # Let Home Manager install and manage itself.
   programs.home-manager.enable = true;
+  manual.manpages.enable = false; # TODO: remove this
 
   home.packages = with pkgs; [
     # System utils
-    pfetch
-    neofetch
     htop
     dstat
-    sshfs
-    git
-    ncdu
-    file
     screen
-    wireguard-tools
+    git
+    iperf
+    pciutils
 
     userApply
     systemApply
   ];
 }
+
