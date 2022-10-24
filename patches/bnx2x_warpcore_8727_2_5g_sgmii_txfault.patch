@@ -1,5 +1,17 @@
---- drivers/net/ethernet/broadcom/bnx2x/bnx2x_link.c	2019-10-21 14:23:50.032830050 -0400
-+++ drivers/net/ethernet/broadcom/bnx2x/bnx2x_link.c	2019-10-21 14:54:39.000000000 -0400
+diff -Naur a/drivers/net/ethernet/broadcom/bnx2x/bnx2x.h b/drivers/net/ethernet/broadcom/bnx2x/bnx2x.h
+--- a/drivers/net/ethernet/broadcom/bnx2x/bnx2x.h	2020-09-03 23:21:36.695693427 -0400
++++ b/drivers/net/ethernet/broadcom/bnx2x/bnx2x.h	2020-09-03 23:29:22.457340229 -0400
+@@ -1592,6 +1592,7 @@
+ 	uint			num_ethernet_queues;
+ 	uint			num_cnic_queues;
+ 	int			disable_tpa;
++	int			mask_tx_fault;
+ 
+ 	u32			rx_mode;
+ #define BNX2X_RX_MODE_NONE		0
+diff -Naur a/drivers/net/ethernet/broadcom/bnx2x/bnx2x_link.c b/drivers/net/ethernet/broadcom/bnx2x/bnx2x_link.c
+--- a/drivers/net/ethernet/broadcom/bnx2x/bnx2x_link.c	2020-09-03 23:21:36.699693373 -0400
++++ b/drivers/net/ethernet/broadcom/bnx2x/bnx2x_link.c	2020-09-03 23:29:22.457340229 -0400
 @@ -151,6 +151,7 @@
  
  #define SFP_EEPROM_CON_TYPE_ADDR		0x2
@@ -151,8 +163,42 @@
  					   SUPPORTED_10000baseT_Full |
  					   SUPPORTED_FIBRE |
  					   SUPPORTED_Pause |
---- drivers/net/ethernet/broadcom/bnx2x/bnx2x_reg.h	2019-10-21 14:23:50.032830050 -0400
-+++ drivers/net/ethernet/broadcom/bnx2x/bnx2x_reg.h	2019-10-21 14:25:37.955753876 -0400
+@@ -13947,7 +13990,8 @@
+ 		    & PORT_HW_CFG_NET_SERDES_IF_MASK) ==
+ 		    PORT_HW_CFG_NET_SERDES_IF_SFI) {
+ 			if (bnx2x_is_sfp_module_plugged(phy, params)) {
+-				bnx2x_sfp_tx_fault_detection(phy, params, vars);
++				if(!((params->port + 1) & bp->mask_tx_fault))
++					bnx2x_sfp_tx_fault_detection(phy, params, vars);
+ 			} else if (vars->link_status &
+ 				LINK_STATUS_SFP_TX_FAULT) {
+ 				/* Clean trail, interrupt corrects the leds */
+diff -Naur a/drivers/net/ethernet/broadcom/bnx2x/bnx2x_main.c b/drivers/net/ethernet/broadcom/bnx2x/bnx2x_main.c
+--- a/drivers/net/ethernet/broadcom/bnx2x/bnx2x_main.c	2020-09-03 23:21:36.699693373 -0400
++++ b/drivers/net/ethernet/broadcom/bnx2x/bnx2x_main.c	2020-09-03 23:29:22.461340175 -0400
+@@ -105,6 +105,10 @@
+ module_param(disable_tpa, int, 0444);
+ MODULE_PARM_DESC(disable_tpa, " Disable the TPA (LRO) feature");
+ 
++static int mask_tx_fault;
++module_param(mask_tx_fault, int, 0444);
++MODULE_PARM_DESC(mask_tx_fault, " Mask SFP TX fault detection");
++
+ static int int_mode;
+ module_param(int_mode, int, 0444);
+ MODULE_PARM_DESC(int_mode, " Force interrupt mode other than MSI-X "
+@@ -12455,6 +12459,8 @@
+ 	if (BP_NOMCP(bp) && (func == 0))
+ 		dev_err(&bp->pdev->dev, "MCP disabled, must load devices in order!\n");
+ 
++	bp->mask_tx_fault = mask_tx_fault;
++
+ 	bp->disable_tpa = disable_tpa;
+ 	bp->disable_tpa |= !!IS_MF_STORAGE_ONLY(bp);
+ 	/* Reduce memory usage in kdump environment by disabling TPA */
+diff -Naur a/drivers/net/ethernet/broadcom/bnx2x/bnx2x_reg.h b/drivers/net/ethernet/broadcom/bnx2x/bnx2x_reg.h
+--- a/drivers/net/ethernet/broadcom/bnx2x/bnx2x_reg.h	2020-09-03 23:21:36.699693373 -0400
++++ b/drivers/net/ethernet/broadcom/bnx2x/bnx2x_reg.h	2020-09-03 23:22:22.975062197 -0400
 @@ -7169,7 +7169,8 @@
  #define MDIO_PMA_REG_8727_PCS_GP		0xc842
  #define MDIO_PMA_REG_8727_OPT_CFG_REG		0xc8e4

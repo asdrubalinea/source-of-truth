@@ -16,8 +16,7 @@
 
     kernelPatches = [ {
       name = "bnx2x hsgmii";
-      # patch = ../patches/bnx2x_router.patch;
-      patch = null;
+      patch = ../patches/bnx2x_warpcore_8727_2_5g_sgmii_txfault.patch;
     } ];
 
   };
@@ -64,23 +63,7 @@
   hardware.cpu.intel.updateMicrocode = config.hardware.enableRedistributableFirmware;
   hardware.enableRedistributableFirmware = true;
 
-  hardware.firmware = with pkgs; [
-    broadcom-bt-firmware
-    # b43Firmware_5_1_138
-    # b43Firmware_6_30_163_46
-    # xow_dongle-firmware
-    linux-firmware
-    # intel2200BGFirmware
-    rtl8192su-firmware
-    rt5677-firmware
-    rtl8723bs-firmware
-    rtl8761b-firmware
-    rtw88-firmware
-    zd1211fw
-    # alsa-firmware
-    # sof-firmware
-    # libreelec-dvb-firmware
-  ];
+  hardware.firmware = with pkgs; [ linux-firmware ];
 
   # Use the systemd-boot EFI boot loader.
   boot.loader.systemd-boot.enable = true;
@@ -108,7 +91,7 @@
     };
   };
 
-  environment.systemPackages = with pkgs; [ ];
+  environment.systemPackages = with pkgs; [ ethtool ];
 
   programs.neovim.enable = true;
   programs.neovim.viAlias = true;
