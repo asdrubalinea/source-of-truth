@@ -11,13 +11,46 @@
     initrd.kernelModules = [ ];
     kernelModules = [ ];
     extraModulePackages = [ ];
+    kernelParams = [ "bnx2x.mask_tx_fault=3" ];
 
-    kernelPackages = pkgs.linuxPackages_5_15;
+    kernelPackages = let
+      linux_custom_pkg = { fetchFromGitHub, buildLinux, ... } @ args:
 
-    kernelPatches = [ {
-      name = "bnx2x hsgmii";
-      patch = ../patches/bnx2x_warpcore_8727_2_5g_sgmii_txfault.patch;
-    } ];
+        buildLinux (args // rec {
+          version = "5.15.74";
+          modDirVersion = version;
+
+          src = fetchFromGitHub {
+	    owner = "asdrubalini";
+	    repo = "linux-bnx2x";
+	    rev = "txfault";
+	    sha256 = "sha256-vKExF1TwQIjWOXTJAt0xUsL/gUA+CNJCYZVScRIMD64=";
+          };
+	  kernelPatches = [];
+
+        } // (args.argsOverride or {}));
+
+      linux_custom = pkgs.callPackage linux_custom_pkg {};
+    in
+      pkgs.recurseIntoAttrs (pkgs.linuxPackagesFor linux_custom);
+
+    kernel.sysctl = {
+      # if you use ipv4, this is all you need
+      "net.ipv4.conf.all.forwarding" = true;
+
+      # If you want to use it for ipv6
+      "net.ipv6.conf.all.forwarding" = true;
+
+      # source: https://github.com/mdlayher/homelab/blob/master/nixos/routnerr-2/configuration.nix#L52
+      # By default, not automatically configure any IPv6 addresses.
+      "net.ipv6.conf.all.accept_ra" = 0;
+      "net.ipv6.conf.all.autoconf" = 0;
+      "net.ipv6.conf.all.use_tempaddr" = 0;
+
+      # On WAN, allow IPv6 autoconfiguration and tempory address use.
+      "net.ipv6.conf.${name}.accept_ra" = 2;
+      "net.ipv6.conf.${name}.autoconf" = 1;
+    };
 
   };
 
@@ -47,14 +80,29 @@
   swapDevices = [ ];
 
   networking = {
-    interfaces.enp1s0f0.useDHCP = true;
+    # fibre
+    interfaces.enp1s0f0 = {
+      useDHCP = true;
+      macAddress = "00:11:22:aa:bb:cc";
+    };
+
+    #interfaces.enp1s0f0.ipv4.addresses = [ {
+    #  address = "192.168.1.1";
+    #  prefixLength = 24;
+    #} ];
 
     interfaces.enp1s0f1.ipv4.addresses = [ {
       address = "10.0.0.1";
       prefixLength = 20;
     } ];
 
+    # virtual interface
     interfaces.enp6s18.useDHCP = true;
+
+    dhcpcd.persistent = true;
+    dhcpcd.extraConfig = ''
+      send vendor-class-identifier "Technicolor_DGA4131FWB/dslforum.org";
+    '';
 
     defaultGateway = "10.0.0.200";
     nameservers = [ "10.0.0.3" ];
@@ -95,6 +143,7 @@
 
   programs.neovim.enable = true;
   programs.neovim.viAlias = true;
+  programs.fish.enable = true;
 
   services.iperf3 = {
     enable = true;
@@ -102,11 +151,14 @@
     verbose = true;
   };
 
-  nix = {
-    settings = {
-      # substituters = [ "ssh://asdrubalini.xyz" ];
-    };
+  services.caddy = {
+    enable = true;
+    virtualHosts."10.0.0.1".extraConfig = ''
+      reverse_proxy http://192.168.1.10
+    '';
+  };
 
+  nix = {
     extraOptions = ''
       experimental-features = nix-command flakes
     '';
@@ -118,7 +170,7 @@
       (import ../ssh-keys/proxmox.nix).key
     ];
   
-  # networking.firewall.allowedTCPPorts = [ ... ];
+  networking.firewall.allowedTCPPorts = [ 8000 80 443 ];
   # networking.firewall.allowedUDPPorts = [ ... ];
 
   system.stateVersion = "22.05";
