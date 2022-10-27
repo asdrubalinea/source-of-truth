@@ -69,52 +69,26 @@
   swapDevices = [ ];
 
   networking = {
-    vlans = {
-      wan = {
-        id = 10;
-        interface = "enp1s0f0";
-      };
-
-      lan = {
-        id = 20;
-        interface = "enp1s0f1";
-      };
-
-      virtual = {
-        id = 30;
-        interface = "enp6s18";
-      };
-    };
-
     interfaces = {
-      enp1s0f0.useDHCP = false;
-      enp1s0f1.useDHCP = false;
-      enp6s18.useDHCP = false;
-
       # fibre
-      # enp1s0f0 = {
-      # };
-
-      #ipv4.addresses = [ {
-      #  address = "192.168.1.1";
-      #  prefixLength = 24;
-      #} ];
-
-      wan = {
+      enp1s0f0 = {
         useDHCP = true;
         macAddress = "00:11:22:aa:bb:cc";
       };
 
-      lan = {
+      #enp1s0f0.ipv4.addresses = [ {
+      #  address = "192.168.1.1";
+      #  prefixLength = 24;
+      #} ];
+
+      enp1s0f1 = {
         ipv4.addresses = [ {
           address = "10.0.0.1";
           prefixLength = 20;
         } ];
       };
 
-      virtual = {
-        useDHCP = true;
-      };
+      enp6s18.useDHCP = true;
     };
 
     dhcpcd.persistent = true;
