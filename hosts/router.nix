@@ -51,7 +51,6 @@
       "net.ipv6.conf.${name}.accept_ra" = 2;
       "net.ipv6.conf.${name}.autoconf" = 1;
     };
-
   };
 
   fileSystems."/" =
@@ -80,24 +79,53 @@
   swapDevices = [ ];
 
   networking = {
-    # fibre
-    interfaces.enp1s0f0 = {
-      useDHCP = true;
-      macAddress = "00:11:22:aa:bb:cc";
+    vlans = {
+      wan = {
+        id = 10;
+        interface = "enp1s0f0";
+      };
+
+      lan = {
+        id = 20;
+        interface = "enp1s0f1";
+      };
+
+      virtual = {
+        id = 30;
+        interface = "enp6s18";
+      };
     };
 
-    #interfaces.enp1s0f0.ipv4.addresses = [ {
-    #  address = "192.168.1.1";
-    #  prefixLength = 24;
-    #} ];
+    interfaces = {
+      enp1s0f0.useDHCP = false;
+      enp1s0f1.useDHCP = false;
+      enp6s18.useDHCP = false;
 
-    interfaces.enp1s0f1.ipv4.addresses = [ {
-      address = "10.0.0.1";
-      prefixLength = 20;
-    } ];
+      # fibre
+      # enp1s0f0 = {
+      # };
 
-    # virtual interface
-    interfaces.enp6s18.useDHCP = true;
+      #ipv4.addresses = [ {
+      #  address = "192.168.1.1";
+      #  prefixLength = 24;
+      #} ];
+
+      wan = {
+        useDHCP = true;
+        macAddress = "00:11:22:aa:bb:cc";
+      };
+
+      lan = {
+        ipv4.addresses = [ {
+          address = "10.0.0.1";
+          prefixLength = 20;
+        } ];
+      };
+
+      virtual = {
+        useDHCP = true;
+      };
+    };
 
     dhcpcd.persistent = true;
     dhcpcd.extraConfig = ''
@@ -106,6 +134,32 @@
 
     defaultGateway = "10.0.0.200";
     nameservers = [ "10.0.0.3" ];
+  };
+
+  services.pppd = {
+    enable = true;
+    peers = {
+      edpnet = {
+        # Autostart the PPPoE session on boot
+        autostart = true;
+        enable = true;
+        config = ''
+          plugin rp-pppoe.so wan
+          
+          # pppd supports multiple ways of entering credentials,
+          # this is just 1 way
+          name "0264087024@alicebiz.routed"
+          password "timadsl"
+
+          persist
+          maxfail 0
+          holdoff 5
+
+          noipdefault
+          defaultroute
+        '';
+      };
+    };
   };
 
   hardware.cpu.intel.updateMicrocode = config.hardware.enableRedistributableFirmware;
@@ -139,7 +193,9 @@
     };
   };
 
-  environment.systemPackages = with pkgs; [ ethtool ];
+  environment.systemPackages = with pkgs; [
+    ethtool conntrack-tools
+  ];
 
   programs.neovim.enable = true;
   programs.neovim.viAlias = true;
