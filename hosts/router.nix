@@ -69,6 +69,64 @@
   swapDevices = [ ];
 
   networking = {
+    nat.enable = false;
+    firewall.enable = false;
+    nftables = {
+      enable = true;
+
+      ruleset = ''
+        table inet filter {
+          # enable flow offloading for better throughput
+          flowtable f {
+            hook ingress priority 0;
+            devices = { ppp0, enp1s0f1 };
+          }
+
+          chain output {
+            type filter hook output priority 100; policy accept;
+          }
+
+          chain input {
+            type filter hook input priority filter; policy drop;
+
+            # Allow trusted networks to access the router
+            iifname {
+              "enp1s0f1",
+            } counter accept
+
+            # Allow returning traffic from ppp0 and drop everthing else
+            iifname "ppp0" ct state { established, related } counter accept
+            iifname "ppp0" drop
+          }
+
+          chain forward {
+            type filter hook forward priority filter; policy drop;
+
+            # enable flow offloading for better throughput
+            ip protocol { tcp, udp } flow offload @f
+
+            # Allow trusted network WAN access
+            iifname { "enp1s0f1", } oifname { "ppp0", } counter accept comment "Allow trusted LAN to WAN"
+
+            # Allow established WAN to return
+            iifname { "ppp0", } oifname { "enp1s0f1", } ct state established,related counter accept comment "Allow established back to LANs"
+          }
+        }
+
+        table ip nat {
+          chain prerouting {
+            type nat hook output priority filter; policy accept;
+          }
+
+          # Setup NAT masquerading on the ppp0 interface
+          chain postrouting {
+            type nat hook postrouting priority filter; policy accept;
+            oifname "ppp0" masquerade
+          }
+        }
+    '';
+    };
+
     vlans = {
       wan = { id = 835; interface = "enp1s0f0"; };
     };
@@ -85,6 +143,7 @@
         useDHCP = true;
       };
 
+      # Lan
       enp1s0f1 = {
         ipv4.addresses = [ {
           address = "10.0.0.1";
@@ -122,7 +181,7 @@
         config = ''
           plugin rp-pppoe.so
 
-	  wan
+          wan
 
           name "0264087024@alicebiz.routed"
           password "timadsl"
@@ -184,12 +243,12 @@
     verbose = true;
   };
 
-  services.caddy = {
-    enable = true;
-    virtualHosts."10.0.0.1".extraConfig = ''
-      reverse_proxy http://192.168.1.10
-    '';
-  };
+  # services.caddy = {
+    # enable = true;
+    # virtualHosts."10.0.0.1".extraConfig = ''
+      # reverse_proxy http://192.168.1.10
+    # '';
+  # };
 
   services.qemuGuest.enable = true;
 
@@ -205,7 +264,7 @@
       (import ../ssh-keys/proxmox.nix).key
     ];
   
-  networking.firewall.allowedTCPPorts = [ 8000 80 443 ];
+  # networking.firewall.allowedTCPPorts = [ 8000 80 443 ];
   # networking.firewall.allowedUDPPorts = [ ... ];
 
   system.stateVersion = "22.05";
