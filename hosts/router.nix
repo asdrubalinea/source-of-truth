@@ -108,7 +108,7 @@
   };
 
   # So ppp is able to overwrite default route
-  environment.etc."/etc/ppp/ip-pre-up.d/10-route-del-default.sh".text = ''
+  environment.etc."ppp/ip-pre-up.d/10-route-del-default.sh".text = ''
     route del default
   '';
 
