@@ -17,14 +17,14 @@
       linux_custom_pkg = { fetchFromGitHub, buildLinux, ... } @ args:
 
         buildLinux (args // rec {
-          version = "5.15.74";
+          version = "5.15.75";
           modDirVersion = version;
 
           src = fetchFromGitHub {
             owner = "asdrubalini";
             repo = "linux-bnx2x";
-            rev = "txfault";
-            sha256 = "sha256-vKExF1TwQIjWOXTJAt0xUsL/gUA+CNJCYZVScRIMD64=";
+            rev = "c958ada747c167adb3307b082752464fa3259dad";
+            sha256 = "sha256-+82jMzNIgORGJd6iYJalR+oiPHHx3vIjS9F+bE9QyQM=";
           };
 
           kernelPatches = [];
@@ -69,17 +69,21 @@
   swapDevices = [ ];
 
   networking = {
+    vlans = {
+      wan = { id = 835; interface = "enp1s0f0"; };
+    };
+
     interfaces = {
-      # fibre
+      # enp1s0f0.ipv4.addresses = [ { address = "192.168.1.1"; prefixLength = 24; } ];
       enp1s0f0 = {
-        useDHCP = true;
         macAddress = "00:11:22:aa:bb:cc";
+        useDHCP = false;
       };
 
-      #enp1s0f0.ipv4.addresses = [ {
-      #  address = "192.168.1.1";
-      #  prefixLength = 24;
-      #} ];
+      wan = {
+        macAddress = "00:11:22:aa:bb:cc";
+        useDHCP = true;
+      };
 
       enp1s0f1 = {
         ipv4.addresses = [ {
@@ -91,27 +95,35 @@
       enp6s18.useDHCP = true;
     };
 
-    dhcpcd.persistent = true;
-    dhcpcd.extraConfig = ''
-      send vendor-class-identifier "Technicolor_DGA4131FWB/dslforum.org";
-    '';
+    dhcpcd = {
+      persistent = true;
+      allowInterfaces = [ "wan" ];
+      extraConfig = ''
+        send vendor-class-identifier "Technicolor_DGA4131FWB/dslforum.org";
+      '';
+    };
 
-    defaultGateway = "10.0.0.200";
-    nameservers = [ "10.0.0.3" ];
+    nameservers = [ "1.1.1.1" ];
+    # defaultGateway = "10.0.0.200";
   };
+
+  # So ppp is able to overwrite default route
+  environment.etc."/etc/ppp/ip-pre-up.d/10-route-del-default.sh".text = ''
+    route del default
+  '';
 
   services.pppd = {
     enable = true;
     peers = {
-      edpnet = {
+      tim = {
         # Autostart the PPPoE session on boot
         autostart = true;
         enable = true;
         config = ''
-          plugin rp-pppoe.so wan
-          
-          # pppd supports multiple ways of entering credentials,
-          # this is just 1 way
+          plugin rp-pppoe.so
+
+	  wan
+
           name "0264087024@alicebiz.routed"
           password "timadsl"
 
@@ -119,7 +131,6 @@
           maxfail 0
           holdoff 5
 
-          noipdefault
           defaultroute
         '';
       };
@@ -158,7 +169,9 @@
   };
 
   environment.systemPackages = with pkgs; [
-    ethtool conntrack-tools
+    ethtool
+    conntrack-tools
+    ppp
   ];
 
   programs.neovim.enable = true;
@@ -177,6 +190,8 @@
       reverse_proxy http://192.168.1.10
     '';
   };
+
+  services.qemuGuest.enable = true;
 
   nix = {
     extraOptions = ''
