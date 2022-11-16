@@ -35,10 +35,7 @@
       pkgs.recurseIntoAttrs (pkgs.linuxPackagesFor linux_custom);
 
     kernel.sysctl = {
-      # if you use ipv4, this is all you need
       "net.ipv4.conf.all.forwarding" = true;
-
-      # If you want to use it for ipv6
       "net.ipv6.conf.all.forwarding" = true;
     };
   };
@@ -73,58 +70,9 @@
     firewall.enable = false;
     nftables = {
       enable = true;
-
       ruleset = ''
-        table inet filter {
-          # enable flow offloading for better throughput
-          flowtable f {
-            hook ingress priority 0;
-            devices = { ppp0, enp1s0f1 };
-          }
-
-          chain output {
-            type filter hook output priority 100; policy accept;
-          }
-
-          chain input {
-            type filter hook input priority filter; policy drop;
-
-            # Allow trusted networks to access the router
-            iifname {
-              "enp1s0f1",
-            } counter accept
-
-            # Allow returning traffic from ppp0 and drop everthing else
-            iifname "ppp0" ct state { established, related } counter accept
-            iifname "ppp0" drop
-          }
-
-          chain forward {
-            type filter hook forward priority filter; policy drop;
-
-            # enable flow offloading for better throughput
-            ip protocol { tcp, udp } flow offload @f
-
-            # Allow trusted network WAN access
-            iifname { "enp1s0f1", } oifname { "ppp0", } counter accept comment "Allow trusted LAN to WAN"
-
-            # Allow established WAN to return
-            iifname { "ppp0", } oifname { "enp1s0f1", } ct state established,related counter accept comment "Allow established back to LANs"
-          }
-        }
-
-        table ip nat {
-          chain prerouting {
-            type nat hook output priority filter; policy accept;
-          }
-
-          # Setup NAT masquerading on the ppp0 interface
-          chain postrouting {
-            type nat hook postrouting priority filter; policy accept;
-            oifname "ppp0" masquerade
-          }
-        }
-    '';
+        
+      '';
     };
 
     vlans = {
@@ -163,7 +111,7 @@
     };
 
     nameservers = [ "1.1.1.1" ];
-    # defaultGateway = "10.0.0.200";
+    defaultGateway = "10.0.0.200";
   };
 
   # So ppp is able to overwrite default route
