@@ -99,7 +99,7 @@
               ct state vmap { established : accept, related : accept, invalid : drop }
 
               # allow loopback traffic, anything else jump to chain for further evaluation
-              iifname vmap { lo : accept, ppp0 : jump inbound_world, enp1s0f1 : jump inbound_private, enp6s18 : jump inbound_private }
+              iifname vmap { lo : accept, ppp0 : jump inbound_world, lan : jump inbound_private }
 
               # the rest is dropped by the above policy
           }
@@ -112,8 +112,7 @@
 
               # connections from the internal net to the internet or to other
               # internal nets are allowed
-              iifname enp1s0f1 accept
-              iifname enp6s18 accept
+              iifname lan accept
 
               # the rest is dropped by the above policy
           }
@@ -132,6 +131,10 @@
       wan = { id = 835; interface = "enp1s0f0"; };
     };
 
+    bridges = {
+      "lan" = { interfaces = [ "enp1s0f1" "enp6s18" ]; };
+    };
+
     interfaces = {
       # enp1s0f0.ipv4.addresses = [ { address = "192.168.1.1"; prefixLength = 24; } ];
       enp1s0f0 = {
@@ -145,18 +148,22 @@
       };
 
       # Lan
-      enp1s0f1 = {
+      lan = {
         ipv4.addresses = [ {
           address = "10.0.0.1";
           prefixLength = 20;
         } ];
+	mtu = 1492;
       };
 
       enp6s18 = {
-        ipv4.addresses = [ {
-          address = "10.0.0.1";
-          prefixLength = 20;
-        } ];
+        useDHCP = false;
+	mtu = 1492;
+      };
+
+      enp1s0f1 = {
+        useDHCP = false;
+	mtu = 1492;
       };
     };
 
@@ -201,7 +208,7 @@
 
   services.dhcpd4 = {
     enable = true;
-    interfaces = [ "enp1s0f1" ];
+    interfaces = [ "lan" ];
 
     extraConfig = ''
       option subnet-mask 255.255.240.0;
@@ -210,7 +217,7 @@
       option domain-name-servers 10.0.0.3;
 
       subnet 10.0.0.0 netmask 255.255.240.0 {
-        range 10.0.2.0 10.1.3.255;
+        range 10.0.2.0 10.0.3.255;
       }
     '';
   };
