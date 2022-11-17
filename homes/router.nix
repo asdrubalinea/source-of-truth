@@ -32,6 +32,7 @@ in
     git
     iperf
     pciutils
+    ookla-speedtest
 
     userApply
     systemApply

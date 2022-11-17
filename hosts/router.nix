@@ -68,6 +68,7 @@
   networking = {
     nat.enable = false;
     firewall.enable = false;
+
     nftables = {
       enable = true;
       ruleset = ''
@@ -80,7 +81,7 @@
               # icmp type echo-request limit rate 5/second accept
 
               # allow SSH connections from some well-known internet host
-              ip saddr 81.209.165.42 tcp dport ssh accept
+              #ip saddr 81.209.165.42 tcp dport ssh accept
           }
 
           chain inbound_private {
@@ -133,7 +134,7 @@
     interfaces = {
       # enp1s0f0.ipv4.addresses = [ { address = "192.168.1.1"; prefixLength = 24; } ];
       enp1s0f0 = {
-        macAddress = "00:11:22:aa:bb:cc";
+        # macAddress = "00:11:22:aa:bb:cc";
         useDHCP = false;
       };
 
@@ -162,13 +163,8 @@
     };
 
     nameservers = [ "1.1.1.1" ];
-    defaultGateway = "10.0.0.200";
+    # defaultGateway = "10.0.0.200";
   };
-
-  # So ppp is able to overwrite default route
-  environment.etc."ppp/ip-pre-up.d/10-route-del-default.sh".text = ''
-    route del default
-  '';
 
   services.pppd = {
     enable = true;
@@ -188,11 +184,29 @@
           persist
           maxfail 0
           holdoff 5
+	  mtu 1492
 
           defaultroute
+	  replacedefaultroute
         '';
       };
     };
+  };
+
+  services.dhcpd4 = {
+    enable = true;
+    interfaces = [ "enp1s0f1" ];
+
+    extraConfig = ''
+      option subnet-mask 255.255.240.0;
+      option broadcast-address 10.0.15.254;
+      option routers 10.0.0.1;
+      option domain-name-servers 10.0.0.3;
+
+      subnet 10.0.0.0 netmask 255.255.240.0 {
+        range 10.0.2.0 10.1.3.255;
+      }
+    '';
   };
 
   hardware.cpu.intel.updateMicrocode = config.hardware.enableRedistributableFirmware;
@@ -262,9 +276,6 @@
       (import ../ssh-keys/the-hydra.nix).key
       (import ../ssh-keys/proxmox.nix).key
     ];
-  
-  # networking.firewall.allowedTCPPorts = [ 8000 80 443 ];
-  # networking.firewall.allowedUDPPorts = [ ... ];
 
   system.stateVersion = "22.05";
 }
