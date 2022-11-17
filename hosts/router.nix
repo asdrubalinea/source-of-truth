@@ -99,7 +99,7 @@
               ct state vmap { established : accept, related : accept, invalid : drop }
 
               # allow loopback traffic, anything else jump to chain for further evaluation
-              iifname vmap { lo : accept, ppp0 : jump inbound_world, enp1s0f1 : jump inbound_private }
+              iifname vmap { lo : accept, ppp0 : jump inbound_world, enp1s0f1 : jump inbound_private, enp6s18 : jump inbound_private }
 
               # the rest is dropped by the above policy
           }
@@ -113,6 +113,7 @@
               # connections from the internal net to the internet or to other
               # internal nets are allowed
               iifname enp1s0f1 accept
+              iifname enp6s18 accept
 
               # the rest is dropped by the above policy
           }
@@ -134,7 +135,7 @@
     interfaces = {
       # enp1s0f0.ipv4.addresses = [ { address = "192.168.1.1"; prefixLength = 24; } ];
       enp1s0f0 = {
-        # macAddress = "00:11:22:aa:bb:cc";
+        macAddress = "00:11:22:aa:bb:cc";
         useDHCP = false;
       };
 
@@ -151,7 +152,12 @@
         } ];
       };
 
-      enp6s18.useDHCP = true;
+      enp6s18 = {
+        ipv4.addresses = [ {
+          address = "10.0.0.1";
+          prefixLength = 20;
+        } ];
+      };
     };
 
     dhcpcd = {
