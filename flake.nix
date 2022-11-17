@@ -57,6 +57,12 @@
 
           modules = [ ./containers/test.nix ];
         };
+
+        sdr = lib.nixosSystem {
+          inherit system pkgs;
+
+          modules = [ ./containers/sdr.nix ];
+        };
       };
 
       homeConfigurations = {

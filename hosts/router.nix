@@ -153,17 +153,18 @@
           address = "10.0.0.1";
           prefixLength = 20;
         } ];
-	mtu = 1492;
+
+	      mtu = 1492;
       };
 
       enp6s18 = {
         useDHCP = false;
-	mtu = 1492;
+	      mtu = 1492;
       };
 
       enp1s0f1 = {
         useDHCP = false;
-	mtu = 1492;
+	      mtu = 1492;
       };
     };
 
@@ -197,10 +198,10 @@
           persist
           maxfail 0
           holdoff 5
-	  mtu 1492
+	        mtu 1492
 
           defaultroute
-	  replacedefaultroute
+	        replacedefaultroute
         '';
       };
     };
