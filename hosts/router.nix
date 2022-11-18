@@ -172,7 +172,7 @@
       '';
     };
 
-    nameservers = [ "1.1.1.1" ];
+    nameservers = [ "10.0.0.3" ];
     # defaultGateway = "10.0.0.200";
   };
 
@@ -203,33 +203,19 @@
     };
   };
 
-  services.dnsmasq = {
+  services.dhcpd4 = {
     enable = true;
+    interfaces = [ "lan" ];
+
     extraConfig = ''
-      # Set the interface on which dnsmasq operates.
-      # If not set, all the interfaces is used.
-      interface=lan
+      option subnet-mask 255.255.240.0;
+      option broadcast-address 10.0.15.254;
+      option routers 10.0.0.1;
+      option domain-name-servers 10.0.0.3;
 
-      # To disable dnsmasq's DNS server functionality.
-      port=0
-
-      # To enable dnsmasq's DHCP server functionality.
-      dhcp-range=10.0.2.0,10.0.3.255,255.255.240.0,12h
-
-      # Set default gateway
-      dhcp-option=3,10.0.0.1
-
-      # Set DNS server
-      dhcp-option=6,10.0.0.3
-
-      # Force MTU size
-      dhcp-option-force=option:mtu,1492
-
-      # Logging.
-      log-facility=/var/log/dnsmasq.log
-      log-async
-      log-queries # log queries.
-      log-dhcp    # log dhcp related messages.
+      subnet 10.0.0.0 netmask 255.255.240.0 {
+        range 10.0.2.0 10.0.3.255;
+      }
     '';
   };
 
