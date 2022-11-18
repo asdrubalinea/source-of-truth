@@ -153,17 +153,14 @@
           address = "10.0.0.1";
           prefixLength = 20;
         } ];
-	mtu = 1492;
       };
 
       enp6s18 = {
         useDHCP = false;
-	mtu = 1492;
       };
 
       enp1s0f1 = {
         useDHCP = false;
-	mtu = 1492;
       };
     };
 
@@ -197,28 +194,42 @@
           persist
           maxfail 0
           holdoff 5
-	  mtu 1492
+	        mtu 1492
 
           defaultroute
-	  replacedefaultroute
+	        replacedefaultroute
         '';
       };
     };
   };
 
-  services.dhcpd4 = {
+  services.dnsmasq = {
     enable = true;
-    interfaces = [ "lan" ];
-
     extraConfig = ''
-      option subnet-mask 255.255.240.0;
-      option broadcast-address 10.0.15.254;
-      option routers 10.0.0.1;
-      option domain-name-servers 10.0.0.3;
+      # Set the interface on which dnsmasq operates.
+      # If not set, all the interfaces is used.
+      interface=lan
 
-      subnet 10.0.0.0 netmask 255.255.240.0 {
-        range 10.0.2.0 10.0.3.255;
-      }
+      # To disable dnsmasq's DNS server functionality.
+      port=0
+
+      # To enable dnsmasq's DHCP server functionality.
+      dhcp-range=10.0.2.0,10.0.3.255,255.255.240.0,12h
+
+      # Set default gateway
+      dhcp-option=3,10.0.0.1
+
+      # Set DNS server
+      dhcp-option=6,10.0.0.3
+
+      # Force MTU size
+      dhcp-option-force=option:mtu,1492
+
+      # Logging.
+      log-facility=/var/log/dnsmasq.log
+      log-async
+      log-queries # log queries.
+      log-dhcp    # log dhcp related messages.
     '';
   };
 
