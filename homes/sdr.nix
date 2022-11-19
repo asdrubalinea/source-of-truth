@@ -5,7 +5,7 @@ let
     #!${pkgs.stdenv.shell}
     pushd /etc/nixos/source-of-truth
 
-    home-manager switch --flake '.#giovanni-router'
+    home-manager switch --flake '.#giovanni-sdr'
 
     popd
   '';
@@ -29,9 +29,7 @@ in
     dstat
     screen
     git
-    iperf
     pciutils
-    ookla-speedtest
 
     userApply
     systemApply

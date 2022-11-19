@@ -62,7 +62,20 @@
     };
   };
 
-  environment.systemPackages = with pkgs; [];
+  environment.systemPackages = with pkgs; [ trunk.sdrpp ];
+
+  systemd.services.sdrpp-server = {
+    enable = true;
+    description = "Start sdrpp server";
+
+    serviceConfig = {
+      ExecStart = "${pkgs.trunk.sdrpp}/bin/sdrpp --server";
+      Restart = "always";
+    };
+
+    wantedBy = [ "multi-user.target" ];
+    after = [ "network.target" ];
+  };
 
   programs.neovim.enable = true;
   programs.neovim.viAlias = true;
