@@ -25,7 +25,9 @@
 
   networking = {
     interfaces = {
-      enp6s18.ipv4.addresses = [ { address = "10.0.0.7"; prefixLength = 20; } ];
+      enp6s18 = {
+        ipv4.addresses = [ { address = "10.0.0.7"; prefixLength = 20; } ];
+      };
     };
 
     nameservers = [ "10.0.0.3" ];
@@ -62,9 +64,7 @@
     };
   };
 
-  environment.systemPackages = with pkgs; [
-    trunk.sdrpp
-  ];
+  environment.systemPackages = with pkgs; [ trunk.sdrpp ];
 
   #systemd.services.sdrpp-server = {
     #enable = true;
