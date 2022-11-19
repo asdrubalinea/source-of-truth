@@ -212,35 +212,6 @@
     };
   };
 
-  #systemd.network = {
-    #enable = true;
-#
-    #netdevs."he-tunnel" = {
-      #netdevConfig = {
-        #Name = "he-ipv6";
-        #Kind = "sit";
-        #MTUBytes = "1480";
-      #};
-#
-      #tunnelConfig = {
-        #Local = "188.11.102.210";
-        #Remote = "216.66.80.98";
-        #TTL = 255;
-      #};
-    #};
-#
-    #networks."he-tunnel" = {
-      #matchConfig = {
-        #Name = "he-ipv6";
-      #};
-#
-      #networkConfig = {
-        #Address = "2001:470:25:d6::2/64";
-        #Gateway = "2001:470:25:d6::1/64";
-      #};
-    #};
-  #};
-
   services.dhcpd4 = {
     enable = true;
     interfaces = [ "lan" ];
