@@ -115,7 +115,7 @@
           home-manager.lib.homeManagerConfiguration {
             inherit pkgs;
             modules = [
-              ./homes/router.nix
+              ./homes/sdr.nix
               {
                 home = {
                   username = "giovanni";
