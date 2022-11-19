@@ -84,63 +84,53 @@
       enable = true;
       ruleset = ''
         table inet filter {
-        # enable flow offloading for better throughput
-        flowtable f {
-          hook ingress priority 0;
-          devices = { ppp0, lan };
-        }
-
-        chain output {
-          type filter hook output priority 100; policy accept;
-        }
-
-        chain input {
-          type filter hook input priority filter; policy drop;
-
-          # Allow trusted networks to access the router
-          iifname {
-            "lan",
-          } counter accept
-
-          # Allow returning traffic from ppp0 and drop everthing else
-          iifname "ppp0" ct state { established, related } counter accept
-          iifname "ppp0" drop
-        }
-
-        chain forward {
-          type filter hook forward priority filter; policy drop;
-	  tcp flags syn tcp option maxseg size set 1452;
-
           # enable flow offloading for better throughput
-          ip protocol { tcp, udp } flow offload @f
+          flowtable f {
+            hook ingress priority 0;
+            devices = { ppp0, lan };
+          }
 
-          # Allow trusted network WAN access
-          iifname {
-                  "lan",
-          } oifname {
-                  "ppp0",
-          } counter accept comment "Allow trusted LAN to WAN"
+          chain output {
+            type filter hook output priority 100; policy accept;
+          }
 
-          # Allow established WAN to return
-          iifname {
-                  "ppp0",
-          } oifname {
-                  "lan",
-          } ct state established,related counter accept comment "Allow established back to LANs"
+          chain input {
+            type filter hook input priority filter; policy drop;
+
+            # Allow trusted networks to access the router
+            iifname { "lan", } counter accept
+
+            # Allow returning traffic from ppp0 and drop everthing else
+            iifname "ppp0" ct state { established, related } counter accept
+            iifname "ppp0" drop
+          }
+
+          chain forward {
+            type filter hook forward priority filter; policy drop;
+            tcp flags syn tcp option maxseg size set 1452;
+
+            # enable flow offloading for better throughput
+            ip protocol { tcp, udp } flow offload @f
+
+            # Allow trusted network WAN access
+            iifname { "lan", } oifname { "ppp0", } counter accept comment "Allow trusted LAN to WAN"
+
+            # Allow established WAN to return
+            iifname { "ppp0", } oifname { "lan", } ct state established,related counter accept comment "Allow established back to LANs"
+          }
         }
-      }
 
-      table ip nat {
-        chain prerouting {
-          type nat hook output priority filter; policy accept;
-        }
+        table ip nat {
+          chain prerouting {
+            type nat hook output priority filter; policy accept;
+          }
 
-        # Setup NAT masquerading on the ppp0 interface
-        chain postrouting {
-          type nat hook postrouting priority filter; policy accept;
-          oifname "ppp0" masquerade
+          # Setup NAT masquerading on the ppp0 interface
+          chain postrouting {
+            type nat hook postrouting priority filter; policy accept;
+            oifname "ppp0" masquerade
+          }
         }
-      }
       '';
     };
 
@@ -281,13 +271,6 @@
     openFirewall = true;
     verbose = true;
   };
-
-  # services.caddy = {
-    # enable = true;
-    # virtualHosts."10.0.0.1".extraConfig = ''
-      # reverse_proxy http://192.168.1.10
-    # '';
-  # };
 
   services.qemuGuest.enable = true;
 
