@@ -83,58 +83,64 @@
     nftables = {
       enable = true;
       ruleset = ''
-        table ip global {
-          chain inbound_world {
-              # accepting ping (icmp-echo-request) for diagnostic purposes.
-              # However, it also lets probes discover this host is alive.
-              # This sample accepts them within a certain rate limit:
-              #
-              # icmp type echo-request limit rate 5/second accept
-
-              # allow SSH connections from some well-known internet host
-              #ip saddr 81.209.165.42 tcp dport ssh accept
-          }
-
-          chain inbound_private {
-              # accepting ping (icmp-echo-request) for diagnostic purposes.
-              icmp type echo-request limit rate 5/second accept
-
-              # allow DHCP, DNS and SSH from the private network
-              ip protocol . th dport vmap { tcp . 22 : accept, udp . 53 : accept, tcp . 53 : accept, udp . 67 : accept}
-          }
-
-          chain inbound {
-              type filter hook input priority 0; policy drop;
-
-              # Allow traffic from established and related packets, drop invalid
-              ct state vmap { established : accept, related : accept, invalid : drop }
-
-              # allow loopback traffic, anything else jump to chain for further evaluation
-              iifname vmap { lo : accept, ppp0 : jump inbound_world, lan : jump inbound_private }
-
-              # the rest is dropped by the above policy
-          }
-
-          chain forward {
-              type filter hook forward priority 0; policy drop;
-
-              # Allow traffic from established and related packets, drop invalid
-              ct state vmap { established : accept, related : accept, invalid : drop }
-
-              # connections from the internal net to the internet or to other
-              # internal nets are allowed
-              iifname lan accept
-
-              # the rest is dropped by the above policy
-          }
-
-          chain postrouting {
-              type nat hook postrouting priority 100; policy accept;
-
-              # masquerade private IP addresses
-              ip saddr 10.0.0.0/20 oifname ppp0 masquerade
-          }
+        table inet filter {
+        # enable flow offloading for better throughput
+        flowtable f {
+          hook ingress priority 0;
+          devices = { ppp0, lan };
         }
+
+        chain output {
+          type filter hook output priority 100; policy accept;
+        }
+
+        chain input {
+          type filter hook input priority filter; policy drop;
+
+          # Allow trusted networks to access the router
+          iifname {
+            "lan",
+          } counter accept
+
+          # Allow returning traffic from ppp0 and drop everthing else
+          iifname "ppp0" ct state { established, related } counter accept
+          iifname "ppp0" drop
+        }
+
+        chain forward {
+          type filter hook forward priority filter; policy drop;
+	  tcp flags syn tcp option maxseg size set 1452;
+
+          # enable flow offloading for better throughput
+          ip protocol { tcp, udp } flow offload @f
+
+          # Allow trusted network WAN access
+          iifname {
+                  "lan",
+          } oifname {
+                  "ppp0",
+          } counter accept comment "Allow trusted LAN to WAN"
+
+          # Allow established WAN to return
+          iifname {
+                  "ppp0",
+          } oifname {
+                  "lan",
+          } ct state established,related counter accept comment "Allow established back to LANs"
+        }
+      }
+
+      table ip nat {
+        chain prerouting {
+          type nat hook output priority filter; policy accept;
+        }
+
+        # Setup NAT masquerading on the ppp0 interface
+        chain postrouting {
+          type nat hook postrouting priority filter; policy accept;
+          oifname "ppp0" masquerade
+        }
+      }
       '';
     };
 
@@ -205,10 +211,9 @@
           persist
           maxfail 0
           holdoff 5
-	        mtu 1492
 
           defaultroute
-	        replacedefaultroute
+          replacedefaultroute
         '';
       };
     };
