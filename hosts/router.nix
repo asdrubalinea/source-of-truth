@@ -97,6 +97,9 @@
           chain input {
             type filter hook input priority filter; policy drop;
 
+            # Allow 6to4
+            ip protocol 41 ip saddr 216.66.80.98 accept;
+
             # Allow trusted networks to access the router
             iifname { "lan", } counter accept
 
@@ -209,23 +212,34 @@
     };
   };
 
-  systemd.services.hurricaneElectric = {
-    wantedBy = [ "multi-user.target" ];
-    after = [ "network.target" ];
-    description = "Establish 6to4 tunnel to Hurricane Electric";
-
-    serviceConfig = {
-      Type = "oneshot";
-      RemainAfterExit = true;
-      ExecStart = "${pkgs.iproute}/bin/ip tunnel add he-ipv6 mode sit remote 216.66.80.98 local 188.11.102.210 ttl 255";
-      ExecStart = "${pkgs.iproute}/bin/ip link set he-ipv6 up mtu 1480";
-      ExecStart = "${pkgs.iproute}/bin/ip addr add 2001:470:25:d6::2/64 dev he-ipv6";
-      ExecStart = "${pkgs.iproute}/bin/ip -6 route add ::/0 dev he-ipv6";
-      ExecStop = "${pkgs.iproute}/bin/ip -6 route del ::/0 dev he-ipv6";
-      ExecStop = "${pkgs.iproute}/bin/ip link set he-ipv6 down";
-      ExecStop = "${pkgs.iproute}/bin/ip tunnel del he-ipv6";
-    };
-  };
+  #systemd.network = {
+    #enable = true;
+#
+    #netdevs."he-tunnel" = {
+      #netdevConfig = {
+        #Name = "he-ipv6";
+        #Kind = "sit";
+        #MTUBytes = "1480";
+      #};
+#
+      #tunnelConfig = {
+        #Local = "188.11.102.210";
+        #Remote = "216.66.80.98";
+        #TTL = 255;
+      #};
+    #};
+#
+    #networks."he-tunnel" = {
+      #matchConfig = {
+        #Name = "he-ipv6";
+      #};
+#
+      #networkConfig = {
+        #Address = "2001:470:25:d6::2/64";
+        #Gateway = "2001:470:25:d6::1/64";
+      #};
+    #};
+  #};
 
   services.dhcpd4 = {
     enable = true;
