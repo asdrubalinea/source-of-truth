@@ -84,12 +84,6 @@
       enable = true;
       ruleset = ''
         table inet filter {
-          # enable flow offloading for better throughput
-          flowtable f {
-            hook ingress priority 0;
-            devices = { ppp0, lan };
-          }
-
           chain output {
             type filter hook output priority 100; policy accept;
           }
@@ -111,9 +105,6 @@
           chain forward {
             type filter hook forward priority filter; policy drop;
             tcp flags syn tcp option maxseg size set 1452;
-
-            # enable flow offloading for better throughput
-            ip protocol { tcp, udp } flow offload @f
 
             # Allow trusted network WAN access
             iifname { "lan", } oifname { "ppp0", } counter accept comment "Allow trusted LAN to WAN"
@@ -182,7 +173,7 @@
       '';
     };
 
-    nameservers = [ "10.0.0.3" ];
+    nameservers = [ "1.1.1.1" ];
     # defaultGateway = "10.0.0.200";
   };
 
