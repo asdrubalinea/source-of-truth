@@ -94,6 +94,8 @@
             # Allow 6to4
             ip protocol 41 ip saddr 216.66.80.98 accept;
 
+            tcp dport ssh accept;
+
             # Allow trusted networks to access the router
             iifname { "lan", } counter accept
 
