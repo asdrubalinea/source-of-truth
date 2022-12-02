@@ -270,6 +270,7 @@
   };
 
   services.qemuGuest.enable = true;
+  programs.mosh.enable = true;
 
   nix = {
     extraOptions = ''
@@ -281,6 +282,7 @@
     [
       (import ../ssh-keys/the-hydra.nix).key
       (import ../ssh-keys/proxmox.nix).key
+      (import ../ssh-keys/ipad.nix).key
     ];
 
   system.stateVersion = "22.05";
