@@ -28,7 +28,7 @@
           };
 
           kernelPatches = [];
-	  extraConfig = builtins.readFile kernel-configs/router.config;
+	  configfile = ../kernel-configs/router.config;
 
         } // (args.argsOverride or {}));
       linux_custom = pkgs.callPackage linux_custom_pkg {};
