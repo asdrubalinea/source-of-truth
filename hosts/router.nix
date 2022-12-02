@@ -17,14 +17,14 @@
       linux_custom_pkg = { fetchFromGitHub, buildLinux, ... } @ args:
 
         buildLinux (args // rec {
-          version = "5.15.75";
+          version = "5.15.80";
           modDirVersion = version;
 
           src = fetchFromGitHub {
             owner = "asdrubalini";
             repo = "linux-bnx2x";
-            rev = "c958ada747c167adb3307b082752464fa3259dad";
-            sha256 = "sha256-+82jMzNIgORGJd6iYJalR+oiPHHx3vIjS9F+bE9QyQM=";
+            rev = "96ddbc6c4ba2783fe271f164c53255ce6652f501";
+	    sha256 = "sha256-JKQfZsNAvKSRapo6mN0StrSvw7qknSrelJCqcrkZT90=";
           };
 
           kernelPatches = [];
