@@ -140,10 +140,10 @@
     };
 
     interfaces = {
-      # enp1s0f0.ipv4.addresses = [ { address = "192.168.1.1"; prefixLength = 24; } ];
       enp1s0f0 = {
         macAddress = "00:11:22:aa:bb:cc";
         useDHCP = false;
+      	# ipv4.addresses = [ { address = "192.168.1.1"; prefixLength = 24; } ];
       };
 
       wan = {
