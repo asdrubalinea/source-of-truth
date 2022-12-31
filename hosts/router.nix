@@ -257,6 +257,8 @@
     ethtool
     conntrack-tools
     ppp
+    sshuttle
+    python
   ];
 
   programs.neovim.enable = true;
