@@ -5,7 +5,7 @@ let
     #!${pkgs.stdenv.shell}
     pushd /etc/nixos/source-of-truth
 
-    home-manager switch --flake '.#giovanni-sdr'
+    home-manager switch --flake '.#giovanni-docker'
 
     popd
   '';
@@ -25,11 +25,9 @@ in
 
   home.packages = with pkgs; [
     # System utils
-    htop
-    dstat
-    screen
     git
-    pciutils
+    neovim
+    htop
 
     userApply
     systemApply

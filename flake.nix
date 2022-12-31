@@ -58,10 +58,10 @@
           modules = [ ./containers/test.nix ];
         };
 
-        sdr = lib.nixosSystem {
+        docker = lib.nixosSystem {
           inherit system pkgs;
 
-          modules = [ ./hosts/sdr.nix ];
+          modules = [ ./hosts/docker.nix ];
         };
       };
 
@@ -111,11 +111,11 @@
             ];
           };
 
-        giovanni-sdr =
+        giovanni-docker =
           home-manager.lib.homeManagerConfiguration {
             inherit pkgs;
             modules = [
-              ./homes/sdr.nix
+              ./homes/docker.nix
               {
                 home = {
                   username = "giovanni";
