@@ -232,6 +232,7 @@
   boot.loader.efi.canTouchEfiVariables = true;
 
   nixpkgs.config.allowUnfree = true;
+
   networking.hostName = "router";
   time.timeZone = "Europe/Rome";
 
@@ -258,7 +259,6 @@
     conntrack-tools
     ppp
     sshuttle
-    python
   ];
 
   programs.neovim.enable = true;
