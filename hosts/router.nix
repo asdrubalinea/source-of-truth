@@ -188,7 +188,7 @@
         autostart = true;
         enable = true;
         config = ''
-          plugin rp-pppoe.so
+	  plugin pppoe.so
 
           wan
 
@@ -258,7 +258,9 @@
     ethtool
     conntrack-tools
     ppp
+    rpPPPoE # not used maybe
     sshuttle
+    python3
   ];
 
   programs.neovim.enable = true;
