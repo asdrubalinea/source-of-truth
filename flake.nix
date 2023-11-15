@@ -3,7 +3,7 @@
 
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
-    nixpkgs-stable.url = "github:nixos/nixpkgs/nixos-22.05";
+    nixpkgs-stable.url = "github:nixos/nixpkgs/nixos-23.05";
     nixpkgs-trunk.url = "github:nixos/nixpkgs";
 
     # nixpkgs-custom.url = "path:/persist/src/nixpkgs";
@@ -38,6 +38,12 @@
           inherit system pkgs;
 
           modules = [ ./hosts/swan.nix ];
+        };
+
+        orchid = lib.nixosSystem {
+          inherit system pkgs;
+
+          modules = [ ./hosts/orchid.nix ];
         };
 
         arrow = lib.nixosSystem {
@@ -76,6 +82,21 @@
                   username = "giovanni";
                   homeDirectory = "/home/${username}";
                   stateVersion = "22.05";
+                };
+              }
+            ];
+          };
+
+        irene-orchid =
+          home-manager.lib.homeManagerConfiguration {
+            inherit pkgs;
+            modules = [
+              ./homes/orchid.nix
+              {
+                home = {
+                  username = "irene";
+                  homeDirectory = "/home/irene";
+                  stateVersion = "23.05";
                 };
               }
             ];

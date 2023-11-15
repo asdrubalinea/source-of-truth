@@ -1,101 +1,194 @@
-# Edit this configuration file to define what should be installed on
-# your system.  Help is available in the configuration.nix(5) man page
-# and in the NixOS manual (accessible by running ‘nixos-help’).
-
-{ config, pkgs, ... }:
+{ config, lib, pkgs, ... }:
 
 {
   imports = [
-    ../scripts/system-clean.nix
-    ../scripts/system-upgrade.nix
-
-    ../services/php-fpm-insegreto.nix
-
-    ../misc/bash-aliases.nix
+    ../network/hosts.nix
   ];
 
-  boot = {
-    # Use the GRUB 2 boot loader.
-    loader.grub.enable = true;
-    loader.grub.version = 2;
-    # Define on which hard drive you want to install Grub.
-    loader.grub.device = "/dev/sda"; # or "nodev" for efi only
-    kernelPackages = pkgs.linuxPackages_latest;
+  boot.initrd.availableKernelModules = [ "ahci" "xhci_pci" "nvme" "usbhid" "usb_storage" "sd_mod" ];
+  boot.initrd.kernelModules = [ "amdgpu" ];
+  boot.kernelModules = [ "kvm-amd" ];
+  boot.extraModulePackages = [ ];
+
+  fileSystems."/" =
+    { device = "rpool/local/root";
+      fsType = "zfs";
+    };
+
+  fileSystems."/boot" =
+    { device = "/dev/disk/by-uuid/0694-89A6";
+      fsType = "vfat";
+    };
+
+  fileSystems."/nix" =
+    { device = "rpool/local/nix";
+      fsType = "zfs";
+    };
+
+  fileSystems."/home" =
+    { device = "rpool/safe/home";
+      fsType = "zfs";
+    };
+
+  fileSystems."/persist" =
+    { device = "rpool/safe/persist";
+      fsType = "zfs";
+    };
+
+  fileSystems."/mnt/docker" = {
+    device = "rpool/local/docker";
+    fsType = "zfs";
   };
 
+  swapDevices = [ ];
+
   networking.hostName = "orchid"; # Define your hostname.
+  networking.hostId = "f00dbabe";
 
-  # Set your time zone.
+  networking.interfaces.enp13s0.ipv4.addresses = [ {
+    address = "10.0.0.10";
+    prefixLength = 20;
+  } ];
+
+  networking.defaultGateway = "10.0.0.1";
+  networking.nameservers = [ "10.0.0.3" ];
+
+  nixpkgs.hostPlatform = lib.mkDefault "x86_64-linux";
+
+  boot.zfs = {
+    enableUnstable = true;
+    forceImportAll = false;
+  };
+
+  boot.kernelParams = [
+    "zfs.zfs_arc_max=1073741824" # 1 GiB
+    "nohibernate"
+  ];
+
+  boot.supportedFilesystems = [ "zfs" ];
+
+  # Enable nested virtualization
+  boot.extraModprobeConfig = ''
+    options kvm_amd nested=1
+  '';
+
+  services.zfs.autoScrub = {
+    enable = true;
+    interval = "Sun, 01:00";
+  };
+
+  hardware.cpu.amd.updateMicrocode = true;
+  hardware.enableAllFirmware = true;
+
+  # nixpkgs.config.allowUnfree = true;
+
+  boot = {
+    loader = {
+      systemd-boot.enable = true;
+      grub = {
+        copyKernels = true; # For better ZFS compatibility
+        enableCryptodisk = true;
+      };
+    };
+
+    loader.efi.canTouchEfiVariables = true;
+    kernelPackages = config.boot.zfs.package.latestCompatibleLinuxPackages;
+  };
+
+  # Erase your darlings.
+  # boot.initrd.postDeviceCommands = lib.mkAfter ''
+  #  zfs rollback -r rpool/local/root@blank
+  #'';
+
+  services.zfs.autoSnapshot = {
+    enable = true;
+    frequent = 10; # keep the latest ten 15-minute snapshots
+    monthly = 4; # keep only four monthly snapshot
+  };
+
   time.timeZone = "Europe/Rome";
-
-  # The global useDHCP flag is deprecated, therefore explicitly set to false here.
-  # Per-interface useDHCP will be mandatory in the future, so this generated config
-  # replicates the default behaviour.
-  networking.useDHCP = false;
-  networking.interfaces.ens3.useDHCP = true;
-  networking.interfaces.ens10.useDHCP = true;
 
   # Select internationalisation properties.
   i18n.defaultLocale = "en_US.UTF-8";
   console = {
-    font = "Lat2-Terminus16";
-    keyMap = "it";
+    earlySetup = true;
+    font = "${pkgs.terminus_font}/share/consolefonts/ter-132n.psf.gz";
+    packages = with pkgs; [ terminus_font ];
+    keyMap = "us";
   };
 
-  # Define a user account. Don't forget to set a password with ‘passwd’.
-  users.users.giovanni = {
-    isNormalUser = true;
-    extraGroups = [ "wheel" "insegreto" ];
-    openssh.authorizedKeys.keys = [ (import ../ssh-keys/lenovo.nix).lenovoKey ];
+  users = {
+    mutableUsers = false;
+    extraUsers.root.hashedPassword = (import ../passwords).password;
+
+    users.irene = {
+      isNormalUser = true;
+      extraGroups = [ "wheel" "libvirtd" "docker" "jackaudio" ];
+      hashedPassword = (import ../passwords).password;
+      shell = pkgs.fish;
+    };
   };
 
-  # List packages installed in system profile. To search, run:
-  # $ nix search wget
+  security.sudo.enable = true;
+  security.doas.enable = true;
+
+  security.doas.extraRules = [{
+    users = [ "irene" ];
+    keepEnv = true;
+    noPass = true;
+  }];
+
   environment.systemPackages = with pkgs; [
+    zfs
     neovim
-    htop
     git
-    screen
-    dstat
-    pkgs.php80Packages.composer
-    pkgs.nodejs
+    swtpm
+    git-crypt
   ];
 
-  # Some programs need SUID wrappers, can be configured further or are
-  # started in user sessions.
-  # programs.mtr.enable = true;
+  programs.fish.enable = true;
+  programs.mosh.enable = true;
+
   programs.gnupg.agent = {
     enable = true;
     enableSSHSupport = true;
   };
 
-  # List services that you want to enable:
-  services.redis = { enable = true; };
+  services.tailscale.enable = true;
+  services.openssh.enable = true;
 
-  services.mysql = {
+  virtualisation.spiceUSBRedirection.enable = true;
+
+  virtualisation.libvirtd = {
     enable = true;
-    package = pkgs.mariadb;
-    user = "giovanni";
+    qemu = {
+      swtpm.enable = true;
+      ovmf.enable = true;
+      ovmf.packages = [ pkgs.OVMFFull ];
+    };
   };
 
-  # Enable the OpenSSH daemon.
-  services.openssh = {
+  environment.sessionVariables.VAGRANT_DEFAULT_PROVIDER = [ "libvirt" ];
+  environment.sessionVariables.LIBVIRT_DEFAULT_URI = [ "qemu:///system" ];
+
+  virtualisation.docker = {
     enable = true;
-    passwordAuthentication = false;
+    extraOptions = "--data-root=/mnt/docker";
   };
 
-  # Open ports in the firewall.
-  networking.firewall.allowedTCPPorts = [ 22 80 443 ];
+  users.users."irene".openssh.authorizedKeys.keys =
+    [ (import ../ssh-keys/looking-glass.nix).key ];
+
+  nix = {
+    package = pkgs.nixFlakes;
+    extraOptions = ''
+      experimental-features = nix-command flakes
+    '';
+  };
+
+  # networking.firewall.allowedTCPPorts = [ 8000 24800 ];
   # networking.firewall.allowedUDPPorts = [ ... ];
-  networking.firewall.enable = true;
 
-  # This value determines the NixOS release from which the default
-  # settings for stateful data, like file locations and database versions
-  # on your system were taken. It‘s perfectly fine and recommended to leave
-  # this value at the release version of the first install of this system.
-  # Before changing this value read the documentation for this option
-  # (e.g. man configuration.nix or on https://nixos.org/nixos/options.html).
-  system.stateVersion = "21.05"; # Did you read the comment?
-
+  system.stateVersion = "23.05";
 }
 
