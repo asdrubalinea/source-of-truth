@@ -17,14 +17,17 @@ let
 in
 {
   imports = [
+    # ../desktop/sway
+    # ../desktop/rofi
+    ../desktop/alacritty
+    ../desktop/emacs
+
     ../scripts/system-clean.nix
     ../misc/aliases.nix
   ];
 
   # Let Home Manager install and manage itself.
   programs.home-manager.enable = true;
-
-  # programs.home-manager.path = "/persist/source-of-truth";
 
   programs.fish.enable = true;
   programs.fish.shellInit = ''
@@ -59,21 +62,45 @@ in
     gnupg
     fzf
     ipcalc
+    iperf3
+
+    nodejs_21
+    yarn
 
     # Nix
     nixpkgs-fmt
+    rnix-lsp
+    gnumake
 
     # Rust
     # rust-analyzer
     clang
     rustup
 
-
     # Docker
-    # docker-compose
+    docker-compose
+    mkcert
+
+    meld
+
+    # Desktop
+    firefox
+    keepassxc
+    chromium
+
+    trunk.geekbench
+
+    prismlauncher
+
+    jetbrains.rust-rover
 
     # Custom
     userApply
     systemApply
   ];
+
+  programs.vscode = {
+    enable = true;
+    package = pkgs.vscode.fhsWithPackages (ps: with ps; [ rustup zlib openssl.dev pkg-config ]);
+  };
 }

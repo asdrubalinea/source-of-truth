@@ -23,7 +23,7 @@ in
   wayland.windowManager.sway = {
     enable = true;
     wrapperFeatures.gtk = true;
-    extraOptions = [ "--unsupported-gpu" ];
+    # extraOptions = [ "--unsupported-gpu" ];
 
     config = {
       modifier = "Mod4";
@@ -81,7 +81,7 @@ in
           pointer_accel = "-0.1";
         };
 
-        "*" = { xkb_layout = "it"; };
+        "*" = { xkb_layout = "us"; };
       };
 
       gaps.inner = 12;
@@ -238,7 +238,7 @@ in
 
     hicolor-icon-theme
 
-    screen-toggle
+    # screen-toggle
   ];
 
   # Handle external displays

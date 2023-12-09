@@ -3,12 +3,27 @@
 {
   imports = [
     ../network/hosts.nix
+    ../options/passthrough.nix
   ];
 
   boot.initrd.availableKernelModules = [ "ahci" "xhci_pci" "nvme" "usbhid" "usb_storage" "sd_mod" ];
-  boot.initrd.kernelModules = [ "amdgpu" ];
-  boot.kernelModules = [ "kvm-amd" ];
+  boot.initrd.kernelModules = [ ];
+  # boot.kernelModules = [ "kvm-amd" "amdgpu" ];
   boot.extraModulePackages = [ ];
+
+  # vfio.enable = true;
+
+  #specialisation."VFIO".configuration = {
+  #  system.nixos.tags = [ "with-vfio" ];
+  #vfio.enable = true;
+  #};
+
+  # hardware.opengl.extraPackages = with pkgs; [
+    # amdvlk
+    # rocm-opencl-icd
+    # rocm-opencl-runtime
+  # ];
+  # hardware.opengl.driSupport = true;
 
   fileSystems."/" =
     { device = "rpool/local/root";
@@ -45,13 +60,34 @@
   networking.hostName = "orchid"; # Define your hostname.
   networking.hostId = "f00dbabe";
 
-  networking.interfaces.enp13s0.ipv4.addresses = [ {
+  networking.interfaces.enp4s0f0.ipv4.addresses = [ {
     address = "10.0.0.10";
     prefixLength = 20;
   } ];
 
+  # networking.interfaces.enp14s0.ipv4.addresses = [ {
+    # address = "10.0.0.11";
+    # prefixLength = 20;
+  # } ];
+
   networking.defaultGateway = "10.0.0.1";
   networking.nameservers = [ "10.0.0.3" ];
+  networking.useDHCP = false;
+
+  # systemd.network = {
+    # enable = true;
+# 
+    # networks = {
+      # "99-localdns" = {
+        # matchConfig.Name = "*";
+# 
+        # networkConfig = {
+          # DNS = "127.0.0.1";
+          # Domains = "~test";
+        # };
+      # };
+    # };
+  # };
 
   nixpkgs.hostPlatform = lib.mkDefault "x86_64-linux";
 
@@ -81,6 +117,13 @@
   hardware.enableAllFirmware = true;
 
   # nixpkgs.config.allowUnfree = true;
+
+  programs.steam = {
+    enable = true;
+    remotePlay.openFirewall = true; # Open ports in the firewall for Steam Remote Play
+    dedicatedServer.openFirewall = true; # Open ports in the firewall for Source Dedicated Server
+  };
+  hardware.opengl.driSupport32Bit = true; # Enables support for 32bit libs that steam uses
 
   boot = {
     loader = {
@@ -144,6 +187,12 @@
     git
     swtpm
     git-crypt
+
+    sunshine
+
+    lutris
+    wineWowPackages.waylandFull
+    protonup-qt
   ];
 
   programs.fish.enable = true;
@@ -154,22 +203,10 @@
     enableSSHSupport = true;
   };
 
+  # programs.nix-ld.enable = true;
+
   services.tailscale.enable = true;
   services.openssh.enable = true;
-
-  virtualisation.spiceUSBRedirection.enable = true;
-
-  virtualisation.libvirtd = {
-    enable = true;
-    qemu = {
-      swtpm.enable = true;
-      ovmf.enable = true;
-      ovmf.packages = [ pkgs.OVMFFull ];
-    };
-  };
-
-  environment.sessionVariables.VAGRANT_DEFAULT_PROVIDER = [ "libvirt" ];
-  environment.sessionVariables.LIBVIRT_DEFAULT_URI = [ "qemu:///system" ];
 
   virtualisation.docker = {
     enable = true;
@@ -185,6 +222,57 @@
       experimental-features = nix-command flakes
     '';
   };
+
+  services.xserver.enable = true;
+  # services.xserver.displayManager.gdm.enable = true;
+  # services.xserver.desktopManager.gnome.enable = true;
+  hardware.pulseaudio.enable = false;
+  # services.xserver.windowManager.windowmaker.enable = true;
+
+  services.xserver.displayManager.sddm.enable = true;
+  services.xserver.desktopManager.plasma5.enable = true;
+
+  security.rtkit.enable = true;
+  services.pipewire = {
+    enable = true;
+    alsa.enable = true;
+    alsa.support32Bit = true;
+    pulse.enable = true;
+    # If you want to use JACK applications, uncomment this
+    jack.enable = true;
+  };
+
+  # services.xrdp.enable = true;
+  # services.xrdp.defaultWindowManager = "/run/current-system/sw/bin/gnome-session";
+  # services.xrdp.openFirewall = true;
+
+  # environment.gnome.excludePackages = (with pkgs; [
+    # gnome-photos
+    # gnome-tour
+  # ]) ++ (with pkgs.gnome; [
+    # cheese # webcam tool
+    # gnome-music
+    # gedit # text editor
+    # epiphany # web browser
+    # geary # email reader
+    # evince # document viewer
+    # # gnome-characters
+    # totem # video player
+    # tali # poker game
+    # iagno # go game
+    # hitori # sudoku game
+    # atomix # puzzle game
+  # ]);
+
+  environment.plasma5.excludePackages = with pkgs.libsForQt5; [
+    elisa
+    gwenview
+    okular
+    oxygen
+    khelpcenter
+    plasma-browser-integration
+    print-manager
+  ];
 
   # networking.firewall.allowedTCPPorts = [ 8000 24800 ];
   # networking.firewall.allowedUDPPorts = [ ... ];

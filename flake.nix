@@ -11,9 +11,13 @@
 
     home-manager.url = "github:nix-community/home-manager";
     home-manager.inputs.nixpkgs.follows = "nixpkgs";
+
+    hyprland.url = "github:hyprwm/Hyprland";
+
+    # vscode-server.url = "github:nix-community/nixos-vscode-server";
   };
 
-  outputs = { self, nixpkgs, nixpkgs-stable, nixpkgs-trunk, nixpkgs-custom, home-manager, ... }:
+  outputs = { self, nixpkgs, nixpkgs-stable, nixpkgs-trunk, nixpkgs-custom, home-manager, hyprland, ... }:
     let
       system = "x86_64-linux";
       username = "giovanni";
@@ -43,7 +47,11 @@
         orchid = lib.nixosSystem {
           inherit system pkgs;
 
-          modules = [ ./hosts/orchid.nix ];
+          modules = [
+	      # vscode-server.nixosModules.default
+
+	    ./hosts/orchid.nix
+	  ];
         };
 
         arrow = lib.nixosSystem {
@@ -92,6 +100,8 @@
             inherit pkgs;
             modules = [
               ./homes/orchid.nix
+              hyprland.homeManagerModules.default
+
               {
                 home = {
                   username = "irene";
