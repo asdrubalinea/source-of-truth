@@ -17,10 +17,15 @@ let
 in
 {
   imports = [
-    # ../desktop/sway
-    # ../desktop/rofi
     ../desktop/alacritty
     ../desktop/emacs
+
+    ../desktop/hyprland
+    ../desktop/waybar
+
+    # ../desktop/sway
+    # ../desktop/rofi
+    # ../desktop/neovim
 
     ../scripts/system-clean.nix
     ../misc/aliases.nix
@@ -70,12 +75,21 @@ in
     # Nix
     nixpkgs-fmt
     rnix-lsp
+    nix-index
     gnumake
+    nixfmt
+
+    fontconfig
+    cmake
+    pkg-config
 
     # Rust
     # rust-analyzer
     clang
     rustup
+
+    # Python
+    pipenv
 
     # Docker
     docker-compose
@@ -103,4 +117,6 @@ in
     enable = true;
     package = pkgs.vscode.fhsWithPackages (ps: with ps; [ rustup zlib openssl.dev pkg-config ]);
   };
+
+  wayland.windowManager.hyprland.enable = true;
 }

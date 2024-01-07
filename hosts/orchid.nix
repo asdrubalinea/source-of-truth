@@ -3,12 +3,12 @@
 {
   imports = [
     ../network/hosts.nix
-    ../options/passthrough.nix
+    # ../options/passthrough.nix
   ];
 
   boot.initrd.availableKernelModules = [ "ahci" "xhci_pci" "nvme" "usbhid" "usb_storage" "sd_mod" ];
   boot.initrd.kernelModules = [ ];
-  # boot.kernelModules = [ "kvm-amd" "amdgpu" ];
+  boot.kernelModules = [ "kvm-amd" "amdgpu" ];
   boot.extraModulePackages = [ ];
 
   # vfio.enable = true;
@@ -18,12 +18,17 @@
   #vfio.enable = true;
   #};
 
-  # hardware.opengl.extraPackages = with pkgs; [
-    # amdvlk
-    # rocm-opencl-icd
-    # rocm-opencl-runtime
-  # ];
-  # hardware.opengl.driSupport = true;
+  hardware.opengl.extraPackages = with pkgs; [
+    amdvlk
+    rocm-opencl-icd
+    rocm-opencl-runtime
+  ];
+  hardware.opengl.driSupport = true;
+
+  systemd.tmpfiles.rules = [
+    "L+    /opt/rocm/hip   -    -    -     -    ${pkgs.rocmPackages.clr}"
+    "L+	   /opt/amdgpu	   -    -    -     -    ${pkgs.libdrm}"
+  ];
 
   fileSystems."/" =
     { device = "rpool/local/root";
@@ -71,23 +76,8 @@
   # } ];
 
   networking.defaultGateway = "10.0.0.1";
-  networking.nameservers = [ "10.0.0.3" ];
+  networking.nameservers = [ "1.1.1.1" ];
   networking.useDHCP = false;
-
-  # systemd.network = {
-    # enable = true;
-# 
-    # networks = {
-      # "99-localdns" = {
-        # matchConfig.Name = "*";
-# 
-        # networkConfig = {
-          # DNS = "127.0.0.1";
-          # Domains = "~test";
-        # };
-      # };
-    # };
-  # };
 
   nixpkgs.hostPlatform = lib.mkDefault "x86_64-linux";
 
@@ -166,7 +156,7 @@
 
     users.irene = {
       isNormalUser = true;
-      extraGroups = [ "wheel" "libvirtd" "docker" "jackaudio" ];
+      extraGroups = [ "wheel" "libvirtd" "docker" "jackaudio" "render" "video" ];
       hashedPassword = (import ../passwords).password;
       shell = pkgs.fish;
     };
@@ -188,6 +178,12 @@
     swtpm
     git-crypt
 
+    rocmPackages.rocminfo
+    rocmPackages.rccl
+    rocmPackages.rocm-smi
+    rocmPackages.miopen-hip
+    rocmPackages.hip-common
+
     sunshine
 
     lutris
@@ -203,7 +199,8 @@
     enableSSHSupport = true;
   };
 
-  # programs.nix-ld.enable = true;
+  services.vscode-server.enable = true;
+  programs.nix-ld.enable = true;
 
   services.tailscale.enable = true;
   services.openssh.enable = true;
@@ -223,14 +220,14 @@
     '';
   };
 
-  services.xserver.enable = true;
+  #services.xserver.enable = true;
   # services.xserver.displayManager.gdm.enable = true;
   # services.xserver.desktopManager.gnome.enable = true;
   hardware.pulseaudio.enable = false;
   # services.xserver.windowManager.windowmaker.enable = true;
 
-  services.xserver.displayManager.sddm.enable = true;
-  services.xserver.desktopManager.plasma5.enable = true;
+  #services.xserver.displayManager.sddm.enable = true;
+  #services.xserver.desktopManager.plasma5.enable = true;
 
   security.rtkit.enable = true;
   services.pipewire = {
@@ -279,4 +276,3 @@
 
   system.stateVersion = "23.05";
 }
-

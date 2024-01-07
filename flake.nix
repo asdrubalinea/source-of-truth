@@ -14,18 +14,28 @@
 
     hyprland.url = "github:hyprwm/Hyprland";
 
-    # vscode-server.url = "github:nix-community/nixos-vscode-server";
+    vscode-server.url = "github:nix-community/nixos-vscode-server";
   };
 
-  outputs = { self, nixpkgs, nixpkgs-stable, nixpkgs-trunk, nixpkgs-custom, home-manager, hyprland, ... }:
+  outputs = { self, nixpkgs, nixpkgs-stable, nixpkgs-trunk, nixpkgs-custom
+    , home-manager, hyprland, vscode-server, ... }:
     let
       system = "x86_64-linux";
       username = "giovanni";
 
       multiChannelOverlay = final: prev: {
-        stable = import nixpkgs-stable { system = final.system; config = final.config; };
-        trunk = import nixpkgs-trunk { system = final.system; config = final.config; };
-        custom = import nixpkgs-custom { system = final.system; config = final.config; };
+        stable = import nixpkgs-stable {
+          system = final.system;
+          config = final.config;
+        };
+        trunk = import nixpkgs-trunk {
+          system = final.system;
+          config = final.config;
+        };
+        custom = import nixpkgs-custom {
+          system = final.system;
+          config = final.config;
+        };
       };
 
       pkgs = import nixpkgs {
@@ -35,8 +45,7 @@
       };
 
       lib = nixpkgs.lib;
-    in
-    {
+    in {
       nixosConfigurations = {
         swan = lib.nixosSystem {
           inherit system pkgs;
@@ -47,11 +56,7 @@
         orchid = lib.nixosSystem {
           inherit system pkgs;
 
-          modules = [
-	      # vscode-server.nixosModules.default
-
-	    ./hosts/orchid.nix
-	  ];
+          modules = [ vscode-server.nixosModules.default ./hosts/orchid.nix ];
         };
 
         arrow = lib.nixosSystem {
@@ -80,82 +85,77 @@
       };
 
       homeConfigurations = {
-        giovanni-swan =
-          home-manager.lib.homeManagerConfiguration {
-            inherit pkgs;
-            modules = [
-              ./homes/swan.nix
-              {
-                home = {
-                  username = "giovanni";
-                  homeDirectory = "/home/${username}";
-                  stateVersion = "22.05";
-                };
-              }
-            ];
-          };
+        giovanni-swan = home-manager.lib.homeManagerConfiguration {
+          inherit pkgs;
+          modules = [
+            ./homes/swan.nix
+            {
+              home = {
+                username = "giovanni";
+                homeDirectory = "/home/${username}";
+                stateVersion = "22.05";
+              };
+            }
+          ];
+        };
 
-        irene-orchid =
-          home-manager.lib.homeManagerConfiguration {
-            inherit pkgs;
-            modules = [
-              ./homes/orchid.nix
-              hyprland.homeManagerModules.default
+        irene-orchid = home-manager.lib.homeManagerConfiguration {
+          inherit pkgs;
+          modules = [
+            ./homes/orchid.nix
+            hyprland.homeManagerModules.default
 
-              {
-                home = {
-                  username = "irene";
-                  homeDirectory = "/home/irene";
-                  stateVersion = "23.05";
-                };
-              }
-            ];
-          };
+            {
+              home = {
+                username = "irene";
+                homeDirectory = "/home/irene";
+                stateVersion = "23.05";
+              };
+            }
+          ];
+        };
 
-        giovanni-arrow =
-          home-manager.lib.homeManagerConfiguration {
-            inherit pkgs;
-            modules = [
-              ./homes/arrow.nix
-              {
-                home = {
-                  username = "giovanni";
-                  homeDirectory = "/home/${username}";
-                  stateVersion = "22.05";
-                };
-              }
-            ];
-          };
+        giovanni-arrow = home-manager.lib.homeManagerConfiguration {
+          inherit pkgs;
+          modules = [
+            ./homes/arrow.nix
+            {
+              home = {
+                username = "giovanni";
+                homeDirectory = "/home/${username}";
+                stateVersion = "22.05";
+              };
+            }
+          ];
+        };
 
-        giovanni-router =
-          home-manager.lib.homeManagerConfiguration {
-            inherit pkgs;
-            modules = [
-              ./homes/router.nix
-              {
-                home = {
-                  username = "giovanni";
-                  homeDirectory = "/home/${username}";
-                  stateVersion = "22.05";
-                };
-              }
-            ];
-          };
+        giovanni-router = home-manager.lib.homeManagerConfiguration {
+          inherit pkgs;
+          modules = [
+            ./homes/router.nix
+            {
+              home = {
+                username = "giovanni";
+                homeDirectory = "/home/${username}";
+                stateVersion = "22.05";
+              };
+            }
+          ];
+        };
 
-        giovanni-docker =
-          home-manager.lib.homeManagerConfiguration {
-            inherit pkgs;
-            modules = [
-              ./homes/docker.nix
-              {
-                home = {
-                  username = "giovanni";
-                  homeDirectory = "/home/${username}";
-                  stateVersion = "22.05";
-                };
-              }
-            ];
-          };
+        giovanni-docker = home-manager.lib.homeManagerConfiguration {
+          inherit pkgs;
+          modules = [
+            ./homes/docker.nix
+            {
+              home = {
+                username = "giovanni";
+                homeDirectory = "/home/${username}";
+                stateVersion = "22.05";
+              };
+            }
+          ];
+        };
 
       };
 
