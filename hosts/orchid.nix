@@ -3,7 +3,9 @@
 {
   imports = [
     ../network/hosts.nix
-    # ../options/passthrough.nix
+    ../rices/hypr/fonts.nix
+
+    ../options/passthrough.nix
   ];
 
   boot.initrd.availableKernelModules = [ "ahci" "xhci_pci" "nvme" "usbhid" "usb_storage" "sd_mod" ];
@@ -11,7 +13,7 @@
   boot.kernelModules = [ "kvm-amd" "amdgpu" ];
   boot.extraModulePackages = [ ];
 
-  # vfio.enable = true;
+  vfio.enable = false;
 
   #specialisation."VFIO".configuration = {
   #  system.nixos.tags = [ "with-vfio" ];
@@ -65,7 +67,7 @@
   networking.hostName = "orchid"; # Define your hostname.
   networking.hostId = "f00dbabe";
 
-  networking.interfaces.enp4s0f0.ipv4.addresses = [ {
+  networking.interfaces.enp13s0.ipv4.addresses = [ {
     address = "10.0.0.10";
     prefixLength = 20;
   } ];
@@ -75,14 +77,15 @@
     # prefixLength = 20;
   # } ];
 
-  networking.defaultGateway = "10.0.0.1";
+  # networking.defaultGateway = "10.0.0.1";
+  networking.defaultGateway = "10.0.0.78";
   networking.nameservers = [ "1.1.1.1" ];
   networking.useDHCP = false;
 
   nixpkgs.hostPlatform = lib.mkDefault "x86_64-linux";
 
   boot.zfs = {
-    enableUnstable = true;
+    package = pkgs.zfs_unstable;
     forceImportAll = false;
   };
 
@@ -178,17 +181,17 @@
     swtpm
     git-crypt
 
-    rocmPackages.rocminfo
-    rocmPackages.rccl
-    rocmPackages.rocm-smi
-    rocmPackages.miopen-hip
-    rocmPackages.hip-common
+    # rocmPackages.rocminfo
+    # rocmPackages.rccl
+    # rocmPackages.rocm-smi
+    # rocmPackages.miopen-hip
+    # rocmPackages.hip-common
 
-    sunshine
+    # sunshine
 
-    lutris
-    wineWowPackages.waylandFull
-    protonup-qt
+    # lutris
+    # wineWowPackages.waylandFull
+    # protonup-qt
   ];
 
   programs.fish.enable = true;
@@ -199,11 +202,11 @@
     enableSSHSupport = true;
   };
 
-  services.vscode-server.enable = true;
   programs.nix-ld.enable = true;
 
   services.tailscale.enable = true;
   services.openssh.enable = true;
+  services.openssh.settings.X11Forwarding = true;
 
   virtualisation.docker = {
     enable = true;
@@ -215,19 +218,22 @@
 
   nix = {
     package = pkgs.nixFlakes;
+    settings.trusted-users = [ "root" "irene" ];
     extraOptions = ''
       experimental-features = nix-command flakes
     '';
   };
 
-  #services.xserver.enable = true;
-  # services.xserver.displayManager.gdm.enable = true;
-  # services.xserver.desktopManager.gnome.enable = true;
+  services.xserver.enable = true;
+
+  services.xserver.displayManager.gdm.enable = true;
+  services.xserver.desktopManager.gnome.enable = true;
   hardware.pulseaudio.enable = false;
+
   # services.xserver.windowManager.windowmaker.enable = true;
 
-  #services.xserver.displayManager.sddm.enable = true;
-  #services.xserver.desktopManager.plasma5.enable = true;
+  # services.displayManager.sddm.wayland.enable = true;
+  # services.xserver.desktopManager.plasma5.enable = true;
 
   security.rtkit.enable = true;
   services.pipewire = {
@@ -261,15 +267,15 @@
     # atomix # puzzle game
   # ]);
 
-  environment.plasma5.excludePackages = with pkgs.libsForQt5; [
-    elisa
-    gwenview
-    okular
-    oxygen
-    khelpcenter
-    plasma-browser-integration
-    print-manager
-  ];
+  # environment.plasma5.excludePackages = with pkgs.libsForQt5; [
+    # elisa
+    # gwenview
+    # okular
+    # oxygen
+    # khelpcenter
+    # plasma-browser-integration
+    # print-manager
+  # ];
 
   # networking.firewall.allowedTCPPorts = [ 8000 24800 ];
   # networking.firewall.allowedUDPPorts = [ ... ];

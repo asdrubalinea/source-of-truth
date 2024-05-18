@@ -17,15 +17,8 @@ let
 in
 {
   imports = [
-    ../desktop/alacritty
     ../desktop/emacs
-
-    ../desktop/hyprland
-    ../desktop/waybar
-
-    # ../desktop/sway
-    # ../desktop/rofi
-    # ../desktop/neovim
+    # ../rices/hypr
 
     ../scripts/system-clean.nix
     ../misc/aliases.nix
@@ -34,10 +27,30 @@ in
   # Let Home Manager install and manage itself.
   programs.home-manager.enable = true;
 
+  programs.vim = {
+    enable = true;
+    plugins = with pkgs.vimPlugins; [ LazyVim ];
+    settings = { ignorecase = true; };
+    extraConfig = ''
+      set mouse=a
+    '';
+  };
+
   programs.fish.enable = true;
   programs.fish.shellInit = ''
     set fish_greeting
   '';
+  home.shellAliases = {
+    gitc = "git commit";
+    gita = "git add";
+    gitp = "git push";
+    gits = "git status";
+    gitl = "git log";
+  };
+
+  # programs.nushell.enable = true;
+  services.vscode-server.enable = true;
+  services.vscode-server.enableFHS = true;
 
   home.packages = with pkgs; [
     # System utils
@@ -69,19 +82,20 @@ in
     ipcalc
     iperf3
 
-    nodejs_21
-    yarn
-
     # Nix
     nixpkgs-fmt
-    rnix-lsp
-    nix-index
+    # rnix-lsp
     gnumake
-    nixfmt
+    nixfmt-classic
+
+    # Project management
+    devenv
+    direnv
 
     fontconfig
     cmake
     pkg-config
+    quickemu
 
     # Rust
     # rust-analyzer
@@ -91,22 +105,21 @@ in
     # Python
     pipenv
 
+    pandoc
+    texliveFull
+
     # Docker
     docker-compose
     mkcert
-
-    meld
 
     # Desktop
     firefox
     keepassxc
     chromium
+    alacritty
 
     trunk.geekbench
-
     prismlauncher
-
-    jetbrains.rust-rover
 
     # Custom
     userApply
@@ -118,5 +131,8 @@ in
     package = pkgs.vscode.fhsWithPackages (ps: with ps; [ rustup zlib openssl.dev pkg-config ]);
   };
 
-  wayland.windowManager.hyprland.enable = true;
+  programs.nix-index = {
+    enable = true;
+    enableFishIntegration = true;
+  };
 }

@@ -56,7 +56,7 @@
         orchid = lib.nixosSystem {
           inherit system pkgs;
 
-          modules = [ vscode-server.nixosModules.default ./hosts/orchid.nix ];
+	  modules = [ ./hosts/orchid.nix ];
         };
 
         arrow = lib.nixosSystem {
@@ -104,6 +104,7 @@
           modules = [
             ./homes/orchid.nix
             hyprland.homeManagerModules.default
+            vscode-server.homeModules.default
 
             {
               home = {

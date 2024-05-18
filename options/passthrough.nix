@@ -13,17 +13,17 @@ in
     in {
       boot = {
         initrd.kernelModules = [
-          "vfio_pci"
-          "vfio"
-          "vfio_iommu_type1"
+          # "vfio_pci"
+          # "vfio"
+          # "vfio_iommu_type1"
           # "kvm-amd"
-          "amdgpu"
+          # "amdgpu"
         ];
 
         kernelParams = [
-          "amd_iommu=on"
-          "iommu=pt"
-          "video=efifb:off"
+          # "amd_iommu=on"
+          # "iommu=pt"
+          # "video=efifb:off"
         ] ++ lib.optional cfg.enable ("vfio-pci.ids=" + lib.concatStringsSep "," ids);
       };
 
@@ -47,6 +47,10 @@ in
           ovmf = {
             enable = true;
             # packages = with pkgs; [ OVMFFull ];
+	    packages = [(pkgs.OVMF.override {
+              secureBoot = true;
+              tpmSupport = true;
+            }).fd];
           };
 
           swtpm.enable = true;
