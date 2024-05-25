@@ -40,21 +40,19 @@ in
   programs.fish.shellInit = ''
     set fish_greeting
   '';
-  home.shellAliases = {
-    gitc = "git commit";
-    gita = "git add";
-    gitp = "git push";
-    gits = "git status";
-    gitl = "git log";
-  };
 
   # programs.nushell.enable = true;
   services.vscode-server.enable = true;
   services.vscode-server.enableFHS = true;
 
+  services.gnome-keyring = {
+    enable = true;
+    components = [ "pkcs11" "secrets" "ssh" ];
+  };
+
   home.packages = with pkgs; [
     # System utils
-    neofetch
+    hyfetch
     pfetch
     htop
     dstat
@@ -81,6 +79,8 @@ in
     fzf
     ipcalc
     iperf3
+    tmux
+    screen
 
     # Nix
     nixpkgs-fmt
@@ -105,21 +105,21 @@ in
     # Python
     pipenv
 
-    pandoc
-    texliveFull
+    # pandoc
+    # texliveFull
 
     # Docker
     docker-compose
-    mkcert
+    # mkcert
 
     # Desktop
-    firefox
-    keepassxc
-    chromium
-    alacritty
+    # firefox
+    # keepassxc
+    # chromium
+    # alacritty
 
-    trunk.geekbench
-    prismlauncher
+    # trunk.geekbench
+    # prismlauncher
 
     # Custom
     userApply

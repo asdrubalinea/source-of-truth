@@ -44,6 +44,16 @@
         overlays = [ multiChannelOverlay ];
       };
 
+      trunkPkgs = import nixpkgs-trunk {
+        inherit system;
+        config = { allowUnfree = true; };
+      };
+
+      stablePkgs = import nixpkgs-stable {
+        inherit system;
+        config = { allowUnfree = true; };
+      };
+
       lib = nixpkgs.lib;
     in {
       nixosConfigurations = {
@@ -56,7 +66,7 @@
         orchid = lib.nixosSystem {
           inherit system pkgs;
 
-	  modules = [ ./hosts/orchid.nix ];
+          modules = [ ./hosts/orchid.nix ];
         };
 
         arrow = lib.nixosSystem {

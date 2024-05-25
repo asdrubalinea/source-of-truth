@@ -10,5 +10,8 @@
     ls = "exa";
     nv = "nvim";
     please = "doas";
+    neofetch = "hyfetch";
+    fetch = "hyfetch";
+    fastfetch = "hyfetch";
   };
 }

@@ -6,6 +6,7 @@
     ../rices/hypr/fonts.nix
 
     ../options/passthrough.nix
+    ../hardware/rocm.nix
   ];
 
   boot.initrd.availableKernelModules = [ "ahci" "xhci_pci" "nvme" "usbhid" "usb_storage" "sd_mod" ];
@@ -13,24 +14,12 @@
   boot.kernelModules = [ "kvm-amd" "amdgpu" ];
   boot.extraModulePackages = [ ];
 
-  vfio.enable = false;
+  vfio.enable = true;
 
   #specialisation."VFIO".configuration = {
   #  system.nixos.tags = [ "with-vfio" ];
   #vfio.enable = true;
   #};
-
-  hardware.opengl.extraPackages = with pkgs; [
-    amdvlk
-    rocm-opencl-icd
-    rocm-opencl-runtime
-  ];
-  hardware.opengl.driSupport = true;
-
-  systemd.tmpfiles.rules = [
-    "L+    /opt/rocm/hip   -    -    -     -    ${pkgs.rocmPackages.clr}"
-    "L+	   /opt/amdgpu	   -    -    -     -    ${pkgs.libdrm}"
-  ];
 
   fileSystems."/" =
     { device = "rpool/local/root";
@@ -72,6 +61,11 @@
     prefixLength = 20;
   } ];
 
+  # Erase your darlings
+  systemd.tmpfiles.rules = [
+    "L /var/lib/tailscale - - - - /persist/var/lib/tailscale"
+  ];
+
   # networking.interfaces.enp14s0.ipv4.addresses = [ {
     # address = "10.0.0.11";
     # prefixLength = 20;
@@ -109,14 +103,11 @@
   hardware.cpu.amd.updateMicrocode = true;
   hardware.enableAllFirmware = true;
 
-  # nixpkgs.config.allowUnfree = true;
-
-  programs.steam = {
-    enable = true;
-    remotePlay.openFirewall = true; # Open ports in the firewall for Steam Remote Play
-    dedicatedServer.openFirewall = true; # Open ports in the firewall for Source Dedicated Server
-  };
-  hardware.opengl.driSupport32Bit = true; # Enables support for 32bit libs that steam uses
+  # programs.steam = {
+    # enable = true;
+    # remotePlay.openFirewall = true; # Open ports in the firewall for Steam Remote Play
+    # dedicatedServer.openFirewall = true; # Open ports in the firewall for Source Dedicated Server
+  # };
 
   boot = {
     loader = {
@@ -132,9 +123,9 @@
   };
 
   # Erase your darlings.
-  # boot.initrd.postDeviceCommands = lib.mkAfter ''
-  #  zfs rollback -r rpool/local/root@blank
-  #'';
+  boot.initrd.postDeviceCommands = lib.mkAfter ''
+    zfs rollback -r rpool/local/root@blank
+  '';
 
   services.zfs.autoSnapshot = {
     enable = true;
@@ -181,12 +172,6 @@
     swtpm
     git-crypt
 
-    # rocmPackages.rocminfo
-    # rocmPackages.rccl
-    # rocmPackages.rocm-smi
-    # rocmPackages.miopen-hip
-    # rocmPackages.hip-common
-
     # sunshine
 
     # lutris
@@ -202,9 +187,12 @@
     enableSSHSupport = true;
   };
 
+  # For VSCode Support
   programs.nix-ld.enable = true;
 
   services.tailscale.enable = true;
+  services.tailscale.useRoutingFeatures = "server";
+
   services.openssh.enable = true;
   services.openssh.settings.X11Forwarding = true;
 
@@ -224,26 +212,39 @@
     '';
   };
 
-  services.xserver.enable = true;
+  # services.xserver.enable = true;
 
-  services.xserver.displayManager.gdm.enable = true;
-  services.xserver.desktopManager.gnome.enable = true;
-  hardware.pulseaudio.enable = false;
+  # services.xserver.displayManager.gdm.enable = true;
+  # services.xserver.desktopManager.gnome.enable = true;
+  # hardware.pulseaudio.enable = false;
 
   # services.xserver.windowManager.windowmaker.enable = true;
 
   # services.displayManager.sddm.wayland.enable = true;
   # services.xserver.desktopManager.plasma5.enable = true;
 
-  security.rtkit.enable = true;
-  services.pipewire = {
-    enable = true;
-    alsa.enable = true;
-    alsa.support32Bit = true;
-    pulse.enable = true;
-    # If you want to use JACK applications, uncomment this
-    jack.enable = true;
-  };
+  # hardware.pulseaudio.enable = false;
+    # services.xserver = {
+    # enable = true;
+    # libinput.enable = true;
+    # displayManager.lightdm.enable = true;
+
+    # desktopManager = {
+      # cinnamon.enable = true;
+    # };
+
+    # displayManager.defaultSession = "cinnamon";
+  # };
+
+  # security.rtkit.enable = true;
+  # services.pipewire = {
+    # enable = true;
+    # alsa.enable = true;
+    # alsa.support32Bit = true;
+    # pulse.enable = true;
+    # # If you want to use JACK applications, uncomment this
+    # jack.enable = true;
+  # };
 
   # services.xrdp.enable = true;
   # services.xrdp.defaultWindowManager = "/run/current-system/sw/bin/gnome-session";
