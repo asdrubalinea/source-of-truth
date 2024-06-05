@@ -21,25 +21,13 @@ in
     # ../rices/hypr
 
     ../scripts/system-clean.nix
-    ../misc/aliases.nix
+    ../misc/fish.nix
   ];
 
   # Let Home Manager install and manage itself.
   programs.home-manager.enable = true;
 
-  programs.vim = {
-    enable = true;
-    plugins = with pkgs.vimPlugins; [ LazyVim ];
-    settings = { ignorecase = true; };
-    extraConfig = ''
-      set mouse=a
-    '';
-  };
-
-  programs.fish.enable = true;
-  programs.fish.shellInit = ''
-    set fish_greeting
-  '';
+  programs.fish = { };
 
   # programs.nushell.enable = true;
   services.vscode-server.enable = true;
@@ -79,8 +67,10 @@ in
     fzf
     ipcalc
     iperf3
+    zellij
     tmux
     screen
+    grc
 
     # Nix
     nixpkgs-fmt
@@ -99,11 +89,10 @@ in
 
     # Rust
     # rust-analyzer
-    clang
-    rustup
+    # clang
 
     # Python
-    pipenv
+    # pipenv
 
     # pandoc
     # texliveFull

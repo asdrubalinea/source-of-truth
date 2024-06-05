@@ -7,6 +7,7 @@
 
     ../options/passthrough.nix
     ../hardware/rocm.nix
+    ../services/syncthing.nix
   ];
 
   boot.initrd.availableKernelModules = [ "ahci" "xhci_pci" "nvme" "usbhid" "usb_storage" "sd_mod" ];
@@ -61,7 +62,7 @@
     prefixLength = 20;
   } ];
 
-  # Erase your darlings
+  # Erase your darlings.
   systemd.tmpfiles.rules = [
     "L /var/lib/tailscale - - - - /persist/var/lib/tailscale"
   ];
