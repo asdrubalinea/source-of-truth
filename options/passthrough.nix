@@ -27,7 +27,7 @@ in
         ] ++ lib.optional cfg.enable ("vfio-pci.ids=" + lib.concatStringsSep "," ids);
       };
 
-      hardware.opengl.enable = true;
+      hardware.graphics.enable = true;
       virtualisation.spiceUSBRedirection.enable = true;
 
       environment.systemPackages = with pkgs; [

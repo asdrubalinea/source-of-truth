@@ -1,11 +1,14 @@
-{ lib, config, pkgs, ... }:
-
-{
+{ pkgs, ... }: {
   programs.fish = {
     enable = true;
 
     interactiveShellInit = ''
       set fish_greeting # Disable greeting
+
+      ${pkgs.blahaj}/bin/blahaj -s
+
+      function fish_right_prompt
+      end
     '';
 
     plugins = [
@@ -24,6 +27,7 @@
       neofetch = "hyfetch";
       fetch = "hyfetch";
       fastfetch = "hyfetch";
+      sudo = "doas";
     };
   };
 }

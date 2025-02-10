@@ -1,18 +1,29 @@
 { config, lib, pkgs, ... }:
 
 {
-  hardware.opengl.extraPackages = with pkgs; [
-    # amdvlk
-    # rocm-opencl-icd
-    # rocm-opencl-runtime
-  ];
-  hardware.opengl.driSupport = true;
-  hardware.opengl.driSupport32Bit = true; # originally for Steam, could be removed from here
+  # hardware = {
+  #   graphics = {
+  #     enable = true;
+  #     enable32Bit = true;
+  #   };
+  # };
 
-  systemd.tmpfiles.rules = [
-    "L+    /opt/rocm/hip   -    -    -     -    ${pkgs.rocmPackages.clr}"
-    "L+	   /opt/amdgpu	   -    -    -     -    ${pkgs.libdrm}"
-  ];
+  # hardware.opengl.extraPackages = with pkgs; [
+  #   # amdvlk
+  #   # rocm-opencl-icd
+  #   # rocm-opencl-runtime
+  #   #
+  #   #    rocm-opencl-icd
+  #       rocm-runtime
+  #       rocminfo
+  #       rocm-smi
+  #       rocm-device-libs
+  # ];
+
+  # systemd.tmpfiles.rules = [
+  #   "L+    /opt/rocm/hip   -    -    -     -    ${pkgs.rocmPackages.clr}"
+  #   "L+	   /opt/amdgpu	   -    -    -     -    ${pkgs.libdrm}"
+  # ];
 
   environment.systemPackages = with pkgs.rocmPackages; [
     rocminfo

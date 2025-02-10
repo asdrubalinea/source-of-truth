@@ -1,19 +1,23 @@
-{ config, pkgs, lib, modulesPath, ... }:
-
 {
-  imports = [ (modulesPath + "/profiles/qemu-guest.nix") ];
+  config,
+  pkgs,
+  lib,
+  modulesPath,
+  ...
+}: {
+  imports = [(modulesPath + "/profiles/qemu-guest.nix")];
 
-  boot.initrd.availableKernelModules = [ "ata_piix" "uhci_hcd" "virtio_pci" "sr_mod" "virtio_blk" ];
-  boot.initrd.kernelModules = [ ];
-  boot.kernelModules = [ ];
-  boot.extraModulePackages = [ ];
+  boot.initrd.availableKernelModules = ["ata_piix" "uhci_hcd" "virtio_pci" "sr_mod" "virtio_blk"];
+  boot.initrd.kernelModules = [];
+  boot.kernelModules = [];
+  boot.extraModulePackages = [];
 
-  fileSystems."/" =
-    { device = "/dev/disk/by-uuid/8efe09d8-214c-4ca7-b635-768ce18b752f";
-      fsType = "ext4";
-    };
+  fileSystems."/" = {
+    device = "/dev/disk/by-uuid/8efe09d8-214c-4ca7-b635-768ce18b752f";
+    fsType = "ext4";
+  };
 
-  swapDevices = [ ];
+  swapDevices = [];
 
   # Enables DHCP on each ethernet and wireless interface. In case of scripted networking
   # (the default) this is the recommended approach. When using systemd-networkd it's
@@ -34,13 +38,15 @@
 
   # Networking
   networking = {
-    interfaces.ens18.ipv4.addresses = [{
-      address = "10.0.0.99";
-      prefixLength = 20;
-    }];
-    
+    interfaces.ens18.ipv4.addresses = [
+      {
+        address = "10.0.0.99";
+        prefixLength = 20;
+      }
+    ];
+
     defaultGateway = "10.0.0.1";
-    nameservers = [ "1.1.1.1" "1.0.0.1" ];
+    nameservers = ["1.1.1.1" "1.0.0.1"];
   };
 
   # Set your time zone.
@@ -65,7 +71,7 @@
   users.users.giovanni = {
     isNormalUser = true;
     description = "Giovanni";
-    extraGroups = [ "networkmanager" "wheel" "docker" ];
+    extraGroups = ["networkmanager" "wheel" "docker"];
     packages = with pkgs; [];
   };
 
@@ -75,7 +81,9 @@
   nixpkgs.config.allowUnfree = true;
 
   environment.systemPackages = with pkgs; [
-    neovim git docker-compose
+    neovim
+    git
+    docker-compose
   ];
 
   # Some programs need SUID wrappers, can be configured further or are
@@ -87,7 +95,7 @@
   };
 
   nix = {
-    package = pkgs.nixFlakes;
+    package = pkgs.nixVersions.stable;
     extraOptions = ''
       experimental-features = nix-command flakes
     '';
@@ -100,7 +108,7 @@
   services.qemuGuest.enable = true;
 
   # Open ports in the firewall.
-  networking.firewall.allowedTCPPorts = [ 80 443 22 ];
+  networking.firewall.allowedTCPPorts = [80 443 22];
   # networking.firewall.allowedUDPPorts = [ ... ];
   # Or disable the firewall altogether.
   # networking.firewall.enable = false;
@@ -112,5 +120,4 @@
   # Before changing this value read the documentation for this option
   # (e.g. man configuration.nix or on https://nixos.org/nixos/options.html).
   system.stateVersion = "22.11"; # Did you read the comment?
-
 }

@@ -1,6 +1,9 @@
-{ config, pkgs, lib, ... }:
-
 {
+  config,
+  pkgs,
+  lib,
+  ...
+}: {
   imports = [
     #../hardware/radeon.nix
     #../hardware/nvidia-prime.nix
@@ -14,46 +17,45 @@
   ];
 
   # Hardware
-  boot.initrd.availableKernelModules =
-    [ "xhci_pci" "nvme" "ahci" "uas" "usb_storage" "usbhid" "sd_mod" ];
-  boot.initrd.kernelModules = [ ];
-  boot.kernelModules = [ "kvm-amd" ];
-  boot.extraModulePackages = [ ];
+  boot.initrd.availableKernelModules = ["xhci_pci" "nvme" "ahci" "uas" "usb_storage" "usbhid" "sd_mod"];
+  boot.initrd.kernelModules = [];
+  boot.kernelModules = ["kvm-amd"];
+  boot.extraModulePackages = [];
   boot.zfs = {
     enableUnstable = true;
     forceImportAll = false;
   };
-  boot.kernelParams = [ "zfs.zfs_arc_max=1073741824" "nohibernate" ]; # 1 GiB
+  boot.kernelParams = ["zfs.zfs_arc_max=1073741824" "nohibernate"]; # 1 GiB
 
-  boot.supportedFilesystems = [ "zfs" ];
+  boot.supportedFilesystems = ["zfs"];
 
   # Enable nested virtualization
   boot.extraModprobeConfig = "options kvm_amd nested=1";
-  
-  fileSystems."/" =
-    { device = "portable0/local/root";
-      fsType = "zfs";
-    };
 
-  fileSystems."/boot" =
-    { device = "/dev/disk/by-uuid/BBDD-3EF6";
-      fsType = "vfat";
-    };
+  fileSystems."/" = {
+    device = "portable0/local/root";
+    fsType = "zfs";
+  };
 
-  fileSystems."/nix" =
-    { device = "portable0/local/nix";
-      fsType = "zfs";
-    };
+  fileSystems."/boot" = {
+    device = "/dev/disk/by-uuid/BBDD-3EF6";
+    fsType = "vfat";
+  };
 
-  fileSystems."/home" =
-    { device = "portable0/safe/home";
-      fsType = "zfs";
-    };
+  fileSystems."/nix" = {
+    device = "portable0/local/nix";
+    fsType = "zfs";
+  };
 
-  fileSystems."/persist" =
-    { device = "portable0/safe/persist";
-      fsType = "zfs";
-    };
+  fileSystems."/home" = {
+    device = "portable0/safe/home";
+    fsType = "zfs";
+  };
+
+  fileSystems."/persist" = {
+    device = "portable0/safe/persist";
+    fsType = "zfs";
+  };
 
   services.zfs.autoScrub = {
     enable = true;
@@ -124,20 +126,20 @@
 
     users.giovanni = {
       isNormalUser = true;
-      extraGroups = [ "wheel" "libvirtd" ];
+      extraGroups = ["wheel" "libvirtd"];
       hashedPassword = (import ../passwords).password;
     };
   };
 
   security.sudo.wheelNeedsPassword = false;
 
-  environment.systemPackages = with pkgs; [ git sudo polkit_gnome zfs ];
+  environment.systemPackages = with pkgs; [git sudo polkit_gnome zfs];
 
   virtualisation.docker.enable = true;
   virtualisation.libvirtd.enable = true;
 
   nix = {
-    package = pkgs.nixFlakes;
+    package = pkgs.nixVersions.stable;
     extraOptions = ''
       experimental-features = nix-command flakes
     '';

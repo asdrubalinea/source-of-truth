@@ -35,7 +35,7 @@ in
       up = "k";
       right = "l";
 
-      output = { "*" = { bg = "${wallpaper} fill"; }; };
+      # output = { "*" = { bg = "${wallpaper} fill"; }; };
 
       colors = {
         focused = rec {
@@ -224,7 +224,7 @@ in
     recursive = true;
   };
 
-  xdg.configFile."wallpaper".source = ./wallpaper;
+  # xdg.configFile."wallpaper".source = ./wallpaper;
 
   home.packages = with pkgs; [
     swayidle

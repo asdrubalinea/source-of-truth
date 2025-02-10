@@ -1,10 +1,12 @@
-{ config, pkgs, lib, modulesPath, ... }:
-
-let
-  limbo = pkgs.callPackage ../packages/secrets/limbo.nix { };
-
-in
 {
+  config,
+  pkgs,
+  lib,
+  modulesPath,
+  ...
+}: let
+  limbo = pkgs.callPackage ../packages/secrets/limbo.nix {};
+in {
   imports = [
     (modulesPath + "/profiles/qemu-guest.nix")
     ../services/ssh-secure.nix
@@ -28,18 +30,17 @@ in
   networking.interfaces.ens3.useDHCP = true;
   networking.interfaces.ens10.useDHCP = true;
 
-  boot.initrd.availableKernelModules =
-    [ "ata_piix" "virtio_pci" "virtio_scsi" "xhci_pci" "sd_mod" "sr_mod" ];
-  boot.initrd.kernelModules = [ ];
-  boot.kernelModules = [ ];
-  boot.extraModulePackages = [ ];
+  boot.initrd.availableKernelModules = ["ata_piix" "virtio_pci" "virtio_scsi" "xhci_pci" "sd_mod" "sr_mod"];
+  boot.initrd.kernelModules = [];
+  boot.kernelModules = [];
+  boot.extraModulePackages = [];
 
   fileSystems."/" = {
     device = "/dev/disk/by-uuid/6cd1d21a-1d6b-405a-b6ec-f5e204649ea7";
     fsType = "btrfs";
   };
 
-  swapDevices = [ ];
+  swapDevices = [];
 
   hardware.cpu.intel.updateMicrocode =
     lib.mkDefault config.hardware.enableRedistributableFirmware;
@@ -48,7 +49,7 @@ in
   console = {
     earlySetup = true;
     font = "${pkgs.terminus_font}/share/consolefonts/ter-132n.psf.gz";
-    packages = with pkgs; [ terminus_font ];
+    packages = with pkgs; [terminus_font];
     keyMap = "it";
   };
 
@@ -58,14 +59,14 @@ in
 
     users.giovanni = {
       isNormalUser = true;
-      extraGroups = [ "wheel" ];
+      extraGroups = ["wheel"];
       hashedPassword = (import ../passwords).password;
     };
   };
 
   security.sudo.wheelNeedsPassword = true;
 
-  environment.systemPackages = with pkgs; [ git ];
+  environment.systemPackages = with pkgs; [git];
 
   programs.neovim.enable = true;
   programs.neovim.viAlias = true;
@@ -79,26 +80,25 @@ in
   };
 
   nix = {
-    # package = pkgs.nixFlakes;
+    # package = pkgs.nixVersions.stable;
     extraOptions = ''
       experimental-features = nix-command flakes
     '';
   };
 
-  users.users."giovanni".openssh.authorizedKeys.keys =
-    [
-      (import ../ssh-keys/swan.nix).key
-      (import ../ssh-keys/the-hydra.nix).key
-      (import ../ssh-keys/router.nix).key
-    ];
-  
-  networking.firewall.allowedTCPPorts = [ 80 443 ];
+  users.users."giovanni".openssh.authorizedKeys.keys = [
+    (import ../ssh-keys/swan.nix).key
+    (import ../ssh-keys/the-hydra.nix).key
+    (import ../ssh-keys/router.nix).key
+  ];
+
+  networking.firewall.allowedTCPPorts = [80 443];
   # networking.firewall.allowedUDPPorts = [ ... ];
 
   programs.mosh.enable = true;
 
   nix.sshServe.enable = true;
-  nix.sshServe.keys = [ (import ../ssh-keys/router.nix).key ];
+  nix.sshServe.keys = [(import ../ssh-keys/router.nix).key];
 
   #services.nextcloud = {
   #  enable = true;

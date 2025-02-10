@@ -1,6 +1,9 @@
-{ config, pkgs, lib, ... }:
-
 {
+  config,
+  pkgs,
+  lib,
+  ...
+}: {
   imports = [
     ../hardware/radeon.nix
     # ../hardware/nvidia-prime.nix
@@ -16,9 +19,8 @@
   ];
 
   # Hardware
-  boot.initrd.availableKernelModules =
-    [ "xhci_pci" "nvme" "ahci" "uas" "usb_storage" "usbhid" "sd_mod" ];
-  boot.initrd.kernelModules = [ ];
+  boot.initrd.availableKernelModules = ["xhci_pci" "nvme" "ahci" "uas" "usb_storage" "usbhid" "sd_mod"];
+  boot.initrd.kernelModules = [];
   boot.kernelModules = [
     "kvm-amd"
     # Virtual Camera
@@ -28,8 +30,7 @@
   ];
 
   # Make some extra kernel modules available to NixOS
-  boot.extraModulePackages = with config.boot.kernelPackages;
-    [ v4l2loopback.out ];
+  boot.extraModulePackages = with config.boot.kernelPackages; [v4l2loopback.out];
 
   boot.zfs = {
     enableUnstable = true;
@@ -40,7 +41,7 @@
     "nohibernate"
   ];
 
-  boot.supportedFilesystems = [ "zfs" ];
+  boot.supportedFilesystems = ["zfs"];
 
   # Enable nested virtualization
   boot.extraModprobeConfig = ''
@@ -83,8 +84,7 @@
     fsType = "zfs";
   };
 
-  swapDevices =
-    [{ device = "/dev/disk/by-uuid/cda0c9ea-4923-40dd-87b1-f17e712df3f7"; }];
+  swapDevices = [{device = "/dev/disk/by-uuid/cda0c9ea-4923-40dd-87b1-f17e712df3f7";}];
 
   services.zfs.autoScrub = {
     enable = true;
@@ -152,7 +152,7 @@
   console = {
     earlySetup = true;
     font = "${pkgs.terminus_font}/share/consolefonts/ter-132n.psf.gz";
-    packages = with pkgs; [ terminus_font ];
+    packages = with pkgs; [terminus_font];
     keyMap = "it";
   };
 
@@ -162,7 +162,7 @@
 
     users.giovanni = {
       isNormalUser = true;
-      extraGroups = [ "wheel" "libvirtd" "docker" "jackaudio" ];
+      extraGroups = ["wheel" "libvirtd" "docker" "jackaudio"];
       hashedPassword = (import ../passwords).password;
       shell = pkgs.fish;
     };
@@ -171,11 +171,13 @@
   security.sudo.enable = true;
   security.doas.enable = true;
 
-  security.doas.extraRules = [{
-    users = [ "giovanni" ];
-    keepEnv = true;
-    noPass = true;
-  }];
+  security.doas.extraRules = [
+    {
+      users = ["giovanni"];
+      keepEnv = true;
+      noPass = true;
+    }
+  ];
 
   environment.systemPackages = with pkgs; [
     polkit_gnome
@@ -204,19 +206,19 @@
     qemu = {
       swtpm.enable = true;
       ovmf.enable = true;
-      ovmf.packages = [ pkgs.OVMFFull ];
+      ovmf.packages = [pkgs.OVMFFull];
     };
   };
 
-  environment.sessionVariables.VAGRANT_DEFAULT_PROVIDER = [ "libvirt" ];
-  environment.sessionVariables.LIBVIRT_DEFAULT_URI = [ "qemu:///system" ];
+  environment.sessionVariables.VAGRANT_DEFAULT_PROVIDER = ["libvirt"];
+  environment.sessionVariables.LIBVIRT_DEFAULT_URI = ["qemu:///system"];
 
   #services.tlp.enable = true;
 
   services.sdrplayApi.enable = true;
 
   nix = {
-    package = pkgs.nixFlakes;
+    package = pkgs.nixVersions.stable;
     extraOptions = ''
       experimental-features = nix-command flakes
     '';
@@ -238,7 +240,7 @@
   xdg.portal = {
     enable = true;
     wlr.enable = true;
-    extraPortals = [ pkgs.xdg-desktop-portal-gnome ];
+    extraPortals = [pkgs.xdg-desktop-portal-gnome];
     gtkUsePortal = true;
   };
 
@@ -254,12 +256,11 @@
     };
   };
 
-  users.users."giovanni".openssh.authorizedKeys.keys =
-    [ (import ../ssh-keys/looking-glass.nix).key ];
+  users.users."giovanni".openssh.authorizedKeys.keys = [(import ../ssh-keys/looking-glass.nix).key];
 
   programs.steam.enable = true;
 
-  networking.firewall.allowedTCPPorts = [ 8000 24800 ];
+  networking.firewall.allowedTCPPorts = [8000 24800];
   # networking.firewall.allowedUDPPorts = [ ... ];
 
   system.stateVersion = "22.05";

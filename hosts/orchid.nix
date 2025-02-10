@@ -1,80 +1,99 @@
-{ config, lib, pkgs, ... }:
-
 {
+  config,
+  lib,
+  pkgs,
+  ...
+}: {
   imports = [
     ../network/hosts.nix
     ../rices/hypr/fonts.nix
 
-    ../options/passthrough.nix
+    # ../options/passthrough.nix
     ../hardware/rocm.nix
-    ../services/syncthing.nix
+    # ../services/syncthing.nix
   ];
 
-  boot.initrd.availableKernelModules = [ "ahci" "xhci_pci" "nvme" "usbhid" "usb_storage" "sd_mod" ];
-  boot.initrd.kernelModules = [ ];
-  boot.kernelModules = [ "kvm-amd" "amdgpu" ];
-  boot.extraModulePackages = [ ];
+  boot.initrd.availableKernelModules = ["ahci" "xhci_pci" "nvme" "usbhid" "usb_storage" "sd_mod"];
+  boot.initrd.kernelModules = [];
+  boot.kernelModules = ["kvm-amd" "amdgpu"];
+  boot.extraModulePackages = [];
 
-  vfio.enable = true;
+  # vfio.enable = false;
 
   #specialisation."VFIO".configuration = {
   #  system.nixos.tags = [ "with-vfio" ];
   #vfio.enable = true;
   #};
 
-  fileSystems."/" =
-    { device = "rpool/local/root";
-      fsType = "zfs";
-    };
+  # services.sdrplayApi.enable = true;
 
-  fileSystems."/boot" =
-    { device = "/dev/disk/by-uuid/0694-89A6";
-      fsType = "vfat";
-    };
+  nix.gc = {
+		automatic = true;
+		dates = "weekly";
+		options = "--delete-older-than 30d";
+	};
 
-  fileSystems."/nix" =
-    { device = "rpool/local/nix";
-      fsType = "zfs";
-    };
-
-  fileSystems."/home" =
-    { device = "rpool/safe/home";
-      fsType = "zfs";
-    };
-
-  fileSystems."/persist" =
-    { device = "rpool/safe/persist";
-      fsType = "zfs";
-    };
-
-  fileSystems."/mnt/docker" = {
-    device = "rpool/local/docker";
+  fileSystems."/" = {
+    device = "zroot/local/root";
     fsType = "zfs";
   };
 
-  swapDevices = [ ];
+  fileSystems."/boot" = {
+    device = "/dev/disk/by-uuid/726C-CCD8";
+    fsType = "vfat";
+  };
+
+  fileSystems."/nix" = {
+    device = "zroot/local/nix";
+    fsType = "zfs";
+  };
+
+  fileSystems."/home" = {
+    device = "zroot/safe/home";
+    fsType = "zfs";
+  };
+
+  fileSystems."/persist" = {
+    device = "zroot/safe/persist";
+    fsType = "zfs";
+  };
+
+  fileSystems."/mnt/docker" = {
+    device = "zroot/local/docker";
+    fsType = "zfs";
+  };
+
+  fileSystems."/data" = {
+    device = "rpool/data";
+    fsType = "zfs";
+  };
+
+  swapDevices = [];
 
   networking.hostName = "orchid"; # Define your hostname.
   networking.hostId = "f00dbabe";
 
-  networking.interfaces.enp13s0.ipv4.addresses = [ {
-    address = "10.0.0.10";
-    prefixLength = 20;
-  } ];
-
-  # Erase your darlings.
-  systemd.tmpfiles.rules = [
-    "L /var/lib/tailscale - - - - /persist/var/lib/tailscale"
+  # Upstream internet
+  networking.interfaces.enp4s0f0.ipv4.addresses = [
+    {
+      address = "10.0.0.10";
+      prefixLength = 20;
+    }
   ];
 
+  # Erase your darlings.
+  # systemd.tmpfiles.rules = [
+  # "L /var/lib/tailscale - - - - /persist/var/lib/tailscale"
+  # ];
+
   # networking.interfaces.enp14s0.ipv4.addresses = [ {
-    # address = "10.0.0.11";
-    # prefixLength = 20;
+  # address = "10.0.0.11";
+  # prefixLength = 20;
   # } ];
 
   # networking.defaultGateway = "10.0.0.1";
-  networking.defaultGateway = "10.0.0.78";
-  networking.nameservers = [ "1.1.1.1" ];
+  networking.defaultGateway = "10.0.0.1";
+  networking.nameservers = ["1.1.1.1" "1.0.0.1"];
   networking.useDHCP = false;
 
   nixpkgs.hostPlatform = lib.mkDefault "x86_64-linux";
@@ -85,11 +104,11 @@
   };
 
   boot.kernelParams = [
-    "zfs.zfs_arc_max=1073741824" # 1 GiB
+    "zfs.zfs_arc_max=12884901888" # 12 GiB
     "nohibernate"
   ];
 
-  boot.supportedFilesystems = [ "zfs" ];
+  boot.supportedFilesystems = ["zfs"];
 
   # Enable nested virtualization
   boot.extraModprobeConfig = ''
@@ -101,14 +120,16 @@
     interval = "Sun, 01:00";
   };
 
+  services.zfs.autoSnapshot.enable = true;
+
   hardware.cpu.amd.updateMicrocode = true;
   hardware.enableAllFirmware = true;
 
-  # programs.steam = {
-    # enable = true;
+  programs.steam = {
+    enable = false;
     # remotePlay.openFirewall = true; # Open ports in the firewall for Steam Remote Play
     # dedicatedServer.openFirewall = true; # Open ports in the firewall for Source Dedicated Server
-  # };
+  };
 
   boot = {
     loader = {
@@ -116,22 +137,38 @@
       grub = {
         copyKernels = true; # For better ZFS compatibility
         enableCryptodisk = true;
+        configurationLimit = 16;
       };
     };
 
     loader.efi.canTouchEfiVariables = true;
-    kernelPackages = config.boot.zfs.package.latestCompatibleLinuxPackages;
+    # kernelPackages = pkgs.linuxPackages_6_11;
   };
 
   # Erase your darlings.
-  boot.initrd.postDeviceCommands = lib.mkAfter ''
-    zfs rollback -r rpool/local/root@blank
-  '';
+  # boot.initrd.postDeviceCommands = lib.mkAfter ''
+  # zfs rollback -r zroot/local/root@blank
+  # '';
 
-  services.zfs.autoSnapshot = {
+  # Enable SMART daemon
+  services.smartd = {
     enable = true;
-    frequent = 10; # keep the latest ten 15-minute snapshots
-    monthly = 4; # keep only four monthly snapshot
+    notifications = {
+      # Enable mail notifications
+      mail = {
+        enable = true;
+        sender = "smartd@localhost";
+        recipient = "smart@asdrubalini.xyz";
+      };
+      # Optionally enable wall notifications
+      wall.enable = true;
+    };
+    defaults.monitored = "-a -o on -S on -T permissive";
+    devices = [
+      { device = "/dev/nvme0n1"; }
+      { device = "/dev/nvme1n1"; }
+      { device = "/dev/nvme2n1"; }
+    ];
   };
 
   time.timeZone = "Europe/Rome";
@@ -141,7 +178,7 @@
   console = {
     earlySetup = true;
     font = "${pkgs.terminus_font}/share/consolefonts/ter-132n.psf.gz";
-    packages = with pkgs; [ terminus_font ];
+    packages = with pkgs; [terminus_font];
     keyMap = "us";
   };
 
@@ -151,7 +188,7 @@
 
     users.irene = {
       isNormalUser = true;
-      extraGroups = [ "wheel" "libvirtd" "docker" "jackaudio" "render" "video" ];
+      extraGroups = ["wheel" "libvirtd" "docker" "jackaudio" "render" "video"];
       hashedPassword = (import ../passwords).password;
       shell = pkgs.fish;
     };
@@ -160,18 +197,27 @@
   security.sudo.enable = true;
   security.doas.enable = true;
 
-  security.doas.extraRules = [{
-    users = [ "irene" ];
-    keepEnv = true;
-    noPass = true;
-  }];
+  security.doas.extraRules = [
+    {
+      users = ["irene"];
+      keepEnv = true;
+      noPass = true;
+    }
+  ];
+
+  services.postfix = {
+    enable = true;
+    setSendmail = true;
+  };
 
   environment.systemPackages = with pkgs; [
     zfs
     neovim
     git
     swtpm
+    tpm2-tools
     git-crypt
+    mailutils
 
     # sunshine
 
@@ -194,92 +240,57 @@
   services.tailscale.enable = true;
   services.tailscale.useRoutingFeatures = "server";
 
+  services.ollama = {
+    enable = false;
+    host = "0.0.0.0";
+    acceleration = "rocm";
+    rocmOverrideGfx = "10.3.1";
+    openFirewall = true;
+  };
+
   services.openssh.enable = true;
-  services.openssh.settings.X11Forwarding = true;
+  # services.openssh.settings.X11Forwarding = true;
+
+  services.github-runners = {
+    leksi = {
+      enable = true;
+      name = "leksi";
+      tokenFile = "/persist/secrets/github-runners/leksi";
+      url = "https://github.com/asdrubalini/leksi";
+    };
+  };
 
   virtualisation.docker = {
     enable = true;
     extraOptions = "--data-root=/mnt/docker";
   };
 
-  users.users."irene".openssh.authorizedKeys.keys =
-    [ (import ../ssh-keys/looking-glass.nix).key ];
+  users.users."irene".openssh.authorizedKeys.keys = [(import ../ssh-keys/looking-glass.nix).key];
+
+  # security.polkit.enable = true;
 
   nix = {
-    package = pkgs.nixFlakes;
-    settings.trusted-users = [ "root" "irene" ];
+    package = pkgs.nixVersions.stable;
+    settings.trusted-users = ["root" "irene"];
     extraOptions = ''
       experimental-features = nix-command flakes
     '';
   };
 
-  # services.xserver.enable = true;
-
-  # services.xserver.displayManager.gdm.enable = true;
-  # services.xserver.desktopManager.gnome.enable = true;
-  # hardware.pulseaudio.enable = false;
-
-  # services.xserver.windowManager.windowmaker.enable = true;
-
-  # services.displayManager.sddm.wayland.enable = true;
-  # services.xserver.desktopManager.plasma5.enable = true;
-
-  # hardware.pulseaudio.enable = false;
-    # services.xserver = {
-    # enable = true;
-    # libinput.enable = true;
-    # displayManager.lightdm.enable = true;
-
-    # desktopManager = {
-      # cinnamon.enable = true;
-    # };
-
-    # displayManager.defaultSession = "cinnamon";
-  # };
+  #services.xserver.enable = true;
+  #services.xserver.displayManager.gdm.enable = true;
+  #services.xserver.desktopManager.gnome.enable = true;
 
   # security.rtkit.enable = true;
-  # services.pipewire = {
-    # enable = true;
-    # alsa.enable = true;
-    # alsa.support32Bit = true;
-    # pulse.enable = true;
-    # # If you want to use JACK applications, uncomment this
-    # jack.enable = true;
-  # };
+  services.pipewire = {
+    enable = true;
+    alsa.enable = true;
+    alsa.support32Bit = true;
+    pulse.enable = true;
+    jack.enable = true;
+  };
 
-  # services.xrdp.enable = true;
-  # services.xrdp.defaultWindowManager = "/run/current-system/sw/bin/gnome-session";
-  # services.xrdp.openFirewall = true;
-
-  # environment.gnome.excludePackages = (with pkgs; [
-    # gnome-photos
-    # gnome-tour
-  # ]) ++ (with pkgs.gnome; [
-    # cheese # webcam tool
-    # gnome-music
-    # gedit # text editor
-    # epiphany # web browser
-    # geary # email reader
-    # evince # document viewer
-    # # gnome-characters
-    # totem # video player
-    # tali # poker game
-    # iagno # go game
-    # hitori # sudoku game
-    # atomix # puzzle game
-  # ]);
-
-  # environment.plasma5.excludePackages = with pkgs.libsForQt5; [
-    # elisa
-    # gwenview
-    # okular
-    # oxygen
-    # khelpcenter
-    # plasma-browser-integration
-    # print-manager
-  # ];
-
-  # networking.firewall.allowedTCPPorts = [ 8000 24800 ];
+  networking.firewall.allowedTCPPorts = [25565 7777 ];
   # networking.firewall.allowedUDPPorts = [ ... ];
 
   system.stateVersion = "23.05";
