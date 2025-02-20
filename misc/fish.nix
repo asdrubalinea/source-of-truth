@@ -28,6 +28,7 @@
       fetch = "hyfetch";
       fastfetch = "hyfetch";
       sudo = "doas";
+      arc = "cat /proc/spl/kstat/zfs/arcstats | grep '^size ' | awk '{ print $3 }' | awk '{ print $1 / (1024 * 1024 * 1024) \" GB\" }'";
     };
   };
 }

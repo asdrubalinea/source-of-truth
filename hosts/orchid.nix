@@ -1,4 +1,5 @@
 {
+  inputs,
   config,
   lib,
   pkgs,
@@ -104,7 +105,7 @@
   };
 
   boot.kernelParams = [
-    "zfs.zfs_arc_max=12884901888" # 12 GiB
+    "zfs.zfs_arc_max=51539607552" # 48 GiB
     "nohibernate"
   ];
 
@@ -272,14 +273,19 @@
   nix = {
     package = pkgs.nixVersions.stable;
     settings.trusted-users = ["root" "irene"];
+    settings = {
+      substituters = ["https://hyprland.cachix.org"];
+      trusted-public-keys = ["hyprland.cachix.org-1:a7pgxzMz7+chwVL3/pzj6jIBMioiJM7ypFP8PwtkuGc="];
+    };
     extraOptions = ''
       experimental-features = nix-command flakes
     '';
   };
 
-  #services.xserver.enable = true;
-  #services.xserver.displayManager.gdm.enable = true;
-  #services.xserver.desktopManager.gnome.enable = true;
+  programs.hyprland = {
+    enable = true;
+    package = inputs.hyprland.packages.${pkgs.system}.hyprland;
+  };
 
   # security.rtkit.enable = true;
   services.pipewire = {

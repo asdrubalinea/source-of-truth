@@ -1,5 +1,5 @@
 {
-  description = "NixOS configurations for Asdrubalini";
+  description = "NixOS configurations for asdrubalinea 🏳️‍⚧️";
 
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
@@ -17,7 +17,7 @@
     vscode-server.url = "github:nix-community/nixos-vscode-server";
   };
 
-  outputs = {
+  outputs = inputs @ {
     nixpkgs,
     nixpkgs-stable,
     nixpkgs-trunk,
@@ -28,17 +28,18 @@
     ...
   }: let
     system = "x86_64-linux";
-    username = "giovanni";
 
     multiChannelOverlay = final: prev: {
       stable = import nixpkgs-stable {
         system = final.system;
         config = final.config;
       };
+
       trunk = import nixpkgs-trunk {
         system = final.system;
         config = final.config;
       };
+
       custom = import nixpkgs-custom {
         system = final.system;
         config = final.config;
@@ -47,82 +48,33 @@
 
     pkgs = import nixpkgs {
       inherit system;
+
       config = {
         allowUnfree = true;
         rocmSupport = true;
       };
-      overlays = [multiChannelOverlay];
-    };
 
-    trunkPkgs = import nixpkgs-trunk {
-      inherit system;
-      config = {allowUnfree = true;};
-    };
-
-    stablePkgs = import nixpkgs-stable {
-      inherit system;
-      config = {allowUnfree = true;};
+      overlays = [ multiChannelOverlay ];
     };
 
     lib = nixpkgs.lib;
   in {
     nixosConfigurations = {
-      swan = lib.nixosSystem {
+      "orchid" = lib.nixosSystem {
         inherit system pkgs;
 
-        modules = [./hosts/swan.nix];
-      };
-
-      orchid = lib.nixosSystem {
-        inherit system pkgs;
+        specialArgs = { inherit inputs; }; # this is the important part (for hyprland)
 
         modules = [
           ./hosts/orchid.nix
         ];
       };
-
-      arrow = lib.nixosSystem {
-        inherit system pkgs;
-
-        modules = [./hosts/arrow.nix];
-      };
-
-      router = lib.nixosSystem {
-        inherit system pkgs;
-
-        modules = [./hosts/router.nix];
-      };
-
-      test = lib.nixosSystem {
-        inherit system pkgs;
-
-        modules = [./containers/test.nix];
-      };
-
-      docker = lib.nixosSystem {
-        inherit system pkgs;
-
-        modules = [./hosts/docker.nix];
-      };
     };
 
     homeConfigurations = {
-      giovanni-swan = home-manager.lib.homeManagerConfiguration {
+      "irene@orchid" = home-manager.lib.homeManagerConfiguration {
         inherit pkgs;
-        modules = [
-          ./homes/swan.nix
-          {
-            home = {
-              username = "giovanni";
-              homeDirectory = "/home/${username}";
-              stateVersion = "22.05";
-            };
-          }
-        ];
-      };
 
-      irene-orchid = home-manager.lib.homeManagerConfiguration {
-        inherit pkgs;
         modules = [
           ./homes/orchid.nix
           hyprland.homeManagerModules.default
@@ -133,48 +85,6 @@
               username = "irene";
               homeDirectory = "/home/irene";
               stateVersion = "23.05";
-            };
-          }
-        ];
-      };
-
-      giovanni-arrow = home-manager.lib.homeManagerConfiguration {
-        inherit pkgs;
-        modules = [
-          ./homes/arrow.nix
-          {
-            home = {
-              username = "giovanni";
-              homeDirectory = "/home/${username}";
-              stateVersion = "22.05";
-            };
-          }
-        ];
-      };
-
-      giovanni-router = home-manager.lib.homeManagerConfiguration {
-        inherit pkgs;
-        modules = [
-          ./homes/router.nix
-          {
-            home = {
-              username = "giovanni";
-              homeDirectory = "/home/${username}";
-              stateVersion = "22.05";
-            };
-          }
-        ];
-      };
-
-      giovanni-docker = home-manager.lib.homeManagerConfiguration {
-        inherit pkgs;
-        modules = [
-          ./homes/docker.nix
-          {
-            home = {
-              username = "giovanni";
-              homeDirectory = "/home/${username}";
-              stateVersion = "22.05";
             };
           }
         ];
