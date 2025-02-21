@@ -1,6 +1,5 @@
 {
   inputs,
-  config,
   lib,
   pkgs,
   ...
@@ -218,13 +217,6 @@
     swtpm
     tpm2-tools
     git-crypt
-    mailutils
-
-    # sunshine
-
-    # lutris
-    # wineWowPackages.waylandFull
-    # protonup-qt
   ];
 
   programs.fish.enable = true;
@@ -295,6 +287,31 @@
     pulse.enable = true;
     jack.enable = true;
   };
+
+  hardware.bluetooth = {
+    enable = true;
+    powerOnBoot = true;
+  };
+
+  services.blueman.enable = true;
+
+  # services.keyd = {
+  #   enable = true;
+  #   keyboards = {
+  #     # The name is just the name of the configuration file, it does not really matter
+  #     default = {
+  #       ids = [ "*" ]; # what goes into the [id] section, here we select all keyboards
+
+  #       settings = {
+  #         # The main layer, if you choose to declare it in Nix
+  #         main = {
+  #           leftcontrol = "leftmeta";
+  #           leftmeta = "leftcontrol";
+  #         };
+  #       };
+  #     };
+  #   };
+  # };
 
   networking.firewall.allowedTCPPorts = [25565 7777 ];
   # networking.firewall.allowedUDPPorts = [ ... ];

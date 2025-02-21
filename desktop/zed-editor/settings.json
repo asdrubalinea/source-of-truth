@@ -1,0 +1,191 @@
+// Zed settings
+//
+// For information on how to configure Zed, see the Zed
+// documentation: https://zed.dev/docs/configuring-zed
+//
+// To see all of Zed's default settings without changing your
+// custom settings, run `zed: open default settings` from the
+// command palette (cmd-shift-p / ctrl-shift-p)
+{
+    "ssh_connections": [
+        {
+            "host": "orchid",
+            "username": "irene",
+            "projects": [
+                {
+                    "paths": ["/persist/source-of-truth/"],
+                },
+                {
+                    "paths": ["~/repositories/diapee-bot/"],
+                },
+                {
+                    "paths": ["~/repositories/leksi/"],
+                },
+                {
+                    "paths": ["~/repositories/leksi/dagster/"],
+                },
+                {
+                    "paths": ["~/repositories/leksi/menqtm/"],
+                },
+                {
+                    "paths": ["~/repositories/leksi/infra/"],
+                },
+                {
+                    "paths": ["~/repositories/leksi/leksid/"],
+                },
+            ],
+        },
+    ],
+    "vim_mode": true,
+    "tabs": {
+        "file_icons": true,
+        "git_status": true,
+    },
+    "ensure_final_newline_on_save": true,
+    "indent_guides": {
+        "enabled": true,
+        "coloring": "indent_aware",
+    },
+    "formatter": "language_server",
+    "always_treat_brackets_as_autoclosed": true,
+    "file_scan_exclusions": [
+        "**/.git",
+        "**/.svn",
+        "**/.hg",
+        "**/.jj",
+        "**/CVS",
+        "**/.DS_Store",
+        "**/Thumbs.db",
+        "**/.classpath",
+        "**/.settings",
+        "**/result",
+        "**/vendor",
+        "**/target",
+    ],
+    "project_panel": {
+        "indent_size": 20,
+        "auto_fold_dirs": true,
+        "button": true,
+        "dock": "left",
+        "git_status": true,
+    },
+    "autosave": "on_focus_change",
+    "restore_on_startup": "none",
+    "buffer_line_height": "comfortable",
+    "cursor_blink": false,
+    "tab_bar": {
+        "show": true,
+        "show_nav_history_buttons": false,
+    },
+    "centered_layout": {
+        "left_padding": 0.15,
+        "right_padding": 0.15,
+    },
+    "soft_wrap": "editor_width",
+    "scrollbar": {
+        "git_diff": false,
+        "search_results": false,
+        "selected_symbol": false,
+        "diagnostics": "none",
+    },
+    "telemetry": {
+        "diagnostics": false,
+        "metrics": false,
+    },
+    "base_keymap": "VSCode",
+    "relative_line_numbers": true,
+    "ui_font_size": 21,
+    "buffer_font_size": 21.0,
+    "buffer_font_family": "Recursive Mono Casual Static",
+    "theme": {
+        "mode": "system",
+        "light": "Catppuccin Latte",
+        "dark": "Ayu Dark",
+    },
+    "inlay_hints": {
+        "enabled": true,
+    },
+    "toolbar": {
+        // Whether to show breadcrumbs.
+        "breadcrumbs": true,
+        // Whether to show quick action buttons.
+        "quick_actions": false,
+        // Whether to show the Selections menu in the editor toolbar
+        "selections_menu": false,
+    },
+    "outline_panel": {
+        "button": false,
+    },
+    "collaboration_panel": {
+        // Whether to show the collaboration panel button in the status bar.
+        "button": false,
+    },
+    "notification_panel": {
+        // Whether to show the notification panel button in the status bar.
+        "button": false,
+    },
+    "task": {
+        // Whether to show task status indicator in the status bar. Default: true
+        "show_status_indicator": false,
+    },
+    "line_indicator_format": "short",
+    "terminal": {
+        "copy_on_select": true,
+        "button": true,
+        "line_height": "comfortable",
+        "toolbar": {
+            // Whether to display the terminal title in its toolbar.
+            "title": false,
+            "breadcrumbs": false,
+        },
+    },
+    "lsp": {
+        "rust-analyzer": {
+            "initialization_options": {
+                "check": {
+                    "command": "clippy", // rust-analyzer.check.command (default: "check")
+                },
+            },
+        },
+    },
+    "assistant": {
+        "default_model": {
+            "provider": "openai",
+            "model": "qwen/qwen-2.5-72b-instruct",
+        },
+        "version": "2",
+    },
+    "language_models": {
+        "ollama": {
+            "api_url": "http://orchid:11434",
+            "available_models": [
+                {
+                    "name": "qwen2.5-coder:14b",
+                    "display_name": "qwen 2.5 coder 32K",
+                    "max_tokens": 32768,
+                },
+            ],
+        },
+        "openai": {
+            "version": "1",
+            "api_url": "https://openrouter.ai/api/v1",
+            "available_models": [
+                {
+                    "display_name": "Qwen2.5 72B",
+                    "name": "qwen/qwen-2.5-72b-instruct",
+                    "max_tokens": 131072,
+                },
+                {
+                    "display_name": "R1 Distill Qwen 32B",
+                    "name": "deepseek/deepseek-r1-distill-qwen-32b",
+                    "max_tokens": 131072,
+                },
+                {
+                    "display_name": "Claude 3.5 Sonnet",
+                    "name": "anthropic/claude-3.5-sonnet:beta",
+                    "max_tokens": 131072,
+                },
+            ],
+        },
+    },
+}

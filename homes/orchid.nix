@@ -12,26 +12,12 @@ let
   systemApply = (pkgs.callPackage ../scripts/system-apply.nix {
     configPath = "/persist/source-of-truth";
   }).systemApply;
-
-  # sdrpp_custom =
-  #   pkgs
-  #   .sdrpp
-  #   # .overrideAttrs
-  #   # (oldAttrs: {
-  #   #   src = pkgs.fetchFromGitHub {
-  #   #     owner = "AlexandreRouma";
-  #   #     repo = "SDRPlusPlus";
-  #   #     rev = "e192cb963b4fb9753b0fcc00685e00697deaaf17";
-  #   #     hash = "sha256-HglX8xQoYZbZqgqEL2F16W7K/xKuoEQrBMPacHD+5vc=";
-  #   #   };
-  #   #   # patches = attrs.patches ++ [../patches/sdrpp/add-radiomicrophones.patch];
-  #   # });
-  #   .override {sdrplay_source = true;};
 in {
   imports = [
-    # ../desktop/emacs
-    # ../desktop/sway
-    # ../rices/hypr
+    ../desktop/waybar.nix
+    ../desktop/hyprland
+    ../desktop/zed-editor
+    ../rices/alacritty
 
     ../scripts/system-clean.nix
     ../misc/fish.nix
@@ -59,7 +45,6 @@ in {
   home.packages = with pkgs; [
     # System utils
     hyfetch
-    pfetch
     htop
     dool
     sshfs
@@ -77,10 +62,8 @@ in {
     wget
     traceroute
     zip
-    nixos-shell
     coreutils
     fd
-    git-crypt
     lazygit
     gnupg
     fzf
@@ -111,7 +94,6 @@ in {
     # Nix
     nixpkgs-fmt
     # rnix-lsp
-    gnumake
 
     alejandra
     nixd
@@ -128,7 +110,6 @@ in {
 
     # Rust
     # rust-analyzer
-    clang
     oha
 
     # Docker
@@ -137,19 +118,17 @@ in {
     # Desktop
     # firefox
     keepassxc
-    # chromium
+    chromium
     alacritty
     wezterm
-    ghostty
 
     neovim
     luarocks
     lua
 
-    trunk.zed-editor
-    # sdrpp_custom
+    rofi
 
-    # trunk.geekbench
+    trunk.geekbench
     # prismlauncher
 
     # Custom
@@ -158,25 +137,6 @@ in {
 
     aider-chat
   ];
-
-  wayland.windowManager.hyprland = {
-    enable = true;
-    settings = {
-      "$mod" = "SUPER";
-      bind = [ "$mod, F, exec, firefox" ", Print, exec, grimblast copy area" ]
-        ++ (
-          # workspaces
-          # binds $mod + [shift +] {1..10} to [move to] workspace {1..10}
-          builtins.concatLists (builtins.genList (x:
-            let
-              ws = let c = (x + 1) / 10;
-              in builtins.toString (x + 1 - (c * 10));
-            in [
-              "$mod, ${ws}, workspace, ${toString (x + 1)}"
-              "$mod SHIFT, ${ws}, movetoworkspace, ${toString (x + 1)}"
-            ]) 10));
-    };
-  };
 
   programs.vscode = {
     enable = true;

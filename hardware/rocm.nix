@@ -1,12 +1,10 @@
-{ config, lib, pkgs, ... }:
-
-{
-  # hardware = {
-  #   graphics = {
-  #     enable = true;
-  #     enable32Bit = true;
-  #   };
-  # };
+{ pkgs, ... }: {
+  hardware = {
+    graphics = {
+      enable = true;
+      enable32Bit = true;
+    };
+  };
 
   # hardware.opengl.extraPackages = with pkgs; [
   #   # amdvlk
@@ -28,6 +26,7 @@
   environment.systemPackages = with pkgs.rocmPackages; [
     rocminfo
     clr.icd
+
     # rccl
     # rocm-smi
     # miopen-hip
