@@ -14,10 +14,9 @@ let
   }).systemApply;
 in {
   imports = [
-    ../desktop/waybar.nix
-    ../desktop/hyprland
     ../desktop/zed-editor
-    ../rices/alacritty
+
+    ../rices/feet
 
     ../scripts/system-clean.nix
     ../misc/fish.nix

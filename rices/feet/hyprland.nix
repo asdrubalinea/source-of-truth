@@ -1,22 +1,4 @@
-{ pkgs, ... }:
-{
-  home.file.".wallpaper".source = ../wallpapers/cats.jpg;
-
-  systemd.user.services.swaybg = {
-    Unit = {
-      Description = "Wayland wallpaper daemon";
-      PartOf = [ "graphical-session.target" ];
-      After = [ "graphical-session.target" ];
-    };
-
-    Service = {
-      ExecStart = "${pkgs.swaybg}/bin/swaybg --mode fill --image ~/.wallpaper";
-      Restart = "on-failure";
-    };
-
-    Install.WantedBy = [ "graphical-session.target" ];
-  };
-
+{ pkgs, ... }: {
   wayland.windowManager.hyprland = {
     enable = true;
 
@@ -28,14 +10,14 @@
       debug.disable_logs = false;
 
       # Variables
-      "$terminal" = "alacritty";
+      "$terminal" = "${pkgs.alacritty}/bin/alacritty";
       "$fileManager" = "nemo";
-      "$menu" = "rofi -disable-history -show drun";
+      "$menu" = "${pkgs.rofi}/bin/rofi -disable-history -show drun";
       "$mainMod" = "SUPER";
 
       # Autostart
       exec-once = [
-        "waybar &"
+        "${pkgs.waybar}/bin/waybar &"
       ];
 
       # Environment variables
@@ -53,7 +35,7 @@
       general = {
         gaps_in = 10;
         gaps_out = 20;
-        border_size = 2;
+        border_size = 1;
         # "col.active_border" = "rgba(595959aa)";
         # "col.inactive_border" = "rgba(2e2e2daa)";
         resize_on_border = true;
@@ -165,6 +147,7 @@
         "$mainMod SHIFT, 8, movetoworkspace, 8"
         "$mainMod SHIFT, w, movetoworkspace, 9"
         "$mainMod SHIFT, 0, movetoworkspace, 10"
+
         "$mainMod, mouse_down, workspace, e+1"
         "$mainMod, mouse_up, workspace, e-1"
       ];
