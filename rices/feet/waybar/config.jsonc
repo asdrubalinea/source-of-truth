@@ -1,0 +1,155 @@
+[
+  {
+    "layer": "top",
+    "position": "top",
+    "margin-top": 0,
+    "margin-bottom": 0,
+    "margin-left": 200,
+    "margin-right": 200,
+    "modules-left": [
+      "custom/rofi",
+      "hyprland/workspaces",
+      "mpris",
+      "hyprland/window"
+    ],
+    "modules-center": [
+      "clock"
+    ],
+    "modules-right": [
+      "memory",
+      "cpu",
+      "backlight",
+      "pulseaudio",
+      "battery"
+    ],
+    "hyprland/workspaces": {
+      "all-outputs": true,
+      "format": "{name}",
+      "on-scroll-up": "hyprctl dispatch workspace e+1 1>/dev/null",
+      "on-scroll-down": "hyprctl dispatch workspace e-1 1>/dev/null",
+      "sort-by-number": true,
+      "active-only": false
+    },
+    "mpris": {
+      "format": "{player_icon} {artist} - {title}",
+      "format-paused": "{status_icon} {artist} - {title}",
+      "tooltip-format": "{player} ({status})\r{artist} - {title}\r\rLeft-Click:   Play / Pause\rMiddle-Click: Previous Track\rRight-Click:  Next Track",
+      "title-len": 20,
+      "player-icons": {
+        "default": "▶",
+        "mpv": "",
+        "spotify": "󰓇"
+      },
+      "status-icons": {
+        "paused": "",
+        "stopped": ""
+      }
+    },
+    "hyprland/window": {
+      "format": "{title}",
+      "separate-outputs": true,
+      "rewrite": {
+        "(.*) — Mozilla Firefox": "󰈹  $1",
+        "(.*) — Zen Browser": "󰈹  Zen - $1",
+        "(.*) - Google Chrome": "  $1",
+        "(.*) - Visual Studio Code": "󰨞  $1",
+        "(.*) - nvim": "  $1",
+        "(.*) - Obsidian(.*)": "󱓧  $1",
+        "(.*) - fish": "  $1",
+        "yazi: (.*)": "  $1",
+        "nwg-look": "  GTK Settings",
+        "Qt6 Configuration Tool": "  QT Settings",
+        "blueman-manager": "Bluetooth Settings"
+      }
+    },
+    "clock": {
+      "format": "  {:%a %e %b %H:%M}",
+      "tooltip-format": "<tt>{calendar}</tt>",
+      "calendar": {
+        "mode": "month",
+        "format": {
+          "months": "<span color='#cdd6f4'><b>{}</b></span>",
+          "days": "<span color='#cdd6f4'><b>{}</b></span>",
+          "weeks": "<span color='#cdd6f4'><b>W{}</b></span>",
+          "weekdays": "<span color='#cdd6f4'><b>{}</b></span>",
+          "today": "<span color='#f38ba8'><b>{}</b></span>"
+        }
+      }
+    },
+    "memory": {
+      "interval": 1,
+      "format": " RAM {percentage}%",
+      "max-length": 20,
+      "tooltip": false
+    },
+    "cpu": {
+      "interval": 1,
+      "format": " CPU {usage}%",
+      "max-length": 13
+    },
+    "backlight": {
+      "format": "{icon} <b>{percent}%</b>",
+      "format-icons": [
+        "󰃞",
+        "󰃟",
+        "󰃠"
+      ],
+      "tooltip": false
+    },
+    "pulseaudio": {
+      "format": "{icon} <b>{volume}%</b>",
+      "format-muted": " 󰝟 ",
+      "format-bluetooth": "{icon}  <b>{volume}%</b>",
+      "format-bluetooth-muted": "󰝟 ",
+      "format-icons": {
+        "headset": "",
+        "default": [
+          "󰕿",
+          "󰖀",
+          "󰕾"
+        ]
+      },
+      "tooltip": true,
+      "on-click": "pavucontrol",
+      "ignored-sinks": [
+        "JamesDSP Sink",
+        "Easy Effects Sink",
+        "HDA NVidia Digital Stereo (HDMI)"
+      ]
+    },
+    "battery": {
+      "format": "{icon} {capacity}%",
+      "format-plugged": " {capacity}%",
+      "format-icons": [
+        "",
+        "",
+        "",
+        "",
+        ""
+      ],
+      "max-length": 25,
+      "tooltip": true,
+      "interval": 5,
+      "states": {
+        "good": 70,
+        "warning": 30,
+        "critical": 15
+      },
+      "on-click": "rog-control-center"
+    },
+    "custom/nix-size": {
+      "exec": "nix-size",
+      "interval": 1,
+      "max-length": 20,
+      "tooltip": false,
+      "format": "{}"
+    },
+    "custom/arc-size": {
+      "exec": "arc-size",
+      "interval": 1,
+      "max-length": 20,
+      "tooltip": false,
+      "format": "{}"
+    }
+  }
+]

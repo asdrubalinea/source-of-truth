@@ -1,8 +1,9 @@
-{ pkgs, ... }: {
+{ ... }: {
   imports = [
     ./alacritty.nix
     ./hyprland.nix
-    ./waybar.nix
+    ./waybar
     ./wallpaper
+    ./tofi.nix
   ];
 }

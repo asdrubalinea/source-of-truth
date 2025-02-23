@@ -1,4 +1,4 @@
-{ config, pkgs, ... }:
+{ pkgs, ... }:
 
 let
   operator-mono = pkgs.callPackage ../packages/operator-mono.nix { };

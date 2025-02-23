@@ -1,17 +1,15 @@
-{ config, pkgs, ... }:
-
-{
+{ pkgs, ... }: {
   programs.fish.shellAliases = {
-    gits = "git status";
-    gitc = "git commit";
-    gitp = "git push";
-    gita = "git add";
-    gitd = "git diff";
-    ls = "exa";
-    nv = "nvim";
-    please = "doas";
-    neofetch = "hyfetch";
-    fetch = "hyfetch";
-    fastfetch = "hyfetch";
+    gits = "${pkgs.git}/bin/git status";
+    gitc = "${pkgs.git}/bin/git commit";
+    gitp = "${pkgs.git}/bin/git push";
+    gita = "${pkgs.git}/bin/git add";
+    gitd = "${pkgs.git}/bin/git diff";
+    ls = "${pkgs.exa}/bin/exa";
+    nv = "${pkgs.neovim}/bin/neovim";
+    please = "${pkgs.doas}/bin/doas";
+    neofetch = "${pkgs.hyfetch}/bin/hyfetch";
+    fetch = "${pkgs.hyfetch}/bin/hyfetch";
+    fastfetch = "${pkgs.hyfetch}/bin/hyfetch";
   };
 }

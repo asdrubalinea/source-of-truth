@@ -47,25 +47,4 @@
     enable = true;
     provider = "geoclue2";
   };
-
-  systemd.user.services.swaybg = let
-    wallpaper = builtins.fetchurl rec {
-      name = "wallpaper-${sha256}.png";
-      url = "https://image-1.uhdpaper.com/wallpaper/anime-girl-playing-game-4k-wallpaper-uhdpaper.com-162@1@n.jpg";
-      sha256 = "17bnw0b342bhg9j70ni085aiypzp6jlrjq2r983sinffaljvqz3l";
-    };
-  in {
-    Unit = {
-      Description = "Wayland wallpaper daemon";
-      PartOf = ["graphical-session.target"];
-      After = ["graphical-session.target"];
-    };
-
-    Service = {
-      ExecStart = "${pkgs.swaybg}/bin/swaybg --mode fill --image ${wallpaper}";
-      Restart = "on-failure";
-    };
-
-    Install.WantedBy = ["graphical-session.target"];
-  };
 }

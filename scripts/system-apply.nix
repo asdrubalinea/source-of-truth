@@ -1,5 +1,4 @@
-{ config, pkgs, configPath, ... }: {
-
+{ pkgs, configPath, ... }: {
   systemApply = pkgs.writeScriptBin "system-apply" ''
     #!${pkgs.stdenv.shell}
     pushd ${configPath}

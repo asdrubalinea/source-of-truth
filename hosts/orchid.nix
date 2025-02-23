@@ -1,22 +1,15 @@
-{
-  inputs,
-  lib,
-  pkgs,
-  ...
-}: {
+{ inputs, lib, pkgs, ... }: {
   imports = [
-    ../network/hosts.nix
     ../rices/hypr/fonts.nix
 
     # ../options/passthrough.nix
     ../hardware/rocm.nix
-    # ../services/syncthing.nix
-  ];
+    ../hardware/bluetooth.nix
+    ../hardware/zfs.nix
+    ../hardware/audio.nix
 
-  boot.initrd.availableKernelModules = ["ahci" "xhci_pci" "nvme" "usbhid" "usb_storage" "sd_mod"];
-  boot.initrd.kernelModules = [];
-  boot.kernelModules = ["kvm-amd" "amdgpu"];
-  boot.extraModulePackages = [];
+    ../services/syncthing.nix
+  ];
 
   # vfio.enable = false;
 
@@ -25,7 +18,20 @@
   #vfio.enable = true;
   #};
 
-  # services.sdrplayApi.enable = true;
+  programs.virt-manager.enable = true;
+  users.groups.libvirtd.members = ["irene"];
+  virtualisation.libvirtd.enable = true;
+  virtualisation.spiceUSBRedirection.enable = true;
+
+  boot.initrd.availableKernelModules = ["ahci" "xhci_pci" "nvme" "usbhid" "usb_storage" "sd_mod"];
+  boot.initrd.kernelModules = [];
+  boot.kernelModules = ["kvm-amd" "amdgpu"];
+  boot.extraModulePackages = [];
+
+  hardware.cpu.amd.updateMicrocode = true;
+  hardware.enableAllFirmware = true;
+
+  services.flatpak.enable = true;
 
   nix.gc = {
 		automatic = true;
@@ -70,66 +76,35 @@
 
   swapDevices = [];
 
-  networking.hostName = "orchid"; # Define your hostname.
+  networking.hostName = "orchid";
   networking.hostId = "f00dbabe";
 
   # Upstream internet
-  networking.interfaces.enp4s0f0.ipv4.addresses = [
-    {
-      address = "10.0.0.10";
-      prefixLength = 20;
-    }
-  ];
+  networking.interfaces.enp4s0f0.ipv4.addresses = [ {
+    address = "10.0.0.10";
+    prefixLength = 20;
+  } ];
 
   # Erase your darlings.
   # systemd.tmpfiles.rules = [
   # "L /var/lib/tailscale - - - - /persist/var/lib/tailscale"
   # ];
 
-  # networking.interfaces.enp14s0.ipv4.addresses = [ {
-  # address = "10.0.0.11";
-  # prefixLength = 20;
-  # } ];
-
-  # networking.defaultGateway = "10.0.0.1";
   networking.defaultGateway = "10.0.0.1";
   networking.nameservers = ["1.1.1.1" "1.0.0.1"];
   networking.useDHCP = false;
 
   nixpkgs.hostPlatform = lib.mkDefault "x86_64-linux";
 
-  boot.zfs = {
-    package = pkgs.zfs_unstable;
-    forceImportAll = false;
-  };
-
   boot.kernelParams = [
     "zfs.zfs_arc_max=51539607552" # 48 GiB
     "nohibernate"
   ];
 
-  boot.supportedFilesystems = ["zfs"];
-
   # Enable nested virtualization
   boot.extraModprobeConfig = ''
     options kvm_amd nested=1
   '';
-
-  services.zfs.autoScrub = {
-    enable = true;
-    interval = "Sun, 01:00";
-  };
-
-  services.zfs.autoSnapshot.enable = true;
-
-  hardware.cpu.amd.updateMicrocode = true;
-  hardware.enableAllFirmware = true;
-
-  programs.steam = {
-    enable = false;
-    # remotePlay.openFirewall = true; # Open ports in the firewall for Steam Remote Play
-    # dedicatedServer.openFirewall = true; # Open ports in the firewall for Source Dedicated Server
-  };
 
   boot = {
     loader = {
@@ -142,39 +117,12 @@
     };
 
     loader.efi.canTouchEfiVariables = true;
-    # kernelPackages = pkgs.linuxPackages_6_11;
-  };
-
-  # Erase your darlings.
-  # boot.initrd.postDeviceCommands = lib.mkAfter ''
-  # zfs rollback -r zroot/local/root@blank
-  # '';
-
-  # Enable SMART daemon
-  services.smartd = {
-    enable = true;
-    notifications = {
-      # Enable mail notifications
-      mail = {
-        enable = true;
-        sender = "smartd@localhost";
-        recipient = "smart@asdrubalini.xyz";
-      };
-      # Optionally enable wall notifications
-      wall.enable = true;
-    };
-    defaults.monitored = "-a -o on -S on -T permissive";
-    devices = [
-      { device = "/dev/nvme0n1"; }
-      { device = "/dev/nvme1n1"; }
-      { device = "/dev/nvme2n1"; }
-    ];
   };
 
   time.timeZone = "Europe/Rome";
 
-  # Select internationalisation properties.
   i18n.defaultLocale = "en_US.UTF-8";
+
   console = {
     earlySetup = true;
     font = "${pkgs.terminus_font}/share/consolefonts/ter-132n.psf.gz";
@@ -186,9 +134,10 @@
     mutableUsers = false;
     extraUsers.root.hashedPassword = (import ../passwords).password;
 
-    users.irene = {
+    users."irene" = {
       isNormalUser = true;
       extraGroups = ["wheel" "libvirtd" "docker" "jackaudio" "render" "video"];
+      openssh.authorizedKeys.keys = [(import ../ssh-keys/looking-glass.nix).key];
       hashedPassword = (import ../passwords).password;
       shell = pkgs.fish;
     };
@@ -197,24 +146,16 @@
   security.sudo.enable = true;
   security.doas.enable = true;
 
-  security.doas.extraRules = [
-    {
-      users = ["irene"];
-      keepEnv = true;
-      noPass = true;
-    }
-  ];
-
-  services.postfix = {
-    enable = true;
-    setSendmail = true;
-  };
+  security.doas.extraRules = [{
+    users = ["irene"];
+    keepEnv = true;
+    noPass = true;
+  }];
 
   # https://discourse.nixos.org/t/login-keyring-did-not-get-unlocked-hyprland/40869/10
   environment.variables.XDG_RUNTIME_DIR = "/run/user/$UID";
 
   environment.systemPackages = with pkgs; [
-    zfs
     neovim
     git
     swtpm
@@ -245,14 +186,13 @@
   };
 
   services.openssh.enable = true;
-  # services.openssh.settings.X11Forwarding = true;
 
   services.github-runners = {
     leksi = {
       enable = true;
       name = "leksi";
       tokenFile = "/persist/secrets/github-runners/leksi";
-      url = "https://github.com/asdrubalini/leksi";
+      url = "https://github.com/asdrubalinea/leksi";
     };
   };
 
@@ -260,8 +200,6 @@
     enable = true;
     extraOptions = "--data-root=/mnt/docker";
   };
-
-  users.users."irene".openssh.authorizedKeys.keys = [(import ../ssh-keys/looking-glass.nix).key];
 
   # security.polkit.enable = true;
 
@@ -282,42 +220,8 @@
     package = inputs.hyprland.packages.${pkgs.system}.hyprland;
   };
 
-  # security.rtkit.enable = true;
-  services.pipewire = {
-    enable = true;
-    alsa.enable = true;
-    alsa.support32Bit = true;
-    pulse.enable = true;
-    jack.enable = true;
-  };
-
-  hardware.bluetooth = {
-    enable = true;
-    powerOnBoot = true;
-  };
-
-  services.blueman.enable = true;
-
-  # services.keyd = {
-  #   enable = true;
-  #   keyboards = {
-  #     # The name is just the name of the configuration file, it does not really matter
-  #     default = {
-  #       ids = [ "*" ]; # what goes into the [id] section, here we select all keyboards
-
-  #       settings = {
-  #         # The main layer, if you choose to declare it in Nix
-  #         main = {
-  #           leftcontrol = "leftmeta";
-  #           leftmeta = "leftcontrol";
-  #         };
-  #       };
-  #     };
-  #   };
-  # };
-
-  networking.firewall.allowedTCPPorts = [25565 7777 ];
-  # networking.firewall.allowedUDPPorts = [ ... ];
+  # networking.firewall.allowedTCPPorts = [ ];
+  # networking.firewall.allowedUDPPorts = [ ];
 
   system.stateVersion = "23.05";
 }

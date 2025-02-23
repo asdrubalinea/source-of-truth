@@ -1,6 +1,6 @@
 { pkgs, ... }:
 let
-  userApply = pkgs.writeScriptBin "user-apply" ''
+  user-apply = pkgs.writeScriptBin "user-apply" ''
     #!${pkgs.stdenv.shell}
     pushd /persist/source-of-truth/
 
@@ -9,17 +9,27 @@ let
     popd
   '';
 
-  systemApply = (pkgs.callPackage ../scripts/system-apply.nix {
+  system-apply = (pkgs.callPackage ../scripts/system-apply.nix {
     configPath = "/persist/source-of-truth";
   }).systemApply;
+
+  arc-size = (pkgs.writeShellScriptBin "arc-size" ''
+    cat /proc/spl/kstat/zfs/arcstats | grep '^size ' | awk '{ print $3 }' | awk '{ print $1 / (1024 * 1024 * 1024) \" GiB\" }'
+  '');
+
+  nix-size = (pkgs.writeShellScriptBin "nix-size" ''
+    zfs list -o name,used -t filesystem,volume -Hp | awk -v dataset='zroot/local/nix' '$1 == dataset { printf \"%.0f GiB\", $2/1024/1024/1024 }'
+  '');
 in {
   imports = [
-    ../desktop/zed-editor
-
     ../rices/feet
 
+    ../desktop/zed-editor
+
     ../scripts/system-clean.nix
+
     ../misc/fish.nix
+    ../misc/aliases.nix
   ];
 
   # Let Home Manager install and manage itself.
@@ -44,6 +54,7 @@ in {
   home.packages = with pkgs; [
     # System utils
     hyfetch
+    onefetch
     htop
     dool
     sshfs
@@ -84,32 +95,23 @@ in {
     ffmpeg
     starship
     nvtopPackages.amd
-    stable.iozone
-    fio
     smartmontools
-    parted
     xxd
+    telegram-desktop
+    pavucontrol
+    obsidian
+    vesktop
 
     # Nix
     nixpkgs-fmt
     # rnix-lsp
-
+    nil
     alejandra
     nixd
 
     # Project management
     devenv
     direnv
-
-    fontconfig
-    cmake
-    pkg-config
-    quickemu
-    distrobox
-
-    # Rust
-    # rust-analyzer
-    oha
 
     # Docker
     docker-compose
@@ -125,14 +127,15 @@ in {
     luarocks
     lua
 
-    rofi
-
     trunk.geekbench
-    # prismlauncher
+    prismlauncher
 
     # Custom
-    userApply
-    systemApply
+    user-apply
+    system-apply
+
+    arc-size
+    nix-size
 
     aider-chat
   ];
@@ -140,7 +143,7 @@ in {
   programs.vscode = {
     enable = true;
     package = pkgs.vscode.fhsWithPackages
-      (ps: with ps; [ rustup zlib openssl.dev pkg-config ]);
+    (ps: with ps; [ rustup zlib openssl.dev pkg-config ]);
   };
 
   programs.nix-index = {

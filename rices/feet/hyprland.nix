@@ -1,4 +1,10 @@
 { pkgs, ... }: {
+  home.packages = with pkgs; [ geoclue2 ];
+  services.redshift = {
+    enable = true;
+    provider = "geoclue2";
+  };
+
   wayland.windowManager.hyprland = {
     enable = true;
 
@@ -11,13 +17,24 @@
 
       # Variables
       "$terminal" = "${pkgs.alacritty}/bin/alacritty";
-      "$fileManager" = "nemo";
-      "$menu" = "${pkgs.rofi}/bin/rofi -disable-history -show drun";
+      "$browser" = "${pkgs.flatpak}/bin/flatpak run app.zen_browser.zen";
+      "$menu" = "${pkgs.tofi}/bin/tofi-run | xargs hyprctl dispatch exec --";
       "$mainMod" = "SUPER";
 
-      # Autostart
+      "$redAlpha" = "f38ba8";
+      "$yellowAlpha" = "f9e2af";
+      "$peachAlpha" = "fab387";
+      "$tealAlpha" = "94e2d5";
+      "$skyAlpha" = "89dceb";
+      "$mauveAlpha" = "cba6f7";
+
       exec-once = [
         "${pkgs.waybar}/bin/waybar &"
+        "${pkgs.swww}/bin/swww-daemon &"
+      ];
+
+      exec = [
+        "${pkgs.swww}/bin/swww img ~/.wallpaper"
       ];
 
       # Environment variables
@@ -33,18 +50,20 @@
       };
 
       general = {
-        gaps_in = 10;
-        gaps_out = 20;
-        border_size = 1;
-        # "col.active_border" = "rgba(595959aa)";
-        # "col.inactive_border" = "rgba(2e2e2daa)";
+        gaps_in = 5;
+        gaps_out = 10;
+        border_size = 2;
+
+        "col.active_border" = "rgba($redAlphaee) rgba($yellowAlphaee) rgba($peachAlphaee) 30deg";
+        "col.inactive_border" = "rgba($mauveAlphaaa) rgba($tealAlphaee) rgba($skyAlphaee) 30deg";
+
         resize_on_border = true;
         allow_tearing = false;
         layout = "dwindle";
       };
 
       decoration = {
-        rounding = 10;
+        rounding = 5;
         active_opacity = 1.0;
         inactive_opacity = 1.0;
 
@@ -60,12 +79,12 @@
         enabled = true;
         bezier = "myBezier, 0.05, 0.9, 0.1, 1.05";
         animation = [
-          "windows, 1, 7, myBezier"
-          "windowsOut, 1, 7, default, popin 80%"
+          "windows, 1, 5, myBezier"
+          "windowsOut, 1, 5, default, popin 80%"
           "border, 1, 10, default"
-          "borderangle, 1, 8, default"
-          "fade, 1, 7, default"
-          "workspaces, 1, 6, default"
+          "fade, 1, 2, default"
+          "workspaces, 1, 3, default"
+          "borderangle, 1, 100, linear, loop"
         ];
       };
 
@@ -86,7 +105,7 @@
 
       input = {
         kb_layout = "us";
-        kb_variant = "";
+        kb_variant = "intl";
         kb_model = "";
         kb_options = "";
         kb_rules = "";
@@ -94,7 +113,7 @@
         sensitivity = -1.0;
 
         touchpad = {
-          natural_scroll = false;
+          natural_scroll = true;
         };
       };
 
@@ -106,16 +125,18 @@
       bind = [
         "$mainMod, return, exec, $terminal"
         "ALT, space, exec, $menu"
+        "$mainMod, space, exec, $menu"
+
         "$mainMod, Q, killactive,"
-        "$mainMod, M, exit,"
-        "$mainMod, F, exec, $fileManager"
+        # "$mainMod, M, exit,"
         "$SUPER_SHIFT, space, togglefloating,"
-        "$mainMod, P, pseudo,"
-        "$mainMod, J, togglesplit,"
-        "$mainMod, D, exec, vesktop"
-        "$mainMod, B, exec, chromium"
-        "$SUPER_SHIFT, S, exec, hyprshot -m output --clipboard-only"
-        "$SUPER_SHIFT, F, fullscreen"
+        # "$mainMod, P, pseudo,"
+        # "$mainMod, J, togglesplit,"
+        # "$mainMod, D, exec, vesktop"
+
+        "$SUPER_SHIFT, B, exec, $browser"
+        "$SUPER_SHIFT, S, exec, ${pkgs.hyprshot}/bin/hyprshot -m output --clipboard-only"
+        "$mainMod, F, fullscreen"
         "$mainMod, v, layoutmsg, preselect d"
         "$mainMod, h, layoutmsg, preselect r"
         "$mainMod, left, movefocus, l"
@@ -137,6 +158,7 @@
         "$mainMod, 8, workspace, 8"
         "$mainMod, 9, workspace, 9"
         "$mainMod, 0, workspace, 10"
+
         "$mainMod SHIFT, 1, movetoworkspace, 1"
         "$mainMod SHIFT, 2, movetoworkspace, 2"
         "$mainMod SHIFT, 3, movetoworkspace, 3"
@@ -145,7 +167,7 @@
         "$mainMod SHIFT, 6, movetoworkspace, 6"
         "$mainMod SHIFT, 7, movetoworkspace, 7"
         "$mainMod SHIFT, 8, movetoworkspace, 8"
-        "$mainMod SHIFT, w, movetoworkspace, 9"
+        "$mainMod SHIFT, 9, movetoworkspace, 9"
         "$mainMod SHIFT, 0, movetoworkspace, 10"
 
         "$mainMod, mouse_down, workspace, e+1"
@@ -173,11 +195,7 @@
         "7"
         "8"
         "9"
-      ];
-
-      windowrulev2 = [
-        "size 1400 1000, class:(Alacritty)"
-        "suppressevent maximize, class:.*"
+        "10"
       ];
     };
   };
