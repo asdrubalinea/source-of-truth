@@ -94,6 +94,7 @@ in {
     pavucontrol
     obsidian
     vesktop
+    btop
 
     # Nix
     nixpkgs-fmt

@@ -18,6 +18,7 @@
 
 #workspaces {
     margin-left: 12pt;
+    color: #cfcbca;
 }
 
 #workspaces button {
@@ -48,17 +49,10 @@
     color: #9399b2;
 }
 
-#mpris {
-    background: #1e1e2e;
-    color: #a6e3a1;
-    border-radius: 12pt;
-    margin-left: 15pt;
-    padding: 0 8pt;
-}
-
 #window {
     margin-left: 15pt;
     margin-right: 20pt;
+    color: #cfcbca;
 }
 
 #clock {

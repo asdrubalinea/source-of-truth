@@ -13,6 +13,10 @@
     home-manager.inputs.nixpkgs.follows = "nixpkgs";
 
     hyprland.url = "github:hyprwm/Hyprland";
+    hyprtasking = {
+      url = "github:raybbian/hyprtasking";
+      inputs.hyprland.follows = "hyprland";
+    };
     vscode-server.url = "github:nix-community/nixos-vscode-server";
     operator-mono.url = "path:/persist/Operator-Mono";
   };
@@ -62,7 +66,6 @@
     nixosConfigurations = {
       "orchid" = lib.nixosSystem {
         inherit system pkgs;
-
         specialArgs = { inherit inputs; };
 
         modules = [
@@ -74,6 +77,7 @@
     homeConfigurations = {
       "irene@orchid" = home-manager.lib.homeManagerConfiguration {
         inherit pkgs;
+        extraSpecialArgs = { inherit inputs; };
 
         modules = [
           ./homes/orchid.nix

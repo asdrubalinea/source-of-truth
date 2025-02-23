@@ -1,12 +1,10 @@
-{ pkgs, ... }: {
-  home.packages = with pkgs; [ geoclue2 ];
-  services.redshift = {
-    enable = true;
-    provider = "geoclue2";
-  };
-
+{ pkgs, inputs, ... }: {
   wayland.windowManager.hyprland = {
     enable = true;
+
+    plugins = [
+      inputs.hyprtasking.packages.${pkgs.system}.hyprtasking
+    ];
 
     # so that we use the version from NixOS
     package = null;
@@ -128,6 +126,8 @@
         "ALT, space, exec, ${pkgs.albert}/bin/albert toggle"
         "$mainMod, space, exec, $menu"
 
+        "$mainMod, u, hyprtasking:toggle, all"
+
         "$mainMod, Q, killactive,"
         # "$mainMod, M, exit,"
         "$SUPER_SHIFT, space, togglefloating,"
@@ -136,7 +136,8 @@
         # "$mainMod, D, exec, vesktop"
 
         "$SUPER_SHIFT, B, exec, $browser"
-        "$SUPER_SHIFT, S, exec, ${pkgs.hyprshot}/bin/hyprshot -m output --clipboard-only"
+        "$SUPER_SHIFT, S, exec, ${pkgs.grim}/bin/grim"
+
         "$mainMod, F, fullscreen"
         "$mainMod, v, layoutmsg, preselect d"
         "$mainMod, h, layoutmsg, preselect r"

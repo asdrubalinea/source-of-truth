@@ -9,7 +9,6 @@
     "modules-left": [
       "custom/rofi",
       "hyprland/workspaces",
-      "mpris",
       "hyprland/window"
     ],
     "modules-center": [
