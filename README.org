@@ -1,7 +1,2 @@
 #+title: nix-config
 ** Asdrubalini's NixOS configs
-
-- The Arrow -> VPS Server
-- The Orchid -> Test Server
-- The Hydra -> MacBook Pro
-- The Router -> Just a vm
