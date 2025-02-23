@@ -31,6 +31,7 @@
       exec-once = [
         "${pkgs.waybar}/bin/waybar &"
         "${pkgs.swww}/bin/swww-daemon &"
+        "${pkgs.albert}/bin/albert &"
       ];
 
       exec = [
@@ -124,7 +125,7 @@
       # Keybindings
       bind = [
         "$mainMod, return, exec, $terminal"
-        "ALT, space, exec, $menu"
+        "ALT, space, exec, ${pkgs.albert}/bin/albert toggle"
         "$mainMod, space, exec, $menu"
 
         "$mainMod, Q, killactive,"
@@ -196,6 +197,10 @@
         "8"
         "9"
         "10"
+      ];
+
+      windowrulev2 = [
+        "noborder, title:^(Albert)$"
       ];
     };
   };

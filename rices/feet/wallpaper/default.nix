@@ -1,4 +1,4 @@
 { pkgs, ... }: {
-  home.file.".wallpaper".source = ./feet.jpg;
+  home.file.".wallpaper".source = ./girl-cats.jpg;
   home.packages = [pkgs.swww];
 }

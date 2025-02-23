@@ -49,7 +49,7 @@
         dynamic_title = true;
         title = "Alacritty";
         decorations = "buttonless";
-        opacity = 0.99;
+        opacity = 0.97;
 
         padding = {
           x = 5;

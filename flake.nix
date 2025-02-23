@@ -3,7 +3,7 @@
 
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
-    nixpkgs-stable.url = "github:nixos/nixpkgs/nixos-23.05";
+    nixpkgs-stable.url = "github:nixos/nixpkgs/nixos-24.05";
     nixpkgs-trunk.url = "github:nixos/nixpkgs";
 
     # nixpkgs-custom.url = "path:/persist/src/nixpkgs";
@@ -13,9 +13,7 @@
     home-manager.inputs.nixpkgs.follows = "nixpkgs";
 
     hyprland.url = "github:hyprwm/Hyprland";
-
     vscode-server.url = "github:nix-community/nixos-vscode-server";
-
     operator-mono.url = "path:/persist/Operator-Mono";
   };
 
