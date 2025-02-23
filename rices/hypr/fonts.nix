@@ -1,6 +1,6 @@
-{pkgs, ...}: {
-  environment.systemPackages = with pkgs; [
-    twemoji-color-font
+{pkgs, inputs, ...}: {
+  environment.systemPackages = [
+    pkgs.twemoji-color-font
   ];
 
   fonts = {
@@ -14,6 +14,8 @@
       nerd-fonts.jetbrains-mono
       nerd-fonts.iosevka-term
       recursive
+    ] ++ [
+      inputs.operator-mono.packages.x86_64-linux.default
     ];
   };
 }

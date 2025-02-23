@@ -163,17 +163,6 @@
     box-shadow: 0 0 3pt #181825;
 }
 
-#custom-file-manager {
-    background: transparent;
-    background-image: url("/home/nicholas/.config/waybar/icons/file-manager.svg");
-    background-position: center;
-    background-repeat: no-repeat;
-    background-size: 28pt;
-    font-size: 28pt;
-    padding: 0 6pt;
-    margin: 0 2pt;
-}
-
 #custom-terminal {
     background: transparent;
     background-image: url("/home/nicholas/.config/waybar/icons/terminal.svg");

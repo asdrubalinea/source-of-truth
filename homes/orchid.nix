@@ -14,11 +14,11 @@ let
   }).systemApply;
 
   arc-size = (pkgs.writeShellScriptBin "arc-size" ''
-    cat /proc/spl/kstat/zfs/arcstats | grep '^size ' | awk '{ print $3 }' | awk '{ print $1 / (1024 * 1024 * 1024) \" GiB\" }'
+    cat /proc/spl/kstat/zfs/arcstats | grep '^size ' | awk '{ print $3 }' | awk '{ print $1 / (1024 * 1024 * 1024) " GiB" }'
   '');
 
   nix-size = (pkgs.writeShellScriptBin "nix-size" ''
-    zfs list -o name,used -t filesystem,volume -Hp | awk -v dataset='zroot/local/nix' '$1 == dataset { printf \"%.0f GiB\", $2/1024/1024/1024 }'
+    zfs list -o name,used -t filesystem,volume -Hp | awk -v dataset='zroot/local/nix' '$1 == dataset { printf "%.0f GiB", $2/1024/1024/1024 }'
   '');
 in {
   imports = [
@@ -34,13 +34,6 @@ in {
 
   # Let Home Manager install and manage itself.
   programs.home-manager.enable = true;
-
-  programs.fish = {
-    enable = true;
-    shellInitLast = ''
-      starship init fish | source
-    '';
-  };
 
   # programs.nushell.enable = true;
   services.vscode-server.enable = true;

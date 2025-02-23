@@ -152,9 +152,6 @@
     noPass = true;
   }];
 
-  # https://discourse.nixos.org/t/login-keyring-did-not-get-unlocked-hyprland/40869/10
-  environment.variables.XDG_RUNTIME_DIR = "/run/user/$UID";
-
   environment.systemPackages = with pkgs; [
     neovim
     git

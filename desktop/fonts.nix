@@ -1,12 +1,7 @@
-{ pkgs, ... }:
-
-let
-  operator-mono = pkgs.callPackage ../packages/operator-mono.nix { };
-in
-{
+{ pkgs, ... }: {
   fonts = {
     enableDefaultFonts = false;
-    fonts = with pkgs; [ operator-mono cascadia-code fira-code agave ];
+    fonts = with pkgs; [ cascadia-code fira-code agave ];
 
     fontconfig = {
       defaultFonts = {

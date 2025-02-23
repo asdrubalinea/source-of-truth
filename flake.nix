@@ -15,6 +15,8 @@
     hyprland.url = "github:hyprwm/Hyprland";
 
     vscode-server.url = "github:nix-community/nixos-vscode-server";
+
+    operator-mono.url = "path:/persist/Operator-Mono";
   };
 
   outputs = inputs @ {
@@ -63,7 +65,7 @@
       "orchid" = lib.nixosSystem {
         inherit system pkgs;
 
-        specialArgs = { inherit inputs; }; # this is the important part (for hyprland)
+        specialArgs = { inherit inputs; };
 
         modules = [
           ./hosts/orchid.nix

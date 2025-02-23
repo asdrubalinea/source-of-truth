@@ -4,6 +4,7 @@
 
     interactiveShellInit = ''
       set fish_greeting # Disable greeting
+      starship init fish | source
 
       # ${pkgs.blahaj}/bin/blahaj -s
 

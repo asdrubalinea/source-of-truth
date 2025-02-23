@@ -25,22 +25,22 @@
         size = 20.0;
 
         bold = {
-          family = "IosevkaTerm Nerd Font";
+          family = "JetBrainsMono Nerd Font";
           style = "Bold";
         };
 
         bold_italic = {
-          family = "IosevkaTerm Nerd Font";
+          family = "JetBrainsMono Nerd Font";
           style = "Bold Italic";
         };
 
         italic = {
-          family = "IosevkaTerm Nerd Font";
+          family = "JetBrainsMono Nerd Font";
           style = "Italic";
         };
 
         normal = {
-          family = "IosevkaTerm Nerd Font";
+          family = "JetBrainsMono Nerd Font";
           style = "Regular";
         };
       };

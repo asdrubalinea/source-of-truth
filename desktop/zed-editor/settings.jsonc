@@ -109,8 +109,9 @@
   "base_keymap": "VSCode",
   "relative_line_numbers": true,
   "ui_font_size": 21,
+  "ui_font_family": "JetBrainsMono Nerd Font",
   "buffer_font_size": 21.0,
-  "buffer_font_family": "Recursive Mono Casual Static",
+  "buffer_font_family": "JetBrainsMono Nerd Font",
   "theme": {
     "mode": "system",
     "light": "Rosé Pine",
