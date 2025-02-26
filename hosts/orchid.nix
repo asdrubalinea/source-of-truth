@@ -9,6 +9,8 @@
     ../hardware/audio.nix
 
     ../services/syncthing.nix
+
+    ../services/grafana
   ];
 
   # vfio.enable = false;
@@ -158,7 +160,7 @@
     swtpm
     tpm2-tools
     git-crypt
-  ];
+  ] ++ [inputs.rose-pine-hyprcursor.packages.${pkgs.system}.default];
 
   programs.fish.enable = true;
   programs.mosh.enable = true;

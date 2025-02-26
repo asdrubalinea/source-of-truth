@@ -38,10 +38,8 @@
 
       # Environment variables
       env = [
-        # "XCURSOR_SIZE,48"
-        # "XCURSOR_THEM,ccgruv"
-        # "HYPRCURSOR_THEME,gruv"
         # "HYPRCURSOR_SIZE,48"
+        "HYPRCURSOR_THEME,rose-pine-hyprcursor"
       ];
 
       xwayland = {
@@ -109,7 +107,8 @@
         kb_options = "";
         kb_rules = "";
         follow_mouse = 1;
-        sensitivity = -1.0;
+        sensitivity = -0.4;
+        accel_profile = "flat";
 
         touchpad = {
           natural_scroll = true;
