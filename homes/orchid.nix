@@ -1,4 +1,4 @@
-{ pkgs, ... }:
+{ pkgs, inputs, ... }:
 let
   user-apply = pkgs.writeScriptBin "user-apply" ''
     #!${pkgs.stdenv.shell}
@@ -96,6 +96,8 @@ in {
     vesktop
     btop
 
+    obs-studio
+
     # Nix
     nixpkgs-fmt
     # rnix-lsp
@@ -111,17 +113,16 @@ in {
     docker-compose
 
     # Desktop
-    # firefox
     keepassxc
     chromium
     alacritty
     wezterm
+    inputs.zen-browser.packages.x86_64-linux.default
 
     neovim
     luarocks
     lua
 
-    trunk.geekbench
     prismlauncher
 
     # Custom
