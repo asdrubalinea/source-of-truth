@@ -18,7 +18,7 @@
       inputs.hyprland.follows = "hyprland";
     };
     vscode-server.url = "github:nix-community/nixos-vscode-server";
-    operator-mono.url = "path:/persist/Operator-Mono";
+    # operator-mono.url = "path:/persist/Operator-Mono";
     zen-browser.url = "github:0xc000022070/zen-browser-flake";
     rose-pine-hyprcursor = {
       url = "github:ndom91/rose-pine-hyprcursor";

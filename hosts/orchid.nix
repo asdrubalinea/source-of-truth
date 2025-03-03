@@ -22,7 +22,12 @@
 
   programs.virt-manager.enable = true;
   users.groups.libvirtd.members = ["irene"];
-  virtualisation.libvirtd.enable = true;
+  virtualisation = {
+    libvirtd = {
+      enable = true;
+      qemu.swtpm.enable = true;
+    };
+  };
   virtualisation.spiceUSBRedirection.enable = true;
 
   boot.initrd.availableKernelModules = ["ahci" "xhci_pci" "nvme" "usbhid" "usb_storage" "sd_mod"];
