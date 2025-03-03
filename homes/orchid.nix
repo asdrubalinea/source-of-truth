@@ -95,6 +95,10 @@ in {
     obsidian
     vesktop
     btop
+    zoom-us
+    superTuxKart
+    nemo
+    csvlens
 
     obs-studio
 
