@@ -98,8 +98,19 @@
   # ];
 
   networking.defaultGateway = "10.0.0.1";
-  networking.nameservers = ["1.1.1.1" "1.0.0.1"];
+  # networking.nameservers = ["1.1.1.1" "1.0.0.1"];
   networking.useDHCP = false;
+
+  services.resolved = {
+    enable = true;
+    extraConfig = ''
+        DNS=45.90.28.0#526d23.dns.nextdns.io
+        DNS=2a07:a8c0::#526d23.dns.nextdns.io
+        DNS=45.90.30.0#526d23.dns.nextdns.io
+        DNS=2a07:a8c1::#526d23.dns.nextdns.io
+        DNSOverTLS=yes
+    '';
+  };
 
   nixpkgs.hostPlatform = lib.mkDefault "x86_64-linux";
 

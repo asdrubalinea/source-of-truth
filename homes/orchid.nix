@@ -99,8 +99,10 @@ in {
     superTuxKart
     nemo
     csvlens
-
+    onlyoffice-desktopeditors
     obs-studio
+
+    (pkgs.callPackage ../packages/cider-2.nix {})
 
     # Nix
     nixpkgs-fmt
@@ -122,6 +124,11 @@ in {
     alacritty
     wezterm
     inputs.zen-browser.packages.x86_64-linux.default
+    ladybird
+
+    inputs.mm.packages.x86_64-linux.default
+    sqlite
+    sqlitebrowser
 
     neovim
     luarocks

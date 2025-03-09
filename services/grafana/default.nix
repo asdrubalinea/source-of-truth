@@ -24,6 +24,7 @@ in
   services.prometheus = {
     enable = true;
     port = 9001;
+    globalConfig.scrape_interval = "5s";
 
     exporters = {
       node = {

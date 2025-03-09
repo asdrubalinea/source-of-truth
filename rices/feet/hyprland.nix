@@ -15,7 +15,8 @@
 
       # Variables
       "$terminal" = "${pkgs.alacritty}/bin/alacritty";
-      "$browser" = "${pkgs.flatpak}/bin/flatpak run app.zen_browser.zen";
+      "$browser" = "${inputs.zen-browser.packages.x86_64-linux.default}/bin/zen";
+      # "$browser" = "${pkgs.flatpak}/bin/flatpak run app.zen_browser.zen";
       "$menu" = "${pkgs.tofi}/bin/tofi-run | xargs hyprctl dispatch exec --";
       "$mainMod" = "SUPER";
 
@@ -29,7 +30,7 @@
       exec-once = [
         "${pkgs.waybar}/bin/waybar &"
         "${pkgs.swww}/bin/swww-daemon &"
-        "${pkgs.albert}/bin/albert &"
+        # "${pkgs.albert}/bin/albert &"
       ];
 
       exec = [
@@ -122,20 +123,20 @@
       # Keybindings
       bind = [
         "$mainMod, return, exec, $terminal"
-        "ALT, space, exec, ${pkgs.albert}/bin/albert toggle"
+        # "ALT, space, exec, ${pkgs.albert}/bin/albert toggle"
         "$mainMod, space, exec, $menu"
 
         "$mainMod, u, hyprtasking:toggle, all"
 
         "$mainMod, Q, killactive,"
-        # "$mainMod, M, exit,"
         "$SUPER_SHIFT, space, togglefloating,"
         # "$mainMod, P, pseudo,"
         # "$mainMod, J, togglesplit,"
         # "$mainMod, D, exec, vesktop"
 
         "$SUPER_SHIFT, B, exec, $browser"
-        "$SUPER_SHIFT, S, exec, ${pkgs.grim}/bin/grim"
+        "$SUPER_SHIFT, S, exec, ${pkgs.grimblast}/bin/grimblast save area"
+        "$SUPER_SHIFT, M, exec, ${(pkgs.callPackage ../../packages/cider-2.nix {})}/bin/cider-2"
 
         "$mainMod, F, fullscreen"
         "$mainMod, v, layoutmsg, preselect d"

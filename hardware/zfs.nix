@@ -38,7 +38,7 @@
       interval = "Sun, 01:00";
     };
 
-    autoSnapshot.enable = true;
+    # autoSnapshot.enable = true;
   };
 
   # Erase your darlings.

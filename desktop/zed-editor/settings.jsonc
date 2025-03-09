@@ -114,8 +114,8 @@
   "buffer_font_family": "Maple Mono",
   "theme": {
     "mode": "system",
-    "light": "Rosé Pine",
-    "dark": "Rosé Pine"
+    "light": "Ayu Dark",
+    "dark": "Ayu Dark"
   },
   "inlay_hints": {
     "enabled": true
@@ -203,6 +203,11 @@
         {
           "display_name": "Claude 3.7 Sonnet",
           "name": "anthropic/claude-3.7-sonnet",
+          "max_tokens": 131072
+        },
+        {
+          "display_name": "Qwen QwQ 32B",
+          "name": "qwen/qwq-32b",
           "max_tokens": 131072
         }
       ]
