@@ -25,6 +25,13 @@
       inputs.nixpkgs.follows = "nixpkgs";
       inputs.hyprlang.follows = "hyprland/hyprlang";
     };
+
+    disko = {
+      url = "github:nix-community/disko/latest";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
+    mm.url = "github:asdrubalinea/mm-schema";
   };
 
   outputs =
@@ -35,6 +42,7 @@
     , home-manager
     , hyprland
     , vscode-server
+    , disko
     , ...
     }:
     let
@@ -78,6 +86,18 @@
 
           modules = [
             ./hosts/orchid.nix
+          ];
+        };
+
+        "tempest" = lib.nixosSystem {
+          inherit system pkgs;
+          specialArgs = { inherit inputs; };
+
+          modules = [
+            disko.nixosModules.disko
+
+            ./hosts/tempest.nix
+            ./disks/tempest.nix
           ];
         };
       };
