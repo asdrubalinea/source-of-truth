@@ -25,6 +25,7 @@ in {
     ../rices/feet
 
     ../desktop/zed-editor
+    ../desktop/emacs
 
     ../scripts/system-clean.nix
 
@@ -101,6 +102,10 @@ in {
     csvlens
     onlyoffice-desktopeditors
     obs-studio
+    helix
+    dnsutils
+    wl-clipboard
+    postman
 
     (pkgs.callPackage ../packages/cider-2.nix {})
 
@@ -126,7 +131,7 @@ in {
     inputs.zen-browser.packages.x86_64-linux.default
     ladybird
 
-    inputs.mm.packages.x86_64-linux.default
+    # inputs.mm.packages.x86_64-linux.default
     sqlite
     sqlitebrowser
 
