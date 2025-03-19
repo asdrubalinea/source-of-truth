@@ -1,14 +1,9 @@
 { ... }:
 let
   grafana_port = 3333;
-  grafana_domain = "grafana.local";
+  grafana_domain = "grafana.asdrubalini.com";
 in
 {
-  networking.extraHosts =
-    ''
-      127.0.0.1 ${grafana_domain}
-    '';
-
   services.grafana = {
     enable = true;
 
@@ -23,20 +18,20 @@ in
 
   services.prometheus = {
     enable = true;
-    port = 9001;
+    port = 9901;
     globalConfig.scrape_interval = "5s";
 
     exporters = {
       node = {
         enable = true;
         enabledCollectors = [ "systemd" ];
-        port = 9002;
+        port = 9902;
       };
 
       zfs = {
         enable = true;
         pools = [ "zroot" ];
-        port = 9003;
+        port = 9903;
       };
     };
 
@@ -44,8 +39,8 @@ in
       {
         job_name = "chrysalis";
         static_configs = [
-          { targets = [ "127.0.0.1:9002" ]; }
-          { targets = [ "127.0.0.1:9003" ]; }
+          { targets = [ "127.0.0.1:9902" ]; }
+          { targets = [ "127.0.0.1:9903" ]; }
         ];
       }
     ];

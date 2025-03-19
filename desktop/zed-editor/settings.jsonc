@@ -7,6 +7,14 @@
 // custom settings, run `zed: open default settings` from the
 // command palette (cmd-shift-p / ctrl-shift-p)
 {
+  "languages": {
+    "Rust": {
+      "show_edit_predictions": false
+    }
+  },
+  "features": {
+    "edit_prediction_provider": "zed"
+  },
   "ssh_connections": [
     {
       "host": "orchid",
@@ -24,6 +32,11 @@
         },
         {
           "paths": [
+            "~/src/leksi-app"
+          ]
+        },
+        {
+          "paths": [
             "~/src/leksi/"
           ]
         },
@@ -34,17 +47,27 @@
         },
         {
           "paths": [
-            "~/src/leksi/menqtm/"
-          ]
-        },
-        {
-          "paths": [
             "~/src/leksi/infra/"
           ]
         },
         {
           "paths": [
             "~/src/leksi/leksid/"
+          ]
+        },
+        {
+          "paths": [
+            "~/src/leksi/menqtm/"
+          ]
+        },
+        {
+          "paths": [
+            "~/src/leksi/py-test"
+          ]
+        },
+        {
+          "paths": [
+            "~/src/ttt-rl-rs"
           ]
         }
       ]
@@ -108,14 +131,14 @@
   },
   "base_keymap": "VSCode",
   "relative_line_numbers": true,
-  "ui_font_size": 21,
+  "ui_font_size": 18.0,
   "ui_font_family": "Maple Mono",
-  "buffer_font_size": 21.0,
+  "buffer_font_size": 18.0,
   "buffer_font_family": "Maple Mono",
   "theme": {
     "mode": "system",
-    "light": "Ayu Dark",
-    "dark": "Ayu Dark"
+    "light": "Catppuccin Mocha",
+    "dark": "Jellybeans"
   },
   "inlay_hints": {
     "enabled": true
@@ -144,6 +167,7 @@
     "show_status_indicator": false
   },
   "line_indicator_format": "short",
+  "format_on_save": "off",
   "terminal": {
     "copy_on_select": true,
     "button": true,
@@ -154,11 +178,33 @@
       "breadcrumbs": false
     }
   },
+  "diagnostics": {
+    // Whether to show warnings or not by default.
+    "include_warnings": false,
+    // Settings for inline diagnostics
+    "inline": {
+      // Whether to show diagnostics inline or not
+      "enabled": true,
+      // The delay in milliseconds to show inline diagnostics after the
+      // last diagnostic update.
+      "update_debounce_ms": 150,
+      // The amount of padding between the end of the source line and the start
+      // of the inline diagnostic in units of em widths.
+      "padding": 4,
+      // The minimum column to display inline diagnostics. This setting can be
+      // used to horizontally align inline diagnostics at some column. Lines
+      // longer than this value will still push diagnostics further to the right.
+      "min_column": 0,
+      // The minimum severity of the diagnostics to show inline.
+      // Shows all diagnostics when not specified.
+      "max_severity": "error"
+    }
+  },
   "lsp": {
     "rust-analyzer": {
       "initialization_options": {
         "check": {
-          "command": "clippy", // rust-analyzer.check.command (default: "check")
+          "command": "clippy" // rust-analyzer.check.command (default: "check")
         }
       }
     }

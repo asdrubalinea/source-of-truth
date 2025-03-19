@@ -8,9 +8,11 @@
     ../hardware/zfs.nix
     ../hardware/audio.nix
 
-    ../services/syncthing.nix
+    # ../services/syncthing.nix
 
     ../services/grafana
+    # ../services/glance
+    # ../services/caddy.nix
   ];
 
   # vfio.enable = false;
@@ -98,19 +100,19 @@
   # ];
 
   networking.defaultGateway = "10.0.0.1";
-  # networking.nameservers = ["1.1.1.1" "1.0.0.1"];
+  networking.nameservers = ["1.1.1.1" "1.0.0.1"];
   networking.useDHCP = false;
 
-  services.resolved = {
-    enable = true;
-    extraConfig = ''
-        DNS=45.90.28.0#526d23.dns.nextdns.io
-        DNS=2a07:a8c0::#526d23.dns.nextdns.io
-        DNS=45.90.30.0#526d23.dns.nextdns.io
-        DNS=2a07:a8c1::#526d23.dns.nextdns.io
-        DNSOverTLS=yes
-    '';
-  };
+  # services.resolved = {
+  #   enable = true;
+  #   extraConfig = ''
+  #       DNS=45.90.28.0#526d23.dns.nextdns.io
+  #       DNS=2a07:a8c0::#526d23.dns.nextdns.io
+  #       DNS=45.90.30.0#526d23.dns.nextdns.io
+  #       DNS=2a07:a8c1::#526d23.dns.nextdns.io
+  #       DNSOverTLS=yes
+  #   '';
+  # };
 
   nixpkgs.hostPlatform = lib.mkDefault "x86_64-linux";
 
@@ -176,6 +178,10 @@
     swtpm
     tpm2-tools
     git-crypt
+
+    vulkan-tools
+    vulkan-loader
+    vulkan-validation-layers
   ] ++ [inputs.rose-pine-hyprcursor.packages.${pkgs.system}.default];
 
   programs.fish.enable = true;
@@ -189,8 +195,11 @@
   # For VSCode Support
   programs.nix-ld.enable = true;
 
-  services.tailscale.enable = true;
-  services.tailscale.useRoutingFeatures = "server";
+  services.tailscale = {
+    enable = true;
+    useRoutingFeatures = "server";
+    permitCertUid = "caddy";
+  };
 
   services.ollama = {
     enable = false;
@@ -202,6 +211,21 @@
 
   services.openssh.enable = true;
 
+  services.vaultwarden = {
+    enable = true;
+    dbBackend = "sqlite";
+    backupDir = "/persist/vaultwarden";
+    config = {
+      DOMAIN = "https://bitwarden.asdrubalini.com";
+      SIGNUPS_ALLOWED = true;
+      ROCKET_ADDRESS = "127.0.0.1";
+      ROCKET_PORT = 8222;
+      ENABLE_WEBSOCKET = true;
+      SENDS_ALLOWED = true;
+      ROCKET_LOG = "critical";
+    };
+  };
+
   services.github-runners = {
     leksi = {
       enable = true;
@@ -211,10 +235,18 @@
     };
   };
 
+  # services.glance = {
+  #   enable = true;
+  #   openFirewall = true;
+  #   settings.server.port = 5678;
+  # };
+
   virtualisation.docker = {
     enable = true;
     extraOptions = "--data-root=/mnt/docker";
   };
+
+  programs.steam.enable = true;
 
   # security.polkit.enable = true;
 
@@ -235,7 +267,7 @@
     package = inputs.hyprland.packages.${pkgs.system}.hyprland;
   };
 
-  # networking.firewall.allowedTCPPorts = [ ];
+  networking.firewall.allowedTCPPorts = [ 80 443 ];
   # networking.firewall.allowedUDPPorts = [ ];
 
   system.stateVersion = "23.05";

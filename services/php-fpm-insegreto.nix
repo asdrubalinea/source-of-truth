@@ -41,4 +41,3 @@ in {
   };
   users.groups.${app} = { };
 }
-

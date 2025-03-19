@@ -22,7 +22,7 @@
       };
 
       font = {
-        size = 18.0;
+        size = 17.0;
 
         bold = {
           family = "JetBrainsMono Nerd Font";
@@ -52,8 +52,8 @@
         opacity = 0.97;
 
         padding = {
-          x = 5;
-          y = 5;
+          x = 8;
+          y = 8;
         };
 
         dimensions = {

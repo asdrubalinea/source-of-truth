@@ -18,6 +18,9 @@
       inputs.hyprland.follows = "hyprland";
     };
     vscode-server.url = "github:nix-community/nixos-vscode-server";
+
+    niri.url = "github:sodiboo/niri-flake";
+
     # operator-mono.url = "path:/persist/Operator-Mono";
     zen-browser.url = "github:0xc000022070/zen-browser-flake";
     rose-pine-hyprcursor = {
@@ -31,7 +34,7 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    mm.url = "github:asdrubalinea/mm-schema";
+    # mm.url = "github:asdrubalinea/mm-schema";
   };
 
   outputs =
@@ -41,6 +44,7 @@
     , nixpkgs-custom
     , home-manager
     , hyprland
+    , niri
     , vscode-server
     , disko
     , ...
@@ -85,6 +89,8 @@
           specialArgs = { inherit inputs; };
 
           modules = [
+            niri.nixosModules.niri
+
             ./hosts/orchid.nix
           ];
         };
@@ -111,6 +117,7 @@
             ./homes/orchid.nix
             hyprland.homeManagerModules.default
             vscode-server.homeModules.default
+            niri.homeModules.config
 
             {
               home = {
