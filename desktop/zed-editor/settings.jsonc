@@ -137,8 +137,8 @@
   "buffer_font_family": "Maple Mono",
   "theme": {
     "mode": "system",
-    "light": "Catppuccin Mocha",
-    "dark": "Jellybeans"
+    "light": "Rosé Pine",
+    "dark": "Rosés Pine"
   },
   "inlay_hints": {
     "enabled": true

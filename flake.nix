@@ -34,6 +34,8 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    stylix.url = "github:danth/stylix";
+
     # mm.url = "github:asdrubalinea/mm-schema";
   };
 
@@ -47,6 +49,7 @@
     , niri
     , vscode-server
     , disko
+    , stylix
     , ...
     }:
     let
@@ -90,6 +93,7 @@
 
           modules = [
             niri.nixosModules.niri
+            # stylix.nixosModules.stylix
 
             ./hosts/orchid.nix
           ];
@@ -114,10 +118,12 @@
           extraSpecialArgs = { inherit inputs; };
 
           modules = [
-            ./homes/orchid.nix
             hyprland.homeManagerModules.default
             vscode-server.homeModules.default
             niri.homeModules.config
+            stylix.homeManagerModules.stylix
+
+            ./homes/orchid.nix
 
             {
               home = {

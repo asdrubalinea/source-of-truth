@@ -5,5 +5,6 @@
     ./waybar
     ./wallpaper
     ./tofi.nix
+    ./stylix.nix
   ];
 }

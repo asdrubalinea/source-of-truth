@@ -22,34 +22,34 @@
       };
 
       font = {
-        size = 17.0;
+        # size = 17.0;
 
-        bold = {
-          family = "JetBrainsMono Nerd Font";
-          style = "Bold";
-        };
+        # bold = {
+        #   family = "JetBrainsMono Nerd Font";
+        #   style = "Bold";
+        # };
 
-        bold_italic = {
-          family = "JetBrainsMono Nerd Font";
-          style = "Bold Italic";
-        };
+        # bold_italic = {
+        #   family = "JetBrainsMono Nerd Font";
+        #   style = "Bold Italic";
+        # };
 
-        italic = {
-          family = "JetBrainsMono Nerd Font";
-          style = "Italic";
-        };
+        # italic = {
+        #   family = "JetBrainsMono Nerd Font";
+        #   style = "Italic";
+        # };
 
-        normal = {
-          family = "JetBrainsMono Nerd Font";
-          style = "Regular";
-        };
+        # normal = {
+        #   family = "JetBrainsMono Nerd Font";
+        #   style = "Regular";
+        # };
       };
 
       window = {
         dynamic_title = true;
         title = "Alacritty";
         decorations = "buttonless";
-        opacity = 0.97;
+        # opacity = 0.97;
 
         padding = {
           x = 8;
@@ -63,34 +63,34 @@
       };
 
       # Synthwave 84
-      colors = {
-        primary = {
-          foreground = "#ffffff";
-          background = "#13111a";
-        };
+      # colors = {
+      #   primary = {
+      #     foreground = "#ffffff";
+      #     background = "#13111a";
+      #   };
 
-        normal = {
-          black = "#262335";
-          red = "#fe4450";
-          green = "#72f1b8";
-          yellow = "#f3e70f";
-          blue = "#03edf9";
-          magenta = "#ff7edb";
-          cyan = "#03edf9";
-          white = "#ffffff";
-        };
+      #   normal = {
+      #     black = "#262335";
+      #     red = "#fe4450";
+      #     green = "#72f1b8";
+      #     yellow = "#f3e70f";
+      #     blue = "#03edf9";
+      #     magenta = "#ff7edb";
+      #     cyan = "#03edf9";
+      #     white = "#ffffff";
+      #   };
 
-        bright = {
-          black = "#614d85";
-          red = "#fe4450";
-          green = "#72f1b8";
-          yellow = "#fede5d";
-          blue = "#03edf9";
-          magenta = "#ff7edb";
-          cyan = "#03edf9";
-          white = "#ffffff";
-        };
-      };
+      #   bright = {
+      #     black = "#614d85";
+      #     red = "#fe4450";
+      #     green = "#72f1b8";
+      #     yellow = "#fede5d";
+      #     blue = "#03edf9";
+      #     magenta = "#ff7edb";
+      #     cyan = "#03edf9";
+      #     white = "#ffffff";
+      #   };
+      # };
 
       # # Challenger deep
       # colors = {
