@@ -11,8 +11,8 @@
       padding-top = "35%";
       result-spacing = 25;
       num-results = 5;
-      font = "JetBrainsMono Nerd Font";
-      background-color = "#000A";
+      # font = "JetBrainsMono Nerd Font";
+      # background-color = "#000A";
     };
   };
 }

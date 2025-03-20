@@ -52,8 +52,8 @@
         gaps_out = 10;
         border_size = 2;
 
-        "col.active_border" = "rgba($redAlphaee) rgba($yellowAlphaee) rgba($peachAlphaee) 30deg";
-        "col.inactive_border" = "rgba($mauveAlphaaa) rgba($tealAlphaee) rgba($skyAlphaee) 30deg";
+        # "col.active_border" = "rgba($redAlphaee) rgba($yellowAlphaee) rgba($peachAlphaee) 30deg";
+        # "col.inactive_border" = "rgba($mauveAlphaaa) rgba($tealAlphaee) rgba($skyAlphaee) 30deg";
 
         resize_on_border = true;
         allow_tearing = false;

@@ -268,7 +268,10 @@
   };
 
   networking.firewall.allowedTCPPorts = [ 80 443 ];
-  # networking.firewall.allowedUDPPorts = [ ];
+  # networking.firewall.allowedUDPPorts = [ ]
+
+  # stylix.enable = true;
+  # stylix.base16Scheme = "${pkgs.base16-schemes}/share/themes/gruvbox-dark-hard.yaml";
 
   system.stateVersion = "23.05";
 }
