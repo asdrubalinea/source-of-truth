@@ -10,6 +10,5 @@
     please = "${pkgs.doas}/bin/doas";
     neofetch = "${pkgs.hyfetch}/bin/hyfetch";
     fetch = "${pkgs.hyfetch}/bin/hyfetch";
-    fastfetch = "${pkgs.hyfetch}/bin/hyfetch";
   };
 }

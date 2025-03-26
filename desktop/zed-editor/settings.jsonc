@@ -212,7 +212,7 @@
   "assistant": {
     "default_model": {
       "provider": "openai",
-      "model": "qwen/qwen-2.5-72b-instruct"
+      "model": "deepseek/deepseek-chat-v3-0324"
     },
     "version": "2"
   },
@@ -254,6 +254,11 @@
         {
           "display_name": "Qwen QwQ 32B",
           "name": "qwen/qwq-32b",
+          "max_tokens": 131072
+        },
+        {
+          "display_name": "DeepSeek V3 0324",
+          "name": "deepseek/deepseek-chat-v3-0324",
           "max_tokens": 131072
         }
       ]
