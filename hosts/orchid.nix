@@ -43,7 +43,7 @@
   services.flatpak.enable = true;
 
   nix.gc = {
-		automatic = true;
+		automatic = false;
 		dates = "weekly";
 		options = "--delete-older-than 30d";
 	};
@@ -182,7 +182,9 @@
     vulkan-tools
     vulkan-loader
     vulkan-validation-layers
-  ] ++ [inputs.rose-pine-hyprcursor.packages.${pkgs.system}.default];
+  ] ++ [
+    inputs.rose-pine-hyprcursor.packages.${pkgs.system}.default
+  ];
 
   programs.fish.enable = true;
   programs.mosh.enable = true;
@@ -269,9 +271,6 @@
 
   networking.firewall.allowedTCPPorts = [ 80 443 ];
   # networking.firewall.allowedUDPPorts = [ ]
-
-  # stylix.enable = true;
-  # stylix.base16Scheme = "${pkgs.base16-schemes}/share/themes/gruvbox-dark-hard.yaml";
 
   system.stateVersion = "23.05";
 }
