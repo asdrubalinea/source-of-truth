@@ -22,10 +22,12 @@ let
   '');
 in {
   imports = [
+    inputs.sops-nix.homeManagerModules.sops
+
     ../rices/feet
 
     ../desktop/zed-editor
-    ../desktop/emacs
+    # ../desktop/emacs
 
     ../scripts/system-clean.nix
 
@@ -165,5 +167,10 @@ in {
   programs.nix-index = {
     enable = true;
     enableFishIntegration = true;
+  };
+
+  sops = {
+    age.sshKeyPaths = [ "/home/irene/.ssh/id_ed25519" ];
+    defaultSopsFile = ./secrets.yaml;
   };
 }

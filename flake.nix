@@ -35,6 +35,7 @@
     };
 
     stylix.url = "github:danth/stylix";
+    sops-nix.url = "github:Mic92/sops-nix";
 
     # mm.url = "github:asdrubalinea/mm-schema";
   };
@@ -50,6 +51,7 @@
     , vscode-server
     , disko
     , stylix
+    , sops-nix
     , ...
     }:
     let
@@ -93,7 +95,6 @@
 
           modules = [
             niri.nixosModules.niri
-            # stylix.nixosModules.stylix
 
             ./hosts/orchid.nix
           ];
