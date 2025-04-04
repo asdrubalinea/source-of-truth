@@ -14,7 +14,7 @@
       debug.disable_logs = false;
 
       # Variables
-      "$terminal" = "${pkgs.alacritty}/bin/alacritty";
+      "$terminal" = "${pkgs.rio}/bin/rio";
       "$browser" = "${inputs.zen-browser.packages.x86_64-linux.default}/bin/zen";
       # "$browser" = "${pkgs.flatpak}/bin/flatpak run app.zen_browser.zen";
       "$menu" = "${pkgs.tofi}/bin/tofi-run | xargs hyprctl dispatch exec --";
