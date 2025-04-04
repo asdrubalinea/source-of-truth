@@ -105,13 +105,22 @@ in {
     csvlens
     onlyoffice-desktopeditors
     obs-studio
-    helix
     dnsutils
     wl-clipboard
     postman
     just
     distrobox
     rclone
+    restic
+    czkawka
+    cachix
+    tor-browser
+    mpv
+    vlc
+    dbeaver-bin
+    gitui
+    yazi
+    evil-helix
 
     (pkgs.callPackage ../packages/cider-2.nix {})
 

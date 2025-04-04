@@ -6,5 +6,6 @@
     ./wallpaper
     ./tofi.nix
     ./stylix.nix
+    # ./niri.nix
   ];
 }
