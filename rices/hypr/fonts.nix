@@ -14,7 +14,7 @@
       nerd-fonts.jetbrains-mono
       nerd-fonts.iosevka-term
       recursive
-      maple-mono
+      # maple-mono
     ] ++ [
       # inputs.operator-mono.packages.x86_64-linux.default
     ];

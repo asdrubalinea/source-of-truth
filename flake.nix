@@ -2,42 +2,60 @@
   description = "NixOS configurations for asdrubalinea 🏳️‍⚧️";
 
   inputs = {
+    # --- Nixpkgs Channels ---
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
-    nixpkgs-stable.url = "github:nixos/nixpkgs/nixos-24.05";
+    nixpkgs-stable.url = "github:nixos/nixpkgs/nixos-24.11";
     nixpkgs-trunk.url = "github:nixos/nixpkgs";
-
-    # nixpkgs-custom.url = "path:/persist/src/nixpkgs";
     nixpkgs-custom.url = "github:nixos/nixpkgs";
 
-    home-manager.url = "github:nix-community/home-manager";
-    home-manager.inputs.nixpkgs.follows = "nixpkgs";
+    # --- Core Components ---
+    home-manager = {
+      url = "github:nix-community/home-manager";
+      # Make home-manager use the same nixpkgs as the system
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+    disko = {
+      url = "github:nix-community/disko"; # Using default branch (often main/master)
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+    sops-nix = {
+      url = "github:Mic92/sops-nix";
+      inputs.nixpkgs.follows = "nixpkgs"; # Good practice to follow the main nixpkgs
+    };
 
-    hyprland.url = "github:hyprwm/Hyprland";
+    # --- Desktop/UI Components ---
+    hyprland = {
+      url = "github:hyprwm/Hyprland";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     hyprtasking = {
       url = "github:raybbian/hyprtasking";
       inputs.hyprland.follows = "hyprland";
+      inputs.nixpkgs.follows = "nixpkgs";
     };
-    vscode-server.url = "github:nix-community/nixos-vscode-server";
-
-    niri.url = "github:sodiboo/niri-flake";
-
-    # operator-mono.url = "path:/persist/Operator-Mono";
-    zen-browser.url = "github:0xc000022070/zen-browser-flake";
+    niri = {
+      url = "github:sodiboo/niri-flake";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+    stylix = {
+      url = "github:danth/stylix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     rose-pine-hyprcursor = {
       url = "github:ndom91/rose-pine-hyprcursor";
       inputs.nixpkgs.follows = "nixpkgs";
       inputs.hyprlang.follows = "hyprland/hyprlang";
     };
 
-    disko = {
-      url = "github:nix-community/disko/latest";
+    # --- Applications/Services ---
+    vscode-server = {
+      url = "github:nix-community/nixos-vscode-server";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-
-    stylix.url = "github:danth/stylix";
-    sops-nix.url = "github:Mic92/sops-nix";
-
-    # mm.url = "github:asdrubalinea/mm-schema";
+    zen-browser = {
+      url = "github:0xc000022070/zen-browser-flake";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs =
