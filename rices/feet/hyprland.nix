@@ -12,10 +12,15 @@
 
     settings = {
       debug.disable_logs = false;
+	
+     monitor = [
+        "HDMI-A-1, 3440x1440@75, 0x0, 1" # Samsung
+        "DP-2, 2560x1440@60, 3440x0, 1" # Benq
+      ];
 
       # Variables
-      "$terminal" = "${pkgs.rio}/bin/rio";
-      "$browser" = "${inputs.zen-browser.packages.x86_64-linux.default}/bin/zen";
+      "$terminal" = "${pkgs.alacritty}/bin/alacritty";
+      "$browser" = "${inputs.zen-browser.packages.x86_64-linux.beta}/bin/zen-beta";
       # "$browser" = "${pkgs.flatpak}/bin/flatpak run app.zen_browser.zen";
       "$menu" = "${pkgs.tofi}/bin/tofi-run | xargs hyprctl dispatch exec --";
       "$mainMod" = "SUPER";

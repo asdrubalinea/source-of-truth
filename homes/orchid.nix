@@ -121,6 +121,7 @@ in {
     gitui
     yazi
     evil-helix
+    seahorse
 
     (pkgs.callPackage ../packages/cider-2.nix {})
 

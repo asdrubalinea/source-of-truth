@@ -166,6 +166,8 @@
   security.sudo.enable = true;
   security.doas.enable = true;
 
+  security.pam.services.greetd.enableGnomeKeyring = true;
+
   security.doas.extraRules = [{
     users = ["irene"];
     keepEnv = true;
