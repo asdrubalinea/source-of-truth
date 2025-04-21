@@ -56,6 +56,10 @@
       url = "github:0xc000022070/zen-browser-flake";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    emacs-overlay = {
+      url = "github:nix-community/emacs-overlay";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs =
@@ -70,6 +74,7 @@
     , disko
     , stylix
     , sops-nix
+    , emacs-overlay
     , ...
     }:
     let
@@ -100,7 +105,7 @@
           rocmSupport = true;
         };
 
-        overlays = [ multiChannelOverlay ];
+        overlays = [ multiChannelOverlay emacs-overlay.overlay ];
       };
 
       lib = nixpkgs.lib;

@@ -47,6 +47,11 @@ in {
     components = [ "pkcs11" "secrets" "ssh" ];
   };
 
+  programs.emacs = {
+    enable = true;
+    package = pkgs.emacsPgtkGcc;
+  };
+
   home.packages = with pkgs; [
     # System utils
     hyfetch
@@ -122,6 +127,7 @@ in {
     yazi
     evil-helix
     seahorse
+    blueberry
 
     (pkgs.callPackage ../packages/cider-2.nix {})
 
