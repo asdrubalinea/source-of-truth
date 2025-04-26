@@ -14,6 +14,7 @@
 
   networking.hostName = "tempst"; # Define your hostname.
   networking.networkmanager.enable = true;  # Easiest to use and most distros use this by default.
+  networking.hostId = "856ff057";
 
   # Set your time zone.
   time.timeZone = "Europe/Rome";
