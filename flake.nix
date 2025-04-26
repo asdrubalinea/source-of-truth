@@ -60,22 +60,27 @@
       url = "github:nix-community/emacs-overlay";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    nixvim = {
+      url = "github:asdrubalinea/nixvim";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs =
-    inputs @ { nixpkgs
-    , nixpkgs-stable
-    , nixpkgs-trunk
-    , nixpkgs-custom
-    , home-manager
-    , hyprland
-    , niri
-    , vscode-server
-    , disko
-    , stylix
-    , sops-nix
-    , emacs-overlay
-    , ...
+    inputs@{
+      nixpkgs,
+      nixpkgs-stable,
+      nixpkgs-trunk,
+      nixpkgs-custom,
+      home-manager,
+      hyprland,
+      niri,
+      vscode-server,
+      disko,
+      stylix,
+      sops-nix,
+      emacs-overlay,
+      ...
     }:
     let
       system = "x86_64-linux";
@@ -105,7 +110,10 @@
           rocmSupport = true;
         };
 
-        overlays = [ multiChannelOverlay emacs-overlay.overlay ];
+        overlays = [
+          multiChannelOverlay
+          emacs-overlay.overlay
+        ];
       };
 
       lib = nixpkgs.lib;
