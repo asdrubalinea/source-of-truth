@@ -133,11 +133,6 @@ in
             options.mountpoint = "legacy";
             mountpoint = "/var/lib";
           };
-          "nixos/config" = {
-            type = "zfs_fs";
-            options.mountpoint = "legacy";
-            mountpoint = "/etc/nixos";
-          };
           "nixos/persist" = {
             type = "zfs_fs";
             options.mountpoint = "legacy";

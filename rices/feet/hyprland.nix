@@ -1,4 +1,5 @@
-{ pkgs, inputs, ... }: {
+{ pkgs, inputs, ... }:
+{
   wayland.windowManager.hyprland = {
     enable = true;
 
@@ -12,8 +13,8 @@
 
     settings = {
       debug.disable_logs = false;
-	
-     monitor = [
+
+      monitor = [
         "HDMI-A-1, 3440x1440@75, 0x0, 1" # Samsung
         "DP-2, 2560x1440@60, 3440x0, 1" # Benq
       ];
@@ -141,7 +142,7 @@
 
         "$SUPER_SHIFT, B, exec, $browser"
         "$SUPER_SHIFT, S, exec, ${pkgs.grimblast}/bin/grimblast save area"
-        "$SUPER_SHIFT, M, exec, ${(pkgs.callPackage ../../packages/cider-2.nix {})}/bin/cider-2"
+        "$SUPER_SHIFT, M, exec, ${(pkgs.callPackage ../../packages/cider-2.nix { })}/bin/cider-2"
 
         "$mainMod, F, fullscreen"
         "$mainMod, v, layoutmsg, preselect d"

@@ -5,6 +5,10 @@
     # base16Scheme = "${pkgs.base16-schemes}/share/themes/qualia.yaml";
     # base16Scheme = "${pkgs.base16-schemes}/share/themes/gruvbox-dark-hard.yaml";
 
+    targets = {
+      neovim.enable = false;
+    };
+
     fonts = {
       sizes = {
         terminal = 20;

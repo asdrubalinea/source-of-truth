@@ -1,4 +1,10 @@
-{ inputs, lib, pkgs, ... }: {
+{
+  inputs,
+  lib,
+  pkgs,
+  ...
+}:
+{
   imports = [
     ../rices/hypr/fonts.nix
 
@@ -23,7 +29,7 @@
   #};
 
   programs.virt-manager.enable = true;
-  users.groups.libvirtd.members = ["irene"];
+  users.groups.libvirtd.members = [ "irene" ];
   virtualisation = {
     libvirtd = {
       enable = true;
@@ -32,10 +38,20 @@
   };
   virtualisation.spiceUSBRedirection.enable = true;
 
-  boot.initrd.availableKernelModules = ["ahci" "xhci_pci" "nvme" "usbhid" "usb_storage" "sd_mod"];
-  boot.initrd.kernelModules = [];
-  boot.kernelModules = ["kvm-amd" "amdgpu"];
-  boot.extraModulePackages = [];
+  boot.initrd.availableKernelModules = [
+    "ahci"
+    "xhci_pci"
+    "nvme"
+    "usbhid"
+    "usb_storage"
+    "sd_mod"
+  ];
+  boot.initrd.kernelModules = [ ];
+  boot.kernelModules = [
+    "kvm-amd"
+    "amdgpu"
+  ];
+  boot.extraModulePackages = [ ];
 
   hardware.cpu.amd.updateMicrocode = true;
   hardware.enableAllFirmware = true;
@@ -43,10 +59,10 @@
   services.flatpak.enable = true;
 
   nix.gc = {
-		automatic = false;
-		dates = "weekly";
-		options = "--delete-older-than 30d";
-	};
+    automatic = false;
+    dates = "weekly";
+    options = "--delete-older-than 30d";
+  };
 
   fileSystems."/" = {
     device = "zroot/local/root";
@@ -83,16 +99,18 @@
     fsType = "zfs";
   };
 
-  swapDevices = [];
+  swapDevices = [ ];
 
   networking.hostName = "orchid";
   networking.hostId = "f00dbabe";
 
   # Upstream internet
-  networking.interfaces.enp4s0f0.ipv4.addresses = [ {
-    address = "10.0.0.10";
-    prefixLength = 20;
-  } ];
+  networking.interfaces.enp4s0f0.ipv4.addresses = [
+    {
+      address = "10.0.0.10";
+      prefixLength = 20;
+    }
+  ];
 
   # Erase your darlings.
   # systemd.tmpfiles.rules = [
@@ -100,7 +118,10 @@
   # ];
 
   networking.defaultGateway = "10.0.0.1";
-  networking.nameservers = ["1.1.1.1" "1.0.0.1"];
+  networking.nameservers = [
+    "1.1.1.1"
+    "1.0.0.1"
+  ];
   networking.useDHCP = false;
 
   # services.resolved = {
@@ -146,7 +167,7 @@
   console = {
     earlySetup = true;
     font = "${pkgs.terminus_font}/share/consolefonts/ter-132n.psf.gz";
-    packages = with pkgs; [terminus_font];
+    packages = with pkgs; [ terminus_font ];
     keyMap = "us";
   };
 
@@ -156,8 +177,15 @@
 
     users."irene" = {
       isNormalUser = true;
-      extraGroups = ["wheel" "libvirtd" "docker" "jackaudio" "render" "video"];
-      openssh.authorizedKeys.keys = [(import ../ssh-keys/looking-glass.nix).key];
+      extraGroups = [
+        "wheel"
+        "libvirtd"
+        "docker"
+        "jackaudio"
+        "render"
+        "video"
+      ];
+      openssh.authorizedKeys.keys = [ (import ../ssh-keys/looking-glass.nix).key ];
       hashedPassword = (import ../passwords).password;
       shell = pkgs.fish;
     };
@@ -168,25 +196,30 @@
 
   security.pam.services.greetd.enableGnomeKeyring = true;
 
-  security.doas.extraRules = [{
-    users = ["irene"];
-    keepEnv = true;
-    noPass = true;
-  }];
-
-  environment.systemPackages = with pkgs; [
-    neovim
-    git
-    swtpm
-    tpm2-tools
-    git-crypt
-
-    vulkan-tools
-    vulkan-loader
-    vulkan-validation-layers
-  ] ++ [
-    inputs.rose-pine-hyprcursor.packages.${pkgs.system}.default
+  security.doas.extraRules = [
+    {
+      users = [ "irene" ];
+      keepEnv = true;
+      noPass = true;
+    }
   ];
+
+  environment.systemPackages =
+    with pkgs;
+    [
+      neovim
+      git
+      swtpm
+      tpm2-tools
+      git-crypt
+
+      vulkan-tools
+      vulkan-loader
+      vulkan-validation-layers
+    ]
+    ++ [
+      inputs.rose-pine-hyprcursor.packages.${pkgs.system}.default
+    ];
 
   programs.fish.enable = true;
   programs.mosh.enable = true;
@@ -256,10 +289,13 @@
 
   nix = {
     package = pkgs.nixVersions.stable;
-    settings.trusted-users = ["root" "irene"];
+    settings.trusted-users = [
+      "root"
+      "irene"
+    ];
     settings = {
-      substituters = ["https://hyprland.cachix.org"];
-      trusted-public-keys = ["hyprland.cachix.org-1:a7pgxzMz7+chwVL3/pzj6jIBMioiJM7ypFP8PwtkuGc="];
+      substituters = [ "https://hyprland.cachix.org" ];
+      trusted-public-keys = [ "hyprland.cachix.org-1:a7pgxzMz7+chwVL3/pzj6jIBMioiJM7ypFP8PwtkuGc=" ];
     };
     extraOptions = ''
       experimental-features = nix-command flakes
@@ -271,7 +307,10 @@
     package = inputs.hyprland.packages.${pkgs.system}.hyprland;
   };
 
-  networking.firewall.allowedTCPPorts = [ 80 443 ];
+  networking.firewall.allowedTCPPorts = [
+    80
+    443
+  ];
   # networking.firewall.allowedUDPPorts = [ ]
 
   system.stateVersion = "23.05";

@@ -9,18 +9,24 @@ let
     popd
   '';
 
-  system-apply = (pkgs.callPackage ../scripts/system-apply.nix {
-    configPath = "/persist/source-of-truth";
-  }).systemApply;
+  system-apply =
+    (pkgs.callPackage ../scripts/system-apply.nix {
+      configPath = "/persist/source-of-truth";
+    }).systemApply;
 
-  arc-size = (pkgs.writeShellScriptBin "arc-size" ''
-    cat /proc/spl/kstat/zfs/arcstats | grep '^size ' | awk '{ print $3 }' | awk '{ print $1 / (1024 * 1024 * 1024) " GiB" }'
-  '');
+  arc-size = (
+    pkgs.writeShellScriptBin "arc-size" ''
+      cat /proc/spl/kstat/zfs/arcstats | grep '^size ' | awk '{ print $3 }' | awk '{ print $1 / (1024 * 1024 * 1024) " GiB" }'
+    ''
+  );
 
-  nix-size = (pkgs.writeShellScriptBin "nix-size" ''
-    zfs list -o name,used -t filesystem,volume -Hp | awk -v dataset='zroot/local/nix' '$1 == dataset { printf "%.0f GiB", $2/1024/1024/1024 }'
-  '');
-in {
+  nix-size = (
+    pkgs.writeShellScriptBin "nix-size" ''
+      zfs list -o name,used -t filesystem,volume -Hp | awk -v dataset='zroot/local/nix' '$1 == dataset { printf "%.0f GiB", $2/1024/1024/1024 }'
+    ''
+  );
+in
+{
   imports = [
     inputs.sops-nix.homeManagerModules.sops
 
@@ -44,7 +50,11 @@ in {
 
   services.gnome-keyring = {
     enable = true;
-    components = [ "pkcs11" "secrets" "ssh" ];
+    components = [
+      "pkcs11"
+      "secrets"
+      "ssh"
+    ];
   };
 
   programs.emacs = {
@@ -128,8 +138,9 @@ in {
     evil-helix
     seahorse
     blueberry
+    ntfs3g
 
-    (pkgs.callPackage ../packages/cider-2.nix {})
+    (pkgs.callPackage ../packages/cider-2.nix { })
 
     # Nix
     nixpkgs-fmt
@@ -158,7 +169,8 @@ in {
     sqlite
     sqlitebrowser
 
-    neovim
+    inputs.nixvim.packages.${pkgs.system}.default
+
     luarocks
     lua
 
@@ -173,6 +185,19 @@ in {
 
     aider-chat
   ];
+
+  # programs.neovim = {
+  #   enable = true;
+
+  #   plugins = with pkgs.vimPlugins; [
+  #     telescope-nvim
+  #     telescope-fzf-native-nvim
+  #   ];
+
+  #   extraPackages = with pkgs; [
+  #     lua-language-server
+  #   ];
+  # };
 
   # programs.vscode = {
   #   enable = true;
