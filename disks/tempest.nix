@@ -1,13 +1,12 @@
-{ config, ... }:
 let
-  diskMain = builtins.head config.zfs-root.bootDevices;
+  diskMain = "vda";
 in
 {
   disko.devices = {
     disk = {
       main = {
         type = "disk";
-        device = "/dev/disk/by-id/${diskMain}";
+        device = "/dev/${diskMain}";
         content = {
           type = "gpt";
           partitions = {
@@ -17,7 +16,7 @@ in
               content = {
                 type = "filesystem";
                 format = "vfat";
-                mountpoint = "/boot/efis/${diskMain}-part2";
+                mountpoint = "/boot/efis/${diskMain}";
               };
             };
 
