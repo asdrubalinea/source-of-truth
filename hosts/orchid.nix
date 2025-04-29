@@ -94,11 +94,6 @@
     fsType = "zfs";
   };
 
-  fileSystems."/data" = {
-    device = "rpool/data";
-    fsType = "zfs";
-  };
-
   swapDevices = [ ];
 
   networking.hostName = "orchid";
@@ -305,6 +300,13 @@
   programs.hyprland = {
     enable = true;
     package = inputs.hyprland.packages.${pkgs.system}.hyprland;
+  };
+
+  services.pixiecore = {
+    enable = true;
+    openFirewall = true;
+    dhcpNoBind = true;
+    kernel = "https://boot.netboot.xyz";
   };
 
   networking.firewall.allowedTCPPorts = [
