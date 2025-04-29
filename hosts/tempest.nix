@@ -6,13 +6,11 @@
   config,
   lib,
   pkgs,
-  modulesPath,
   ...
 }:
 
 {
   imports = [
-    (modulesPath + "/profiles/qemu-guest.nix")
   ];
 
   # Enable ZFS
@@ -20,31 +18,24 @@
   # boot.initrd.supportedFilesystems = [ "zfs" ]; # Ensure initrd can handle ZFS pool discovery
   # services.zfs.autoScrub.enable = true;
 
+  boot.initrd.availableKernelModules = [ "nvme" "xhci_pci" "thunderbolt" "usb_storage" "sd_mod" ];
+  boot.initrd.kernelModules = [ ];
+  boot.kernelModules = [ "kvm-amd" ];
+  boot.extraModulePackages = [ ];
+
   networking.hostName = "tempest"; # Define your hostname.
   networking.networkmanager.enable = true; # Easiest to use and most distros use this by default.
   networking.hostId = "856ff057";
 
-  # Configure LUKS device unlocking in initrd
-  # These device paths depend on the partition labels/UUIDs created by Disko.
-  # Double-check these match the PARTLABELs in /dev/disk/by-partlabel/ after Disko runs.
-  boot.initrd.luks.devices = {
-    "cryptroot" = {
-      device = "/dev/disk/by-partlabel/cryptroot";
-      preLVM = true;
-      allowDiscards = true;
-    };
-  };
-
   # Configure Bootloader (GRUB for LUKS unlock)
-  # disko-install with --write-efi-boot-entries handles the EFI side.
-  # These settings ensure GRUB itself is configured correctly within NixOS.
   boot.loader.systemd-boot.enable = false;
-  boot.loader.efi.canTouchEfiVariables = true;
+  boot.loader.efi.canTouchEfiVariables = false;
+  boot.loader.efi.efiSysMountPoint = "/boot/efi";
   boot.loader.grub = {
     enable = true;
+    efiInstallAsRemovable = true;
     efiSupport = true;
-    device = "nodev"; # Let NixOS manage the ESP path
-    useOSProber = false;
+    device = "nodev";
     enableCryptodisk = true;
   };
 

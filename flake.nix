@@ -140,7 +140,7 @@
 
           modules = [
             disko.nixosModules.disko
-            impermanence.homeManagerModules.impermanence
+            # impermanence.homeManagerModules.impermanence
 
             ./hosts/tempest.nix
             ./disks/luks-tempest-temp.nix
