@@ -144,7 +144,7 @@
             impermanence.homeManagerModules.impermanence
 
             ./hosts/tempest.nix
-            ./disks/tempest.nix
+            ./disks/luks-tempest-temp.nix
           ];
         };
       };
