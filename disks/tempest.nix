@@ -1,149 +1,108 @@
+{ inputs, ... }:
+
 let
-  diskMain = "vda";
+  diskDevicePath = inputs.main.device;
+
+  swapSize = "40G";
 in
 {
   disko.devices = {
     disk = {
       main = {
-        type = "disk";
-        device = "/dev/${diskMain}";
-        content = {
-          type = "gpt";
-          partitions = {
-            efi = {
-              size = "1G";
-              type = "EF00";
+        device = diskDevicePath;
+        type = "gpt";
+        partitions = [
+          # EFI System Partition (ESP) - Unencrypted
+          {
+            name = "ESP";
+            size = "1G";
+            type = "ef00";
+            content = {
+              type = "filesystem";
+              format = "vfat";
+              mountpoint = "/boot/efi";
+            };
+          }
+
+          # LUKS Encrypted Partition for Swap
+          {
+            name = "cryptswap_part";
+            size = swapSize;
+            content = {
+              type = "luks";
+              name = "cryptswap"; # Mapped device: /dev/mapper/cryptswap
+              # keyFile option can be added if needed
+              settings = {
+                allowDiscards = true;
+              };
               content = {
-                type = "filesystem";
-                format = "vfat";
-                mountpoint = "/boot/efis/${diskMain}";
+                type = "swap"; # Mark for NixOS swap activation
               };
             };
+          }
 
-            bpool = {
-              size = "4G";
+          # LUKS Encrypted Partition for ZFS (main data)
+          {
+            name = "cryptroot_part";
+            size = "100%";
+            content = {
+              type = "luks";
+              name = "cryptroot"; # Mapped device: /dev/mapper/cryptroot
+              # keyFile option can be added if needed
+              settings = {
+                allowDiscards = true;
+              };
               content = {
-                type = "zfs";
-                pool = "bpool";
+                type = "zpool";
+                name = "zroot";
+                rootFsOptions = {
+                  canmount = "off";
+                  mountpoint = "none";
+                };
+                options = {
+                  ashift = "12";
+                  autotrim = "on";
+                };
+                datasets = {
+                  # Base datasets needed
+                  "blankroot" = {
+                    mountpoint = "/";
+                    options.canmount = "off";
+                  }; # For tmpfs overlay
+                  "nix" = {
+                    mountpoint = "/nix";
+                  };
+                  "boot" = {
+                    mountpoint = "/boot";
+                  }; # Kernels/initrds live here (encrypted)
+
+                  # Base persistent directory - Used by impermanence module
+                  "persist" = {
+                    mountpoint = "/persist";
+                  };
+
+                  "home" = {
+                    mountpoint = "/home";
+                  };
+                  "var/log" = {
+                    mountpoint = "/var/log";
+                  };
+                };
               };
             };
-
-            rpool = {
-              end = "-1M";
-              content = {
-                type = "zfs";
-                pool = "rpool";
-              };
-            };
-
-            bios = {
-              size = "100%";
-              type = "EF02";
-            };
-          };
-        };
+          }
+        ];
       };
     };
 
-    zpool = {
-      # Boot
-      bpool = {
-        type = "zpool";
-        options = {
-          ashift = "12";
-          autotrim = "on";
-          compatibility = "grub2";
-        };
-        rootFsOptions = {
-          acltype = "posixacl";
-          canmount = "off";
-          compression = "lz4";
-          devices = "off";
-          normalization = "formD";
-          relatime = "on";
-          xattr = "sa";
-          "com.sun:auto-snapshot" = "false";
-        };
-        mountpoint = "/boot";
-        datasets = {
-          nixos = {
-            type = "zfs_fs";
-            options.mountpoint = "none";
-          };
-          "nixos/root" = {
-            type = "zfs_fs";
-            options.mountpoint = "legacy";
-            mountpoint = "/boot";
-          };
-        };
-      };
-
-      # Root
-      rpool = {
-        type = "zpool";
-        options = {
-          ashift = "12";
-          autotrim = "on";
-        };
-        rootFsOptions = {
-          acltype = "posixacl";
-          canmount = "off";
-          compression = "zstd";
-          dnodesize = "auto";
-          normalization = "formD";
-          relatime = "on";
-          xattr = "sa";
-          "com.sun:auto-snapshot" = "false";
-        };
-        mountpoint = "/";
-
-        datasets = {
-          nixos = {
-            type = "zfs_fs";
-            options.mountpoint = "none";
-          };
-          "nixos/var" = {
-            type = "zfs_fs";
-            options.mountpoint = "none";
-          };
-          "nixos/empty" = {
-            type = "zfs_fs";
-            options.mountpoint = "legacy";
-            mountpoint = "/";
-            postCreateHook = "zfs snapshot rpool/nixos/empty@start";
-          };
-          "nixos/home" = {
-            type = "zfs_fs";
-            options.mountpoint = "legacy";
-            mountpoint = "/home";
-          };
-          "nixos/data" = {
-            type = "zfs_fs";
-            options.mountpoint = "legacy";
-            mountpoint = "/mnt/user";
-          };
-          "nixos/var/log" = {
-            type = "zfs_fs";
-            options.mountpoint = "legacy";
-            mountpoint = "/var/log";
-          };
-          "nixos/var/lib" = {
-            type = "zfs_fs";
-            options.mountpoint = "legacy";
-            mountpoint = "/var/lib";
-          };
-          "nixos/persist" = {
-            type = "zfs_fs";
-            options.mountpoint = "legacy";
-            mountpoint = "/persist";
-          };
-          "nixos/nix" = {
-            type = "zfs_fs";
-            options.mountpoint = "legacy";
-            mountpoint = "/nix";
-          };
-        };
-      };
+    # Define the root filesystem type for impermanence
+    nodev."/" = {
+      fsType = "tmpfs";
+      mountOptions = [
+        "defaults"
+        "size=2G"
+        "mode=755"
+      ]; # Adjust tmpfs size as needed
     };
   };
 }

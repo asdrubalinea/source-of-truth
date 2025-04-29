@@ -11,16 +11,19 @@
     # --- Core Components ---
     home-manager = {
       url = "github:nix-community/home-manager";
-      # Make home-manager use the same nixpkgs as the system
       inputs.nixpkgs.follows = "nixpkgs";
     };
     disko = {
-      url = "github:nix-community/disko"; # Using default branch (often main/master)
+      url = "github:nix-community/disko";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+    impermanence = {
+      url = "github:nix-community/impermanence";
       inputs.nixpkgs.follows = "nixpkgs";
     };
     sops-nix = {
       url = "github:Mic92/sops-nix";
-      inputs.nixpkgs.follows = "nixpkgs"; # Good practice to follow the main nixpkgs
+      inputs.nixpkgs.follows = "nixpkgs";
     };
 
     # --- Desktop/UI Components ---
@@ -77,6 +80,7 @@
       niri,
       vscode-server,
       disko,
+      impermanence,
       stylix,
       sops-nix,
       emacs-overlay,
@@ -137,6 +141,7 @@
 
           modules = [
             disko.nixosModules.disko
+            impermanence.homeManagerModules.impermanence
 
             ./hosts/tempest.nix
             ./disks/tempest.nix
