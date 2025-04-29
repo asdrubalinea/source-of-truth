@@ -16,11 +16,11 @@
   ];
 
   # Enable ZFS
-  boot.supportedFilesystems = [ "zfs" ];
-  boot.initrd.supportedFilesystems = [ "zfs" ]; # Ensure initrd can handle ZFS pool discovery
-  services.zfs.autoScrub.enable = true;
+  # boot.supportedFilesystems = [ "zfs" ];
+  # boot.initrd.supportedFilesystems = [ "zfs" ]; # Ensure initrd can handle ZFS pool discovery
+  # services.zfs.autoScrub.enable = true;
 
-  networking.hostName = "tempst"; # Define your hostname.
+  networking.hostName = "tempest"; # Define your hostname.
   networking.networkmanager.enable = true; # Easiest to use and most distros use this by default.
   networking.hostId = "856ff057";
 
@@ -29,12 +29,8 @@
   # Double-check these match the PARTLABELs in /dev/disk/by-partlabel/ after Disko runs.
   boot.initrd.luks.devices = {
     "cryptroot" = {
-      device = "/dev/disk/by-partlabel/cryptroot_part"; # Match Disko partition name
+      device = "/dev/disk/by-partlabel/cryptroot";
       preLVM = true;
-      allowDiscards = true;
-    };
-    "cryptswap" = {
-      device = "/dev/disk/by-partlabel/cryptswap_part"; # Match Disko partition name
       allowDiscards = true;
     };
   };
@@ -53,54 +49,7 @@
   };
 
   # Hibernation
-  powerManagement.resumeDevice = "/dev/mapper/cryptswap";
-
-  # Impermanence Module Configuration
-  # Uses the '/persist' mount created by Disko (zroot/persist)
-  environment.persistence."/persist" = {
-    hideMounts = true;
-    directories = [
-      "/etc/ssh" # Persist SSH host keys
-      "/etc/nixos"
-      "/etc/NetworkManager/system-connections" # Persist NetworkManager profiles
-      "/var/lib/NetworkManager" # Persist DHCP leases, nm state
-      "/var/lib/bluetooth" # Persist bluetooth pairings
-      "/var/lib/tailscale" # Persist tailscale
-      "/var/lib/libvirt"
-      "/var/log"
-    ];
-
-    files = [
-      "/etc/machine-id" # Crucial for DHCP, journald consistency etc.
-    ];
-
-    users.irene = {
-      directories = [
-        "Downloads"
-        "Music"
-        "Pictures"
-        "Documents"
-        "Videos"
-        {
-          directory = ".gnupg";
-          mode = "0700";
-        }
-        {
-          directory = ".ssh";
-          mode = "0700";
-        }
-        {
-          directory = ".nixops";
-          mode = "0700";
-        }
-        {
-          directory = ".local/share/keyrings";
-          mode = "0700";
-        }
-        ".local/share/direnv"
-      ];
-    };
-  };
+  # powerManagement.resumeDevice = "/dev/mapper/cryptswap";
 
   time.timeZone = "Europe/Rome";
 

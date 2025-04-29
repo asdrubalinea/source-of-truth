@@ -1,108 +1,83 @@
-{ inputs, ... }:
-
-let
-  diskDevicePath = inputs.main.device;
-
-  swapSize = "40G";
-in
 {
   disko.devices = {
     disk = {
       main = {
-        device = diskDevicePath;
-        type = "gpt";
-        partitions = [
-          # EFI System Partition (ESP) - Unencrypted
-          {
-            name = "ESP";
-            size = "1G";
-            type = "ef00";
-            content = {
-              type = "filesystem";
-              format = "vfat";
-              mountpoint = "/boot/efi";
-            };
-          }
-
-          # LUKS Encrypted Partition for Swap
-          {
-            name = "cryptswap_part";
-            size = swapSize;
-            content = {
-              type = "luks";
-              name = "cryptswap"; # Mapped device: /dev/mapper/cryptswap
-              # keyFile option can be added if needed
-              settings = {
-                allowDiscards = true;
-              };
+        type = "disk";
+        device = "/dev/nvme0n1";
+        content = {
+          type = "gpt";
+          partitions = {
+            ESP = {
+              label = "boot";
+              name = "ESP";
+              size = "1G";
+              type = "EF00";
               content = {
-                type = "swap"; # Mark for NixOS swap activation
+                type = "filesystem";
+                format = "vfat";
+                mountpoint = "/boot/efi";
+		mountOptions = [ "umask=0077" ];
               };
             };
-          }
 
-          # LUKS Encrypted Partition for ZFS (main data)
-          {
-            name = "cryptroot_part";
-            size = "100%";
-            content = {
-              type = "luks";
-              name = "cryptroot"; # Mapped device: /dev/mapper/cryptroot
-              # keyFile option can be added if needed
-              settings = {
-                allowDiscards = true;
-              };
+            luks = {
+              size = "100%";
+              label = "luks";
               content = {
-                type = "zpool";
-                name = "zroot";
-                rootFsOptions = {
-                  canmount = "off";
-                  mountpoint = "none";
-                };
-                options = {
-                  ashift = "12";
-                  autotrim = "on";
-                };
-                datasets = {
-                  # Base datasets needed
-                  "blankroot" = {
-                    mountpoint = "/";
-                    options.canmount = "off";
-                  }; # For tmpfs overlay
-                  "nix" = {
-                    mountpoint = "/nix";
-                  };
-                  "boot" = {
-                    mountpoint = "/boot";
-                  }; # Kernels/initrds live here (encrypted)
+                type = "luks";
+                name = "cryptroot";
 
-                  # Base persistent directory - Used by impermanence module
-                  "persist" = {
-                    mountpoint = "/persist";
-                  };
+                extraOpenArgs = [
+		  # performance
+                  "--perf-no_read_workqueue"
+		  # performance
+                  "--perf-no_write_workqueue"
+                ];
 
-                  "home" = {
-                    mountpoint = "/home";
-                  };
-                  "var/log" = {
-                    mountpoint = "/var/log";
+		settings = {
+                  allowDiscards = true;
+                  #keyFile = "/tmp/secret.key";
+                };
+
+                # https://0pointer.net/blog/unlocking-luks2-volumes-with-tpm2-fido2-pkcs11-security-hardware-on-systemd-248.html
+                # settings = {crypttabExtraOpts = ["fido2-device=auto" "token-timeout=10"];};
+
+                content = {
+                  type = "btrfs";
+                  extraArgs = ["-L" "nixos" "-f"];
+                  subvolumes = {
+                    "/root" = {
+                      mountpoint = "/";
+                      mountOptions = ["subvol=root" "compress=zstd" "noatime"];
+                    };
+                    "/home" = {
+                      mountpoint = "/home";
+                      mountOptions = ["subvol=home" "compress=zstd" "noatime"];
+                    };
+                    "/nix" = {
+                      mountpoint = "/nix";
+                      mountOptions = ["subvol=nix" "compress=zstd" "noatime"];
+                    };
+                    "/persist" = {
+                      mountpoint = "/persist";
+                      mountOptions = ["subvol=persist" "compress=zstd" "noatime"];
+                    };
+                    "/log" = {
+                      mountpoint = "/var/log";
+                      mountOptions = ["subvol=log" "compress=zstd" "noatime"];
+                    };
+                    "/swap" = {
+                      mountpoint = "/swap";
+                      swap.swapfile.size = "64G";
+                    };
                   };
                 };
               };
             };
-          }
-        ];
+          };
+        };
       };
-    };
-
-    # Define the root filesystem type for impermanence
-    nodev."/" = {
-      fsType = "tmpfs";
-      mountOptions = [
-        "defaults"
-        "size=2G"
-        "mode=755"
-      ]; # Adjust tmpfs size as needed
     };
   };
 }
+
