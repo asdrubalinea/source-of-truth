@@ -302,17 +302,6 @@
     package = inputs.hyprland.packages.${pkgs.system}.hyprland;
   };
 
-  services.pixiecore = {
-    enable = true;
-    openFirewall = true;
-    dhcpNoBind = true;
-    kernel = "https://boot.netboot.xyz";
-  };
-
-  networking.firewall.allowedTCPPorts = [
-    80
-    443
-  ];
   # networking.firewall.allowedUDPPorts = [ ]
 
   system.stateVersion = "23.05";
