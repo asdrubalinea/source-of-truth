@@ -24,7 +24,6 @@
   boot.kernelPackages = pkgs.linuxPackages_6_13;
 
   networking.hostName = "tempest"; # Define your hostname.
-  networking.networkmanager.enable = true; # Easiest to use and most distros use this by default.
   networking.hostId = "856ff057";
 
   # Configure Bootloader (GRUB for LUKS unlock)
@@ -104,8 +103,6 @@
         libva
       ];
     };
-
-    framework.amd-7040.preventWakeOnAC = true;
   };
 
   services = {

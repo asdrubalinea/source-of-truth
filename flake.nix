@@ -138,6 +138,18 @@
           ];
         };
 
+
+        live = nixpkgs.lib.nixosSystem {
+          inherit system pkgs;
+          specialArgs = { inherit inputs; };
+
+          modules = [
+            (nixpkgs + "/nixos/modules/installer/cd-dvd/installation-cd-minimal.nix")
+
+            ./hosts/tempest.nix
+          ];
+        };
+
         "tempest" = lib.nixosSystem {
           inherit system pkgs;
           specialArgs = { inherit inputs; };
