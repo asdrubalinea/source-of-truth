@@ -29,6 +29,8 @@ in
 {
   imports = [
     inputs.sops-nix.homeManagerModules.sops
+    inputs.hyprland.homeManagerModules.default
+    inputs.stylix.homeManagerModules.stylix
 
     ../rices/feet
 
@@ -44,9 +46,15 @@ in
   # Let Home Manager install and manage itself.
   programs.home-manager.enable = true;
 
+  home = {
+    username = "irene";
+    homeDirectory = "/home/irene";
+    stateVersion = "23.05";
+  };
+
   # programs.nushell.enable = true;
-  services.vscode-server.enable = true;
-  services.vscode-server.enableFHS = true;
+  # services.vscode-server.enable = true;
+  # services.vscode-server.enableFHS = true;
 
   services.gnome-keyring = {
     enable = true;
@@ -58,8 +66,14 @@ in
   };
 
   programs.emacs = {
-    enable = true;
+    enable = false;
     package = pkgs.emacsPgtkGcc;
+  };
+
+  programs.git = {
+    enable = true;
+    userName = "Irene";
+    userEmail = "git@asdrubalini.xyz";
   };
 
   home.packages = with pkgs; [
@@ -140,7 +154,7 @@ in
     blueberry
     ntfs3g
 
-    (pkgs.callPackage ../packages/cider-2.nix { })
+    # (pkgs.callPackage ../packages/cider-2.nix { })
 
     # Nix
     nixpkgs-fmt
