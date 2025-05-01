@@ -24,6 +24,9 @@
       url = "github:Mic92/sops-nix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    nixos-hardware = {
+      url = "github:NixOS/nixos-hardware/master";
+    };
 
     # --- Desktop/UI Components ---
     hyprland = {
@@ -82,6 +85,7 @@
       impermanence,
       stylix,
       sops-nix,
+      nixos-hardware,
       emacs-overlay,
       ...
     }:
@@ -141,6 +145,7 @@
           modules = [
             disko.nixosModules.disko
             impermanence.nixosModules.impermanence
+	    nixos-hardware.nixosModules.framework-amd-ai-300-series
 
             ./disks/tempest.nix
             ./hosts/tempest.nix

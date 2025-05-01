@@ -73,6 +73,5 @@
   # Enable the OpenSSH daemon.
   services.openssh.enable = true;
 
-  system.copySystemConfiguration = true;
   system.stateVersion = "24.11";
 }
