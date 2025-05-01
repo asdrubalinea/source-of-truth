@@ -1,83 +1,91 @@
 {
   disko.devices = {
     disk = {
-      main = {
+      nvme0n1 = {
         type = "disk";
         device = "/dev/nvme0n1";
         content = {
           type = "gpt";
           partitions = {
             ESP = {
-              label = "boot";
-              name = "ESP";
               size = "1G";
               type = "EF00";
               content = {
                 type = "filesystem";
                 format = "vfat";
                 mountpoint = "/boot/efi";
-		mountOptions = [ "umask=0077" ];
+                mountOptions = [ "umask=0077" ];
               };
             };
-
-            luks = {
+            zfs = {
               size = "100%";
-              label = "luks";
               content = {
-                type = "luks";
-                name = "cryptroot";
-
-                extraOpenArgs = [
-		  # performance
-                  "--perf-no_read_workqueue"
-		  # performance
-                  "--perf-no_write_workqueue"
-                ];
-
-		settings = {
-                  allowDiscards = true;
-                  #keyFile = "/tmp/secret.key";
-                };
-
-                # https://0pointer.net/blog/unlocking-luks2-volumes-with-tpm2-fido2-pkcs11-security-hardware-on-systemd-248.html
-                # settings = {crypttabExtraOpts = ["fido2-device=auto" "token-timeout=10"];};
-
-                content = {
-                  type = "btrfs";
-                  extraArgs = ["-L" "nixos" "-f"];
-                  subvolumes = {
-                    "/root" = {
-                      mountpoint = "/";
-                      mountOptions = ["subvol=root" "compress=zstd" "noatime"];
-                    };
-                    "/home" = {
-                      mountpoint = "/home";
-                      mountOptions = ["subvol=home" "compress=zstd" "noatime"];
-                    };
-                    "/nix" = {
-                      mountpoint = "/nix";
-                      mountOptions = ["subvol=nix" "compress=zstd" "noatime"];
-                    };
-                    "/persist" = {
-                      mountpoint = "/persist";
-                      mountOptions = ["subvol=persist" "compress=zstd" "noatime"];
-                    };
-                    "/log" = {
-                      mountpoint = "/var/log";
-                      mountOptions = ["subvol=log" "compress=zstd" "noatime"];
-                    };
-                    "/swap" = {
-                      mountpoint = "/swap";
-                      swap.swapfile.size = "64G";
-                    };
-                  };
-                };
+                type = "zfs";
+                pool = "zroot";
               };
             };
           };
         };
       };
     };
+
+    zpool = {
+      zroot = {
+        type = "zpool";
+
+        options = {
+          ashift = "12";
+          autotrim = "on";
+        };
+        rootFsOptions = {
+          compression = "lz4";
+	  canmount = "off";
+          "com.sun:auto-snapshot" = "false";
+	  relatime = "on";
+	  normalization = "formD";
+	  xattr = "sa";
+        };
+
+	mountpoint = "/";
+
+        datasets = {
+          nixos = {
+            type = "zfs_fs";
+            options.mountpoint = "none";
+          };
+
+          "nixos/empty" = {
+            type = "zfs_fs";
+            options.mountpoint = "legacy";
+            mountpoint = "/";
+            postCreateHook = "zfs snapshot rpool/nixos/empty@start";
+          };
+
+          "nixos/nix" = {
+            type = "zfs_fs";
+            options.mountpoint = "legacy";
+            mountpoint = "/nix";
+          };
+
+          "nixos/home" = {
+            type = "zfs_fs";
+            options.mountpoint = "legacy";
+            mountpoint = "/home";
+          };
+
+          "nixos/var/log" = {
+            type = "zfs_fs";
+            options.mountpoint = "legacy";
+            mountpoint = "/var/log";
+          };
+
+          "nixos/persist" = {
+            type = "zfs_fs";
+            options.mountpoint = "legacy";
+            mountpoint = "/persist";
+          };
+        };
+      };
+    };
   };
 }
-

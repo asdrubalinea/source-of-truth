@@ -140,10 +140,10 @@
 
           modules = [
             disko.nixosModules.disko
-            # impermanence.homeManagerModules.impermanence
+            impermanence.nixosModules.impermanence
 
+            ./disks/tempest.nix
             ./hosts/tempest.nix
-            ./disks/luks-tempest-temp.nix
           ];
         };
       };
