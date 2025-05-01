@@ -1,16 +1,18 @@
-# Edit this configuration file to define what should be installed on
-# your system. Help is available in the configuration.nix(5) man page, on
-# https://search.nixos.org/options and in the NixOS manual (`nixos-help`).
-
 {
-  config,
-  lib,
   pkgs,
+  inputs,
   ...
 }:
 
 {
   imports = [
+    ../rices/hypr/fonts.nix
+
+    # ../hardware/rocm.nix
+    ../hardware/bluetooth.nix
+    ../hardware/audio.nix
+
+    # ../services/syncthing.nix
   ];
 
   # Enable ZFS
@@ -18,10 +20,6 @@
   boot.initrd.supportedFilesystems = [ "zfs" ]; # Ensure initrd can handle ZFS pool discovery
   services.zfs.autoScrub.enable = true;
 
-  boot.initrd.availableKernelModules = [ "nvme" "xhci_pci" "thunderbolt" "usb_storage" "sd_mod" ];
-  boot.initrd.kernelModules = [ ];
-  boot.kernelModules = [ "kvm-amd" ];
-  boot.extraModulePackages = [ ];
   boot.kernelPackages = pkgs.linuxPackages_6_13;
 
   networking.hostName = "tempest"; # Define your hostname.
@@ -53,14 +51,33 @@
     hashedPassword = "$6$BkMgWYEIITYDhZkR$KnfSasOiuqi14e.85Ft/YMjgxoniRxoYXc8Tbk1J4ksq2I8Hk358V2OQFcRqHmBv/g52nhCOUWvb3uzjQuMbF0";
   };
 
-  security.doas.enable = true;
+  security.doas = {
+    enable = true;
+    wheelNeedsPassword = false;
+  };
   security.sudo.enable = true;
+  security.pam.services.greetd.enableGnomeKeyring = true;
 
   environment.systemPackages = with pkgs; [
     neovim
     curl
     git
   ];
+
+  nix = {
+    package = pkgs.nixVersions.stable;
+    settings.trusted-users = [
+      "root"
+      "irene"
+    ];
+    settings = {
+      substituters = [ "https://hyprland.cachix.org" ];
+      trusted-public-keys = [ "hyprland.cachix.org-1:a7pgxzMz7+chwVL3/pzj6jIBMioiJM7ypFP8PwtkuGc=" ];
+    };
+    extraOptions = ''
+      experimental-features = nix-command flakes
+    '';
+  };
 
   # Some programs need SUID wrappers, can be configured further or are
   # started in user sessions.
@@ -70,8 +87,21 @@
     enableSSHSupport = true;
   };
 
+  programs.dconf.enable = true;
+
   # Enable the OpenSSH daemon.
   services.openssh.enable = true;
+
+  # === User configs ===
+  programs.hyprland = {
+    enable = true;
+    package = inputs.hyprland.packages.${pkgs.system}.hyprland;
+  };
+
+  programs.fish.enable = true;
+  programs.mosh.enable = true;
+
+  services.fwupd.enable = true;
 
   system.stateVersion = "24.11";
 }

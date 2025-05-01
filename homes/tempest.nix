@@ -1,19 +1,5 @@
 { pkgs, inputs, ... }:
 let
-  user-apply = pkgs.writeScriptBin "user-apply" ''
-    #!${pkgs.stdenv.shell}
-    pushd /persist/source-of-truth/
-
-    home-manager switch --flake '.#irene@tempest' "$@"
-
-    popd
-  '';
-
-  system-apply =
-    (pkgs.callPackage ../scripts/system-apply.nix {
-      configPath = "/persist/source-of-truth";
-    }).systemApply;
-
   arc-size = (
     pkgs.writeShellScriptBin "arc-size" ''
       cat /proc/spl/kstat/zfs/arcstats | grep '^size ' | awk '{ print $3 }' | awk '{ print $1 / (1024 * 1024 * 1024) " GiB" }'
@@ -28,13 +14,15 @@ let
 in
 {
   imports = [
-    inputs.sops-nix.homeManagerModules.sops
+    inputs.hyprland.homeManagerModules.default
+    inputs.stylix.homeManagerModules.stylix
 
     ../rices/feet
 
     ../desktop/zed-editor
 
     ../scripts/system-clean.nix
+    ../scripts/config-apply.nix
 
     ../misc/fish.nix
     ../misc/aliases.nix
@@ -43,17 +31,25 @@ in
   # Let Home Manager install and manage itself.
   programs.home-manager.enable = true;
 
-  # programs.nushell.enable = true;
-  services.vscode-server.enable = true;
-  services.vscode-server.enableFHS = true;
+  home = {
+    username = "irene";
+    homeDirectory = "/home/irene";
+    stateVersion = "23.05";
+  };
 
   services.gnome-keyring = {
-    enable = true;
+    enable = false;
     components = [
       "pkcs11"
       "secrets"
       "ssh"
     ];
+  };
+
+  programs.git = {
+    enable = true;
+    userName = "Irene";
+    userEmail = "git@asdrubalini.xyz";
   };
 
   home.packages = with pkgs; [
@@ -67,7 +63,6 @@ in
     pciutils
     file
     eza
-    git
     bat
     jq
     unzip
@@ -167,10 +162,6 @@ in
     lua
 
     prismlauncher
-
-    # Custom
-    user-apply
-    system-apply
 
     arc-size
     nix-size

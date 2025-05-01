@@ -145,10 +145,18 @@
           modules = [
             disko.nixosModules.disko
             impermanence.nixosModules.impermanence
-	    nixos-hardware.nixosModules.framework-amd-ai-300-series
+            nixos-hardware.nixosModules.framework-amd-ai-300-series
 
             ./disks/tempest.nix
             ./hosts/tempest.nix
+
+            home-manager.nixosModules.home-manager
+            {
+              home-manager.extraSpecialArgs = { inherit inputs; };
+              home-manager.useGlobalPkgs = true;
+              home-manager.useUserPackages = true;
+              home-manager.users.irene = import ./homes/tempest.nix;
+            }
           ];
         };
       };

@@ -1,4 +1,5 @@
-{ ... }: {
+{ ... }:
+{
   imports = [
     ./alacritty.nix
     ./hyprland.nix
@@ -6,6 +7,7 @@
     ./wallpaper
     ./tofi.nix
     ./stylix.nix
+
     # ./niri.nix
   ];
 }

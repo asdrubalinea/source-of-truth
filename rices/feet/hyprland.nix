@@ -4,7 +4,7 @@
     enable = true;
 
     plugins = [
-      inputs.hyprtasking.packages.${pkgs.system}.hyprtasking
+      # inputs.hyprtasking.packages.${pkgs.system}.hyprtasking
     ];
 
     # so that we use the version from NixOS
@@ -36,7 +36,6 @@
       exec-once = [
         "${pkgs.waybar}/bin/waybar &"
         "${pkgs.swww}/bin/swww-daemon &"
-        # "${pkgs.albert}/bin/albert &"
       ];
 
       exec = [
@@ -132,7 +131,7 @@
         # "ALT, space, exec, ${pkgs.albert}/bin/albert toggle"
         "$mainMod, space, exec, $menu"
 
-        "$mainMod, u, hyprtasking:toggle, all"
+        # "$mainMod, u, hyprtasking:toggle, all"
 
         "$mainMod, Q, killactive,"
         "$SUPER_SHIFT, space, togglefloating,"
@@ -142,7 +141,6 @@
 
         "$SUPER_SHIFT, B, exec, $browser"
         "$SUPER_SHIFT, S, exec, ${pkgs.grimblast}/bin/grimblast save area"
-        "$SUPER_SHIFT, M, exec, ${(pkgs.callPackage ../../packages/cider-2.nix { })}/bin/cider-2"
 
         "$mainMod, F, fullscreen"
         "$mainMod, v, layoutmsg, preselect d"
