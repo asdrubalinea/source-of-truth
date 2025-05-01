@@ -14,30 +14,24 @@
   ];
 
   # Enable ZFS
-  # boot.supportedFilesystems = [ "zfs" ];
-  # boot.initrd.supportedFilesystems = [ "zfs" ]; # Ensure initrd can handle ZFS pool discovery
-  # services.zfs.autoScrub.enable = true;
+  boot.supportedFilesystems = [ "zfs" ];
+  boot.initrd.supportedFilesystems = [ "zfs" ]; # Ensure initrd can handle ZFS pool discovery
+  services.zfs.autoScrub.enable = true;
 
   boot.initrd.availableKernelModules = [ "nvme" "xhci_pci" "thunderbolt" "usb_storage" "sd_mod" ];
   boot.initrd.kernelModules = [ ];
   boot.kernelModules = [ "kvm-amd" ];
   boot.extraModulePackages = [ ];
+  boot.kernelPackages = pkgs.linuxPackages_6_13;
 
   networking.hostName = "tempest"; # Define your hostname.
   networking.networkmanager.enable = true; # Easiest to use and most distros use this by default.
   networking.hostId = "856ff057";
 
   # Configure Bootloader (GRUB for LUKS unlock)
-  boot.loader.systemd-boot.enable = false;
-  boot.loader.efi.canTouchEfiVariables = false;
+  boot.loader.systemd-boot.enable = true;
+  boot.loader.efi.canTouchEfiVariables = true;
   boot.loader.efi.efiSysMountPoint = "/boot/efi";
-  boot.loader.grub = {
-    enable = true;
-    efiInstallAsRemovable = true;
-    efiSupport = true;
-    device = "nodev";
-    enableCryptodisk = true;
-  };
 
   # Hibernation
   # powerManagement.resumeDevice = "/dev/mapper/cryptswap";

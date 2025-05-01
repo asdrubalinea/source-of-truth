@@ -1,7 +1,7 @@
 {
   disko.devices = {
     disk = {
-      nvme0n1 = {
+      main = {
         type = "disk";
         device = "/dev/nvme0n1";
         content = {
@@ -58,7 +58,7 @@
             type = "zfs_fs";
             options.mountpoint = "legacy";
             mountpoint = "/";
-            postCreateHook = "zfs snapshot rpool/nixos/empty@start";
+            postCreateHook = "zfs snapshot zroot/nixos/empty@start";
           };
 
           "nixos/nix" = {
