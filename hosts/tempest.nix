@@ -1,6 +1,7 @@
 {
   pkgs,
   inputs,
+  lib,
   ...
 }:
 
@@ -92,6 +93,36 @@
   # Enable the OpenSSH daemon.
   services.openssh.enable = true;
 
+  hardware = {
+    graphics = {
+      enable = true;
+      enable32Bit = true;
+      extraPackages = with pkgs; [
+        # Encoding/decoding acceleration
+        libvdpau-va-gl
+        libva-vdpau-driver
+        libva
+      ];
+    };
+
+    framework.amd-7040.preventWakeOnAC = true;
+  };
+
+  services = {
+    fwupd = {
+      enable = true;
+      extraRemotes = [ "lvfs-testing" ]; # Some framework firmware is still in testing
+    };
+
+    logind.lidSwitch = "suspend-then-hibernate";
+    power-profiles-daemon.enable = true;
+  };
+
+  powerManagement = {
+    cpuFreqGovernor = lib.mkDefault "powersave";
+    powertop.enable = true; # Run powertop on boot
+  };
+
   # === User configs ===
   programs.hyprland = {
     enable = true;
@@ -100,8 +131,6 @@
 
   programs.fish.enable = true;
   programs.mosh.enable = true;
-
-  services.fwupd.enable = true;
 
   system.stateVersion = "24.11";
 }
