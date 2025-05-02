@@ -83,6 +83,7 @@ in
     xxd # Make a hexdump or do the reverse
     yazi # Terminal file manager
     zip # Create zip archives
+    yek
 
     # --- Networking ---
     curl # Data transfer utility

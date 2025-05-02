@@ -68,6 +68,7 @@
     directories = [
       "/var/lib/bluetooth"
       "/var/lib/nixos"
+      "/var/lib/tailscale"
       "/var/lib/systemd/coredump"
       "/etc/NetworkManager/system-connections"
     ];
@@ -106,6 +107,10 @@
     };
     logind.lidSwitch = "suspend-then-hibernate";
     power-profiles-daemon.enable = true;
+    tailscale = {
+      enable = true;
+      useRoutingFeatures = "client";
+    };
   };
 
   # Power Management
