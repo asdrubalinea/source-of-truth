@@ -1,4 +1,10 @@
-{ pkgs, inputs, ... }:
+{
+  pkgs,
+  lib,
+  inputs,
+  hostname,
+  ...
+}:
 {
   wayland.windowManager.hyprland = {
     enable = true;
@@ -14,15 +20,23 @@
     settings = {
       debug.disable_logs = false;
 
-      monitor = [
-        "HDMI-A-1, 3440x1440@75, 0x0, 1" # Samsung
-        "DP-2, 2560x1440@60, 3440x0, 1" # Benq
-      ];
+      monitor = (
+        if hostname == "orchid" then
+          [
+            "HDMI-A-1, 3440x1440@75, 0x0, 1" # Samsung
+            "DP-2, 2560x1440@60, 3440x0, 1" # Benq
+          ]
+        else if hostname == "tempest" then
+          [
+            "eDP-1, 2880x1920@120, 0x0, 2"
+          ]
+        else
+          null
+      );
 
       # Variables
       "$terminal" = "${pkgs.alacritty}/bin/alacritty";
       "$browser" = "${inputs.zen-browser.packages.x86_64-linux.beta}/bin/zen-beta";
-      # "$browser" = "${pkgs.flatpak}/bin/flatpak run app.zen_browser.zen";
       "$menu" = "${pkgs.tofi}/bin/tofi-run | xargs hyprctl dispatch exec --";
       "$mainMod" = "SUPER";
 
@@ -53,8 +67,8 @@
       };
 
       general = {
-        gaps_in = 5;
-        gaps_out = 10;
+        gaps_in = 3;
+        gaps_out = 5;
         border_size = 2;
 
         # "col.active_border" = "rgba($redAlphaee) rgba($yellowAlphaee) rgba($peachAlphaee) 30deg";
@@ -113,8 +127,15 @@
         kb_options = "";
         kb_rules = "";
         follow_mouse = 1;
-        sensitivity = -1.0;
         # accel_profile = "flat";
+
+        sensitivity =
+          if hostname == "tempest" then
+            0
+          else if hostname == "orchid" then
+            -1.0
+          else
+            0;
 
         touchpad = {
           natural_scroll = true;
@@ -202,10 +223,6 @@
         "8"
         "9"
         "10"
-      ];
-
-      windowrulev2 = [
-        "noborder, title:^(Albert)$"
       ];
     };
   };
