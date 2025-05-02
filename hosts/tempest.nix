@@ -15,9 +15,17 @@
   ];
 
   boot.kernelPackages = pkgs.linuxPackages_6_14;
+  # boot.zfs.package = pkgs.trunk.zfs_unstable;
 
   networking.hostName = "tempest";
   networking.hostId = "856ff057";
+
+  fileSystems."/persist" = {
+    device = "/dev/disk/by-partlabel/disk-main-root";
+    neededForBoot = true;
+    fsType = "btrfs";
+    options = [ "subvol=/@persist" ];
+  };
 
   services.xserver.videoDrivers = [ "amdgpu" ];
   hardware.enableRedistributableFirmware = true;
@@ -29,7 +37,7 @@
   boot.initrd.supportedFilesystems = [
     "btrfs"
     "vfat"
-    "zfs"
+    # "zfs"
   ];
 
   fileSystems."/" = {
@@ -147,6 +155,24 @@
   };
 
   programs.fish.enable = true;
+
+  environment.persistence."/persist" = {
+    enable = true;
+    hideMounts = true;
+    directories = [
+      "/var/lib/bluetooth"
+      "/var/lib/nixos"
+      "/var/lib/systemd/coredump"
+      "/etc/NetworkManager/system-connections"
+    ];
+    files = [
+      "/etc/machine-id"
+      "/etc/ssh/ssh_host_ed25519_key"
+      "/etc/ssh/ssh_host_ed25519_key.pub"
+      "/etc/ssh/ssh_host_rsa_key"
+      "/etc/ssh/ssh_host_rsa_key.pub"
+    ];
+  };
 
   system.stateVersion = "24.11";
 }

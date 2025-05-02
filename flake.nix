@@ -109,18 +109,16 @@
         };
       };
 
-      zfsOverlay = (
-        self: super: {
-          zfs = super.zfs.overrideAttrs (oldAttrs: {
-            src = super.fetchFromGitHub {
-              owner = "openzfs";
-              repo = "zfs";
-              rev = "zfs-2.3.99";
-              sha256 = "sha256_hash_goes_here";
-            };
-          });
-        }
-      );
+      zfsOverlay = self: super: {
+        zfs_unstable = super.zfs_unstable.overrideAttrs (oldAttrs: {
+          src = super.fetchFromGitHub {
+            owner = "openzfs";
+            repo = "zfs";
+            rev = "zfs-2.3.99";
+            sha256 = lib.fakeSha256;
+          };
+        });
+      };
 
       pkgs = import nixpkgs {
         inherit system;
@@ -133,7 +131,7 @@
         overlays = [
           multiChannelOverlay
           emacs-overlay.overlay
-          zfsOverlay
+          # zfsOverlay
         ];
       };
 
