@@ -143,7 +143,10 @@
       nixosConfigurations = {
         "orchid" = lib.nixosSystem {
           inherit system pkgs;
-          specialArgs = { inherit inputs; };
+          specialArgs = {
+            inherit inputs;
+            hostname = "orchid";
+          };
 
           modules = [
             niri.nixosModules.niri
@@ -165,7 +168,10 @@
 
         "tempest" = lib.nixosSystem {
           inherit system pkgs;
-          specialArgs = { inherit inputs; };
+          specialArgs = {
+            inherit inputs;
+            hostname = "tempest";
+          };
 
           modules = [
             disko.nixosModules.disko
@@ -177,7 +183,10 @@
 
             home-manager.nixosModules.home-manager
             {
-              home-manager.extraSpecialArgs = { inherit inputs; };
+              home-manager.extraSpecialArgs = {
+                inherit inputs;
+                hostname = "tempest";
+              };
               home-manager.useGlobalPkgs = true;
               home-manager.useUserPackages = true;
               home-manager.users.irene = import ./homes/tempest.nix;
@@ -189,7 +198,10 @@
       homeConfigurations = {
         "irene@orchid" = home-manager.lib.homeManagerConfiguration {
           inherit pkgs;
-          extraSpecialArgs = { inherit inputs; };
+          extraSpecialArgs = {
+            inherit inputs;
+            hostname = "orchid";
+          };
 
           modules = [
             hyprland.homeManagerModules.default

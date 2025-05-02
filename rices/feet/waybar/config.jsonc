@@ -4,8 +4,8 @@
     "position": "top",
     "margin-top": 0,
     "margin-bottom": 0,
-    "margin-left": 200,
-    "margin-right": 200,
+    "margin-left": 20,
+    "margin-right": 20,
     "modules-left": [
       "custom/rofi",
       "hyprland/workspaces",
