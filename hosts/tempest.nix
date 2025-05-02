@@ -14,27 +14,34 @@
     ../hardware/audio.nix
   ];
 
-  boot.kernelPackages = pkgs.linuxPackages_6_14;
+  boot.kernelPackages = pkgs.linuxPackages_latest;
+  # boot.zfs.package = pkgs.zfs_unstable;
 
-  networking.hostName = "tempest"; # Define your hostname.
+  networking.hostName = "tempest";
   networking.hostId = "856ff057";
 
-  boot.initrd.kernelModules = [ "btrfs" ];
+  services.xserver.videoDrivers = [ "amdgpu" ];
+  hardware.enableRedistributableFirmware = true;
+
+  boot.initrd.kernelModules = [
+    "btrfs"
+    "amdgpu"
+  ];
   boot.initrd.supportedFilesystems = [
     "btrfs"
     "vfat"
+    # "zfs"
   ];
 
   fileSystems."/" = {
     fsType = "tmpfs";
     options = [
       "defaults"
-      "size=4G"
+      "size=2G"
       "mode=755"
     ];
   };
 
-  # Configure Bootloader (GRUB for LUKS unlock)
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
   boot.loader.efi.efiSysMountPoint = "/boot/efi";
@@ -53,9 +60,14 @@
     keyMap = "us";
   };
 
+  networking.networkmanager.enable = true;
+
   users.users.irene = {
     isNormalUser = true;
-    extraGroups = [ "wheel" ];
+    extraGroups = [
+      "wheel"
+      "networkmanager"
+    ];
     hashedPassword = "$6$BkMgWYEIITYDhZkR$KnfSasOiuqi14e.85Ft/YMjgxoniRxoYXc8Tbk1J4ksq2I8Hk358V2OQFcRqHmBv/g52nhCOUWvb3uzjQuMbF0";
   };
 
@@ -135,7 +147,6 @@
   };
 
   programs.fish.enable = true;
-  programs.mosh.enable = true;
 
   system.stateVersion = "24.11";
 }

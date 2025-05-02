@@ -1,4 +1,5 @@
-{ pkgs, ... }: {
+{ pkgs, hostname, ... }:
+{
   stylix = {
     enable = true;
     base16Scheme = "${pkgs.base16-schemes}/share/themes/rose-pine.yaml";
@@ -11,7 +12,13 @@
 
     fonts = {
       sizes = {
-        terminal = 20;
+        terminal =
+          if hostname == "tempest" then
+            16
+          else if hostname == "orchid" then
+            20
+          else
+            16;
       };
 
       serif = {
