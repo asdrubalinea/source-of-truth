@@ -8,153 +8,59 @@
 {
   imports = [
     ../rices/hypr/fonts.nix
-
-    # ../hardware/rocm.nix
     ../hardware/bluetooth.nix
     ../hardware/audio.nix
   ];
 
-  boot.kernelPackages = pkgs.linuxPackages_latest;
-  # boot.zfs.package = pkgs.trunk.zfs_unstable;
+  # Boot Configuration
+  boot = {
+    kernelPackages = pkgs.linuxPackages_latest;
+    initrd = {
+      kernelModules = [
+        "btrfs"
+        "amdgpu"
+      ];
 
-  networking.hostName = "tempest";
-  networking.hostId = "856ff057";
-
-  fileSystems."/persist" = {
-    device = "/dev/disk/by-partlabel/disk-main-root";
-    neededForBoot = true;
-    fsType = "btrfs";
-    options = [ "subvol=/@persist" ];
-  };
-
-  services.xserver.videoDrivers = [ "amdgpu" ];
-  hardware.enableRedistributableFirmware = true;
-
-  boot.initrd.kernelModules = [
-    "btrfs"
-    "amdgpu"
-  ];
-  boot.initrd.supportedFilesystems = [
-    "btrfs"
-    "vfat"
-    # "zfs"
-  ];
-
-  fileSystems."/" = {
-    fsType = "tmpfs";
-    options = [
-      "defaults"
-      "size=2G"
-      "mode=755"
-    ];
-  };
-
-  boot.loader.systemd-boot.enable = true;
-  boot.loader.efi.canTouchEfiVariables = true;
-  boot.loader.efi.efiSysMountPoint = "/boot/efi";
-
-  # Hibernation
-  # powerManagement.resumeDevice = "/dev/mapper/cryptswap";
-
-  time.timeZone = "Europe/Rome";
-
-  # Select internationalisation properties.
-  i18n.defaultLocale = "en_US.UTF-8";
-  console = {
-    earlySetup = true;
-    font = "${pkgs.terminus_font}/share/consolefonts/ter-132n.psf.gz";
-    packages = with pkgs; [ terminus_font ];
-    keyMap = "us";
-  };
-
-  networking.networkmanager.enable = true;
-
-  users.users.irene = {
-    isNormalUser = true;
-    extraGroups = [
-      "wheel"
-      "networkmanager"
-    ];
-    hashedPassword = "$6$BkMgWYEIITYDhZkR$KnfSasOiuqi14e.85Ft/YMjgxoniRxoYXc8Tbk1J4ksq2I8Hk358V2OQFcRqHmBv/g52nhCOUWvb3uzjQuMbF0";
-    shell = pkgs.fish;
-  };
-
-  security.doas = {
-    enable = true;
-    wheelNeedsPassword = false;
-  };
-  security.sudo.enable = true;
-  security.pam.services.greetd.enableGnomeKeyring = true;
-
-  environment.systemPackages = with pkgs; [
-    neovim
-    curl
-    git
-  ];
-
-  nix = {
-    package = pkgs.nixVersions.stable;
-    settings.trusted-users = [
-      "root"
-      "irene"
-    ];
-    settings = {
-      substituters = [ "https://hyprland.cachix.org" ];
-      trusted-public-keys = [ "hyprland.cachix.org-1:a7pgxzMz7+chwVL3/pzj6jIBMioiJM7ypFP8PwtkuGc=" ];
-    };
-    extraOptions = ''
-      experimental-features = nix-command flakes
-    '';
-  };
-
-  # Some programs need SUID wrappers, can be configured further or are
-  # started in user sessions.
-  programs.mtr.enable = true;
-  programs.gnupg.agent = {
-    enable = true;
-    enableSSHSupport = true;
-  };
-
-  programs.dconf.enable = true;
-
-  # Enable the OpenSSH daemon.
-  services.openssh.enable = true;
-
-  hardware = {
-    graphics = {
-      enable = true;
-      enable32Bit = true;
-      extraPackages = with pkgs; [
-        # Encoding/decoding acceleration
-        libvdpau-va-gl
-        libva-vdpau-driver
-        libva
+      supportedFilesystems = [
+        "btrfs"
+        "vfat"
       ];
     };
+
+    loader = {
+      systemd-boot.enable = true;
+      efi = {
+        canTouchEfiVariables = true;
+        efiSysMountPoint = "/boot/efi";
+      };
+    };
   };
 
-  services = {
-    fwupd = {
-      enable = true;
-      extraRemotes = [ "lvfs-testing" ]; # Some framework firmware is still in testing
+  # Networking
+  networking = {
+    hostName = "tempest";
+    hostId = "856ff057";
+    networkmanager.enable = true;
+  };
+
+  # Filesystems & Persistence
+  fileSystems = {
+    "/" = {
+      fsType = "tmpfs";
+      options = [
+        "defaults"
+        "size=2G"
+        "mode=755"
+      ];
     };
 
-    logind.lidSwitch = "suspend-then-hibernate";
-    power-profiles-daemon.enable = true;
+    "/persist" = {
+      device = "/dev/disk/by-partlabel/disk-main-root";
+      neededForBoot = true;
+      fsType = "btrfs";
+      options = [ "subvol=/@persist" ];
+    };
   };
-
-  powerManagement = {
-    cpuFreqGovernor = lib.mkDefault "powersave";
-    powertop.enable = true; # Run powertop on boot
-  };
-
-  # === User configs ===
-  programs.hyprland = {
-    enable = true;
-    package = inputs.hyprland.packages.${pkgs.system}.hyprland;
-  };
-
-  programs.fish.enable = true;
 
   environment.persistence."/persist" = {
     enable = true;
@@ -174,5 +80,107 @@
     ];
   };
 
+  # Hardware Configuration
+  hardware = {
+    enableRedistributableFirmware = true;
+    graphics = {
+      enable = true;
+      enable32Bit = true;
+      extraPackages = with pkgs; [
+        libvdpau-va-gl
+        libva-vdpau-driver
+        libva
+      ];
+    };
+  };
+
+  services.xserver.videoDrivers = [ "amdgpu" ];
+
+  # Services
+  services = {
+    openssh.enable = true;
+    getty.autologinUser = "irene";
+    fwupd = {
+      enable = true;
+      extraRemotes = [ "lvfs-testing" ];
+    };
+    logind.lidSwitch = "suspend-then-hibernate";
+    power-profiles-daemon.enable = true;
+  };
+
+  # Power Management
+  powerManagement = {
+    cpuFreqGovernor = lib.mkDefault "powersave";
+    powertop.enable = true;
+  };
+
+  # Internationalisation & Console
+  time.timeZone = "Europe/Rome";
+  i18n.defaultLocale = "en_US.UTF-8";
+  console = {
+    earlySetup = true;
+    font = "${pkgs.terminus_font}/share/consolefonts/ter-132n.psf.gz";
+    packages = with pkgs; [ terminus_font ];
+    keyMap = "us";
+  };
+
+  # Users & Security
+  users.users.irene = {
+    isNormalUser = true;
+    extraGroups = [
+      "wheel"
+      "networkmanager"
+    ];
+    hashedPassword = "$6$BkMgWYEIITYDhZkR$KnfSasOiuqi14e.85Ft/YMjgxoniRxoYXc8Tbk1J4ksq2I8Hk358V2OQFcRqHmBv/g52nhCOUWvb3uzjQuMbF0";
+    shell = pkgs.fish;
+  };
+
+  security = {
+    doas = {
+      enable = true;
+      wheelNeedsPassword = false;
+    };
+    sudo.enable = true;
+    pam.services.greetd.enableGnomeKeyring = true;
+  };
+
+  # Nix Configuration
+  nix = {
+    package = pkgs.nixVersions.stable;
+    settings = {
+      trusted-users = [
+        "root"
+        "irene"
+      ];
+      substituters = [ "https://hyprland.cachix.org" ];
+      trusted-public-keys = [ "hyprland.cachix.org-1:a7pgxzMz7+chwVL3/pzj6jIBMioiJM7ypFP8PwtkuGc=" ];
+    };
+    extraOptions = ''
+      experimental-features = nix-command flakes
+    '';
+  };
+
+  # Programs & Packages
+  environment.systemPackages = with pkgs; [
+    neovim
+    curl
+    git
+  ];
+
+  programs = {
+    mtr.enable = true;
+    gnupg.agent = {
+      enable = true;
+      enableSSHSupport = true;
+    };
+    dconf.enable = true;
+    hyprland = {
+      enable = true;
+      package = inputs.hyprland.packages.${pkgs.system}.hyprland;
+    };
+    fish.enable = true;
+  };
+
+  # System Version
   system.stateVersion = "24.11";
 }
