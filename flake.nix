@@ -109,6 +109,19 @@
         };
       };
 
+      zfsOverlay = (
+        self: super: {
+          zfs = super.zfs.overrideAttrs (oldAttrs: {
+            src = super.fetchFromGitHub {
+              owner = "openzfs";
+              repo = "zfs";
+              rev = "zfs-2.3.99";
+              sha256 = "sha256_hash_goes_here";
+            };
+          });
+        }
+      );
+
       pkgs = import nixpkgs {
         inherit system;
 
@@ -120,6 +133,7 @@
         overlays = [
           multiChannelOverlay
           emacs-overlay.overlay
+          zfsOverlay
         ];
       };
 
@@ -137,7 +151,6 @@
             ./hosts/orchid.nix
           ];
         };
-
 
         live = nixpkgs.lib.nixosSystem {
           inherit system pkgs;
