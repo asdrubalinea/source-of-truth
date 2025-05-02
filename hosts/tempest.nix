@@ -21,7 +21,7 @@
   boot.initrd.supportedFilesystems = [ "zfs" ]; # Ensure initrd can handle ZFS pool discovery
   services.zfs.autoScrub.enable = true;
 
-  boot.kernelPackages = pkgs.linuxPackages_6_13;
+  boot.kernelPackages = pkgs.linuxPackages_6_14;
 
   networking.hostName = "tempest"; # Define your hostname.
   networking.hostId = "856ff057";
