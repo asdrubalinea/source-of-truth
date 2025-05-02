@@ -14,7 +14,7 @@
     ../hardware/audio.nix
   ];
 
-  boot.kernelPackages = pkgs.linuxPackages_6_14;
+  boot.kernelPackages = pkgs.linuxPackages_latest;
   # boot.zfs.package = pkgs.trunk.zfs_unstable;
 
   networking.hostName = "tempest";
