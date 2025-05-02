@@ -115,6 +115,7 @@
         config = {
           allowUnfree = true;
           rocmSupport = true;
+          allowBroken = true;
         };
 
         overlays = [
@@ -137,7 +138,6 @@
             ./hosts/orchid.nix
           ];
         };
-
 
         live = nixpkgs.lib.nixosSystem {
           inherit system pkgs;

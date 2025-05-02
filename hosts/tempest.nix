@@ -12,19 +12,27 @@
     # ../hardware/rocm.nix
     ../hardware/bluetooth.nix
     ../hardware/audio.nix
-
-    # ../services/syncthing.nix
   ];
 
-  # Enable ZFS
-  boot.supportedFilesystems = [ "zfs" ];
-  boot.initrd.supportedFilesystems = [ "zfs" ]; # Ensure initrd can handle ZFS pool discovery
-  services.zfs.autoScrub.enable = true;
-
-  boot.kernelPackages = pkgs.linuxPackages_6_13;
+  boot.kernelPackages = pkgs.linuxPackages_6_14;
 
   networking.hostName = "tempest"; # Define your hostname.
   networking.hostId = "856ff057";
+
+  boot.initrd.kernelModules = [ "btrfs" ];
+  boot.initrd.supportedFilesystems = [
+    "btrfs"
+    "vfat"
+  ];
+
+  fileSystems."/" = {
+    fsType = "tmpfs";
+    options = [
+      "defaults"
+      "size=4G"
+      "mode=755"
+    ];
+  };
 
   # Configure Bootloader (GRUB for LUKS unlock)
   boot.loader.systemd-boot.enable = true;

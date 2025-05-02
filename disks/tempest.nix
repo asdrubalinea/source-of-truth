@@ -3,86 +3,65 @@
     disk = {
       main = {
         type = "disk";
-        device = "/dev/nvme0n1";
+        device = "/dev/nvme0n1"; # Specify your target disk device
         content = {
           type = "gpt";
           partitions = {
             ESP = {
               size = "1G";
-              type = "EF00";
+              type = "EF00"; # EFI System Partition type
               content = {
                 type = "filesystem";
                 format = "vfat";
-                mountpoint = "/boot/efi";
+                mountpoint = "/boot/efi"; # Standard EFI mount point
                 mountOptions = [ "umask=0077" ];
               };
             };
-            zfs = {
-              size = "100%";
+            # BTRFS partition containing persistent subvolumes
+            root = {
+              size = "100%"; # Use remaining space
               content = {
-                type = "zfs";
-                pool = "zroot";
+                type = "btrfs";
+                # You can label the filesystem for easier identification in NixOS config
+                extraArgs = [ "-L nixos" ];
+                # Common mount options applied when NixOS mounts the subvolumes below
+                mountOptions = [
+                  "compress=zstd" # Or compress=lz4
+                  "noatime" # Or relatime
+                  "discard=async" # For SSDs
+                  "space_cache=v2"
+                ];
+                # Define the persistent subvolumes needed by the tmpfs setup
+                subvolumes = {
+                  # Optional: Default BTRFS subvolume, not mounted by Disko.
+                  # NixOS will mount tmpfs at '/' instead.
+                  # Keep it if you might want to boot directly into it for maintenance.
+                  "/@" = {
+                    # no mountpoint defined here
+                  };
+                  # Subvolume for /home (persisted)
+                  "/@home" = {
+                    mountpoint = "/home";
+                  };
+                  # Subvolume for /nix (persisted)
+                  "/@nix" = {
+                    mountpoint = "/nix";
+                    # Nix store often benefits from no compression
+                    mountOptions = [ "compress=no" ];
+                  };
+                  # Subvolume for /var/log (persisted)
+                  "/@log" = {
+                    mountpoint = "/var/log";
+                  };
+                  # Subvolume for persistence (e.g., with impermanence module)
+                  "/@persist" = {
+                    mountpoint = "/persist";
+                  };
+                  # Add other persistent subvolumes if needed
+                  # "/@snapshots" = { mountpoint = "/.snapshots"; };
+                };
               };
             };
-          };
-        };
-      };
-    };
-
-    zpool = {
-      zroot = {
-        type = "zpool";
-
-        options = {
-          ashift = "12";
-          autotrim = "on";
-        };
-        rootFsOptions = {
-          compression = "lz4";
-	  canmount = "off";
-          "com.sun:auto-snapshot" = "false";
-	  relatime = "on";
-	  normalization = "formD";
-	  xattr = "sa";
-        };
-
-	mountpoint = "/";
-
-        datasets = {
-          nixos = {
-            type = "zfs_fs";
-            options.mountpoint = "none";
-          };
-
-          "nixos/empty" = {
-            type = "zfs_fs";
-            options.mountpoint = "legacy";
-            mountpoint = "/";
-            postCreateHook = "zfs snapshot zroot/nixos/empty@start";
-          };
-
-          "nixos/nix" = {
-            type = "zfs_fs";
-            options.mountpoint = "legacy";
-            mountpoint = "/nix";
-          };
-
-          "nixos/home" = {
-            type = "zfs_fs";
-            options.mountpoint = "legacy";
-            mountpoint = "/home";
-          };
-
-          "nixos/var/log" = {
-            type = "zfs_fs";
-            options.mountpoint = "legacy";
-            mountpoint = "/var/log";
-          };
-
-          "nixos/persist" = {
-            type = "zfs_fs";
-            options.mountpoint = "legacy";
-            mountpoint = "/persist";
           };
         };
       };
