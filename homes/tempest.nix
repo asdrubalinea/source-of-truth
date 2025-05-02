@@ -128,6 +128,7 @@ in
     seahorse
     blueberry
     ntfs3g
+    networkmanagerapplet
 
     # Nix
     nixpkgs-fmt
