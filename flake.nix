@@ -184,17 +184,6 @@
 
             ./disks/tempest.nix
             ./hosts/tempest.nix
-
-            home-manager.nixosModules.home-manager
-            {
-              home-manager.extraSpecialArgs = {
-                inherit inputs;
-                hostname = "tempest";
-              };
-              home-manager.useGlobalPkgs = true;
-              home-manager.useUserPackages = true;
-              home-manager.users.irene = import ./homes/tempest.nix;
-            }
           ];
         };
       };
