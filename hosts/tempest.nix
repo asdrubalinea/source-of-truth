@@ -89,7 +89,6 @@
       "/var/lib/nixos"
       "/var/lib/tailscale"
       "/var/lib/systemd/coredump"
-      "/var/lib/sbctl"
       "/etc/NetworkManager/system-connections"
     ];
     files = [
