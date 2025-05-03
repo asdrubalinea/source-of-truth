@@ -16,6 +16,17 @@
   boot = {
     kernelPackages = pkgs.linuxPackages_latest;
     initrd = {
+      systemd.enable = true;
+
+      availableKernelModules = [
+        "ahci"
+        "nvme"
+        "sd_mod"
+        "usb_storage"
+        "usbhid"
+        "xhci_pci"
+      ];
+
       kernelModules = [
         "btrfs"
         "amdgpu"
@@ -28,12 +39,20 @@
     };
 
     loader = {
-      systemd-boot.enable = true;
+      systemd-boot.enable = lib.mkForce false;
+
       efi = {
         canTouchEfiVariables = true;
         efiSysMountPoint = "/boot/efi";
       };
     };
+
+    lanzaboote = {
+      enable = true;
+      pkiBundle = "/var/lib/sbctl";
+    };
+
+    bootspec.enable = true;
   };
 
   # Networking
@@ -70,6 +89,7 @@
       "/var/lib/nixos"
       "/var/lib/tailscale"
       "/var/lib/systemd/coredump"
+      "/var/lib/sbctl"
       "/etc/NetworkManager/system-connections"
     ];
     files = [

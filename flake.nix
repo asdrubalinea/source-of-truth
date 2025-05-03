@@ -27,6 +27,10 @@
     nixos-hardware = {
       url = "github:NixOS/nixos-hardware/master";
     };
+    lanzaboote = {
+      url = "github:nix-community/lanzaboote";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
 
     # --- Desktop/UI Components ---
     hyprland = {
@@ -87,6 +91,7 @@
       sops-nix,
       nixos-hardware,
       emacs-overlay,
+      lanzaboote,
       ...
     }:
     let
@@ -164,7 +169,7 @@
           ];
         };
 
-        "tempest" = lib.nixosSystem {
+        tempest = lib.nixosSystem {
           inherit system pkgs;
           specialArgs = {
             inherit inputs;
@@ -175,6 +180,7 @@
             disko.nixosModules.disko
             impermanence.nixosModules.impermanence
             nixos-hardware.nixosModules.framework-amd-ai-300-series
+            lanzaboote.nixosModules.lanzaboote
 
             ./disks/tempest.nix
             ./hosts/tempest.nix
