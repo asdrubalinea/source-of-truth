@@ -37,7 +37,6 @@
                   "nosuid"
                   "nodev"
                   "noexec"
-                  "umask=0077"
                 ];
               };
             };
