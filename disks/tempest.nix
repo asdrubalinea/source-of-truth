@@ -3,7 +3,7 @@
     disk = {
       main = {
         type = "disk";
-        device = "/dev/nvme0n1"; # Specify your target disk device
+        device = "/dev/nvme0n1";
         content = {
           type = "gpt";
           partitions = {
@@ -13,24 +13,34 @@
               content = {
                 type = "filesystem";
                 format = "vfat";
-                mountpoint = "/boot/efi"; # Standard EFI mount point
-                mountOptions = [ "umask=0077" ];
+                mountpoint = "/boot/efi";
+                mountOptions = [ "defaults" "nofail" "nosuid" "nodev" "noexec" "umask=0077" ];
               };
             };
+
+            boot = {
+              size = "2G";
+              content = {
+                type = "filesystem";
+                format = "ext4";
+                mountpoint = "/boot";
+                mountOptions = [ "defaults" "nofail" "nosuid" "nodev" "noexec" "umask=0077" ];
+              };
+            };
+
             # BTRFS partition containing persistent subvolumes
             root = {
               size = "100%"; # Use remaining space
               content = {
                 type = "btrfs";
-                # You can label the filesystem for easier identification in NixOS config
                 extraArgs = [ "-L nixos" ];
-                # Common mount options applied when NixOS mounts the subvolumes below
                 mountOptions = [
-                  "compress=zstd" # Or compress=lz4
-                  "noatime" # Or relatime
+                  "compress=lz4"
+                  "noatime"
                   "discard=async" # For SSDs
                   "space_cache=v2"
                 ];
+
                 # Define the persistent subvolumes needed by the tmpfs setup
                 subvolumes = {
                   # Optional: Default BTRFS subvolume, not mounted by Disko.
