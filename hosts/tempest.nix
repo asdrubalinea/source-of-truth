@@ -39,20 +39,13 @@
     };
 
     loader = {
-      systemd-boot.enable = lib.mkForce false;
+      systemd-boot.enable = true;
 
       efi = {
         canTouchEfiVariables = true;
         efiSysMountPoint = "/boot/efi";
       };
     };
-
-    lanzaboote = {
-      enable = true;
-      pkiBundle = "/var/lib/sbctl";
-    };
-
-    bootspec.enable = true;
   };
 
   # Networking
