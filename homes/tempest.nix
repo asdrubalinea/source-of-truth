@@ -69,6 +69,7 @@ in
     pciutils # PCI utilities (lspci)
     smartmontools # Disk health monitoring (smartctl)
     usbutils # USB utilities (lsusb)
+    sbctl
 
     # --- File Management & Text Processing ---
     bat # Cat clone with syntax highlighting
