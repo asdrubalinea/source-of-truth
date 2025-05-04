@@ -191,6 +191,7 @@
                 inherit inputs;
                 hostname = "tempest";
               };
+              home-manager.backupFileExtension = "backup";
               home-manager.useGlobalPkgs = true;
               home-manager.useUserPackages = true;
               home-manager.users.irene = import ./homes/tempest.nix;

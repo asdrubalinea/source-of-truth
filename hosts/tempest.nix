@@ -10,11 +10,14 @@
     ../rices/hypr/fonts.nix
     ../hardware/bluetooth.nix
     ../hardware/audio.nix
+    ../modules/secure-boot.nix
   ];
 
   # Boot Configuration
   boot = {
     kernelPackages = pkgs.linuxPackages_latest;
+    resumeDevice = "/dev/mapper/pool-swap";
+
     initrd = {
       systemd.enable = true;
 
@@ -107,22 +110,28 @@
     };
   };
 
-  services.xserver.videoDrivers = [ "amdgpu" ];
-
   # Services
   services = {
     openssh.enable = true;
-    getty.autologinUser = "irene";
+
     fwupd = {
       enable = true;
       extraRemotes = [ "lvfs-testing" ];
     };
-    logind.lidSwitch = "suspend-then-hibernate";
+
     power-profiles-daemon.enable = true;
+
     tailscale = {
       enable = true;
       useRoutingFeatures = "client";
     };
+
+    xserver.videoDrivers = [ "amdgpu" ];
+
+    logind.lidSwitch = "suspend-then-hibernate";
+    logind.extraConfig = ''
+      HandlePowerKey=hibernate
+    '';
   };
 
   # Power Management
