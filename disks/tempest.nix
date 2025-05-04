@@ -66,9 +66,16 @@
       pool = {
         type = "lvm_vg";
         lvs = {
+          swap = {
+            size = "36G";
+            content = {
+              type = "swap";
+            };
+          };
+
           # BTRFS partition containing persistent subvolumes
           root = {
-            size = "-36G";
+            size = "100%";
             content = {
               type = "btrfs";
               extraArgs = [ "-L nixos" ];
@@ -109,13 +116,6 @@
 		  mountpoint = "/var/lib/sbctl";
 		};
               };
-            };
-          };
-
-          swap = {
-            size = "100%";
-            content = {
-              type = "swap";
             };
           };
         };
