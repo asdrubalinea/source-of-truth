@@ -2,6 +2,7 @@
   pkgs,
   inputs,
   lib,
+  config,
   ...
 }:
 
@@ -13,25 +14,30 @@
     ../modules/secure-boot.nix
   ];
 
+  nixpkgs.hostPlatform = lib.mkDefault "x86_64-linux";
+
   # Boot Configuration
   boot = {
     kernelPackages = pkgs.linuxPackages_latest;
+    # kernelPackages = pkgs.linuxPackages_testing;
     resumeDevice = "/dev/mapper/pool-swap";
+    # kernelParams = [ "usbcore.autosuspend=-1" ];
+    kernelParams = [ "microcode.amd_sha_check=off" ];
+
+    kernelModules = [ "kvm-amd" ];
 
     initrd = {
       systemd.enable = true;
 
       availableKernelModules = [
-        "ahci"
         "nvme"
-        "sd_mod"
-        "usb_storage"
-        "usbhid"
         "xhci_pci"
+        "thunderbolt"
+        "usbhid"
       ];
 
       kernelModules = [
-        "btrfs"
+        "dm-snapshot"
         "amdgpu"
       ];
 
@@ -97,8 +103,14 @@
   };
 
   # Hardware Configuration
+  services.ucodenix.enable = true;
   hardware = {
+    cpu.amd.updateMicrocode = lib.mkDefault config.hardware.enableRedistributableFirmware;
+    enableAllFirmware = true;
     enableRedistributableFirmware = true;
+
+    firmware = [ pkgs.linux-firmware ];
+
     graphics = {
       enable = true;
       enable32Bit = true;
@@ -129,8 +141,10 @@
     xserver.videoDrivers = [ "amdgpu" ];
 
     logind.lidSwitch = "suspend-then-hibernate";
+    logind.lidSwitchExternalPower = "ignore";
     logind.extraConfig = ''
       HandlePowerKey=hibernate
+      HandleLidSwitchDocked=ignore
     '';
   };
 

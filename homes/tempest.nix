@@ -60,6 +60,7 @@ in
     file # Determine file type
     gnupg # Encryption and signing
     htop # Interactive process viewer
+    btop
     hyfetch # System information fetcher (neofetch fork)
     lsof # List open files
     ntfs3g # NTFS filesystem driver
@@ -85,6 +86,7 @@ in
     yazi # Terminal file manager
     zip # Create zip archives
     yek
+    powertop
 
     # --- Networking ---
     curl # Data transfer utility

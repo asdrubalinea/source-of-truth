@@ -31,6 +31,7 @@
       url = "github:nix-community/lanzaboote";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    ucodenix.url = "github:e-tho/ucodenix";
 
     # --- Desktop/UI Components ---
     hyprland = {
@@ -92,6 +93,7 @@
       nixos-hardware,
       emacs-overlay,
       lanzaboote,
+      ucodenix,
       ...
     }:
     let
@@ -181,6 +183,7 @@
             impermanence.nixosModules.impermanence
             nixos-hardware.nixosModules.framework-amd-ai-300-series
             lanzaboote.nixosModules.lanzaboote
+            ucodenix.nixosModules.default
 
             ./disks/tempest.nix
             ./hosts/tempest.nix
