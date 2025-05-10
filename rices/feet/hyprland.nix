@@ -146,7 +146,7 @@ in
 
         sensitivity =
           if hostname == "tempest" then
-            -0.2
+            0
           else if hostname == "orchid" then
             -1.0
           else
@@ -154,6 +154,7 @@ in
 
         touchpad = {
           natural_scroll = true;
+          scroll_factor = 0.2;
         };
       };
 

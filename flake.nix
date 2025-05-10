@@ -56,6 +56,7 @@
       inputs.nixpkgs.follows = "nixpkgs";
       inputs.hyprlang.follows = "hyprland/hyprlang";
     };
+    nixos-cosmic.url = "github:lilyinstarlight/nixos-cosmic";
 
     # --- Applications/Services ---
     vscode-server = {

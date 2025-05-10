@@ -19,10 +19,20 @@
   # Boot Configuration
   boot = {
     kernelPackages = pkgs.linuxPackages_latest;
+    kernelPatches = [
+      {
+        name = "0001_dpg_pause_unpause_for_vcn_4_0_5";
+        patch = ../patches/0001_dpg_pause_unpause_for_vcn_4_0_5.patch;
+      }
+    ];
+
     # kernelPackages = pkgs.linuxPackages_testing;
     resumeDevice = "/dev/mapper/pool-swap";
     # kernelParams = [ "usbcore.autosuspend=-1" ];
-    kernelParams = [ "microcode.amd_sha_check=off" ];
+    kernelParams = [
+      "microcode.amd_sha_check=off"
+      "amdgpu.dcdebugmask=0x12"
+    ];
 
     kernelModules = [ "kvm-amd" ];
 
@@ -70,7 +80,7 @@
       fsType = "tmpfs";
       options = [
         "defaults"
-        "size=2G"
+        "size=32G"
         "mode=755"
       ];
     };
@@ -192,8 +202,14 @@
         "root"
         "irene"
       ];
-      substituters = [ "https://hyprland.cachix.org" ];
-      trusted-public-keys = [ "hyprland.cachix.org-1:a7pgxzMz7+chwVL3/pzj6jIBMioiJM7ypFP8PwtkuGc=" ];
+      substituters = [
+        "https://hyprland.cachix.org"
+        "https://cosmic.cachix.org/"
+      ];
+      trusted-public-keys = [
+        "hyprland.cachix.org-1:a7pgxzMz7+chwVL3/pzj6jIBMioiJM7ypFP8PwtkuGc="
+        "cosmic.cachix.org-1:Dya9IyXD4xdBehWjrkPv6rtxpmMdRel02smYzA85dPE="
+      ];
     };
     extraOptions = ''
       experimental-features = nix-command flakes
@@ -219,6 +235,19 @@
       package = inputs.hyprland.packages.${pkgs.system}.hyprland;
     };
     fish.enable = true;
+  };
+
+  systemd.services.disable-fingerprint-led = {
+    description = "Disable Framework Laptop Fingerprint LED at boot";
+    wantedBy = [ "multi-user.target" ];
+    after = [ "multi-user.target" ];
+
+    serviceConfig = {
+      Type = "oneshot";
+      RemainAfterExit = true;
+
+      ExecStart = "${pkgs.fw-ectool}/bin/ectool led power off";
+    };
   };
 
   # System Version
