@@ -18,7 +18,8 @@
 
   # Boot Configuration
   boot = {
-    kernelPackages = pkgs.linuxPackages_latest;
+    # kernelPackages = pkgs.linuxPackages_latest;
+    kernelPackages = pkgs.linuxPackages_6_14;
     kernelPatches = [
       {
         name = "0001_dpg_pause_unpause_for_vcn_4_0_5";
