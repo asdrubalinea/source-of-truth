@@ -1,0 +1,45 @@
+{ pkgs, hostname, ... }:
+{
+  stylix = {
+    enable = true;
+    base16Scheme = "${pkgs.base16-schemes}/share/themes/rose-pine.yaml";
+    # base16Scheme = "${pkgs.base16-schemes}/share/themes/qualia.yaml";
+    # base16Scheme = "${pkgs.base16-schemes}/share/themes/gruvbox-dark-hard.yaml";
+
+    targets = {
+      neovim.enable = false;
+    };
+
+    fonts = {
+      sizes = {
+        terminal =
+          if hostname == "tempest" then
+            16
+          else if hostname == "orchid" then
+            20
+          else
+            16;
+      };
+
+      serif = {
+        package = pkgs.dejavu_fonts;
+        name = "DejaVu Serif";
+      };
+
+      sansSerif = {
+        package = pkgs.dejavu_fonts;
+        name = "DejaVu Sans";
+      };
+
+      monospace = {
+        package = pkgs.comic-mono;
+        name = "Comic Mono";
+      };
+
+      emoji = {
+        package = pkgs.noto-fonts-emoji;
+        name = "Noto Color Emoji";
+      };
+    };
+  };
+}
