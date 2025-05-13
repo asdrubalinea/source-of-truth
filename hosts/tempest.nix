@@ -8,10 +8,11 @@
 
 {
   imports = [
-    ../rices/hypr/fonts.nix
     ../hardware/bluetooth.nix
     ../hardware/audio.nix
     ../modules/secure-boot.nix
+
+    ../rices/estradiol/system.nix
   ];
 
   nixpkgs.hostPlatform = lib.mkDefault "x86_64-linux";
@@ -21,9 +22,13 @@
     # kernelPackages = pkgs.linuxPackages_latest;
     kernelPackages = pkgs.linuxPackages_6_14;
     kernelPatches = [
+      # {
+      # name = "0001_dpg_pause_unpause_for_vcn_4_0_5";
+      # patch = ../patches/0001_dpg_pause_unpause_for_vcn_4_0_5.patch;
+      # }
       {
-        name = "0001_dpg_pause_unpause_for_vcn_4_0_5";
-        patch = ../patches/0001_dpg_pause_unpause_for_vcn_4_0_5.patch;
+        name = "0001-turn-off-doorbell-for-vcn-ring-use";
+        patch = ../patches/0001-turn-off-doorbell-for-vcn-ring-use.patch;
       }
     ];
 
@@ -142,8 +147,6 @@
       extraRemotes = [ "lvfs-testing" ];
     };
 
-    power-profiles-daemon.enable = true;
-
     tailscale = {
       enable = true;
       useRoutingFeatures = "client";
@@ -160,10 +163,10 @@
   };
 
   # Power Management
-  powerManagement = {
-    cpuFreqGovernor = lib.mkDefault "powersave";
-    powertop.enable = true;
-  };
+  # powerManagement = {
+  # cpuFreqGovernor = lib.mkDefault "powersave";
+  # powertop.enable = true;
+  # };
 
   # Internationalisation & Console
   time.timeZone = "Europe/Rome";
@@ -231,11 +234,6 @@
       enableSSHSupport = true;
     };
     dconf.enable = true;
-    hyprland = {
-      enable = true;
-      package = inputs.hyprland.packages.${pkgs.system}.hyprland;
-    };
-    fish.enable = true;
   };
 
   systemd.services.disable-fingerprint-led = {
@@ -248,6 +246,19 @@
       RemainAfterExit = true;
 
       ExecStart = "${pkgs.fw-ectool}/bin/ectool led power off";
+    };
+  };
+
+  systemd.services.set-default-brightness = {
+    description = "Set default brightness level";
+    wantedBy = [ "multi-user.target" ];
+    after = [ "multi-user.target" ];
+
+    serviceConfig = {
+      Type = "oneshot";
+      RemainAfterExit = true;
+
+      ExecStart = "${pkgs.brightnessctl}/bin/brightnessctl set 30%";
     };
   };
 
