@@ -5,7 +5,22 @@
   hostname,
   ...
 }:
+
+let
+  handleClamshell = pkgs.writeScriptBin "hypr-handle-clamshell" ''
+    #!${pkgs.stdenv.shell}
+
+    if [[ $1 == "open" ]]; then
+      hyprctl keyword monitor "eDP-1, 2880x1920@120, 0x0, 2"
+    else
+      hyprctl keyword monitor "eDP-1,disable"
+    fi
+  '';
+
+in
 {
+  home.packages = [ handleClamshell ];
+
   wayland.windowManager.hyprland = {
     enable = true;
 
@@ -139,11 +154,12 @@
 
         touchpad = {
           natural_scroll = true;
+          scroll_factor = 0.2;
         };
       };
 
       gestures = {
-        workspace_swipe = false;
+        workspace_swipe = true;
       };
 
       # Keybindings
@@ -205,6 +221,9 @@
         ", XF86AudioPlay, exec, playerctl play-pause"
         ", XF86AudioPrev, exec, playerctl previous"
         ", XF86AudioNext, exec, playerctl next"
+
+        ", switch:off:Lid Switch,exec,${handleClamshell}/bin/hypr-handle-clamshell open"
+        ", switch:on:Lid Switch,exec,${handleClamshell}/bin/hypr-handle-clamshell close"
       ];
 
       bindm = [

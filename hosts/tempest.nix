@@ -2,36 +2,58 @@
   pkgs,
   inputs,
   lib,
+  config,
   ...
 }:
 
 {
   imports = [
-    ../rices/hypr/fonts.nix
     ../hardware/bluetooth.nix
     ../hardware/audio.nix
     ../modules/secure-boot.nix
+
+    ../rices/estradiol/system.nix
   ];
+
+  nixpkgs.hostPlatform = lib.mkDefault "x86_64-linux";
 
   # Boot Configuration
   boot = {
-    kernelPackages = pkgs.linuxPackages_latest;
+    # kernelPackages = pkgs.linuxPackages_latest;
+    kernelPackages = pkgs.linuxPackages_6_14;
+    kernelPatches = [
+      # {
+      # name = "0001_dpg_pause_unpause_for_vcn_4_0_5";
+      # patch = ../patches/0001_dpg_pause_unpause_for_vcn_4_0_5.patch;
+      # }
+      {
+        name = "0001-turn-off-doorbell-for-vcn-ring-use";
+        patch = ../patches/0001-turn-off-doorbell-for-vcn-ring-use.patch;
+      }
+    ];
+
+    # kernelPackages = pkgs.linuxPackages_testing;
     resumeDevice = "/dev/mapper/pool-swap";
+    # kernelParams = [ "usbcore.autosuspend=-1" ];
+    kernelParams = [
+      "microcode.amd_sha_check=off"
+      "amdgpu.dcdebugmask=0x12"
+    ];
+
+    kernelModules = [ "kvm-amd" ];
 
     initrd = {
       systemd.enable = true;
 
       availableKernelModules = [
-        "ahci"
         "nvme"
-        "sd_mod"
-        "usb_storage"
-        "usbhid"
         "xhci_pci"
+        "thunderbolt"
+        "usbhid"
       ];
 
       kernelModules = [
-        "btrfs"
+        "dm-snapshot"
         "amdgpu"
       ];
 
@@ -64,7 +86,7 @@
       fsType = "tmpfs";
       options = [
         "defaults"
-        "size=2G"
+        "size=32G"
         "mode=755"
       ];
     };
@@ -97,8 +119,14 @@
   };
 
   # Hardware Configuration
+  services.ucodenix.enable = true;
   hardware = {
+    cpu.amd.updateMicrocode = lib.mkDefault config.hardware.enableRedistributableFirmware;
+    enableAllFirmware = true;
     enableRedistributableFirmware = true;
+
+    firmware = [ pkgs.linux-firmware ];
+
     graphics = {
       enable = true;
       enable32Bit = true;
@@ -119,8 +147,6 @@
       extraRemotes = [ "lvfs-testing" ];
     };
 
-    power-profiles-daemon.enable = true;
-
     tailscale = {
       enable = true;
       useRoutingFeatures = "client";
@@ -129,16 +155,18 @@
     xserver.videoDrivers = [ "amdgpu" ];
 
     logind.lidSwitch = "suspend-then-hibernate";
+    logind.lidSwitchExternalPower = "ignore";
     logind.extraConfig = ''
       HandlePowerKey=hibernate
+      HandleLidSwitchDocked=ignore
     '';
   };
 
   # Power Management
-  powerManagement = {
-    cpuFreqGovernor = lib.mkDefault "powersave";
-    powertop.enable = true;
-  };
+  # powerManagement = {
+  # cpuFreqGovernor = lib.mkDefault "powersave";
+  # powertop.enable = true;
+  # };
 
   # Internationalisation & Console
   time.timeZone = "Europe/Rome";
@@ -178,8 +206,14 @@
         "root"
         "irene"
       ];
-      substituters = [ "https://hyprland.cachix.org" ];
-      trusted-public-keys = [ "hyprland.cachix.org-1:a7pgxzMz7+chwVL3/pzj6jIBMioiJM7ypFP8PwtkuGc=" ];
+      substituters = [
+        "https://hyprland.cachix.org"
+        "https://cosmic.cachix.org/"
+      ];
+      trusted-public-keys = [
+        "hyprland.cachix.org-1:a7pgxzMz7+chwVL3/pzj6jIBMioiJM7ypFP8PwtkuGc="
+        "cosmic.cachix.org-1:Dya9IyXD4xdBehWjrkPv6rtxpmMdRel02smYzA85dPE="
+      ];
     };
     extraOptions = ''
       experimental-features = nix-command flakes
@@ -200,11 +234,32 @@
       enableSSHSupport = true;
     };
     dconf.enable = true;
-    hyprland = {
-      enable = true;
-      package = inputs.hyprland.packages.${pkgs.system}.hyprland;
+  };
+
+  systemd.services.disable-fingerprint-led = {
+    description = "Disable Framework Laptop Fingerprint LED at boot";
+    wantedBy = [ "multi-user.target" ];
+    after = [ "multi-user.target" ];
+
+    serviceConfig = {
+      Type = "oneshot";
+      RemainAfterExit = true;
+
+      ExecStart = "${pkgs.fw-ectool}/bin/ectool led power off";
     };
-    fish.enable = true;
+  };
+
+  systemd.services.set-default-brightness = {
+    description = "Set default brightness level";
+    wantedBy = [ "multi-user.target" ];
+    after = [ "multi-user.target" ];
+
+    serviceConfig = {
+      Type = "oneshot";
+      RemainAfterExit = true;
+
+      ExecStart = "${pkgs.brightnessctl}/bin/brightnessctl set 30%";
+    };
   };
 
   # System Version
