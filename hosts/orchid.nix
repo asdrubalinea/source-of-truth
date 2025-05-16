@@ -280,6 +280,8 @@
 
   programs.steam.enable = true;
 
+  hardware.logitech.wireless.enable = true;
+
   # security.polkit.enable = true;
 
   nix = {
