@@ -30,7 +30,7 @@ in
   imports = [
     inputs.sops-nix.homeManagerModules.sops
     inputs.hyprland.homeManagerModules.default
-    inputs.stylix.homeManagerModules.stylix
+    # inputs.stylix.homeManagerModules.stylix
 
     ../rices/feet
 
@@ -198,6 +198,7 @@ in
     nix-size
 
     aider-chat
+    solaar
   ];
 
   # programs.neovim = {
