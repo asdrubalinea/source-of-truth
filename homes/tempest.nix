@@ -13,7 +13,7 @@ in
     inputs.hyprland.homeManagerModules.default
     inputs.stylix.homeManagerModules.stylix
 
-    ../rices/feet
+    ../rices/estradiol
     ../desktop/zed-editor
     ../scripts/system-clean.nix
     ../scripts/config-apply.nix
@@ -70,6 +70,8 @@ in
     smartmontools # Disk health monitoring (smartctl)
     usbutils # USB utilities (lsusb)
     sbctl
+    glxinfo
+    feh
 
     # --- File Management & Text Processing ---
     bat # Cat clone with syntax highlighting
@@ -85,6 +87,7 @@ in
     yazi # Terminal file manager
     zip # Create zip archives
     yek
+    powertop
 
     # --- Networking ---
     curl # Data transfer utility
@@ -130,6 +133,7 @@ in
 
     # --- Desktop Environment & GUI Apps ---
     alacritty # GPU-accelerated terminal emulator
+    ghostty
     blueberry # Bluetooth frontend
     chromium # Web browser
     ffmpeg # Multimedia framework (often a dependency)
@@ -152,6 +156,7 @@ in
     wezterm # GPU-accelerated terminal emulator
     wl-clipboard # Wayland clipboard utilities
     zoom-us # Video conferencing
+    cdrtools
 
     # --- Data Management ---
     dbeaver-bin # Universal database tool

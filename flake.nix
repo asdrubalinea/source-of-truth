@@ -31,6 +31,7 @@
       url = "github:nix-community/lanzaboote";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    ucodenix.url = "github:e-tho/ucodenix";
 
     # --- Desktop/UI Components ---
     hyprland = {
@@ -54,6 +55,11 @@
       url = "github:ndom91/rose-pine-hyprcursor";
       inputs.nixpkgs.follows = "nixpkgs";
       inputs.hyprlang.follows = "hyprland/hyprlang";
+    };
+    nixos-cosmic.url = "github:lilyinstarlight/nixos-cosmic";
+    anyrun = {
+      url = "github:anyrun-org/anyrun";
+      inputs.nixpkgs.follows = "nixpkgs";
     };
 
     # --- Applications/Services ---
@@ -92,6 +98,7 @@
       nixos-hardware,
       emacs-overlay,
       lanzaboote,
+      ucodenix,
       ...
     }:
     let
@@ -181,6 +188,7 @@
             impermanence.nixosModules.impermanence
             nixos-hardware.nixosModules.framework-amd-ai-300-series
             lanzaboote.nixosModules.lanzaboote
+            ucodenix.nixosModules.default
 
             ./disks/tempest.nix
             ./hosts/tempest.nix
