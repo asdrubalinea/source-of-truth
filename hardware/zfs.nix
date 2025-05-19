@@ -1,4 +1,5 @@
-{ pkgs, ... }: {
+{ pkgs, ... }:
+{
   environment.systemPackages = with pkgs; [ zfs ];
 
   # Enable SMART daemon
@@ -21,7 +22,7 @@
     devices = [
       { device = "/dev/nvme0n1"; }
       { device = "/dev/nvme1n1"; }
-      { device = "/dev/nvme2n1"; }
+      # { device = "/dev/nvme2n1"; }
     ];
   };
 
