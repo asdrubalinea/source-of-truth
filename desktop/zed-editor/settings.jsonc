@@ -118,9 +118,9 @@
   },
   "base_keymap": "VSCode",
   "relative_line_numbers": true,
-  "ui_font_size": 18.0,
+  "ui_font_size": 22.0,
   "ui_font_family": "Maple Mono",
-  "buffer_font_size": 18.0,
+  "buffer_font_size": 22.0,
   "buffer_font_family": "Maple Mono",
   "theme": {
     "mode": "system",
@@ -196,59 +196,59 @@
       },
     },
   },
-  "assistant": {
-    "default_model": {
-      "provider": "openai",
-      "model": "deepseek/deepseek-chat-v3-0324",
-    },
-    "version": "2",
-  },
-  "language_models": {
-    "ollama": {
-      "api_url": "http://orchid:11434",
-      "available_models": [
-        {
-          "name": "qwen2.5-coder:14b",
-          "display_name": "qwen 2.5 coder 32K",
-          "max_tokens": 32768,
-        },
-      ],
-    },
-    "openai": {
-      "version": "1",
-      "api_url": "https://openrouter.ai/api/v1",
-      "available_models": [
-        {
-          "display_name": "Qwen2.5 72B",
-          "name": "qwen/qwen-2.5-72b-instruct",
-          "max_tokens": 131072,
-        },
-        {
-          "display_name": "R1 Distill Qwen 32B",
-          "name": "deepseek/deepseek-r1-distill-qwen-32b",
-          "max_tokens": 131072,
-        },
-        {
-          "display_name": "Claude 3.5 Sonnet",
-          "name": "anthropic/claude-3.5-sonnet:beta",
-          "max_tokens": 131072,
-        },
-        {
-          "display_name": "Claude 3.7 Sonnet",
-          "name": "anthropic/claude-3.7-sonnet",
-          "max_tokens": 131072,
-        },
-        {
-          "display_name": "Qwen QwQ 32B",
-          "name": "qwen/qwq-32b",
-          "max_tokens": 131072,
-        },
-        {
-          "display_name": "DeepSeek V3 0324",
-          "name": "deepseek/deepseek-chat-v3-0324",
-          "max_tokens": 131072,
-        },
-      ],
-    },
-  },
+  // "assistant": {
+  //   "default_model": {
+  //     "provider": "openai",
+  //     "model": "deepseek/deepseek-chat-v3-0324",
+  //   },
+  //   "version": "2",
+  // },
+  // "language_models": {
+  //   "ollama": {
+  //     "api_url": "http://orchid:11434",
+  //     "available_models": [
+  //       {
+  //         "name": "qwen2.5-coder:14b",
+  //         "display_name": "qwen 2.5 coder 32K",
+  //         "max_tokens": 32768,
+  //       },
+  //     ],
+  //   },
+  // "openai": {
+  //   "version": "1",
+  //   "api_url": "https://openrouter.ai/api/v1",
+  //   "available_models": [
+  //     {
+  //       "display_name": "Qwen2.5 72B",
+  //       "name": "qwen/qwen-2.5-72b-instruct",
+  //       "max_tokens": 131072,
+  //     },
+  //     {
+  //       "display_name": "R1 Distill Qwen 32B",
+  //       "name": "deepseek/deepseek-r1-distill-qwen-32b",
+  //       "max_tokens": 131072,
+  //     },
+  //     {
+  //       "display_name": "Claude 3.5 Sonnet",
+  //       "name": "anthropic/claude-3.5-sonnet:beta",
+  //       "max_tokens": 131072,
+  //     },
+  //     {
+  //       "display_name": "Claude 3.7 Sonnet",
+  //       "name": "anthropic/claude-3.7-sonnet",
+  //       "max_tokens": 131072,
+  //     },
+  //     {
+  //       "display_name": "Qwen QwQ 32B",
+  //       "name": "qwen/qwq-32b",
+  //       "max_tokens": 131072,
+  //     },
+  //     {
+  //       "display_name": "DeepSeek V3 0324",
+  //       "name": "deepseek/deepseek-chat-v3-0324",
+  //       "max_tokens": 131072,
+  //     },
+  //   ],
+  // },
+  // },
 }
