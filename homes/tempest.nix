@@ -157,6 +157,8 @@ in
     wl-clipboard # Wayland clipboard utilities
     zoom-us # Video conferencing
     cdrtools
+    nix-diff
+    lm_sensors
 
     # --- Data Management ---
     dbeaver-bin # Universal database tool

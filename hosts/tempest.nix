@@ -10,6 +10,7 @@
   imports = [
     ../hardware/bluetooth.nix
     ../hardware/audio.nix
+    ../hardware/framework.nix
     ../modules/secure-boot.nix
 
     ../rices/estradiol/system.nix
@@ -163,10 +164,10 @@
   };
 
   # Power Management
-  # powerManagement = {
-  # cpuFreqGovernor = lib.mkDefault "powersave";
-  # powertop.enable = true;
-  # };
+  powerManagement = {
+    cpuFreqGovernor = lib.mkDefault "powersave";
+    # powertop.enable = true;
+  };
 
   # Internationalisation & Console
   time.timeZone = "Europe/Rome";
@@ -236,31 +237,14 @@
     dconf.enable = true;
   };
 
-  systemd.services.disable-fingerprint-led = {
-    description = "Disable Framework Laptop Fingerprint LED at boot";
-    wantedBy = [ "multi-user.target" ];
-    after = [ "multi-user.target" ];
-
-    serviceConfig = {
-      Type = "oneshot";
-      RemainAfterExit = true;
-
-      ExecStart = "${pkgs.fw-ectool}/bin/ectool led power off";
-    };
-  };
-
-  systemd.services.set-default-brightness = {
-    description = "Set default brightness level";
-    wantedBy = [ "multi-user.target" ];
-    after = [ "multi-user.target" ];
-
-    serviceConfig = {
-      Type = "oneshot";
-      RemainAfterExit = true;
-
-      ExecStart = "${pkgs.brightnessctl}/bin/brightnessctl set 30%";
-    };
-  };
+  networking.extraHosts = ''
+    127.0.0.1 dscovr.test
+    127.0.0.1 tak.dscovr.test
+    127.0.0.1 admin.dscovr.test
+    127.0.0.1 app.dscovr.test
+    127.0.0.1 experiment.dscovr.test
+    127.0.0.1 teams.dscovr.test
+  '';
 
   # System Version
   system.stateVersion = "24.11";
