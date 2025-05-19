@@ -280,6 +280,8 @@
 
   programs.steam.enable = true;
 
+  hardware.logitech.wireless.enable = true;
+
   # security.polkit.enable = true;
 
   nix = {
@@ -303,6 +305,16 @@
   };
 
   # networking.firewall.allowedUDPPorts = [ ]
+
+  networking.extraHosts = ''
+    127.0.0.1 dscovr.test
+    127.0.0.1 tak.dscovr.test
+    127.0.0.1 admin.dscovr.test
+    127.0.0.1 app.dscovr.test
+    127.0.0.1 experiment.dscovr.test
+    127.0.0.1 teams.dscovr.test
+    127.0.0.1 sole24ore.dscovr.test
+  '';
 
   system.stateVersion = "23.05";
 }

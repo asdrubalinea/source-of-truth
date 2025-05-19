@@ -30,7 +30,7 @@ in
   imports = [
     inputs.sops-nix.homeManagerModules.sops
     inputs.hyprland.homeManagerModules.default
-    inputs.stylix.homeManagerModules.stylix
+    # inputs.stylix.homeManagerModules.stylix
 
     ../rices/feet
 
@@ -38,9 +38,12 @@ in
     # ../desktop/emacs
 
     ../scripts/system-clean.nix
+    ../scripts/port-forward.nix
 
     ../misc/fish.nix
     ../misc/aliases.nix
+
+    ../desktop/home-packages.nix
   ];
 
   # Let Home Manager install and manage itself.
@@ -77,127 +80,10 @@ in
   };
 
   home.packages = with pkgs; [
-    # System utils
-    hyfetch
-    onefetch
-    fastfetch
-    htop
-    dool
-    sshfs
-    pciutils
-    file
-    eza
-    git
-    bat
-    jq
-    unzip
-    ripgrep
-    usbutils
-    openssl
-    curl
-    wget
-    traceroute
-    zip
-    coreutils
-    fd
-    lazygit
-    gnupg
-    fzf
-    ipcalc
-    iperf3
-    zellij
-    tmux
-    screen
-    grc
-    devbox
-    gay
-    ponysay
-    blahaj
-    dive
-    lsof
-    lurk
-    nix-tree
-    yt-dlp
-    ffmpeg
-    starship
-    nvtopPackages.amd
-    smartmontools
-    xxd
-    telegram-desktop
-    pavucontrol
-    obsidian
-    vesktop
-    btop
-    zoom-us
-    superTuxKart
-    nemo
-    csvlens
-    onlyoffice-desktopeditors
-    obs-studio
-    dnsutils
-    wl-clipboard
-    postman
-    just
-    distrobox
-    rclone
-    restic
-    czkawka
-    cachix
-    tor-browser
-    mpv
-    vlc
-    dbeaver-bin
-    gitui
-    yazi
-    evil-helix
-    seahorse
-    blueberry
-    ntfs3g
-
-    # (pkgs.callPackage ../packages/cider-2.nix { })
-
-    # Nix
-    nixpkgs-fmt
-    # rnix-lsp
-    nil
-    alejandra
-    nixd
-
-    # Project management
-    devenv
-    direnv
-
-    # Docker
-    docker-compose
-
-    # Desktop
-    keepassxc
-    chromium
-    alacritty
-    kitty
-    wezterm
-    inputs.zen-browser.packages.x86_64-linux.default
-    ladybird
-
-    # inputs.mm.packages.x86_64-linux.default
-    sqlite
-    sqlitebrowser
-
-    inputs.nixvim.packages.${pkgs.system}.default
-
-    luarocks
-    lua
-
-    prismlauncher
-
-    # Custom
     user-apply
     system-apply
-
     arc-size
     nix-size
-
-    aider-chat
   ];
 
   # programs.neovim = {
