@@ -88,7 +88,7 @@
     blueberry # Bluetooth frontend
     chromium # Web browser
     dbeaver-bin # Universal database tool
-    evil-helix # (Likely a game or demo)
+    helix # (Likely a game or demo)
     ffmpeg # Multimedia framework (often a dependency)
     inputs.zen-browser.packages.x86_64-linux.default # Zen Browser
     keepassxc # Password manager
@@ -115,6 +115,7 @@
     restic # Backup tool
     sqlite # SQLite database engine
     sqlitebrowser # SQLite database GUI
+    litecli
 
     # --- Fun & Miscellaneous ---
     blahaj # IKEA shark ASCII art
@@ -122,6 +123,7 @@
     ponysay # Cowsay reimplementation with ponies
 
     solaar # Logitech mouse manager
+    kdePackages.okular
 
     # (pkgs.callPackage ../packages/cider-2.nix { })
     # rnix-lsp

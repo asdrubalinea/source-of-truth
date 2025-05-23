@@ -19,6 +19,8 @@
     ../services/grafana
     # ../services/glance
     # ../services/caddy.nix
+
+    inputs.diapee-bot.nixosModules.x86_64-linux.default
   ];
 
   # vfio.enable = false;
@@ -315,6 +317,22 @@
     127.0.0.1 teams.dscovr.test
     127.0.0.1 sole24ore.dscovr.test
   '';
+
+  services.diapee-bot = {
+    enable = true;
+
+    # user = "irene";
+    # group = "irene";
+
+    environmentFile = "/persist/diapee-bot/env";
+    dataDir = "/persist/diapee-bot";
+
+    extraEnvironment = {
+      RUST_LOG = "info,diapee_bot=debug";
+      DIAPEEBOT_MODEL = "google/gemini-2.5-pro-preview";
+      DIAPEEBOT_PRONOUNS = "she/her";
+    };
+  };
 
   system.stateVersion = "23.05";
 }
