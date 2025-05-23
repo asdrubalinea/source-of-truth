@@ -161,6 +161,8 @@
       HandlePowerKey=hibernate
       HandleLidSwitchDocked=ignore
     '';
+
+    gnome.gnome-keyring.enable = true;
   };
 
   # Power Management
@@ -190,12 +192,26 @@
     shell = pkgs.fish;
   };
 
+  users.users.plasma = {
+    isNormalUser = true;
+    extraGroups = [
+      "wheel"
+      "networkmanager"
+    ];
+    hashedPassword = "$6$BkMgWYEIITYDhZkR$KnfSasOiuqi14e.85Ft/YMjgxoniRxoYXc8Tbk1J4ksq2I8Hk358V2OQFcRqHmBv/g52nhCOUWvb3uzjQuMbF0";
+    shell = pkgs.fish;
+  };
+
   security = {
     doas = {
       enable = true;
       wheelNeedsPassword = false;
     };
-    sudo.enable = true;
+    sudo = {
+      package = pkgs.sudo-rs;
+      execWheelOnly = true;
+    };
+    sudo-rs.enable = true;
     pam.services.greetd.enableGnomeKeyring = true;
   };
 
@@ -244,7 +260,21 @@
     127.0.0.1 app.dscovr.test
     127.0.0.1 experiment.dscovr.test
     127.0.0.1 teams.dscovr.test
+    127.0.0.1 acea.dscovr.test
+    127.0.0.1 workspace5nrt.dscovr.test
+    127.0.0.1 workspace0tcb.dscovr.test
+    127.0.0.1 workspace2nrt.dscovr.test
   '';
+
+  hardware.logitech.wireless.enable = true;
+
+  environment.sessionVariables = {
+    DESKTOP_SESSION = "plasma";
+   QT_STYLE_OVERRIDE = "breeze";
+  };
+  services.displayManager.sddm.enable = true;
+  services.displayManager.sddm.wayland.enable = true;
+  services.desktopManager.plasma6.enable = true;
 
   # System Version
   system.stateVersion = "24.11";

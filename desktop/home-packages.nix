@@ -122,9 +122,12 @@
     ponysay # Cowsay reimplementation with ponies
 
     solaar # Logitech mouse manager
+    kdePackages.okular
 
     # (pkgs.callPackage ../packages/cider-2.nix { })
     # rnix-lsp
     # inputs.mm.packages.x86_64-linux.default
+
+    appimage-run
   ];
 }
