@@ -82,24 +82,23 @@
   };
 
   outputs =
-    inputs@{
-      nixpkgs,
-      nixpkgs-stable,
-      nixpkgs-trunk,
-      nixpkgs-custom,
-      home-manager,
-      hyprland,
-      niri,
-      vscode-server,
-      disko,
-      impermanence,
-      stylix,
-      sops-nix,
-      nixos-hardware,
-      emacs-overlay,
-      lanzaboote,
-      ucodenix,
-      ...
+    inputs@{ nixpkgs
+    , nixpkgs-stable
+    , nixpkgs-trunk
+    , nixpkgs-custom
+    , home-manager
+    , hyprland
+    , niri
+    , vscode-server
+    , disko
+    , impermanence
+    , stylix
+    , sops-nix
+    , nixos-hardware
+    , emacs-overlay
+    , lanzaboote
+    , ucodenix
+    , ...
     }:
     let
       system = "x86_64-linux";
@@ -195,14 +194,20 @@
 
             home-manager.nixosModules.home-manager
             {
-              home-manager.extraSpecialArgs = {
-                inherit inputs;
-                hostname = "tempest";
+              home-manager = {
+                extraSpecialArgs = {
+                  inherit inputs;
+                  hostname = "tempest";
+                };
+                backupFileExtension = "backup";
+                useGlobalPkgs = true;
+                useUserPackages = true;
+
+                users = {
+                  irene = import ./homes/tempest.nix;
+                  plasma = import ./homes/plasma.nix;
+                };
               };
-              home-manager.backupFileExtension = "backup";
-              home-manager.useGlobalPkgs = true;
-              home-manager.useUserPackages = true;
-              home-manager.users.irene = import ./homes/tempest.nix;
             }
           ];
         };

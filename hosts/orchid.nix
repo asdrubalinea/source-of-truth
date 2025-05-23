@@ -316,5 +316,9 @@
     127.0.0.1 sole24ore.dscovr.test
   '';
 
+  services.displayManager.sddm.enable = true;
+  services.displayManager.sddm.wayland.enable = true;
+  services.desktopManager.plasma6.enable = true;
+
   system.stateVersion = "23.05";
 }
