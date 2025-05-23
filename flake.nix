@@ -79,6 +79,10 @@
       url = "github:asdrubalinea/nixvim";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    diapee-bot = {
+      url = "github:asdrubalinea/diapee-bot/llms";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs =
