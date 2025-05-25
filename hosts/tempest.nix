@@ -12,6 +12,7 @@
     ../hardware/audio.nix
     ../hardware/framework.nix
     ../modules/secure-boot.nix
+    ../desktop/gnome.nix
 
     ../rices/estradiol/system.nix
   ];
@@ -27,10 +28,11 @@
       # name = "0001_dpg_pause_unpause_for_vcn_4_0_5";
       # patch = ../patches/0001_dpg_pause_unpause_for_vcn_4_0_5.patch;
       # }
-      {
-        name = "0001-turn-off-doorbell-for-vcn-ring-use";
-        patch = ../patches/0001-turn-off-doorbell-for-vcn-ring-use.patch;
-      }
+
+      # {
+      # name = "0001-turn-off-doorbell-for-vcn-ring-use";
+      # patch = ../patches/0001-turn-off-doorbell-for-vcn-ring-use.patch;
+      # }
     ];
 
     # kernelPackages = pkgs.linuxPackages_testing;
@@ -161,6 +163,8 @@
       HandlePowerKey=hibernate
       HandleLidSwitchDocked=ignore
     '';
+
+    gnome.gnome-keyring.enable = true;
   };
 
   # Power Management
@@ -190,12 +194,26 @@
     shell = pkgs.fish;
   };
 
+  users.users.plasma = {
+    isNormalUser = true;
+    extraGroups = [
+      "wheel"
+      "networkmanager"
+    ];
+    hashedPassword = "$6$BkMgWYEIITYDhZkR$KnfSasOiuqi14e.85Ft/YMjgxoniRxoYXc8Tbk1J4ksq2I8Hk358V2OQFcRqHmBv/g52nhCOUWvb3uzjQuMbF0";
+    shell = pkgs.fish;
+  };
+
   security = {
     doas = {
       enable = true;
       wheelNeedsPassword = false;
     };
-    sudo.enable = true;
+    sudo = {
+      package = pkgs.sudo-rs;
+      execWheelOnly = true;
+    };
+    sudo-rs.enable = true;
     pam.services.greetd.enableGnomeKeyring = true;
   };
 
@@ -244,7 +262,13 @@
     127.0.0.1 app.dscovr.test
     127.0.0.1 experiment.dscovr.test
     127.0.0.1 teams.dscovr.test
+    127.0.0.1 acea.dscovr.test
+    127.0.0.1 workspace5nrt.dscovr.test
+    127.0.0.1 workspace0tcb.dscovr.test
+    127.0.0.1 workspace2nrt.dscovr.test
   '';
+
+  hardware.logitech.wireless.enable = true;
 
   # System Version
   system.stateVersion = "24.11";
