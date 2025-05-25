@@ -12,6 +12,7 @@
     ../hardware/audio.nix
     ../hardware/framework.nix
     ../modules/secure-boot.nix
+    ../desktop/gnome.nix
 
     ../rices/estradiol/system.nix
   ];
@@ -27,10 +28,11 @@
       # name = "0001_dpg_pause_unpause_for_vcn_4_0_5";
       # patch = ../patches/0001_dpg_pause_unpause_for_vcn_4_0_5.patch;
       # }
-      {
-        name = "0001-turn-off-doorbell-for-vcn-ring-use";
-        patch = ../patches/0001-turn-off-doorbell-for-vcn-ring-use.patch;
-      }
+
+      # {
+      # name = "0001-turn-off-doorbell-for-vcn-ring-use";
+      # patch = ../patches/0001-turn-off-doorbell-for-vcn-ring-use.patch;
+      # }
     ];
 
     # kernelPackages = pkgs.linuxPackages_testing;
@@ -267,14 +269,6 @@
   '';
 
   hardware.logitech.wireless.enable = true;
-
-  environment.sessionVariables = {
-    DESKTOP_SESSION = "plasma";
-   QT_STYLE_OVERRIDE = "breeze";
-  };
-  services.displayManager.sddm.enable = true;
-  services.displayManager.sddm.wayland.enable = true;
-  services.desktopManager.plasma6.enable = true;
 
   # System Version
   system.stateVersion = "24.11";
