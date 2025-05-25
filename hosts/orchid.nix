@@ -316,6 +316,7 @@
     127.0.0.1 experiment.dscovr.test
     127.0.0.1 teams.dscovr.test
     127.0.0.1 sole24ore.dscovr.test
+    127.0.0.1 workspace2nrt.dscovr.test
   '';
 
   services.diapee-bot = {
@@ -329,7 +330,7 @@
 
     extraEnvironment = {
       RUST_LOG = "info,diapee_bot=debug";
-      DIAPEEBOT_MODEL = "google/gemini-2.5-pro-preview";
+      DIAPEEBOT_MODEL = "google/gemini-2.5-flash-preview-05-20";
       DIAPEEBOT_PRONOUNS = "she/her";
     };
   };

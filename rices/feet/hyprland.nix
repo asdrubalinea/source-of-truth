@@ -146,7 +146,7 @@ in
 
         sensitivity =
           if hostname == "tempest" then
-            0.3
+            0.4
           else if hostname == "orchid" then
             -1.0
           else

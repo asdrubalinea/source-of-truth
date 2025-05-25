@@ -4,16 +4,25 @@ let
   portForward = pkgs.writeScriptBin "port-forward" ''
     #!${pkgs.stdenv.shell}
 
-    # Check for correct number of arguments
-    if [ "$#" -ne 2 ]; then
-        echo "Usage: $0 <remote_host> <remote_port>"
+    # Check for at least a host and one port.
+    if [ "$#" -lt 2 ]; then
+        echo "Usage: $0 <remote_host> <port1> [<port2> ...]"
         exit 1
     fi
 
     REMOTE_HOST="$1"
-    REMOTE_PORT="$2"
+    shift # The rest of the arguments are the ports.
 
-    ssh -L "$REMOTE_PORT:localhost:$REMOTE_PORT" "$REMOTE_HOST"
+    SSH_ARGS=""
+    # Loop through all the port arguments.
+    for port in "$@"; do
+        # Append an -L option for each port.
+        SSH_ARGS="$SSH_ARGS -L $port:localhost:$port"
+    done
+
+    # Execute the ssh command with all the forwarding options.
+    # 'exec' replaces the shell process with the ssh process.
+    exec ssh $SSH_ARGS "$REMOTE_HOST"
   '';
 in
 {
