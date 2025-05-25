@@ -139,7 +139,7 @@ in
       device = [
         {
           name = "pixa3854:00-093a:0274-touchpad";
-          sensitivity = 0.0;
+          sensitivity = 0.3;
         }
         {
           name = "logitech-usb-receiver";
@@ -154,7 +154,7 @@ in
         kb_options = "";
         kb_rules = "";
         follow_mouse = 1;
-        # accel_profile = "flat";
+        accel_profile = "flat";
 
         # sensitivity =
         # if hostname == "tempest" then
