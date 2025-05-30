@@ -88,7 +88,7 @@
     blueberry # Bluetooth frontend
     chromium # Web browser
     dbeaver-bin # Universal database tool
-    helix # (Likely a game or demo)
+    evil-helix # (Likely a game or demo)
     ffmpeg # Multimedia framework (often a dependency)
     inputs.zen-browser.packages.x86_64-linux.default # Zen Browser
     keepassxc # Password manager
