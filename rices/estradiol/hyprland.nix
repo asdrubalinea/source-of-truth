@@ -69,7 +69,7 @@ in
       ];
 
       exec = [
-        "${pkgs.swww}/bin/swww img ~/.wallpaper"
+        # "${pkgs.swww}/bin/swww img ~/.wallpaper"
       ];
 
       # Environment variables
@@ -143,7 +143,7 @@ in
         }
         {
           name = "logitech-usb-receiver";
-          sensitivity = -0.8;
+          sensitivity = -0.2;
         }
       ];
 
