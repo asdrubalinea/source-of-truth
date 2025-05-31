@@ -5,22 +5,14 @@
     "margin-top": 0,
     "margin-bottom": 0,
     "margin-left": 20,
-    "margin-right": 20,
+    "margin-right": 600,
     "modules-left": [
       "custom/rofi",
       "hyprland/workspaces",
       "hyprland/window"
     ],
-    "modules-center": [
-      "clock"
-    ],
-    "modules-right": [
-      "memory",
-      "cpu",
-      "backlight",
-      "pulseaudio",
-      "battery"
-    ],
+    "modules-center": [],
+    "modules-right": [],
     "hyprland/workspaces": {
       "all-outputs": true,
       "format": "{name}",
@@ -36,12 +28,12 @@
       "title-len": 20,
       "player-icons": {
         "default": "▶",
-        "mpv": "",
+        "mpv": "",
         "spotify": "󰓇"
       },
       "status-icons": {
-        "paused": "",
-        "stopped": ""
+        "paused": "",
+        "stopped": ""
       }
     },
     "hyprland/window": {
@@ -50,19 +42,32 @@
       "rewrite": {
         "(.*) — Mozilla Firefox": "󰈹  $1",
         "(.*) — Zen Browser": "󰈹  Zen - $1",
-        "(.*) - Google Chrome": "  $1",
+        "(.*) - Google Chrome": "  $1",
         "(.*) - Visual Studio Code": "󰨞  $1",
-        "(.*) - nvim": "  $1",
+        "(.*) - nvim": "  $1",
         "(.*) - Obsidian(.*)": "󱓧  $1",
-        "(.*) - fish": "  $1",
-        "yazi: (.*)": "  $1",
-        "nwg-look": "  GTK Settings",
-        "Qt6 Configuration Tool": "  QT Settings",
+        "(.*) - fish": "  $1",
+        "yazi: (.*)": "  $1",
+        "nwg-look": "  GTK Settings",
+        "Qt6 Configuration Tool": "  QT Settings",
         "blueman-manager": "Bluetooth Settings"
       }
-    },
+    }
+  },
+  {
+    "layer": "top",
+    "position": "top",
+    "margin-top": 0,
+    "margin-bottom": 0,
+    "margin-left": 300,
+    "margin-right": 300,
+    "modules-left": [],
+    "modules-center": [
+      "clock"
+    ],
+    "modules-right": [],
     "clock": {
-      "format": "  {:%a %e %b %H:%M}",
+      "format": "  {:%a %e %b %H:%M}",
       "tooltip-format": "<tt>{calendar}</tt>",
       "calendar": {
         "mode": "month",
@@ -74,16 +79,33 @@
           "today": "<span color='#f38ba8'><b>{}</b></span>"
         }
       }
-    },
+    }
+  },
+  {
+    "layer": "top",
+    "position": "top",
+    "margin-top": 0,
+    "margin-bottom": 0,
+    "margin-left": 600,
+    "margin-right": 20,
+    "modules-left": [],
+    "modules-center": [],
+    "modules-right": [
+      "memory",
+      "cpu",
+      "backlight",
+      "pulseaudio",
+      "battery"
+    ],
     "memory": {
       "interval": 1,
-      "format": " RAM {percentage}%",
+      "format": " RAM {percentage}%",
       "max-length": 20,
       "tooltip": false
     },
     "cpu": {
       "interval": 1,
-      "format": " CPU {usage}%",
+      "format": " CPU {usage}%",
       "max-length": 13
     },
     "backlight": {
@@ -98,10 +120,10 @@
     "pulseaudio": {
       "format": "{icon} <b>{volume}%</b>",
       "format-muted": " 󰝟 ",
-      "format-bluetooth": "{icon}  <b>{volume}%</b>",
-      "format-bluetooth-muted": "󰝟 ",
+      "format-bluetooth": "{icon}  <b>{volume}%</b>",
+      "format-bluetooth-muted": "󰝟 ",
       "format-icons": {
-        "headset": "",
+        "headset": "",
         "default": [
           "󰕿",
           "󰖀",
@@ -118,13 +140,13 @@
     },
     "battery": {
       "format": "{icon} {capacity}%",
-      "format-plugged": " {capacity}%",
+      "format-plugged": " {capacity}%",
       "format-icons": [
-        "",
-        "",
-        "",
-        "",
-        ""
+        "",
+        "",
+        "",
+        "",
+        ""
       ],
       "max-length": 25,
       "tooltip": true,

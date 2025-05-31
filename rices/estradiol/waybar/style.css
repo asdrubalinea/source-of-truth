@@ -52,7 +52,7 @@
 
 #window {
   margin-left: 15pt;
-  margin-right: 20pt;
+  margin-right: 7pt;
   color: #cfcbca;
 }
 
@@ -62,6 +62,7 @@
 
 #memory {
   color: #fab387;
+  margin-left: 7pt;
   margin-right: 12pt;
 }
 
