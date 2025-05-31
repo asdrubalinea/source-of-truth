@@ -1,152 +1,139 @@
-[
-  {
-    "layer": "top",
-    "position": "top",
-    "margin-top": 0,
-    "margin-bottom": 0,
-    "margin-left": 10,
-    "margin-right": 500,
-    "modules-left": [
-      "custom/rofi",
-      "hyprland/workspaces",
-      "hyprland/window"
-    ],
-    "modules-center": [],
-    "modules-right": [],
-    "custom/rofi": {
-      "format": "",
-      "on-click": "rofi -show drun",
-      "tooltip": false
-    },
-    "hyprland/workspaces": {
-      "all-outputs": true,
-      "format": "{name}",
-      "on-scroll-up": "hyprctl dispatch workspace e+1 1>/dev/null",
-      "on-scroll-down": "hyprctl dispatch workspace e-1 1>/dev/null",
-      "sort-by-number": true,
-      "active-only": false
-    },
-    "hyprland/window": {
-      "format": "{title}",
-      "separate-outputs": true,
-      "rewrite": {
-        "(.*) — Mozilla Firefox": "󰈹  $1",
-        "(.*) — Zen Browser": "󰈹  Zen - $1",
-        "(.*) - Google Chrome": "  $1",
-        "(.*) - Visual Studio Code": "󰨞  $1",
-        "(.*) - nvim": "  $1",
-        "(.*) - Obsidian(.*)": "󱓧  $1",
-        "(.*) - fish": "  $1",
-        "yazi: (.*)": "  $1",
-        "nwg-look": "  GTK Settings",
-        "Qt6 Configuration Tool": "  QT Settings",
-        "blueman-manager": "Bluetooth Settings"
+[{
+  "layer": "top",
+  "reload_style_on_change": true,
+  "modules-left": [
+    "hyprland/workspaces",
+    "hyprland/language",
+    "cpu",
+    "memory",
+    "temperature"
+  ],
+  "modules-center": ["clock", "tray"],
+  "modules-right": [
+    "custom/fans",
+    "backlight",
+    "pulseaudio",
+    "network",
+    "battery"
+  ],
+
+  "hyprland/workspaces": {
+    "on-click": "activate",
+    "on-scroll-up": "hyprctl dispatch workspace e-1",
+    "on-scroll-down": "hyprctl dispatch workspace e+1",
+    "persistent-workspaces": {
+      "*": 3
+    }
+  },
+
+  "hyprland/language": {
+    "format": "󰌌 {}",
+    "keyboard-name": "at-translated-set-2-keyboard"
+  },
+
+  "clock": {
+    "format": "󰥔 {:%H:%M}",
+    "format-alt": "󰃮 {:%A, %d %B}",
+    "tooltip-format": "<big>{:%Y %B}</big>\n<tt><small>{calendar}</small></tt>",
+    "calendar": {
+      "mode": "month",
+      "mode-mon-col": 3,
+      "weeks-pos": "right",
+      "on-scroll": 1,
+      "on-click-right": "mode",
+      "format": {
+        "months": "<span color='#d3c6aa'><b>{}</b></span>",
+        "days": "<span color='#e67e80'>{}</span>",
+        "weeks": "<span color='#a7c080'><b>W{}</b></span>",
+        "weekdays": "<span color='#7fbbb3'><b>{}</b></span>",
+        "today": "<span color='#dbbc7f'><b><u>{}</u></b></span>"
       }
     }
   },
-  {
-    "layer": "top",
-    "position": "top",
-    "margin-top": 0,
-    "margin-bottom": 0,
-    "margin-left": 400,
-    "margin-right": 400,
-    "modules-left": [],
-    "modules-center": [
-      "clock"
-    ],
-    "modules-right": [],
-    "clock": {
-      "format": "  {:%a %e %b %H:%M}",
-      "tooltip-format": "<tt>{calendar}</tt>",
-      "calendar": {
-        "mode": "month",
-        "format": {
-          "months": "<span color='#cdd6f4'><b>{}</b></span>",
-          "days": "<span color='#cdd6f4'><b>{}</b></span>",
-          "weeks": "<span color='#cdd6f4'><b>W{}</b></span>",
-          "weekdays": "<span color='#cdd6f4'><b>{}</b></span>",
-          "today": "<span color='#f38ba8'><b>{}</b></span>"
-        }
-      }
-    }
+
+  "tray": {
+    "icon-size": 18,
+    "spacing": 5
   },
-  {
-    "layer": "top",
-    "position": "top",
-    "margin-top": 0,
-    "margin-bottom": 0,
-    "margin-left": 800,
-    "margin-right": 10,
-    "modules-left": [],
-    "modules-center": [],
-    "modules-right": [
-      "memory",
-      "cpu",
-      "backlight",
-      "pulseaudio",
-      "battery"
-    ],
-    "memory": {
-      "interval": 1,
-      "format": " RAM {percentage}%",
-      "max-length": 20,
-      "tooltip": false
+
+  "backlight": {
+    "format": "{icon} {percent}%",
+    "format-icons": ["󰃞", "󰃟", "󰃠"],
+    "on-click": "brightnessctl set +5%",
+    "on-click-right": "brightnessctl set 5%-"
+  },
+
+  "pulseaudio": {
+    "format": "{icon} {volume}%",
+    "format-bluetooth": "󰂰 {volume}%",
+    "format-bluetooth-muted": "󰂲 {icon}",
+    "format-muted": "󰝟",
+    "format-icons": {
+      "headphone": "󰋋",
+      "hands-free": "󰥰",
+      "headset": "󰋎",
+      "phone": "󰏲",
+      "portable": "󰄝",
+      "car": "󰄋",
+      "default": ["󰕿", "󰖀", "󰕾"]
     },
-    "cpu": {
-      "interval": 1,
-      "format": " CPU {usage}%",
-      "max-length": 13
+    "on-click": "pavucontrol",
+    "on-click-right": "pactl set-sink-mute @DEFAULT_SINK@ toggle",
+    "on-scroll-up": "pactl set-sink-volume @DEFAULT_SINK@ +2%",
+    "on-scroll-down": "pactl set-sink-volume @DEFAULT_SINK@ -2%"
+  },
+
+  "network": {
+    "format-wifi": "󰖩 {essid} {signalStrength}%",
+    "format-ethernet": "󰈀 {ifname}",
+    "format-linked": "󰈀 {ifname} (No IP)",
+    "format-disconnected": "󰖪 Disconnected",
+    "format-alt": "{ifname}: {ipaddr}/{cidr}",
+    "tooltip-format": "{ifname}: {ipaddr}"
+  },
+
+  "battery": {
+    "states": {
+      "good": 95,
+      "warning": 30,
+      "critical": 15
     },
-    "backlight": {
-      "format": "{icon} <b>{percent}%</b>",
-      "format-icons": [
-        "󰃞",
-        "󰃟",
-        "󰃠"
-      ],
-      "tooltip": false
+    "format": "{icon} {capacity}%",
+    "format-charging": "󰂄 {capacity}%",
+    "format-plugged": "󰚥 {capacity}%",
+    "format-alt": "{icon} {time}",
+    "format-icons": ["󰂎", "󰁺", "󰁻", "󰁼", "󰁽", "󰁾", "󰁿", "󰂀", "󰂁", "󰂂", "󰁹"]
+  },
+
+  "cpu": {
+    "format": "󰘚 {usage}%",
+    "tooltip": true,
+    "interval": 1
+  },
+
+  "memory": {
+    "format": "󰍛 {}%",
+    "interval": 1
+  },
+
+  "temperature": {
+    "hwmon-path": "/sys/devices/platform/PNP0C14:02/wmi_bus/wmi_bus-PNP0C14:02/F1DDEE52-063C-4784-A11E-8A06684B9B01/hwmon/hwmon5/temp1_input",
+    "critical-threshold": 80,
+    "format": "{icon} {temperatureC}°C",
+    "format-icons": ["󱃃", "󰔏", "󱃂"]
+  },
+
+  "custom/fans": {
+    "exec": "/home/kaezr/dotfiles/scripts/fancheck.sh",
+    "format": "Fans {icon} ",
+    "format-icons": {
+      "on": "",
+      "off": "󰠝"
     },
-    "pulseaudio": {
-      "format": "{icon} <b>{volume}%</b>",
-      "format-muted": " 󰝟 ",
-      "format-bluetooth": "{icon}  <b>{volume}%</b>",
-      "format-bluetooth-muted": "󰝟 ",
-      "format-icons": {
-        "headset": "",
-        "default": [
-          "󰕿",
-          "󰖀",
-          "󰕾"
-        ]
-      },
-      "tooltip": true,
-      "on-click": "pavucontrol",
-      "ignored-sinks": [
-        "JamesDSP Sink",
-        "Easy Effects Sink",
-        "HDA NVidia Digital Stereo (HDMI)"
-      ]
-    },
-    "battery": {
-      "format": "{icon} {capacity}%",
-      "format-plugged": " {capacity}%",
-      "format-icons": [
-        "",
-        "",
-        "",
-        "",
-        ""
-      ],
-      "max-length": 25,
-      "tooltip": true,
-      "interval": 5,
-      "states": {
-        "good": 70,
-        "warning": 30,
-        "critical": 15
-      },
-      "on-click": "rog-control-center"
-    }
+    "on-click": "sudo /home/kaezr/dotfiles/scripts/cool.sh on",
+    "on-click-right": "sudo /home/kaezr/dotfiles/scripts/cool.sh off",
+    "interval": 5,
+    "return-type": "json"
   }
+}
 ]
