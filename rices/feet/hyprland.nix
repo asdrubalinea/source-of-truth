@@ -68,7 +68,7 @@ in
       ];
 
       exec = [
-        "${pkgs.swww}/bin/swww img ~/.wallpaper"
+        # "${pkgs.swww}/bin/swww img ~/.wallpaper"
       ];
 
       # Environment variables
@@ -148,7 +148,7 @@ in
           if hostname == "tempest" then
             0.4
           else if hostname == "orchid" then
-            -1.0
+            -0.8
           else
             0;
 
