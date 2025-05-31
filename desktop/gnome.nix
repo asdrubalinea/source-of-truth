@@ -1,7 +1,7 @@
-{config, pkgs, ...}:
+{ config, pkgs, ... }:
 {
-  services.xserver.displayManager.gdm.enable = true;
-  services.xserver.desktopManager.gnome.enable = true;
+  services.displayManager.gdm.enable = true;
+  services.desktopManager.gnome.enable = true;
 
   environment.gnome.excludePackages = with pkgs; [
     orca
@@ -39,10 +39,10 @@
     # gnome-clocks
     gnome-console
     gnome-contacts
-    gnome-font-viewer
+    # gnome-font-viewer
     gnome-logs
     gnome-maps
-    gnome-music
+    # gnome-music
     # gnome-system-monitor
     gnome-weather
     # loupe
@@ -54,4 +54,10 @@
     yelp
     gnome-software
   ];
+
+  environment.systemPackages = [
+    pkgs.libheif
+    pkgs.libheif.out
+  ];
+  environment.pathsToLink = [ "share/thumbnailers" ];
 }
