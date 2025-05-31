@@ -52,8 +52,8 @@ in
       # Variables
       "$terminal" = "${pkgs.alacritty}/bin/alacritty";
       "$browser" = "${inputs.zen-browser.packages.x86_64-linux.beta}/bin/zen-beta";
-      "$menu" = "${pkgs.anyrun}/bin/anyrun";
-      # "$menu" = "${pkgs.tofi}/bin/tofi-run | xargs hyprctl dispatch exec --";
+      # "$menu" = "${pkgs.anyrun}/bin/anyrun";
+      "$menu" = "${pkgs.tofi}/bin/tofi-run | xargs hyprctl dispatch exec --";
       "$mainMod" = "SUPER";
 
       "$redAlpha" = "f38ba8";
@@ -69,7 +69,7 @@ in
       ];
 
       exec = [
-        # "${pkgs.swww}/bin/swww img ~/.wallpaper"
+        "${pkgs.swww}/bin/swww img ~/.wallpaper"
       ];
 
       # Environment variables
