@@ -4,8 +4,8 @@
     "position": "top",
     "margin-top": 0,
     "margin-bottom": 0,
-    "margin-left": 20,
-    "margin-right": 600,
+    "margin-left": 10,
+    "margin-right": 500,
     "modules-left": [
       "custom/rofi",
       "hyprland/workspaces",
@@ -13,6 +13,11 @@
     ],
     "modules-center": [],
     "modules-right": [],
+    "custom/rofi": {
+      "format": "",
+      "on-click": "rofi -show drun",
+      "tooltip": false
+    },
     "hyprland/workspaces": {
       "all-outputs": true,
       "format": "{name}",
@@ -20,21 +25,6 @@
       "on-scroll-down": "hyprctl dispatch workspace e-1 1>/dev/null",
       "sort-by-number": true,
       "active-only": false
-    },
-    "mpris": {
-      "format": "{player_icon} {artist} - {title}",
-      "format-paused": "{status_icon} {artist} - {title}",
-      "tooltip-format": "{player} ({status})\r{artist} - {title}\r\rLeft-Click:   Play / Pause\rMiddle-Click: Previous Track\rRight-Click:  Next Track",
-      "title-len": 20,
-      "player-icons": {
-        "default": "▶",
-        "mpv": "",
-        "spotify": "󰓇"
-      },
-      "status-icons": {
-        "paused": "",
-        "stopped": ""
-      }
     },
     "hyprland/window": {
       "format": "{title}",
@@ -59,8 +49,8 @@
     "position": "top",
     "margin-top": 0,
     "margin-bottom": 0,
-    "margin-left": 300,
-    "margin-right": 300,
+    "margin-left": 400,
+    "margin-right": 400,
     "modules-left": [],
     "modules-center": [
       "clock"
@@ -86,8 +76,8 @@
     "position": "top",
     "margin-top": 0,
     "margin-bottom": 0,
-    "margin-left": 600,
-    "margin-right": 20,
+    "margin-left": 800,
+    "margin-right": 10,
     "modules-left": [],
     "modules-center": [],
     "modules-right": [
@@ -157,20 +147,6 @@
         "critical": 15
       },
       "on-click": "rog-control-center"
-    },
-    "custom/nix-size": {
-      "exec": "nix-size",
-      "interval": 1,
-      "max-length": 20,
-      "tooltip": false,
-      "format": "{}"
-    },
-    "custom/arc-size": {
-      "exec": "arc-size",
-      "interval": 1,
-      "max-length": 20,
-      "tooltip": false,
-      "format": "{}"
     }
   }
 ]
