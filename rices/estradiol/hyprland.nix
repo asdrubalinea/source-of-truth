@@ -108,8 +108,8 @@ in
         };
       };
 
-      animations = {
-        enabled = if hostname == "orchid" then true else false;
+      animations = if hostname == "orchid" then {
+        enabled = true;
         bezier = "myBezier, 0.05, 0.9, 0.1, 1.05";
         animation = [
           "windows, 1, 5, myBezier"
@@ -119,6 +119,8 @@ in
           "workspaces, 1, 3, default"
           "borderangle, 1, 100, linear, loop"
         ];
+      } else {
+        enabled = false;
       };
 
       dwindle = {
