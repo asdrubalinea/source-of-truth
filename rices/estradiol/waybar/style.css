@@ -7,7 +7,7 @@
   border: none;
   border-radius: 0;
   min-height: 0;
-  font-family: "JetBrainsMono Nerd Font", monospace;
+  font-family: "Maple Mono", monospace;
   font-weight: bold;
   font-size: 14px;
   padding: 0;
@@ -15,7 +15,7 @@
 
 window#waybar {
   background: transparent;
-  border: none;
+  background-color: transparent;
 }
 
 tooltip {
