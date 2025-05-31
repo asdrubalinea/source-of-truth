@@ -11,7 +11,7 @@ in
 {
   imports = [
     inputs.hyprland.homeManagerModules.default
-    inputs.stylix.homeManagerModules.stylix
+    inputs.stylix.homeModules.stylix
 
     ../rices/estradiol
     ../desktop/zed-editor
