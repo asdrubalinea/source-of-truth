@@ -13,6 +13,7 @@
     ../hardware/bluetooth.nix
     ../hardware/zfs.nix
     ../hardware/audio.nix
+    ../desktop/gnome.nix
 
     # ../services/syncthing.nix
 

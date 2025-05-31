@@ -125,6 +125,10 @@
     solaar # Logitech mouse manager
     kdePackages.okular
 
+    krita
+    gimp3
+    libheif
+
     # (pkgs.callPackage ../packages/cider-2.nix { })
     # rnix-lsp
     # inputs.mm.packages.x86_64-linux.default
