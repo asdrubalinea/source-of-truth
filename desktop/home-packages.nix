@@ -91,6 +91,7 @@
     evil-helix # (Likely a game or demo)
     ffmpeg # Multimedia framework (often a dependency)
     inputs.zen-browser.packages.x86_64-linux.default # Zen Browser
+    firefox
     keepassxc # Password manager
     kitty # GPU-based terminal emulator
     ladybird # SerenityOS web browser (experimental)

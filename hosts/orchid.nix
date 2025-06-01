@@ -6,7 +6,7 @@
 }:
 {
   imports = [
-    ../rices/hypr/fonts.nix
+    ../rices/estradiol/fonts.nix
 
     # ../options/passthrough.nix
     ../hardware/rocm.nix
