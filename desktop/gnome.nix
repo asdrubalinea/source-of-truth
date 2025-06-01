@@ -55,9 +55,9 @@
     gnome-software
   ];
 
-  environment.systemPackages = [
-    pkgs.libheif
-    pkgs.libheif.out
+  environment.systemPackages = with pkgs; [
+    libheif
+    libheif.out
   ];
   environment.pathsToLink = [ "share/thumbnailers" ];
 }

@@ -32,7 +32,7 @@ in
     inputs.hyprland.homeManagerModules.default
     # inputs.stylix.homeManagerModules.stylix
 
-    ../rices/feet
+    ../rices/estradiol
 
     ../desktop/zed-editor
     # ../desktop/emacs
