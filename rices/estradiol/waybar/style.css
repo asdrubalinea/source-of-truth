@@ -32,10 +32,14 @@ tooltip {
 #backlight,
 #temperature,
 #custom-fans,
-#network,
-#pulseaudio {
+#network {
   margin: 6px 6px 6px 0px;
   padding: 2px 8px;
+}
+
+#pulseaudio {
+  margin: 6px 6px 6px 0px;
+  padding: 8px 5px 8px 2px;
 }
 
 #workspaces {

@@ -127,6 +127,7 @@
     kdePackages.okular
 
     krita
+    inkscape
     gimp3
     libheif
 

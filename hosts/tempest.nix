@@ -81,6 +81,7 @@
     hostName = "tempest";
     hostId = "856ff057";
     networkmanager.enable = true;
+    # useDHCP = true;
   };
 
   # Filesystems & Persistence
