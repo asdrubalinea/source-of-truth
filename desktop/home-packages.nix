@@ -129,6 +129,7 @@
     krita
     gimp3
     libheif
+    imagemagick
 
     # (pkgs.callPackage ../packages/cider-2.nix { })
     # rnix-lsp

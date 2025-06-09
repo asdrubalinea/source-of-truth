@@ -318,6 +318,7 @@
     127.0.0.1 teams.dscovr.test
     127.0.0.1 sole24ore.dscovr.test
     127.0.0.1 workspace2nrt.dscovr.test
+    127.0.0.1 workspace5nrt.dscovr.test
   '';
 
   services.diapee-bot = {
