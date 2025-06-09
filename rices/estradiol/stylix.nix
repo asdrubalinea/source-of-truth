@@ -33,7 +33,7 @@
 
       monospace = {
         package = pkgs.comic-mono;
-        name = "Comic Mono";
+        name = "Maple Mono";
       };
 
       emoji = {
