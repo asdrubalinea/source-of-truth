@@ -83,6 +83,10 @@
       url = "github:asdrubalinea/diapee-bot/llms";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    helix = {
+      url = "github:usagi-flow/evil-helix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs =
