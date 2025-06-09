@@ -267,6 +267,7 @@
     127.0.0.1 workspace5nrt.dscovr.test
     127.0.0.1 workspace0tcb.dscovr.test
     127.0.0.1 workspace2nrt.dscovr.test
+    127.0.0.1 workspace5nrt.dscovr.test
   '';
 
   hardware.logitech.wireless.enable = true;
