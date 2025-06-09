@@ -29,10 +29,10 @@
       # patch = ../patches/0001_dpg_pause_unpause_for_vcn_4_0_5.patch;
       # }
 
-      {
-        name = "0001-turn-off-doorbell-for-vcn-ring-use";
-        patch = ../patches/0001-turn-off-doorbell-for-vcn-ring-use.patch;
-      }
+      # {
+        #name = "0001-turn-off-doorbell-for-vcn-ring-use";
+        #patch = ../patches/0001-turn-off-doorbell-for-vcn-ring-use.patch;
+      #}
     ];
 
     # kernelPackages = pkgs.linuxPackages_testing;
