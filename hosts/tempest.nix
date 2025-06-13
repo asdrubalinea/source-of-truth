@@ -274,4 +274,6 @@
 
   # System Version
   system.stateVersion = "24.11";
+
+  networking.firewall.allowedTCPPorts = [3700];
 }

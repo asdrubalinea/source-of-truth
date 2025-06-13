@@ -87,6 +87,8 @@
     alacritty # GPU-accelerated terminal emulator
     blueberry # Bluetooth frontend
     chromium # Web browser
+    google-chrome
+    brave
     dbeaver-bin # Universal database tool
     inputs.helix.packages.x86_64-linux.default
     ffmpeg # Multimedia framework (often a dependency)
