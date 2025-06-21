@@ -62,6 +62,10 @@
     neededForBoot = true;
   };
 
+  fileSystems."/boot" = {
+    neededForBoot = true;
+  };
+
   environment.persistence."/persist" = {
     enable = true;
     hideMounts = true;
