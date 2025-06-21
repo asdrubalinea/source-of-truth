@@ -1,0 +1,168 @@
+{
+  pkgs,
+  inputs,
+  lib,
+  config,
+  ...
+}:
+
+{
+  imports = [
+    ../misc/fish.nix
+  ];
+
+  nixpkgs.hostPlatform = lib.mkDefault "x86_64-linux";
+
+  # Boot Configuration
+  boot = {
+    kernelPackages = pkgs.linuxPackages;
+
+    initrd = {
+      systemd.enable = true;
+
+      availableKernelModules = [
+        "virtio_pci"
+        "virtio_scsi"
+        "ahci"
+        "xhci_pci"
+        "sr_mod"
+        "virtio_blk"
+      ];
+
+      kernelModules = [ ];
+
+      supportedFilesystems = [
+        "zfs"
+        "vfat"
+      ];
+    };
+
+    loader = {
+      systemd-boot.enable = true;
+      efi = {
+        canTouchEfiVariables = true;
+        efiSysMountPoint = "/boot";
+      };
+    };
+
+    # ZFS support
+    supportedFilesystems = [ "zfs" ];
+    zfs.forceImportRoot = false;
+  };
+
+  # Networking
+  networking = {
+    hostName = "vm";
+    hostId = "12345678"; # Required for ZFS
+    networkmanager.enable = true;
+    useDHCP = lib.mkDefault true;
+  };
+
+  # Filesystems & Persistence
+  # ZFS root filesystem is handled by disko configuration
+
+  environment.persistence."/persist" = {
+    enable = true;
+    hideMounts = true;
+    directories = [
+      "/var/lib/nixos"
+      "/var/lib/tailscale"
+      "/var/lib/systemd/coredump"
+      "/etc/NetworkManager/system-connections"
+    ];
+    files = [
+      "/etc/machine-id"
+      "/etc/ssh/ssh_host_ed25519_key"
+      "/etc/ssh/ssh_host_ed25519_key.pub"
+      "/etc/ssh/ssh_host_rsa_key"
+      "/etc/ssh/ssh_host_rsa_key.pub"
+    ];
+  };
+
+  # Hardware Configuration
+  hardware = {
+    enableRedistributableFirmware = true;
+  };
+
+  # Services
+  services = {
+    openssh.enable = true;
+
+    tailscale = {
+      enable = true;
+      useRoutingFeatures = "client";
+    };
+
+    qemuGuest.enable = true;
+  };
+
+  # Internationalisation & Console
+  time.timeZone = "Europe/Rome";
+  i18n.defaultLocale = "en_US.UTF-8";
+  console = {
+    font = "Lat2-Terminus16";
+    keyMap = "us";
+  };
+
+  # Users & Security
+  users.users.irene = {
+    isNormalUser = true;
+    extraGroups = [ "wheel" "networkmanager" ];
+    hashedPassword = (import ../passwords).password;
+    shell = pkgs.fish;
+    openssh.authorizedKeys.keys = [
+      "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIPTpfPoB4Z+DTvGcSrnrl/+RU0GULGScqvls4T0AW6is"
+      "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAINvjpybr/+VM1dY75+BkISNz3hzwheDMsr9wiN5Dtsdz"
+      "ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBJH8z+mQ3H3qiMYCAr5qjxS+OTnZPU18D9bSdLfTvG4/98Vv2pqekGGLZ6sjeDqjtENtx5MWL1q2DPd95a5ng0g="
+      "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIGpHFZG50jXUnHmtix5s2TjAuxaUNJXDmtxXIFd9VBGv"
+    ];
+  };
+
+  security = {
+    doas = {
+      enable = true;
+      wheelNeedsPassword = false;
+    };
+    sudo = {
+      package = pkgs.sudo-rs;
+      execWheelOnly = true;
+    };
+    sudo-rs.enable = true;
+  };
+
+  # Nix Configuration
+  nix = {
+    package = pkgs.nixVersions.stable;
+    settings = {
+      trusted-users = [ "root" "irene" ];
+      experimental-features = [ "nix-command" "flakes" ];
+    };
+  };
+
+  # Basic system packages
+  environment.systemPackages = with pkgs; [
+    git
+    curl
+    wget
+  ];
+
+  programs = {
+    mtr.enable = true;
+    gnupg.agent = {
+      enable = true;
+      enableSSHSupport = true;
+    };
+
+    # Enable fish shell system-wide
+    fish.enable = true;
+  };
+
+  # Enable ZFS services
+  services.zfs = {
+    autoScrub.enable = true;
+    autoSnapshot.enable = true;
+  };
+
+  # System Version
+  system.stateVersion = "24.11";
+}
