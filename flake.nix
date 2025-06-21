@@ -211,6 +211,39 @@
             }
           ];
         };
+
+        vm = lib.nixosSystem {
+          inherit system pkgs;
+          specialArgs = {
+            inherit inputs;
+            hostname = "vm";
+          };
+
+          modules = [
+            disko.nixosModules.disko
+            impermanence.nixosModules.impermanence
+
+            ./disks/vm.nix
+            ./hosts/vm.nix
+
+            home-manager.nixosModules.home-manager
+            {
+              home-manager = {
+                extraSpecialArgs = {
+                  inherit inputs;
+                  hostname = "vm";
+                };
+                backupFileExtension = "backup";
+                useGlobalPkgs = true;
+                useUserPackages = true;
+
+                users = {
+                  irene = import ./homes/vm.nix;
+                };
+              };
+            }
+          ];
+        };
       };
 
       homeConfigurations = {
