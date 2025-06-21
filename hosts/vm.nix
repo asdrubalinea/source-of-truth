@@ -60,6 +60,9 @@
 
   # Filesystems & Persistence
   # ZFS root filesystem is handled by disko configuration
+  fileSystems."/persist" = {
+    neededForBoot = true;
+  };
 
   environment.persistence."/persist" = {
     enable = true;
