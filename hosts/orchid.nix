@@ -101,14 +101,17 @@
 
   networking.hostName = "orchid";
   networking.hostId = "f00dbabe";
+  networking.networkmanager.enable = false;
+  networking.useDHCP = true;
+  networking.enableIPv6 = true;
 
   # Upstream internet
-  networking.interfaces.enp4s0f0.ipv4.addresses = [
-    {
-      address = "10.0.0.10";
-      prefixLength = 20;
-    }
-  ];
+  #networking.interfaces.enp4s0f0.ipv4.addresses = [
+  #  {
+  #    address = "10.0.0.10";
+  #    prefixLength = 20;
+  #  }
+  #];
 
   # Erase your darlings.
   # systemd.tmpfiles.rules = [
@@ -120,7 +123,6 @@
     "1.1.1.1"
     "1.0.0.1"
   ];
-  networking.useDHCP = false;
 
   # services.resolved = {
   #   enable = true;

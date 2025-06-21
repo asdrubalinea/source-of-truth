@@ -139,5 +139,9 @@
     # inputs.mm.packages.x86_64-linux.default
 
     appimage-run
+
+    kdePackages.dolphin
+    claude-code
+    inputs.claude-desktop.packages.${system}.claude-desktop
   ];
 }
