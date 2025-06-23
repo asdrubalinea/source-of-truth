@@ -87,6 +87,8 @@
       url = "github:usagi-flow/evil-helix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    claude-desktop.url = "github:k3d3/claude-desktop-linux-flake";
+    claude-desktop.inputs.nixpkgs.follows = "nixpkgs";
   };
 
   outputs =
@@ -204,6 +206,39 @@
                 users = {
                   irene = import ./homes/tempest.nix;
                   plasma = import ./homes/plasma.nix;
+                };
+              };
+            }
+          ];
+        };
+
+        vm = lib.nixosSystem {
+          inherit system pkgs;
+          specialArgs = {
+            inherit inputs;
+            hostname = "vm";
+          };
+
+          modules = [
+            disko.nixosModules.disko
+            impermanence.nixosModules.impermanence
+
+            ./disks/vm.nix
+            ./hosts/vm.nix
+
+            home-manager.nixosModules.home-manager
+            {
+              home-manager = {
+                extraSpecialArgs = {
+                  inherit inputs;
+                  hostname = "vm";
+                };
+                backupFileExtension = "backup";
+                useGlobalPkgs = true;
+                useUserPackages = true;
+
+                users = {
+                  irene = import ./homes/vm.nix;
                 };
               };
             }
