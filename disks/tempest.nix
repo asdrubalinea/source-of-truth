@@ -112,9 +112,9 @@
                 "/@persist" = {
                   mountpoint = "/persist";
                 };
-		"/@sbctl" = {
-		  mountpoint = "/var/lib/sbctl";
-		};
+                "/@sbctl" = {
+            		  mountpoint = "/var/lib/sbctl";
+          		  };
               };
             };
           };
