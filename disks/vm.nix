@@ -92,7 +92,7 @@
           # Persist directory for impermanence
           "persist/root" = {
             type = "zfs_fs";
-            mountpoint = "/persist";
+            mountpoint = "legacy";
             options = {
               canmount = "on";
               compression = "lz4";
@@ -102,7 +102,7 @@
           # Home directories
           "persist/home" = {
             type = "zfs_fs";
-            mountpoint = "/home";
+            mountpoint = "legacy";
             options = {
               canmount = "on";
               compression = "lz4";
@@ -112,7 +112,7 @@
           # Log files
           "persist/log" = {
             type = "zfs_fs";
-            mountpoint = "/var/log";
+            mountpoint = "legacy";
             options = {
               canmount = "on";
               compression = "lz4";

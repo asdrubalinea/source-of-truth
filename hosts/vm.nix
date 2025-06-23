@@ -31,6 +31,10 @@
         "zfs"
         "vfat"
       ];
+
+      postDeviceCommands = lib.mkAfter ''
+        zfs rollback -r zroot/local/root@blank
+      '';
     };
 
     loader = {
@@ -54,13 +58,38 @@
   };
 
   # Filesystems & Persistence
-  # ZFS root filesystem is handled by disko configuration
-  fileSystems."/persist" = {
-    neededForBoot = true;
-  };
+  fileSystems = {
+    "/" = {
+      device = "zroot/local/root";
+      fsType = "zfs";
+    };
 
-  fileSystems."/boot" = {
-    neededForBoot = true;
+    "/nix" = {
+      device = "zroot/local/nix";
+      fsType = "zfs";
+    };
+
+    "/persist" = {
+      device = "zroot/persist/root";
+      fsType = "zfs";
+      neededForBoot = true;
+    };
+
+    "/home" = {
+      device = "zroot/persist/home";
+      fsType = "zfs";
+    };
+
+    "/var/log" = {
+      device = "zroot/persist/log";
+      fsType = "zfs";
+    };
+
+    "/boot" = {
+      device = "/dev/disk/by-label/ESP";
+      fsType = "vfat";
+      neededForBoot = true;
+    };
   };
 
   environment.persistence."/persist" = {
