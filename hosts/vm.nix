@@ -16,8 +16,6 @@
     kernelPackages = pkgs.linuxPackages;
 
     initrd = {
-      systemd.enable = true;
-
       availableKernelModules = [
         "virtio_pci"
         "virtio_scsi"
@@ -39,7 +37,6 @@
       systemd-boot.enable = true;
       efi = {
         canTouchEfiVariables = true;
-        efiSysMountPoint = "/boot";
       };
     };
 

@@ -143,5 +143,7 @@
     kdePackages.dolphin
     claude-code
     inputs.claude-desktop.packages.${system}.claude-desktop
+
+    nodejs
   ];
 }
