@@ -139,5 +139,7 @@
     # inputs.mm.packages.x86_64-linux.default
 
     appimage-run
+    claude-code
+    nodejs
   ];
 }
