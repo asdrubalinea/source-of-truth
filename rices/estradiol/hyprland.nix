@@ -74,7 +74,7 @@ in
       # Environment variables
       env = [
         # "HYPRCURSOR_SIZE,48"
-        "HYPRCURSOR_THEME,rose-pine-hyprcursor"
+        # "HYPRCURSOR_THEME,rose-pine-hyprcursor"
       ];
 
       xwayland = {
