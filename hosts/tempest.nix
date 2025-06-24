@@ -12,7 +12,8 @@
     ../hardware/audio.nix
     ../hardware/framework.nix
     ../modules/secure-boot.nix
-    ../desktop/gnome.nix
+    # ../desktop/gnome.nix
+     ../desktop/plasma.nix
 
     ../rices/estradiol/system.nix
   ];
@@ -112,6 +113,7 @@
       "/var/lib/tailscale"
       "/var/lib/systemd/coredump"
       "/etc/NetworkManager/system-connections"
+      "/var/lib/sddm"
     ];
     files = [
       "/etc/machine-id"
