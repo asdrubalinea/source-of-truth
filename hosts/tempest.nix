@@ -272,8 +272,11 @@
 
   hardware.logitech.wireless.enable = true;
 
+  programs.virt-manager.enable = true;
+  users.groups.libvirtd.members = ["irene"];
+  virtualisation.libvirtd.enable = true;
+  virtualisation.spiceUSBRedirection.enable = true;
+
   # System Version
   system.stateVersion = "24.11";
-
-  networking.firewall.allowedTCPPorts = [3700];
 }
