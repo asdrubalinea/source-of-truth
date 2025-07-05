@@ -2,12 +2,14 @@
 {
   stylix = {
     enable = true;
+    autoEnable = true;
     base16Scheme = "${pkgs.base16-schemes}/share/themes/rose-pine.yaml";
     # base16Scheme = "${pkgs.base16-schemes}/share/themes/qualia.yaml";
     # base16Scheme = "${pkgs.base16-schemes}/share/themes/gruvbox-dark-hard.yaml";
 
     targets = {
       neovim.enable = false;
+      ghostty.enable = true;
     };
 
     fonts = {

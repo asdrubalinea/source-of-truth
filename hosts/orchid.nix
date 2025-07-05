@@ -218,7 +218,7 @@
       vulkan-validation-layers
     ]
     ++ [
-      inputs.rose-pine-hyprcursor.packages.${pkgs.system}.default
+      # inputs.rose-pine-hyprcursor.packages.${pkgs.system}.default
     ];
 
   programs.fish.enable = true;
