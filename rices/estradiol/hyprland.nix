@@ -191,6 +191,7 @@ in
 
         "$SUPER_SHIFT, B, exec, $browser"
         "$SUPER_SHIFT, S, exec, ${pkgs.grimblast}/bin/grimblast save area"
+        "$SUPER_SHIFT, D, exec, ${pkgs.grimblast}/bin/grimblast save area | ${pkgs.wl-clipboard}/bin/wl-copy"
 
         "$mainMod, F, fullscreen"
         "$mainMod, v, layoutmsg, preselect d"
