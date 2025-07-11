@@ -13,7 +13,7 @@
     ../hardware/bluetooth.nix
     ../hardware/zfs.nix
     ../hardware/audio.nix
-    ../desktop/gnome.nix
+    ../desktop/kde.nix
 
     # ../services/syncthing.nix
 
@@ -194,7 +194,7 @@
   security.sudo.enable = true;
   security.doas.enable = true;
 
-  security.pam.services.greetd.enableGnomeKeyring = true;
+  security.pam.services.sddm.enableKwallet = true;
 
   security.doas.extraRules = [
     {
