@@ -139,9 +139,10 @@
     # inputs.mm.packages.x86_64-linux.default
 
     appimage-run
+    asciinema
 
     kdePackages.dolphin
-    claude-code
+    trunk.claude-code
     nodejs
     inputs.claude-desktop.packages.${system}.claude-desktop
     thunderbird
