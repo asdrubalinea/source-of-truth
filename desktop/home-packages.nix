@@ -144,5 +144,6 @@
     claude-code
     nodejs
     inputs.claude-desktop.packages.${system}.claude-desktop
+    thunderbird
   ];
 }
