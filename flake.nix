@@ -5,7 +5,7 @@
     # --- Nixpkgs Channels ---
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
     nixpkgs-stable.url = "github:nixos/nixpkgs/nixos-24.11";
-    nixpkgs-trunk.url = "github:nixos/nixpkgs/26b82c99abd1487c34bafe46115c6624a9de9833";
+    nixpkgs-trunk.url = "github:nixos/nixpkgs";
     nixpkgs-custom.url = "github:nixos/nixpkgs";
 
     # --- Core Components ---
