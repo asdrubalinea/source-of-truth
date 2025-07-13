@@ -140,6 +140,7 @@
 
     appimage-run
     asciinema
+    ladybird
 
     kdePackages.dolphin
     trunk.claude-code
