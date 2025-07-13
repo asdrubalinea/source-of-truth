@@ -142,7 +142,6 @@
         overlays = [
           multiChannelOverlay
           emacs-overlay.overlay
-          # zfsOverlay
         ];
       };
 
