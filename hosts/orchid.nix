@@ -13,7 +13,7 @@
     ../hardware/bluetooth.nix
     ../hardware/zfs.nix
     ../hardware/audio.nix
-    ../desktop/kde.nix
+    # ../desktop/kde.nix
 
     # ../services/syncthing.nix
 
@@ -334,7 +334,7 @@
 
     extraEnvironment = {
       RUST_LOG = "info,diapee_bot=debug";
-      DIAPEEBOT_MODEL = "google/gemini-2.5-flash-preview-05-20";
+      DIAPEEBOT_MODEL = "google/gemini-2.5-pro";
       DIAPEEBOT_PRONOUNS = "she/her";
     };
   };

@@ -1,0 +1,19 @@
+{
+  "id": "niri-rice",
+  "started": "2025-01-13T18:47:00Z",
+  "lastUpdated": "2025-01-13T18:47:00Z",
+  "status": "active",
+  "phase": "complete",
+  "progress": {
+    "discovery": { "answered": 5, "total": 5 },
+    "detail": { "answered": 5, "total": 5 }
+  },
+  "contextFiles": [
+    "/persist/source-of-truth/rices/estradiol/default.nix",
+    "/persist/source-of-truth/rices/estradiol/hyprland.nix",
+    "/persist/source-of-truth/rices/estradiol/system.nix",
+    "/persist/source-of-truth/flake.nix",
+    "/persist/source-of-truth/niri/flake.nix"
+  ],
+  "relatedFeatures": ["estradiol rice", "hyprland configuration", "niri-flake"]
+}
