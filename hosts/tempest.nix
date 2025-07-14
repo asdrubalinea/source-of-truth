@@ -13,7 +13,7 @@
     ../hardware/framework.nix
     ../modules/secure-boot.nix
     # ../desktop/gnome.nix
-     ../desktop/plasma.nix
+    # ../desktop/plasma.nix
 
     ../rices/estradiol/system.nix
   ];
