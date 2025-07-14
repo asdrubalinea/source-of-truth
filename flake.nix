@@ -205,7 +205,7 @@
 
                 users = {
                   irene = import ./homes/tempest.nix;
-                  plasma = import ./homes/plasma.nix;
+                  # plasma = import ./homes/plasma.nix;
                 };
               };
             }
