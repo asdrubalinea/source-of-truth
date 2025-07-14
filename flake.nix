@@ -187,6 +187,7 @@
             nixos-hardware.nixosModules.framework-amd-ai-300-series
             lanzaboote.nixosModules.lanzaboote
             ucodenix.nixosModules.default
+            niri.nixosModules.niri
 
             ./disks/tempest.nix
             ./hosts/tempest.nix
