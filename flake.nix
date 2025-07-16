@@ -244,6 +244,43 @@
             }
           ];
         };
+
+        niri-test = lib.nixosSystem {
+          inherit system pkgs;
+          specialArgs = {
+            inherit inputs;
+            hostname = "niri-test";
+          };
+
+          modules = [
+            disko.nixosModules.disko
+            niri.nixosModules.niri
+            stylix.nixosModules.stylix
+
+            ./disks/niri-test.nix
+            ./hosts/niri-test.nix
+
+            home-manager.nixosModules.home-manager
+            {
+              home-manager = {
+                extraSpecialArgs = {
+                  inherit inputs;
+                  hostname = "niri-test";
+                };
+                backupFileExtension = "backup";
+                useGlobalPkgs = true;
+                useUserPackages = true;
+                sharedModules = [
+                  stylix.homeModules.stylix
+                ];
+
+                users = {
+                  irene = import ./homes/niri-test.nix;
+                };
+              };
+            }
+          ];
+        };
       };
 
       homeConfigurations = {

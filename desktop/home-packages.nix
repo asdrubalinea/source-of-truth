@@ -51,7 +51,7 @@
     yt-dlp # Video downloader
 
     # --- Development & Nix ---
-    aider-chat # AI coding assistant in the terminal
+    # aider-chat # AI coding assistant in the terminal
     alejandra # Nix code formatter
     cachix # Nix binary cache management
     devenv # Nix-based development environment manager
@@ -90,23 +90,26 @@
     google-chrome
     brave
     dbeaver-bin # Universal database tool
-    inputs.helix.packages.x86_64-linux.default
+    # inputs.helix.packages.x86_64-linux.default
+
+    pkgs.trunk.helix
+    
     ffmpeg # Multimedia framework (often a dependency)
     inputs.zen-browser.packages.x86_64-linux.default # Zen Browser
     firefox
     keepassxc # Password manager
     kitty # GPU-based terminal emulator
-    ladybird # SerenityOS web browser (experimental)
+    # ladybird # SerenityOS web browser (experimental)
     mpv # Media player
     nemo # File manager
     obs-studio # Streaming and recording software
     obsidian # Note-taking application
     onlyoffice-desktopeditors # Office suite
     pavucontrol # PulseAudio volume control
-    prismlauncher # MultiMC/PolyMC fork for Minecraft
+    # prismlauncher # MultiMC/PolyMC fork for Minecraft
     seahorse # GPG/SSH key manager GUI
     telegram-desktop # Messaging application
-    tor-browser # Privacy-focused web browser
+    # tor-browser # Privacy-focused web browser
     vesktop # Vencord-enhanced Discord client
     vlc # Media player
     wezterm # GPU-accelerated terminal emulator
@@ -140,12 +143,13 @@
 
     appimage-run
     asciinema
-    ladybird
+    # ladybird
 
     kdePackages.dolphin
     trunk.claude-code
     nodejs
     inputs.claude-desktop.packages.${system}.claude-desktop
     thunderbird
+    uv
   ];
 }
