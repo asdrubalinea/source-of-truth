@@ -46,4 +46,9 @@
   # boot.initrd.postDeviceCommands = lib.mkAfter ''
   # zfs rollback -r zroot/local/root@blank
   # '';
+  
+  # Enable ZFS rollback for impermanence (uncomment when using ZFS root)
+  # boot.initrd.postDeviceCommands = lib.mkAfter ''
+  #   zfs rollback -r zroot/local/root@blank
+  # '';
 }
