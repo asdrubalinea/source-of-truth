@@ -205,6 +205,7 @@
 
                 users = {
                   irene = import ./homes/tempest.nix;
+                  claude = import ./homes/claude.nix;
                   # plasma = import ./homes/plasma.nix;
                 };
               };
@@ -304,6 +305,26 @@
                 username = "irene";
                 homeDirectory = "/home/irene";
                 stateVersion = "23.05";
+              };
+            }
+          ];
+        };
+
+        "claude@tempest" = home-manager.lib.homeManagerConfiguration {
+          inherit pkgs;
+          extraSpecialArgs = {
+            inherit inputs;
+            hostname = "tempest";
+          };
+
+          modules = [
+            ./homes/claude.nix
+
+            {
+              home = {
+                username = "claude";
+                homeDirectory = "/home/claude";
+                stateVersion = "24.11";
               };
             }
           ];
