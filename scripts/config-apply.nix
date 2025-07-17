@@ -5,7 +5,7 @@ let
     #!${pkgs.stdenv.shell}
     pushd /persist/source-of-truth
 
-    nixos-rebuild switch --flake '.#' --use-remote-sudo
+    nixos-rebuild switch --flake '.#' --sudo
 
     popd
   '';

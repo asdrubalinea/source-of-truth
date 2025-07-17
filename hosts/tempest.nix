@@ -129,6 +129,7 @@
       "/var/lib/systemd/coredump"
       "/etc/NetworkManager/system-connections"
       "/var/lib/sddm"
+      "/home/claude"
     ];
     files = [
       "/etc/machine-id"
@@ -220,6 +221,15 @@
     ];
     hashedPassword = "$6$BkMgWYEIITYDhZkR$KnfSasOiuqi14e.85Ft/YMjgxoniRxoYXc8Tbk1J4ksq2I8Hk358V2OQFcRqHmBv/g52nhCOUWvb3uzjQuMbF0";
     shell = pkgs.fish;
+  };
+
+  users.users.claude = {
+    isNormalUser = true;
+    extraGroups = [ "networkmanager" ];
+    hashedPassword = "$6$BkMgWYEIITYDhZkR$KnfSasOiuqi14e.85Ft/YMjgxoniRxoYXc8Tbk1J4ksq2I8Hk358V2OQFcRqHmBv/g52nhCOUWvb3uzjQuMbF0";
+    shell = pkgs.fish;
+    home = "/home/claude";
+    createHome = true;
   };
 
   security = {
