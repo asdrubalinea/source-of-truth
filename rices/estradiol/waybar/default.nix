@@ -1,6 +1,6 @@
-{ lib, ... }: {
+{ lib, hostname, ... }: {
   programs.waybar = {
-    enable = true;
+    enable = hostname != "tempest";
     settings = lib.importJSON ./config.jsonc;
     style = builtins.readFile ./style.css;
   };
