@@ -1,4 +1,4 @@
-{ pkgs, ... }: {
+{ pkgs, inputs, ... }: {
   programs.fish.shellAliases = {
     gits = "${pkgs.git}/bin/git status";
     gitc = "${pkgs.git}/bin/git commit";
@@ -10,5 +10,6 @@
     please = "${pkgs.doas}/bin/doas";
     neofetch = "${pkgs.hyfetch}/bin/hyfetch";
     fetch = "${pkgs.hyfetch}/bin/hyfetch";
+    hn = "${inputs.hn-tui-flake.packages.${pkgs.system}.hackernews-tui}/bin/hackernews_tui";
   };
 }
