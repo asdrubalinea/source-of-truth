@@ -80,15 +80,19 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
     diapee-bot = {
-      url = "github:asdrubalinea/diapee-bot/llms";
+      url = "github:asdrubalinea/diapee-bot/main";
       inputs.nixpkgs.follows = "nixpkgs";
     };
     helix = {
       url = "github:usagi-flow/evil-helix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    claude-desktop.url = "github:k3d3/claude-desktop-linux-flake";
-    claude-desktop.inputs.nixpkgs.follows = "nixpkgs";
+    # claude-desktop.url = "github:k3d3/claude-desktop-linux-flake";
+    # claude-desktop.inputs.nixpkgs.follows = "nixpkgs";
+    hn-tui-flake = {
+      url = "github:asdrubalinea/hn-tui-flake";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs =
