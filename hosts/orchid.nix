@@ -326,6 +326,11 @@
   services.diapee-bot = {
     enable = true;
 
+    web = {
+      enable = true;
+      port = 3000;
+    };
+
     # user = "irene";
     # group = "irene";
 

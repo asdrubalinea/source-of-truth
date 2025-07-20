@@ -42,6 +42,7 @@ in
 
     ../misc/fish.nix
     ../misc/aliases.nix
+    ../desktop/tmux.nix
 
     ../desktop/home-packages.nix
   ];
