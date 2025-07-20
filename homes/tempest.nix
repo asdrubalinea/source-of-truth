@@ -19,6 +19,7 @@ in
     ../scripts/config-apply.nix
     ../misc/fish.nix
     ../misc/aliases.nix
+    ../desktop/tmux.nix
 
     ../desktop/home-packages.nix
     ../scripts/port-forward.nix
