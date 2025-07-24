@@ -5,7 +5,8 @@ let
   cfg = config.services.borg-backup;
   wait-ac = (pkgs.callPackage ../scripts/wait-ac.nix { }).wait-ac;
 
-in {
+in
+{
   options.services.borg-backup = {
     enable = mkEnableOption "borg-backup";
 

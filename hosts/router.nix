@@ -13,26 +13,27 @@
     extraModulePackages = [ ];
     kernelParams = [ "bnx2x.mask_tx_fault=3" ];
 
-    kernelPackages = let
-      linux_custom_pkg = { fetchFromGitHub, buildLinux, ... } @ args:
+    kernelPackages =
+      let
+        linux_custom_pkg = { fetchFromGitHub, buildLinux, ... } @ args:
 
-        buildLinux (args // rec {
-          version = "6.1.0";
-          modDirVersion = version;
+          buildLinux (args // rec {
+            version = "6.1.0";
+            modDirVersion = version;
 
-          src = fetchFromGitHub {
-            owner = "asdrubalini";
-            repo = "linux-bnx2x";
-            rev = "267524a6a1908a898d8ffbf715cd2ec2cc762b41";
-	    sha256 = "sha256-zcdrdH5HJ+uvvXI9dffoRbQwwo0z1gZsvhIoy1ZbXjE=";
-          };
+            src = fetchFromGitHub {
+              owner = "asdrubalini";
+              repo = "linux-bnx2x";
+              rev = "267524a6a1908a898d8ffbf715cd2ec2cc762b41";
+              sha256 = "sha256-zcdrdH5HJ+uvvXI9dffoRbQwwo0z1gZsvhIoy1ZbXjE=";
+            };
 
-          kernelPatches = [];
-	  configfile = ../kernel-configs/router.config;
+            kernelPatches = [ ];
+            configfile = ../kernel-configs/router.config;
 
-        } // (args.argsOverride or {}));
-      linux_custom = pkgs.callPackage linux_custom_pkg {};
-    in
+          } // (args.argsOverride or { }));
+        linux_custom = pkgs.callPackage linux_custom_pkg { };
+      in
       pkgs.recurseIntoAttrs (pkgs.linuxPackagesFor linux_custom);
 
     kernel.sysctl = {
@@ -52,25 +53,29 @@
   };
 
   fileSystems."/" =
-    { device = "/dev/disk/by-uuid/a00746d8-02d2-4b0b-8226-3745c33918c8";
+    {
+      device = "/dev/disk/by-uuid/a00746d8-02d2-4b0b-8226-3745c33918c8";
       fsType = "btrfs";
       options = [ "subvol=@" ];
     };
 
   fileSystems."/home" =
-    { device = "/dev/disk/by-uuid/a00746d8-02d2-4b0b-8226-3745c33918c8";
+    {
+      device = "/dev/disk/by-uuid/a00746d8-02d2-4b0b-8226-3745c33918c8";
       fsType = "btrfs";
       options = [ "subvol=@home" ];
     };
 
   fileSystems."/nix" =
-    { device = "/dev/disk/by-uuid/a00746d8-02d2-4b0b-8226-3745c33918c8";
+    {
+      device = "/dev/disk/by-uuid/a00746d8-02d2-4b0b-8226-3745c33918c8";
       fsType = "btrfs";
       options = [ "subvol=@nix" ];
     };
 
   fileSystems."/boot" =
-    { device = "/dev/disk/by-uuid/6CAD-375A";
+    {
+      device = "/dev/disk/by-uuid/6CAD-375A";
       fsType = "vfat";
     };
 
@@ -143,7 +148,7 @@
       enp1s0f0 = {
         macAddress = "00:11:22:aa:bb:cc";
         useDHCP = false;
-      	# ipv4.addresses = [ { address = "192.168.1.1"; prefixLength = 24; } ];
+        # ipv4.addresses = [ { address = "192.168.1.1"; prefixLength = 24; } ];
       };
 
       wan = {
@@ -153,10 +158,10 @@
 
       # Lan
       lan = {
-        ipv4.addresses = [ {
+        ipv4.addresses = [{
           address = "10.0.0.1";
           prefixLength = 20;
-        } ];
+        }];
       };
 
       enp6s18 = {
@@ -188,19 +193,19 @@
         autostart = true;
         enable = true;
         config = ''
-	  plugin pppoe.so
+          	  plugin pppoe.so
 
-          wan
+                    wan
 
-          name "0264087024@alicebiz.routed"
-          password "timadsl"
+                    name "0264087024@alicebiz.routed"
+                    password "timadsl"
 
-          persist
-          maxfail 0
-          holdoff 5
+                    persist
+                    maxfail 0
+                    holdoff 5
 
-          defaultroute
-          replacedefaultroute
+                    defaultroute
+                    replacedefaultroute
         '';
       };
     };

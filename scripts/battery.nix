@@ -6,4 +6,5 @@ let
     #!${pkgs.stdenv.shell}
     cat /sys/class/power_supply/BAT0/capacity
   '';
-in { environment.systemPackages = with pkgs; [ battery ]; }
+in
+{ environment.systemPackages = with pkgs; [ battery ]; }

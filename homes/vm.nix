@@ -102,7 +102,7 @@
   home.packages = with pkgs; [
     # Neovim configuration
     inputs.nixvim.packages.${pkgs.system}.default
-    
+
     # Core development tools
     htop
     tree

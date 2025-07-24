@@ -6,7 +6,8 @@ let
   domain = "arrow";
   vpn-dev = "tun0";
   port = 1194;
-in {
+in
+{
   # sudo systemctl start nat
   networking.nat = {
     enable = true;

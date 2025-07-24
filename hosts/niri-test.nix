@@ -1,9 +1,8 @@
-{
-  pkgs,
-  inputs,
-  lib,
-  config,
-  ...
+{ pkgs
+, inputs
+, lib
+, config
+, ...
 }:
 
 {
@@ -61,7 +60,7 @@
     };
 
     qemuGuest.enable = true;
-    
+
     # Display manager for niri
     displayManager = {
       sessionPackages = [ pkgs.niri ];
@@ -163,7 +162,7 @@
 
     # Enable fish shell system-wide
     fish.enable = true;
-    
+
     # Enable niri
     niri.enable = true;
   };

@@ -113,8 +113,8 @@
                   mountpoint = "/persist";
                 };
                 "/@sbctl" = {
-            		  mountpoint = "/var/lib/sbctl";
-          		  };
+                  mountpoint = "/var/lib/sbctl";
+                };
               };
             };
           };

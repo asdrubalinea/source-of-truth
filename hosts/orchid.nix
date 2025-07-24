@@ -1,8 +1,7 @@
-{
-  inputs,
-  lib,
-  pkgs,
-  ...
+{ inputs
+, lib
+, pkgs
+, ...
 }:
 {
   imports = [
@@ -119,7 +118,7 @@
   # ];
 
   networking.defaultGateway = "10.0.0.1";
-  
+
   # Use systemd-resolved for NextDNS with DNS-over-TLS
   services.resolved = {
     enable = true;

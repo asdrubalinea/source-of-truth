@@ -52,9 +52,9 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
     #rose-pine-hyprcursor = {
-      #url = "github:ndom91/rose-pine-hyprcursor";
-      #inputs.nixpkgs.follows = "nixpkgs";
-      #inputs.hyprlang.follows = "hyprland/hyprlang";
+    #url = "github:ndom91/rose-pine-hyprcursor";
+    #inputs.nixpkgs.follows = "nixpkgs";
+    #inputs.hyprlang.follows = "hyprland/hyprlang";
     #};
     nixos-cosmic.url = "github:lilyinstarlight/nixos-cosmic";
     anyrun = {
@@ -96,24 +96,23 @@
   };
 
   outputs =
-    inputs@{
-      nixpkgs,
-      nixpkgs-stable,
-      nixpkgs-trunk,
-      nixpkgs-custom,
-      home-manager,
-      hyprland,
-      niri,
-      vscode-server,
-      disko,
-      impermanence,
-      stylix,
-      sops-nix,
-      nixos-hardware,
-      emacs-overlay,
-      lanzaboote,
-      ucodenix,
-      ...
+    inputs@{ nixpkgs
+    , nixpkgs-stable
+    , nixpkgs-trunk
+    , nixpkgs-custom
+    , home-manager
+    , hyprland
+    , niri
+    , vscode-server
+    , disko
+    , impermanence
+    , stylix
+    , sops-nix
+    , nixos-hardware
+    , emacs-overlay
+    , lanzaboote
+    , ucodenix
+    , ...
     }:
     let
       system = "x86_64-linux";
@@ -209,7 +208,6 @@
 
                 users = {
                   irene = import ./homes/tempest.nix;
-                  claude = import ./homes/claude.nix;
                   # plasma = import ./homes/plasma.nix;
                 };
               };
@@ -309,26 +307,6 @@
                 username = "irene";
                 homeDirectory = "/home/irene";
                 stateVersion = "23.05";
-              };
-            }
-          ];
-        };
-
-        "claude@tempest" = home-manager.lib.homeManagerConfiguration {
-          inherit pkgs;
-          extraSpecialArgs = {
-            inherit inputs;
-            hostname = "tempest";
-          };
-
-          modules = [
-            ./homes/claude.nix
-
-            {
-              home = {
-                username = "claude";
-                homeDirectory = "/home/claude";
-                stateVersion = "24.11";
               };
             }
           ];

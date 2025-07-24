@@ -1,8 +1,7 @@
-{
-  pkgs,
-  inputs,
-  hostname,
-  ...
+{ pkgs
+, inputs
+, hostname
+, ...
 }:
 
 let
@@ -43,6 +42,9 @@ in
         else if hostname == "tempest" then
           [
             "eDP-1, 2880x1920@120, 0x0, 2"
+            "DP-5, 3440x1440@75, 0x0, 1" # Samsung center
+            "DP-6, 2560x1440@60, 3440x0, 1" # BenQ right of Samsung
+            "DP-3, 2560x1440@144, 440x1440, 1" # BOE portable centered below Samsung
           ]
         else
           null
@@ -107,20 +109,21 @@ in
         };
       };
 
-      animations = if hostname == "orchid" then {
-        enabled = true;
-        bezier = "myBezier, 0.05, 0.9, 0.1, 1.05";
-        animation = [
-          "windows, 1, 5, myBezier"
-          "windowsOut, 1, 5, default, popin 80%"
-          "border, 1, 10, default"
-          "fade, 1, 2, default"
-          "workspaces, 1, 3, default"
-          "borderangle, 1, 100, linear, loop"
-        ];
-      } else {
-        enabled = false;
-      };
+      animations =
+        if hostname == "orchid" then {
+          enabled = true;
+          bezier = "myBezier, 0.05, 0.9, 0.1, 1.05";
+          animation = [
+            "windows, 1, 5, myBezier"
+            "windowsOut, 1, 5, default, popin 80%"
+            "border, 1, 10, default"
+            "fade, 1, 2, default"
+            "workspaces, 1, 3, default"
+            "borderangle, 1, 100, linear, loop"
+          ];
+        } else {
+          enabled = false;
+        };
 
       dwindle = {
         pseudotile = true;

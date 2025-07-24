@@ -112,7 +112,7 @@
   home.packages = with pkgs; [
     # Neovim configuration
     inputs.nixvim.packages.${pkgs.system}.default
-    
+
     # Core development tools
     htop
     tree
@@ -169,13 +169,13 @@
     # Desktop applications
     firefox
     alacritty
-    
+
     # Wayland utilities
     wl-clipboard
     grim
     slurp
     imv
-    
+
     # File manager
     nemo
 

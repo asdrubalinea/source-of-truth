@@ -1,13 +1,12 @@
-{
-  pkgs,
-  inputs,
-  lib,
-  config,
-  ...
+{ pkgs
+, inputs
+, lib
+, config
+, ...
 }:
 
 {
-  imports = [];
+  imports = [ ];
 
   nixpkgs.hostPlatform = lib.mkDefault "x86_64-linux";
 
