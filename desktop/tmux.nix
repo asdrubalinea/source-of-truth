@@ -9,7 +9,7 @@
     baseIndex = 1;
     escapeTime = 0;
     historyLimit = 10000;
-    
+
     extraConfig = ''
       # Enable 256 colors and true color support
       set -ga terminal-overrides ",*256col*:Tc"

@@ -9,4 +9,5 @@ let
     nix-store --gc
     nix-store --optimize
   '';
-in { home.packages = [ systemClean ]; }
+in
+{ home.packages = [ systemClean ]; }

@@ -1,8 +1,8 @@
-{
-  appimageTools,
-  lib,
-  requireFile,
-  makeWrapper,
+{ appimageTools
+, lib
+, requireFile
+, makeWrapper
+,
 }:
 
 appimageTools.wrapType2 rec {

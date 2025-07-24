@@ -14,7 +14,7 @@
     ../modules/secure-boot.nix
     # ../desktop/gnome.nix
     # ../desktop/plasma.nix
-
+    # ../services/grafana
     ../rices/estradiol/system.nix
   ];
 
@@ -22,9 +22,8 @@
 
   # Boot Configuration
   boot = {
-    # kernelPackages = pkgs.trunk.linuxPackages_6_14;
     kernelPackages = pkgs.linuxPackages_6_15;
-    kernelPatches = [
+    # kernelPatches = [
       # {
       # name = "0001_dpg_pause_unpause_for_vcn_4_0_5";
       # patch = ../patches/0001_dpg_pause_unpause_for_vcn_4_0_5.patch;
@@ -34,14 +33,14 @@
         #name = "0001-turn-off-doorbell-for-vcn-ring-use";
         #patch = ../patches/0001-turn-off-doorbell-for-vcn-ring-use.patch;
       #}
-    ];
+    # ];
 
-    # kernelPackages = pkgs.linuxPackages_testing;
     resumeDevice = "/dev/mapper/pool-swap";
-    # kernelParams = [ "usbcore.autosuspend=-1" ];
     kernelParams = [
       "microcode.amd_sha_check=off"
       "amdgpu.dcdebugmask=0x12"
+      "amd_pstate=active"  # Enable modern AMD CPU power management
+      "usbcore.autosuspend=-1"
     ];
 
     kernelModules = [ "kvm-amd" ];
@@ -82,7 +81,6 @@
     hostName = "tempest";
     hostId = "856ff057";
     networkmanager.enable = true;
-    # useDHCP = true;
   };
 
   # Use systemd-resolved for NextDNS with DNS-over-TLS
@@ -130,6 +128,10 @@
       "/etc/NetworkManager/system-connections"
       "/var/lib/sddm"
       "/home/claude"
+      "/var/lib/grafana"
+      "/var/lib/prometheus2"
+      "/var/lib/docker"
+      "/var/lib/prometheus-node-exporter"
     ];
     files = [
       "/etc/machine-id"
@@ -160,14 +162,20 @@
     };
   };
 
+  # # Monitoring Configuration
+  # services.monitoring = {
+  #   enable = false;
+  #   powerEfficient = true;  # Laptop-optimized settings
+  #   domain = "localhost";   # Local-only access for laptop
+  #   enableAmdGpu = true;    # Framework laptop has AMD GPU
+  #   enableHardwareSensors = true;  # Temperature monitoring
+  #   enableSmartMonitoring = true;  # NVMe health monitoring
+  #   enableZfs = false;      # Tempest uses BTRFS, not ZFS
+  # };
+
   # Services
   services = {
     openssh.enable = true;
-
-    fwupd = {
-      enable = true;
-      extraRemotes = [ "lvfs-testing" ];
-    };
 
     tailscale = {
       enable = true;
@@ -175,22 +183,8 @@
     };
 
     xserver.videoDrivers = [ "amdgpu" ];
-
-    logind.lidSwitch = "suspend-then-hibernate";
-    logind.lidSwitchExternalPower = "ignore";
-    logind.extraConfig = ''
-      HandlePowerKey=hibernate
-      HandleLidSwitchDocked=ignore
-    '';
-
     gnome.gnome-keyring.enable = true;
   };
-
-  # Power Management
-  #powerManagement = {
-  # cpuFreqGovernor = lib.mkDefault "powersave";
-  # powertop.enable = true;
-  # };
 
   # Internationalisation & Console
   time.timeZone = "Europe/Rome";
@@ -208,6 +202,7 @@
     extraGroups = [
       "wheel"
       "networkmanager"
+      "docker"
     ];
     hashedPassword = "$6$BkMgWYEIITYDhZkR$KnfSasOiuqi14e.85Ft/YMjgxoniRxoYXc8Tbk1J4ksq2I8Hk358V2OQFcRqHmBv/g52nhCOUWvb3uzjQuMbF0";
     shell = pkgs.fish;
@@ -303,6 +298,12 @@
   users.groups.libvirtd.members = ["irene"];
   virtualisation.libvirtd.enable = true;
   virtualisation.spiceUSBRedirection.enable = true;
+
+  virtualisation.docker = {
+    enable = true;
+  };
+
+  services.hardware.bolt.enable = true;
 
   # System Version
   system.stateVersion = "24.11";

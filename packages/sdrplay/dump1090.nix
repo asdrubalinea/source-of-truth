@@ -1,4 +1,11 @@
-{ lib, stdenv, fetchFromGitHub, pkg-config, libusb1, ncurses, sdrplay, rtl-sdr
+{ lib
+, stdenv
+, fetchFromGitHub
+, pkg-config
+, libusb1
+, ncurses
+, sdrplay
+, rtl-sdr
 }:
 
 stdenv.mkDerivation rec {

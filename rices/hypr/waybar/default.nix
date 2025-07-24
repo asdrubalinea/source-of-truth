@@ -1,16 +1,16 @@
-{
-  pkgs,
-  lib,
-  config,
-  ...
-}: let
+{ pkgs
+, lib
+, config
+, ...
+}:
+let
   brightnessctl = pkgs.brightnessctl + "/bin/brightnessctl";
   pamixer = pkgs.pamixer + "/bin/pamixer";
   waybar-wttr = pkgs.stdenv.mkDerivation {
     name = "waybar-wttr";
     buildInputs = [
       (pkgs.python39.withPackages
-        (pythonPackages: with pythonPackages; [requests]))
+        (pythonPackages: with pythonPackages; [ requests ]))
     ];
     unpackPhase = "true";
     installPhase = ''
@@ -19,7 +19,8 @@
       chmod +x $out/bin/waybar-wttr
     '';
   };
-in {
+in
+{
   xdg.configFile."waybar/style.css".text = import ./style.nix;
 
   programs.waybar = {
@@ -45,7 +46,7 @@ in {
           "tray"
         ];
 
-        modules-center = [];
+        modules-center = [ ];
 
         modules-right = [
           "battery"
@@ -75,11 +76,12 @@ in {
           tooltip = true;
           format = "{}";
           interval = 7;
-          exec = let
-            todo = pkgs.todo + "/bin/todo";
-            sed = pkgs.gnused + "/bin/sed";
-            wc = pkgs.coreutils + "/bin/wc";
-          in
+          exec =
+            let
+              todo = pkgs.todo + "/bin/todo";
+              sed = pkgs.gnused + "/bin/sed";
+              wc = pkgs.coreutils + "/bin/wc";
+            in
             pkgs.writeShellScript "todo-waybar" ''
               #!/bin/sh
 
@@ -122,11 +124,12 @@ in {
 
         "custom/swallow" = {
           tooltip = false;
-          on-click = let
-            hyprctl = config.wayland.windowManager.hyprland.package + "/bin/hyprctl";
-            notify-send = pkgs.libnotify + "/bin/notify-send";
-            rg = pkgs.ripgrep + "/bin/rg";
-          in
+          on-click =
+            let
+              hyprctl = config.wayland.windowManager.hyprland.package + "/bin/hyprctl";
+              notify-send = pkgs.libnotify + "/bin/notify-send";
+              rg = pkgs.ripgrep + "/bin/rg";
+            in
             pkgs.writeShellScript "waybar-swallow" ''
               #!/bin/sh
               if ${hyprctl} getoption misc:enable_swallow | ${rg}/bin/rg -q "int: 1"; then
@@ -165,7 +168,7 @@ in {
         backlight = {
           tooltip = false;
           format = "{icon} {percent}%";
-          format-icons = ["󰋙" "󰫃" "󰫄" "󰫅" "󰫆" "󰫇" "󰫈"];
+          format-icons = [ "󰋙" "󰫃" "󰫄" "󰫅" "󰫆" "󰫇" "󰫈" ];
           on-scroll-up = "${brightnessctl} s 1%-";
           on-scroll-down = "${brightnessctl} s +1%";
         };
@@ -180,7 +183,7 @@ in {
           format-charging = "󰂄 {capacity}%";
           format-plugged = "󰚥 {capacity}%";
           format-alt = "{time} {icon}";
-          format-icons = ["󰂃" "󰁺" "󰁻" "󰁼" "󰁽" "󰁾" "󰁿" "󰂀" "󰂁" "󰂂" "󰁹"];
+          format-icons = [ "󰂃" "󰁺" "󰁻" "󰁼" "󰁽" "󰁾" "󰁿" "󰂀" "󰂁" "󰂂" "󰁹" ];
         };
 
         network = {
@@ -197,7 +200,7 @@ in {
           tooltip = false;
           format = "{icon} {volume}%";
           format-muted = "󰖁";
-          format-icons = {default = ["󰕿" "󰖀" "󰕾"];};
+          format-icons = { default = [ "󰕿" "󰖀" "󰕾" ]; };
           tooltip-format = "{desc}, {volume}%";
           on-click = "${pamixer} -t";
           on-scroll-up = "${pamixer} -d 1";

@@ -1,9 +1,8 @@
-{
-  pkgs,
-  inputs,
-  lib,
-  config,
-  ...
+{ pkgs
+, inputs
+, lib
+, config
+, ...
 }:
 
 {
@@ -13,7 +12,7 @@
     ../hardware/framework.nix
     ../modules/secure-boot.nix
     # ../desktop/gnome.nix
-     ../desktop/plasma.nix
+    ../desktop/plasma.nix
 
     ../rices/niri/system.nix
   ];
@@ -31,8 +30,8 @@
       # }
 
       # {
-        #name = "0001-turn-off-doorbell-for-vcn-ring-use";
-        #patch = ../patches/0001-turn-off-doorbell-for-vcn-ring-use.patch;
+      #name = "0001-turn-off-doorbell-for-vcn-ring-use";
+      #patch = ../patches/0001-turn-off-doorbell-for-vcn-ring-use.patch;
       #}
     ];
 
@@ -292,7 +291,7 @@
   hardware.logitech.wireless.enable = true;
 
   programs.virt-manager.enable = true;
-  users.groups.libvirtd.members = ["irene"];
+  users.groups.libvirtd.members = [ "irene" ];
   virtualisation.libvirtd.enable = true;
   virtualisation.spiceUSBRedirection.enable = true;
 

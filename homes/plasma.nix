@@ -27,26 +27,26 @@ in
     homeDirectory = "/home/plasma";
     stateVersion = "24.11";
 
-  #   persistence."/persist/home/plasma" = {
-  #     directories = [
-  #       "Downloads"
-  #       "Music"
-  #       "Pictures"
-  #       "Documents"
-  #       "Videos"
-  #       "VirtualBox VMs"
-  #       ".gnupg"
-  #       ".ssh"
-  #       ".zen"
-  #       ".nixops"
-  #       ".local/share/keyrings"
-  #       ".local/share/direnv"
-  #     ];
-  #     files = [
-  #       ".screenrc"
-  #     ];
-  #     allowOther = true;
-  #   };
+    #   persistence."/persist/home/plasma" = {
+    #     directories = [
+    #       "Downloads"
+    #       "Music"
+    #       "Pictures"
+    #       "Documents"
+    #       "Videos"
+    #       "VirtualBox VMs"
+    #       ".gnupg"
+    #       ".ssh"
+    #       ".zen"
+    #       ".nixops"
+    #       ".local/share/keyrings"
+    #       ".local/share/direnv"
+    #     ];
+    #     files = [
+    #       ".screenrc"
+    #     ];
+    #     allowOther = true;
+    #   };
   };
 
   programs = {

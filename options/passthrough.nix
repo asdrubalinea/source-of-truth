@@ -47,10 +47,12 @@ in
           ovmf = {
             enable = true;
             # packages = with pkgs; [ OVMFFull ];
-	    packages = [(pkgs.OVMF.override {
-              secureBoot = true;
-              tpmSupport = true;
-            }).fd];
+            packages = [
+              (pkgs.OVMF.override {
+                secureBoot = true;
+                tpmSupport = true;
+              }).fd
+            ];
           };
 
           swtpm.enable = true;

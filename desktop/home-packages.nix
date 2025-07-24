@@ -93,7 +93,7 @@
     # inputs.helix.packages.x86_64-linux.default
 
     pkgs.trunk.helix
-    
+
     ffmpeg # Multimedia framework (often a dependency)
     inputs.zen-browser.packages.x86_64-linux.default # Zen Browser
     firefox
@@ -152,5 +152,6 @@
     inputs.hn-tui-flake.packages.${pkgs.system}.hackernews-tui # hn command for Hacker News TUI
     thunderbird
     uv
+    upower
   ];
 }
