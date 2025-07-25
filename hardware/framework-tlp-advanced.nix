@@ -1,15 +1,10 @@
-# Advanced TLP Configuration for Framework 13 AMD
-# WARNING: This is for advanced users only. Framework officially recommends PPD.
-# Only use this if PPD doesn't meet your power saving needs.
-
-{ pkgs, ... }:
+{ lib, ... }:
 {
   # Enable TLP for advanced tuning
-  services.tlp.enable = true;
+  services.tlp.enable = lib.mkForce true;
 
   # Explicitly disable conflicting daemons
-  services.power-profiles-daemon.enable = false;
-  services.auto-cpufreq.enable = false;
+  services.power-profiles-daemon.enable = lib.mkForce false;
 
   # Detailed TLP Configuration
   services.tlp.settings = {
