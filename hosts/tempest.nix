@@ -1,9 +1,8 @@
-{
-  pkgs,
-  inputs,
-  lib,
-  config,
-  ...
+{ pkgs
+, inputs
+, lib
+, config
+, ...
 }:
 
 {
@@ -15,6 +14,8 @@
     # ../desktop/gnome.nix
     # ../desktop/plasma.nix
     # ../services/grafana
+    ../services/btrfs-snapshots.nix
+    ../services/nix-cleanup.nix
     ../rices/estradiol/system.nix
   ];
 
@@ -24,22 +25,22 @@
   boot = {
     kernelPackages = pkgs.linuxPackages_6_15;
     # kernelPatches = [
-      # {
-      # name = "0001_dpg_pause_unpause_for_vcn_4_0_5";
-      # patch = ../patches/0001_dpg_pause_unpause_for_vcn_4_0_5.patch;
-      # }
+    # {
+    # name = "0001_dpg_pause_unpause_for_vcn_4_0_5";
+    # patch = ../patches/0001_dpg_pause_unpause_for_vcn_4_0_5.patch;
+    # }
 
-      # {
-        #name = "0001-turn-off-doorbell-for-vcn-ring-use";
-        #patch = ../patches/0001-turn-off-doorbell-for-vcn-ring-use.patch;
-      #}
+    # {
+    #name = "0001-turn-off-doorbell-for-vcn-ring-use";
+    #patch = ../patches/0001-turn-off-doorbell-for-vcn-ring-use.patch;
+    #}
     # ];
 
     resumeDevice = "/dev/mapper/pool-swap";
     kernelParams = [
       "microcode.amd_sha_check=off"
       "amdgpu.dcdebugmask=0x12"
-      "amd_pstate=active"  # Enable modern AMD CPU power management
+      "amd_pstate=active" # Enable modern AMD CPU power management
       "usbcore.autosuspend=-1"
     ];
 
@@ -295,7 +296,7 @@
   hardware.logitech.wireless.enable = true;
 
   programs.virt-manager.enable = true;
-  users.groups.libvirtd.members = ["irene"];
+  users.groups.libvirtd.members = [ "irene" ];
   virtualisation.libvirtd.enable = true;
   virtualisation.spiceUSBRedirection.enable = true;
 

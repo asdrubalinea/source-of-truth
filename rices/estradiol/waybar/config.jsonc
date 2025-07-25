@@ -5,13 +5,15 @@
     "modules-left": [
       "hyprland/workspaces",
       "cpu",
-      "memory"
+      "memory",
+      "temperature"
     ],
     "modules-center": ["clock", "tray"],
     "modules-right": [
       "backlight",
       "pulseaudio",
       "network",
+      "custom/power",
       "battery"
     ],
 
@@ -107,6 +109,21 @@
     "memory": {
       "format": "󰍛 {}%",
       "interval": 1
+    },
+
+    "temperature": {
+      "hwmon-path": "/sys/class/hwmon/hwmon6/temp1_input",
+      "critical-threshold": 80,
+      "format": "🌡️ {temperatureC}°C",
+      "format-critical": "🔥 {temperatureC}°C",
+      "interval": 2
+    },
+
+    "custom/power": {
+      "exec": "paste /sys/class/power_supply/BAT1/current_now /sys/class/power_supply/BAT1/voltage_now | awk '{watts = $1 * $2 / 1000000000000; if (watts < 0) printf \"⚡ %.1f W\", -watts; else printf \"🔌 %.1f W\", watts}'",
+      "format": "{}",
+      "interval": 2,
+      "tooltip": false
     }
   }
 ]
