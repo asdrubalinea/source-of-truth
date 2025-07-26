@@ -24,7 +24,7 @@
       # Yearly snapshots
       TIMELINE_LIMIT_YEARLY = "2";
     };
-    
+
     persist = {
       SUBVOLUME = "/persist";
       ALLOW_USERS = [ "irene" ];
@@ -36,7 +36,7 @@
       TIMELINE_LIMIT_MONTHLY = "6";
       TIMELINE_LIMIT_YEARLY = "1";
     };
-    
+
     nix = {
       SUBVOLUME = "/nix";
       TIMELINE_CREATE = true;
@@ -48,7 +48,7 @@
       TIMELINE_LIMIT_MONTHLY = "1";
       TIMELINE_LIMIT_YEARLY = "0";
     };
-    
+
     log = {
       SUBVOLUME = "/var/log";
       TIMELINE_CREATE = true;

@@ -8,6 +8,7 @@
 {
   imports = [
     ../rices/niri/system.nix
+    ../modules/nix.nix
   ];
 
   nixpkgs.hostPlatform = lib.mkDefault "x86_64-linux";
@@ -131,15 +132,6 @@
       execWheelOnly = true;
     };
     sudo-rs.enable = true;
-  };
-
-  # Nix Configuration
-  nix = {
-    package = pkgs.nixVersions.stable;
-    settings = {
-      trusted-users = [ "root" "irene" ];
-      experimental-features = [ "nix-command" "flakes" ];
-    };
   };
 
   # Basic system packages
