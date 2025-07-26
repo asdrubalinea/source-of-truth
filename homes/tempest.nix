@@ -4,6 +4,8 @@
     # Desktop environment and theming
     inputs.hyprland.homeManagerModules.default
     inputs.stylix.homeModules.stylix
+    inputs.impermanence.homeManagerModules.impermanence
+
     ../rices/estradiol
 
     # Applications and tools
@@ -27,6 +29,30 @@
     stateVersion = "23.05";
 
     # packages = [ ];
+
+    persistence."/persist/home/irene" = {
+      directories = [
+        "Downloads"
+        "Music"
+        "Pictures"
+        "Documents"
+        "Videos"
+        ".gnupg"
+        ".ssh"
+        ".local/share/keyrings"
+        ".local/share/direnv"
+        {
+          directory = ".local/share/Steam";
+          method = "symlink";
+        }
+      ];
+      files = [
+        ".claude.json" ".claude.json" ".nix-channels"
+        ".Xresources" ".gtkrc-2.0" ".bash_history"
+        ".python_history" ".mysql_history"
+      ];
+      allowOther = true;
+    };
   };
 
   programs = {
