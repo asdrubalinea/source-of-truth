@@ -6,7 +6,7 @@
     ../hardware/bluetooth.nix
     ../hardware/audio.nix
     ../hardware/framework.nix
-    
+
     # Shared system modules
     ../modules/nix.nix
   ];

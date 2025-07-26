@@ -59,12 +59,6 @@
     fstrim.enable = true;
   };
 
-  # Power Management
-  # powerManagement = {
-  # Enable powertop for diagnostics
-  # powertop.enable = true;
-  # };
-
   # Power Management Daemon (PPD) - Framework's recommended approach
   services.power-profiles-daemon.enable = true;
   # Explicitly disable conflicting daemons
