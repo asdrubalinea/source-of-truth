@@ -38,6 +38,8 @@
     xxd # Make a hexdump or do the reverse
     yazi # Terminal file manager
     zip # Create zip archives
+    lz4
+    ncdu
 
     # --- Networking ---
     curl # Data transfer utility
