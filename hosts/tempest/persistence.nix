@@ -28,6 +28,9 @@
 
     # Directories that need to be persistent
     directories = [
+      # System logs
+      "/var/log"
+
       # System state
       "/var/lib/bluetooth"
       "/var/lib/nixos"
@@ -43,9 +46,6 @@
       "/var/lib/prometheus2"
       "/var/lib/prometheus-node-exporter"
       "/var/lib/docker"
-
-      # User home directories
-      "/home/claude"
     ];
 
     # Individual files that need persistence

@@ -19,7 +19,7 @@ in
     ../../hardware/framework.nix
 
     # System modules
-    ../../modules/secure-boot.nix
+    # ../../modules/secure-boot.nix
     ../../modules/nix.nix
 
     # Services
@@ -112,6 +112,7 @@ in
       enableSSHSupport = true;
     };
     dconf.enable = true;
+    fish.enable = true;
   };
 
   # System Version

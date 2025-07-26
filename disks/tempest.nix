@@ -94,19 +94,11 @@
                 "/@" = {
                   # no mountpoint defined here
                 };
-                # Subvolume for /home (persisted)
-                "/@home" = {
-                  mountpoint = "/home";
-                };
                 # Subvolume for /nix (persisted)
                 "/@nix" = {
                   mountpoint = "/nix";
                   # Nix store often benefits from no compression
                   mountOptions = [ "compress=no" ];
-                };
-                # Subvolume for /var/log (persisted)
-                "/@log" = {
-                  mountpoint = "/var/log";
                 };
                 # Subvolume for persistence (e.g., with impermanence module)
                 "/@persist" = {

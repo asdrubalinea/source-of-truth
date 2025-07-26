@@ -47,8 +47,8 @@
         }
       ];
       files = [
-        ".claude.json" ".claude.json" ".nix-channels"
-        ".Xresources" ".gtkrc-2.0" ".bash_history"
+        ".claude.json" ".claude.json"
+        ".bash_history"
         ".python_history" ".mysql_history"
       ];
       allowOther = true;
