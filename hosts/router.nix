@@ -4,6 +4,7 @@
   imports = [
     (modulesPath + "/profiles/qemu-guest.nix")
     ../services/ssh-secure.nix
+    ../modules/nix.nix
   ];
 
   boot = {
@@ -280,12 +281,6 @@
 
   services.qemuGuest.enable = true;
   programs.mosh.enable = true;
-
-  nix = {
-    extraOptions = ''
-      experimental-features = nix-command flakes
-    '';
-  };
 
   users.users."giovanni".openssh.authorizedKeys.keys =
     [

@@ -173,7 +173,7 @@
           modules = [
             (nixpkgs + "/nixos/modules/installer/cd-dvd/installation-cd-minimal.nix")
 
-            ./hosts/tempest.nix
+            ./hosts/live.nix
           ];
         };
 
@@ -193,7 +193,7 @@
             niri.nixosModules.niri
 
             ./disks/tempest.nix
-            ./hosts/tempest.nix
+            ./hosts/tempest/default.nix
 
             home-manager.nixosModules.home-manager
             {

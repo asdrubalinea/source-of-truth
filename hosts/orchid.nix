@@ -14,6 +14,9 @@
     ../hardware/audio.nix
     # ../desktop/kde.nix
 
+    # Shared system modules
+    ../modules/nix.nix
+
     # ../services/syncthing.nix
 
     ../services/grafana
@@ -288,20 +291,6 @@
 
   # security.polkit.enable = true;
 
-  nix = {
-    package = pkgs.nixVersions.stable;
-    settings.trusted-users = [
-      "root"
-      "irene"
-    ];
-    settings = {
-      substituters = [ "https://hyprland.cachix.org" ];
-      trusted-public-keys = [ "hyprland.cachix.org-1:a7pgxzMz7+chwVL3/pzj6jIBMioiJM7ypFP8PwtkuGc=" ];
-    };
-    extraOptions = ''
-      experimental-features = nix-command flakes
-    '';
-  };
 
   programs.hyprland = {
     enable = true;

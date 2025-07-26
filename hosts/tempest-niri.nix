@@ -11,6 +11,7 @@
     ../hardware/audio.nix
     ../hardware/framework.nix
     ../modules/secure-boot.nix
+    ../modules/nix.nix
     # ../desktop/gnome.nix
     ../desktop/plasma.nix
 
@@ -235,27 +236,20 @@
   };
 
   # Nix Configuration
-  nix = {
-    package = pkgs.nixVersions.stable;
-    settings = {
-      trusted-users = [
-        "root"
-        "irene"
-      ];
-      substituters = [
-        "https://hyprland.cachix.org"
-        "https://cosmic.cachix.org/"
-        "https://niri.cachix.org"
-      ];
-      trusted-public-keys = [
-        "hyprland.cachix.org-1:a7pgxzMz7+chwVL3/pzj6jIBMioiJM7ypFP8PwtkuGc="
-        "cosmic.cachix.org-1:Dya9IyXD4xdBehWjrkPv6rtxpmMdRel02smYzA85dPE="
-        "niri.cachix.org-1:Wv0OmO7PsuocRKzfDoJ3mulSl7Z6oezYhGhR+3W2964="
-      ];
-    };
-    extraOptions = ''
-      experimental-features = nix-command flakes
-    '';
+  # Override shared Nix config to add niri-specific cache
+  nix.settings = {
+    substituters = [
+      "https://cache.nixos.org/"
+      "https://hyprland.cachix.org"
+      "https://cosmic.cachix.org/"
+      "https://niri.cachix.org"
+    ];
+    trusted-public-keys = [
+      "cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY="
+      "hyprland.cachix.org-1:a7pgxzMz7+chwVL3/pzj6jIBMioiJM7ypFP8PwtkuGc="
+      "cosmic.cachix.org-1:Dya9IyXD4xdBehWjrkPv6rtxpmMdRel02smYzA85dPE="
+      "niri.cachix.org-1:Wv0OmO7PsuocRKzfDoJ3mulSl7Z6oezYhGhR+3W2964="
+    ];
   };
 
   # Programs & Packages
