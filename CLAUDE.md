@@ -72,6 +72,10 @@ system-clean
 4. Update dependencies with `./update-flakes.sh`
 5. Clean up with `system-clean`
 
+## IMPORTANT: Configuration Application Policy
+
+**NEVER automatically apply NixOS configurations.** Always let the user run `nixos-rebuild` commands themselves. Claude should only edit configuration files and inform the user that they need to apply the changes manually.
+
 ## Important Patterns
 
 - Host configurations import from multiple modules (hardware/, services/, desktop/)

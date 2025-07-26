@@ -12,7 +12,7 @@
       "microcode.amd_sha_check=off"
       "amdgpu.dcdebugmask=0x12"
       "amd_pstate=active" # Enable modern AMD CPU power management
-      "usbcore.autosuspend=-1" # Disable USB autosuspend for reliability. Consider removing this
+      # "usbcore.autosuspend=-1" # Disable USB autosuspend for reliability. Consider removing this
     ];
 
     # KVM support for virtualization
