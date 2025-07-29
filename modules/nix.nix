@@ -6,20 +6,20 @@
 
     settings = {
       # Base trusted users - hosts can extend this list
-      trusted-users = lib.mkDefault [
+      trusted-users = [
         "root"
         "irene"
       ];
 
       # Common substituters for performance
-      substituters = lib.mkDefault [
+      substituters = [
         "https://cache.nixos.org/"
         "https://hyprland.cachix.org"
         "https://cosmic.cachix.org/"
       ];
 
       # Corresponding public keys
-      trusted-public-keys = lib.mkDefault [
+      trusted-public-keys = [
         "cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY="
         "hyprland.cachix.org-1:a7pgxzMz7+chwVL3/pzj6jIBMioiJM7ypFP8PwtkuGc="
         "cosmic.cachix.org-1:Dya9IyXD4xdBehWjrkPv6rtxpmMdRel02smYzA85dPE="
