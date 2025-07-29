@@ -42,7 +42,7 @@ in
         else if hostname == "tempest" then
           [
             "eDP-1, 2880x1920@120, 0x0, 2"
-            "DP-1, 3440x1440@75, 0x0, 1"
+            "DP-1, 3440x1440@100, 0x0, 1"
             # "DP-5, 3440x1440@75, 0x0, 1" # Samsung center
             # "DP-6, 2560x1440@60, 3440x0, 1" # BenQ right of Samsung
             # "DP-1, 2560x1440@144, 440x1440, 1" # BOE portable centered below Samsung
