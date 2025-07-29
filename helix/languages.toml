@@ -1,0 +1,16 @@
+[language-server.rust-analyzer.config.check]
+command = "clippy"
+
+[language-server.rust-analyzer.config.cargo]
+features = "all"
+
+[[language]]
+name = "rust"
+#ther rust language settings...
+language-servers = ["rust-analyzer"]
+
+[language-server.rust-analyzer]
+command = "rust-analyzer"
+# You might need additional args depending on your setup,
+# but often the default is sufficient when run from the dev shell.
+# args = ["--stdio"]

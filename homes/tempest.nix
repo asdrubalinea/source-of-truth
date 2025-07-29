@@ -10,6 +10,7 @@
 
     # Applications and tools
     ../desktop/zed-editor
+    ../desktop/helix.nix
     ../desktop/tmux.nix
     ../desktop/home-packages.nix
 
