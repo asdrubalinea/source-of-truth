@@ -46,6 +46,8 @@
       "/var/lib/prometheus2"
       "/var/lib/prometheus-node-exporter"
       "/var/lib/docker"
+
+      "/home/irene"
     ];
 
     # Individual files that need persistence
@@ -59,4 +61,6 @@
       "/etc/ssh/ssh_host_rsa_key.pub"
     ];
   };
+
+  programs.fuse.userAllowOther = true;
 }

@@ -23,7 +23,7 @@ in
     ../../modules/nix.nix
 
     # Services
-    ../../services/btrfs-snapshots.nix
+    # ../../services/btrfs-snapshots.nix
     ../../services/nix-cleanup.nix
 
     # Desktop environment
@@ -37,10 +37,9 @@ in
       enable = true;
       useRoutingFeatures = "client";
     };
-    gnome.gnome-keyring.enable = true;
+    # gnome.gnome-keyring.enable = true;
   };
 
-  # Localization
   time.timeZone = "Europe/Rome";
   i18n.defaultLocale = "en_US.UTF-8";
   console = {
@@ -112,7 +111,6 @@ in
       enableSSHSupport = true;
     };
     dconf.enable = true;
-    fish.enable = true;
   };
 
   # System Version

@@ -30,29 +30,29 @@
 
     # packages = [ ];
 
-    persistence."/persist/home/irene" = {
-      directories = [
-        "Downloads"
-        "Music"
-        "Pictures"
-        "Documents"
-        "Videos"
-        ".gnupg"
-        ".ssh"
-        ".local/share/keyrings"
-        ".local/share/direnv"
-        {
-          directory = ".local/share/Steam";
-          method = "symlink";
-        }
-      ];
-      files = [
-        ".claude.json" ".claude.json"
-        ".bash_history"
-        ".python_history" ".mysql_history"
-      ];
-      allowOther = true;
-    };
+    # persistence."/persist/home/irene" = {
+    #   directories = [
+    #     "Downloads"
+    #     "Music"
+    #     "Pictures"
+    #     "Documents"
+    #     "Videos"
+    #     ".gnupg"
+    #     ".ssh"
+    #     ".local/share/keyrings"
+    #     ".local/share/direnv"
+    #     {
+    #       directory = ".local/share/Steam";
+    #       method = "symlink";
+    #     }
+    #   ];
+    #   files = [
+    #     ".claude.json"
+    #     ".bash_history"
+    #     ".python_history" ".mysql_history"
+    #   ];
+    #   allowOther = true;
+    # };
   };
 
   programs = {
@@ -83,12 +83,12 @@
   };
 
   # Security services
-  services.gnome-keyring = {
-    enable = false;
-    components = [
-      "pkcs11"
-      "secrets"
-      "ssh"
-    ];
-  };
+  # services.gnome-keyring = {
+    # enable = false;
+    # components = [
+      # "pkcs11"
+      # "secrets"
+      # "ssh"
+    # ];
+  # };
 }
