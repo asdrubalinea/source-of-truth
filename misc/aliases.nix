@@ -6,6 +6,7 @@
     gita = "${pkgs.git}/bin/git add";
     gitd = "${pkgs.git}/bin/git diff";
     ls = "${pkgs.eza}/bin/exa";
+    cat = "${pkgs.bat}/bin/bat";
     # nv = "${pkgs.neovim}/bin/nvim";
     please = "${pkgs.doas}/bin/doas";
     neofetch = "${pkgs.hyfetch}/bin/hyfetch";
