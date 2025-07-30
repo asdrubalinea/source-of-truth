@@ -237,7 +237,6 @@
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
 
-  nixpkgs.config.allowUnfree = true;
 
   networking.hostName = "router";
   time.timeZone = "Europe/Rome";
