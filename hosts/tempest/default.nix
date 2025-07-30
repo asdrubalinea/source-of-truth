@@ -25,6 +25,7 @@ in
     # Services
     # ../../services/btrfs-snapshots.nix
     ../../services/nix-cleanup.nix
+    ../../services/grafana/default.nix
 
     # Desktop environment
     ../../rices/estradiol/system.nix
@@ -38,6 +39,14 @@ in
       useRoutingFeatures = "client";
     };
     # gnome.gnome-keyring.enable = true;
+    
+    # Monitoring stack optimized for laptop usage
+    monitoring = {
+      enable = true;
+      powerEfficient = true;
+      enableHardwareSensors = true;
+      enablePowertopExporter = true;
+    };
   };
 
   time.timeZone = "Europe/Rome";
