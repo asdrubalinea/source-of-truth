@@ -39,13 +39,11 @@ in
       useRoutingFeatures = "client";
     };
     # gnome.gnome-keyring.enable = true;
-    
-    # Monitoring stack optimized for laptop usage
+
+    # Grafana monitoring
     monitoring = {
-      enable = true;
+      enable = false;
       powerEfficient = true;
-      enableHardwareSensors = true;
-      enablePowertopExporter = true;
     };
   };
 
@@ -104,7 +102,6 @@ in
     sudo-rs.enable = true;
     pam.services.greetd.enableGnomeKeyring = true;
   };
-
 
   # System packages and programs
   environment.systemPackages = with pkgs; [
