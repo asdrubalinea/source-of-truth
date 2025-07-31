@@ -26,6 +26,7 @@ in
     # ../../services/btrfs-snapshots.nix
     ../../services/nix-cleanup.nix
     ../../services/grafana/default.nix
+    ../../services/syncthing.nix
 
     # Desktop environment
     ../../rices/estradiol/system.nix
