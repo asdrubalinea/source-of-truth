@@ -15,9 +15,29 @@ let
     fi
   '';
 
+  detectLidState = pkgs.writeScriptBin "hypr-detect-lid-state" ''
+    #!${pkgs.stdenv.shell}
+
+    # Check lid state from ACPI
+    LID_STATE_FILE="/proc/acpi/button/lid/LID0/state"
+    
+    if [[ -f "$LID_STATE_FILE" ]]; then
+      LID_STATE=$(cat "$LID_STATE_FILE" | grep -o "open\|closed")
+      
+      if [[ "$LID_STATE" == "closed" ]]; then
+        ${handleClamshell}/bin/hypr-handle-clamshell close
+      else
+        ${handleClamshell}/bin/hypr-handle-clamshell open
+      fi
+    else
+      # Fallback: if no lid state file, assume open (desktop behavior)
+      ${handleClamshell}/bin/hypr-handle-clamshell open
+    fi
+  '';
+
 in
 {
-  home.packages = [ handleClamshell ];
+  home.packages = [ handleClamshell detectLidState ];
 
   wayland.windowManager.hyprland = {
     enable = true;
@@ -69,6 +89,7 @@ in
       exec-once = [
         "${pkgs.waybar}/bin/waybar &"
         "${pkgs.swww}/bin/swww-daemon &"
+        "${detectLidState}/bin/hypr-detect-lid-state"
       ];
 
       exec = [

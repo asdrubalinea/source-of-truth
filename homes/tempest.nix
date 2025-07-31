@@ -85,11 +85,11 @@
 
   # Security services
   # services.gnome-keyring = {
-    # enable = false;
-    # components = [
-      # "pkcs11"
-      # "secrets"
-      # "ssh"
-    # ];
+  # enable = false;
+  # components = [
+  # "pkcs11"
+  # "secrets"
+  # "ssh"
+  # ];
   # };
 }

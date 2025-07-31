@@ -15,18 +15,6 @@ in
       description = "Enable power-efficient settings for laptop usage";
     };
 
-    enableHardwareSensors = mkOption {
-      type = types.bool;
-      default = false;
-      description = "Enable hardware sensor monitoring (lm_sensors)";
-    };
-
-    enablePowertopExporter = mkOption {
-      type = types.bool;
-      default = false;
-      description = "Enable powertop exporter for power consumption metrics";
-    };
-
     prometheusRetentionDays = mkOption {
       type = types.int;
       default = 7;
@@ -47,7 +35,7 @@ in
       settings = {
         server = {
           http_addr = "127.0.0.1";
-          http_port = 3000;
+          http_port = 3333;
         };
 
         # Power-efficient settings
@@ -97,78 +85,65 @@ in
         evaluation_interval = if cfg.powerEfficient then "60s" else "15s";
       };
 
-      scrapeConfigs = [
-        {
-          job_name = "node";
-          static_configs = [{
-            targets = [ "localhost:9902" ];
-          }];
-          # Longer scrape interval for power efficiency
-          scrape_interval = if cfg.powerEfficient then "120s" else null;
-        }
-      ] ++ optional (!cfg.powerEfficient) {
-        job_name = "systemd";
+      scrapeConfigs = [{
+        job_name = "node";
         static_configs = [{
-          targets = [ "localhost:9903" ];
+          targets = [ "localhost:9902" ];
         }];
+        scrape_interval = if cfg.powerEfficient then "120s" else null;
+      }];
+
+      # Node exporter with optimized collectors
+      exporters.node = {
+        enable = true;
+        port = 9902;
+        enabledCollectors =
+          if cfg.powerEfficient then [
+            # Essential collectors only
+            "cpu"
+            "cpufreq"
+            "loadavg"
+            "meminfo"
+            "filesystem"
+            "diskstats"
+            "netstat"
+            "netclass"
+            "powersupplyclass" # Battery monitoring
+            "thermal_zone" # Temperature monitoring
+            "time"
+            "uname"
+            "vmstat"
+          ] else [
+            # Full set of collectors
+            "cpu"
+            "cpufreq"
+            "diskstats"
+            "filesystem"
+            "hwmon"
+            "interrupts"
+            "loadavg"
+            "meminfo"
+            "netclass"
+            "netstat"
+            "powersupplyclass"
+            "pressure"
+            "processes"
+            "rapl"
+            "schedstat"
+            "softirqs"
+            "stat"
+            "systemd"
+            "textfile"
+            "thermal_zone"
+            "time"
+            "uname"
+            "vmstat"
+          ];
+
+        extraFlags = [
+          "--collector.cpu.info.bugs-include=^(meltdown|spectre|tsx_async_abort)$"
+        ] ++ optional cfg.powerEfficient "--collector.cpu.info";
       };
-    };
-
-    # Node exporter with optimized collectors
-    services.prometheus.exporters.node = {
-      enable = true;
-      port = 9902;
-      enabledCollectors = if cfg.powerEfficient then [
-        # Essential collectors only
-        "cpu"
-        "cpufreq"
-        "loadavg"
-        "meminfo"
-        "filesystem"
-        "diskstats"
-        "netstat"
-        "netclass"
-        "powersupplyclass"  # Battery monitoring
-        "thermal_zone"      # Temperature monitoring
-        "time"
-        "uname"
-        "vmstat"
-      ] else [
-        # Full set of collectors
-        "cpu"
-        "cpufreq"
-        "diskstats"
-        "filesystem"
-        "hwmon"
-        "interrupts"
-        "loadavg"
-        "meminfo"
-        "netclass"
-        "netstat"
-        "powersupplyclass"
-        "pressure"
-        "processes"
-        "rapl"
-        "schedstat"
-        "softirqs"
-        "stat"
-        "systemd"
-        "textfile"
-        "thermal_zone"
-        "time"
-        "uname"
-        "vmstat"
-      ];
-
-      extraFlags = [
-        "--collector.cpu.info.bugs-include=^(meltdown|spectre|tsx_async_abort)$"
-      ] ++ optional cfg.powerEfficient "--collector.cpu.info";
-    };
-
-    # Systemd exporter (disabled in power-efficient mode)
-    services.prometheus.exporters.systemd = mkIf (!cfg.powerEfficient) {
-      enable = true;
-      port = 9903;
     };
 
     # Hardware sensors exporter (optional)
@@ -179,19 +154,21 @@ in
     # The prometheus-powertop-exporter package is not available in nixpkgs
 
     # Ensure services restart on failure
-    systemd.services.grafana.serviceConfig = {
-      Restart = "on-failure";
-      RestartSec = "10s";
-      # Reduce resource usage
-      CPUQuota = mkIf cfg.powerEfficient "20%";
-      MemoryMax = mkIf cfg.powerEfficient "512M";
-    };
+    systemd.services = {
+      grafana.serviceConfig = {
+        Restart = "on-failure";
+        RestartSec = "10s";
+        # Reduce resource usage
+        CPUQuota = mkIf cfg.powerEfficient "20%";
+        MemoryMax = mkIf cfg.powerEfficient "512M";
+      };
 
-    systemd.services.prometheus.serviceConfig = {
-      RestartSec = "10s";
-      # Reduce resource usage
-      CPUQuota = mkIf cfg.powerEfficient "10%";
-      MemoryMax = mkIf cfg.powerEfficient "256M";
+      prometheus.serviceConfig = {
+        RestartSec = "10s";
+        # Reduce resource usage
+        CPUQuota = mkIf cfg.powerEfficient "10%";
+        MemoryMax = mkIf cfg.powerEfficient "256M";
+      };
     };
   };
 }
