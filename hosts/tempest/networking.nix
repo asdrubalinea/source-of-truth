@@ -19,6 +19,7 @@
       127.0.0.1 workspace0tcb.dscovr.test
       127.0.0.1 workspace2nrt.dscovr.test
       127.0.0.1 workspace6nrt.dscovr.test
+      127.0.0.1 alotofpeoplenrt.dscovr.test
     '';
   };
 
