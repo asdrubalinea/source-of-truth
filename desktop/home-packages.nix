@@ -149,6 +149,7 @@
 
     kdePackages.dolphin
     trunk.claude-code
+    # opencode
     nodejs
     # inputs.claude-desktop.packages.${system}.claude-desktop
     inputs.hn-tui-flake.packages.${pkgs.system}.hackernews-tui # hn command for Hacker News TUI
