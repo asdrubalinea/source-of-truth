@@ -5,6 +5,8 @@
 }:
 {
   imports = [
+    inputs.diapee-bot.nixosModules.x86_64-linux.default
+
     ../rices/estradiol/fonts.nix
 
     # ../options/passthrough.nix
@@ -22,8 +24,7 @@
     ../services/grafana
     # ../services/glance
     # ../services/caddy.nix
-
-    inputs.diapee-bot.nixosModules.x86_64-linux.default
+    ../services/syncthing.nix
   ];
 
   # vfio.enable = false;
@@ -127,7 +128,10 @@
     enable = true;
     dnssec = "true";
     domains = [ "~." ];
-    fallbackDns = [ "1.1.1.1" "1.0.0.1" ];
+    fallbackDns = [
+      "1.1.1.1"
+      "1.0.0.1"
+    ];
     extraConfig = ''
       DNS=45.90.28.0#526d23.dns.nextdns.io
       DNS=2a07:a8c0::#526d23.dns.nextdns.io
@@ -291,7 +295,6 @@
 
   # security.polkit.enable = true;
 
-
   programs.hyprland = {
     enable = true;
     package = inputs.hyprland.packages.${pkgs.system}.hyprland;
@@ -312,6 +315,34 @@
     127.0.0.1 workspace6nrt.dscovr.test
   '';
 
+  services.ncps = {
+    enable = true;
+    upstream = {
+      caches = [
+        "https://cache.nixos.org/"
+        "https://hyprland.cachix.org"
+        "https://cosmic.cachix.org/"
+      ];
+
+      publicKeys = [
+        "cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY="
+        "hyprland.cachix.org-1:a7pgxzMz7+chwVL3/pzj6jIBMioiJM7ypFP8PwtkuGc="
+        "cosmic.cachix.org-1:Dya9IyXD4xdBehWjrkPv6rtxpmMdRel02smYzA85dPE="
+      ];
+    };
+
+    server = {
+      addr = ":8501";
+    };
+
+    logLevel = "trace";
+
+    cache = {
+      maxSize = "500G";
+      hostName = "orchid.boreal-city.ts";
+    };
+  };
+
   services.diapee-bot = {
     enable = true;
 
@@ -319,9 +350,6 @@
       enable = true;
       port = 3000;
     };
-
-    # user = "irene";
-    # group = "irene";
 
     environmentFile = "/persist/diapee-bot/env";
     dataDir = "/persist/diapee-bot";
