@@ -39,7 +39,6 @@ in
     ../scripts/port-forward.nix
 
     ../misc/fish.nix
-    ../misc/aliases.nix
 
     ../desktop/home-packages.nix
   ];
