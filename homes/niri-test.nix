@@ -3,7 +3,6 @@
 {
   imports = [
     ../misc/fish.nix
-    ../misc/aliases.nix
     ../scripts/config-apply.nix
     ../scripts/system-clean.nix
     ../rices/niri/alacritty.nix
@@ -41,6 +40,14 @@
     starship = {
       enable = true;
       enableFishIntegration = true;
+      settings = {
+        format = "$hostname$all";
+        hostname = {
+          ssh_only = false;
+          format = "[$hostname]($style) ";
+          style = "bold green";
+        };
+      };
     };
 
     # Better directory listing

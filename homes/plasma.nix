@@ -16,7 +16,6 @@ in
     ../scripts/system-clean.nix
     ../scripts/config-apply.nix
     ../misc/fish.nix
-    ../misc/aliases.nix
 
     ../desktop/home-packages.nix
     ../scripts/port-forward.nix

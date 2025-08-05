@@ -9,7 +9,7 @@
         "irene"
       ];
 
-      substituters = 
+      substituters =
         if config.networking.hostName == "tempest" then [
           "http://orchid.boreal-city.ts.net:8501/"
         ]
@@ -20,7 +20,7 @@
         ];
 
       # Corresponding public keys
-      trusted-public-keys = 
+      trusted-public-keys =
         if config.networking.hostName == "tempest" then [
           "orchid:OonqQD3i5uEEi8h3zSxxp/uvVGR+Mum0/mbJohLJ09I="
         ]

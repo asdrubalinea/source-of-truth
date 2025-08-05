@@ -1,4 +1,4 @@
-{ inputs, ... }:
+{ inputs, pkgs, ... }:
 {
   imports = [
     # Desktop environment and theming
@@ -21,8 +21,8 @@
 
     # Shell and configuration
     ../misc/fish.nix
-    ../misc/aliases.nix
   ];
+
 
   home = {
     username = "irene";
@@ -69,7 +69,21 @@
     # Development tools
     nix-index = {
       enable = true;
+      # enableFishIntegration = true;
+    };
+
+    # Enhanced shell prompt
+    starship = {
+      enable = true;
       enableFishIntegration = true;
+      settings = {
+        format = "$hostname$all";
+        hostname = {
+          ssh_only = false;
+          format = "[$hostname]($style) ";
+          style = "bold green";
+        };
+      };
     };
 
     # vscode = {

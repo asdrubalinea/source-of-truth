@@ -7,7 +7,6 @@
     ../scripts/system-clean.nix
     ../scripts/config-apply.nix
     ../misc/fish.nix
-    ../misc/aliases.nix
 
     ../scripts/port-forward.nix
   ];

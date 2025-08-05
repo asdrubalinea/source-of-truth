@@ -1,6 +1,8 @@
-{ pkgs, ... }: {
+{ pkgs, inputs, ... }: {
   programs.fish = {
     enable = true;
+
+    shellAliases = import ./aliases.nix { inherit pkgs inputs; };
 
     interactiveShellInit = ''
       set fish_greeting # Disable greeting

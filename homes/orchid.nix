@@ -42,7 +42,6 @@ in
     ../scripts/port-forward.nix
 
     ../misc/fish.nix
-    ../misc/aliases.nix
     ../desktop/tmux.nix
 
     ../desktop/home-packages.nix
