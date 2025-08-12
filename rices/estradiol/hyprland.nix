@@ -64,8 +64,8 @@ in
             "eDP-1, 2880x1920@120, 0x0, 2"
             # "DP-1, 3440x1440@100, 0x0, 1"
 
-            "DP-6, 3440x1440@75, 0x0, 1" # Samsung center
-            "DP-5, 2560x1440@60, 3440x0, 1" # BenQ right of Samsung
+            "DP-5, 3440x1440@75, 0x0, 1" # Samsung center
+            "DP-6, 2560x1440@60, 3440x0, 1" # BenQ right of Samsung
             "DP-3, 2560x1440@144, 440x1440, 1" # BOE portable centered below Samsung
           ]
         else
@@ -219,6 +219,8 @@ in
         "$SUPER_SHIFT, B, exec, $browser"
         "$SUPER_SHIFT, S, exec, ${pkgs.grimblast}/bin/grimblast save area"
         "$SUPER_SHIFT, D, exec, ${pkgs.grimblast}/bin/grimblast save area | ${pkgs.wl-clipboard}/bin/wl-copy"
+
+        "$mainMod, W, exec, killall waybar; waybar"
 
         "$mainMod, F, fullscreen"
         "$mainMod, v, layoutmsg, preselect d"

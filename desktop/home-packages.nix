@@ -55,6 +55,8 @@
     # --- Development & Nix ---
     # aider-chat # AI coding assistant in the terminal
     alejandra # Nix code formatter
+    android-studio # Android IDE with SDK
+    httptoolkit
     cachix # Nix binary cache management
     devenv # Nix-based development environment manager
     devbox # Nix-based development environment manager
@@ -156,5 +158,7 @@
     thunderbird
     uv
     upower
+    python3
+    bun
   ];
 }

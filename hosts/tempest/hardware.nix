@@ -11,6 +11,9 @@
     enableRedistributableFirmware = true;
     firmware = [ pkgs.linux-firmware ];
 
+    # Enable CPU virtualization features
+    cpu.amd.sev.enable = true;
+
     # Graphics configuration for AMD GPU
     graphics = {
       enable = true;

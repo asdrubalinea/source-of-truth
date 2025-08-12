@@ -5,6 +5,7 @@
     hostName = "tempest";
     hostId = "856ff057";
     networkmanager.enable = true;
+    firewall.allowedTCPPorts = [ 8000 ];
 
     # Development environment hosts
     extraHosts = ''
