@@ -65,6 +65,7 @@ in
         "wheel"
         "networkmanager"
         "docker"
+        "kvm"
       ];
       inherit hashedPassword;
       shell = pkgs.fish;
@@ -118,6 +119,7 @@ in
       enableSSHSupport = true;
     };
     dconf.enable = true;
+    steam.enable = true;
   };
 
   # System Version

@@ -63,7 +63,7 @@
     git = {
       enable = true;
       userName = "Irene";
-      userEmail = "git@asdrubalini.xyz";
+      userEmail = "git@irene.foo";
     };
 
     # Development tools
