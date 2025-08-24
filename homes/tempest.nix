@@ -11,6 +11,7 @@
     # Applications and tools
     ../desktop/zed-editor
     ../desktop/helix.nix
+    # ../desktop/emacs
     ../desktop/tmux.nix
     ../desktop/home-packages.nix
 
@@ -84,6 +85,12 @@
           style = "bold green";
         };
       };
+    };
+
+    # Emacs editor
+    emacs = {
+      enable = true;
+      package = pkgs.emacsPgtkGcc;
     };
 
     # vscode = {
