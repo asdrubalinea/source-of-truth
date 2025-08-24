@@ -64,9 +64,9 @@ in
             "eDP-1, 2880x1920@120, 0x0, 2"
             # "DP-1, 3440x1440@100, 0x0, 1"
 
-            "DP-5, 3440x1440@75, 0x0, 1" # Samsung center
-            "DP-6, 2560x1440@60, 3440x0, 1" # BenQ right of Samsung
-            "DP-3, 2560x1440@144, 440x1440, 1" # BOE portable centered below Samsung
+            "desc:Samsung Electric Company S34J55x H4LT300008, 3440x1440@75, 0x0, 1" # Samsung center
+            "desc:BNQ BenQ GW2765 W6H00193019, 2560x1440@60, 3440x0, 1" # BenQ right of Samsung
+            "desc:BOE Display, 2560x1440@144, 440x1440, 1" # BOE portable centered below Samsung
           ]
         else
           null

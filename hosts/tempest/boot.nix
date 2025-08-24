@@ -34,6 +34,9 @@
       kernelModules = [
         "dm-snapshot" # LVM snapshots
         "amdgpu" # AMD GPU driver
+        "thunderbolt"
+        "xhci_pci"
+        "xhci_hcd"
       ];
 
       # Filesystem support for early boot
