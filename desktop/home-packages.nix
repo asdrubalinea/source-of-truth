@@ -96,7 +96,7 @@
     dbeaver-bin # Universal database tool
     # inputs.helix.packages.x86_64-linux.default
 
-    pkgs.trunk.helix
+    # pkgs.trunk.helix
 
     ffmpeg # Multimedia framework (often a dependency)
     inputs.zen-browser.packages.x86_64-linux.default # Zen Browser
