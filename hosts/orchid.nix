@@ -18,6 +18,7 @@
 
     # Shared system modules
     ../modules/nix.nix
+    ../modules/gaming.nix
 
     # ../services/syncthing.nix
 
@@ -218,6 +219,7 @@
       swtpm
       tpm2-tools
       git-crypt
+      ntfs3g
 
       vulkan-tools
       vulkan-loader
