@@ -162,6 +162,7 @@
         enableCryptodisk = true;
         configurationLimit = 16;
       };
+      timeout = 5;
     };
 
     loader.efi.canTouchEfiVariables = true;
