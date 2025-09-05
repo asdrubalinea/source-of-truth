@@ -47,10 +47,10 @@
 
     logind.lidSwitch = "suspend-then-hibernate";
     logind.lidSwitchExternalPower = "ignore";
-    logind.extraConfig = ''
-      HandlePowerKey=hibernate
-      HandleLidSwitchDocked=ignore
-    '';
+    logind.settings.Login = {
+      HandlePowerKey = "hibernate";
+      HandleLidSwitchDocked = "ignore";
+    };
 
     # Enable thermal management to prevent overheating
     thermald.enable = true;
