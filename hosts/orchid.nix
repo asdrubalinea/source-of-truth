@@ -245,6 +245,7 @@
     enable = true;
     useRoutingFeatures = "server";
     permitCertUid = "caddy";
+    extraSetFlags = ["--advertise-exit-node"];
   };
 
   services.ollama = {
