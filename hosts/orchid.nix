@@ -162,6 +162,7 @@
         enableCryptodisk = true;
         configurationLimit = 16;
       };
+      timeout = 5;
     };
 
     loader.efi.canTouchEfiVariables = true;
@@ -244,6 +245,7 @@
     enable = true;
     useRoutingFeatures = "server";
     permitCertUid = "caddy";
+    extraSetFlags = ["--advertise-exit-node"];
   };
 
   services.ollama = {
