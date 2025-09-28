@@ -11,7 +11,7 @@
 
       substituters =
         if config.networking.hostName == "tempest" then [
-          "http://orchid.boreal-city.ts.net:8501/"
+          # "http://orchid.boreal-city.ts.net:8501/"
         ]
         else [
           "https://cache.nixos.org/"

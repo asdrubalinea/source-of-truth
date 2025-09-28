@@ -151,6 +151,7 @@
 
     kdePackages.dolphin
     trunk.claude-code
+    trunk.codex
     # opencode
     nodejs
     # inputs.claude-desktop.packages.${system}.claude-desktop
@@ -160,5 +161,6 @@
     upower
     python3
     bun
+    burpsuite
   ];
 }

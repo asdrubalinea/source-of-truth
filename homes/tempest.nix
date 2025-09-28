@@ -104,6 +104,12 @@
     # };
   };
 
+  services.wlsunset = {
+    enable = true;
+    latitude = 45.4642;    # Milan, Italy
+    longitude = 9.1900;
+  };
+
   # Security services
   # services.gnome-keyring = {
   # enable = false;
