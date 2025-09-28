@@ -45,11 +45,11 @@
       extraRemotes = [ "lvfs-testing" ];
     };
 
-    logind.lidSwitch = "suspend-then-hibernate";
-    logind.lidSwitchExternalPower = "ignore";
     logind.settings.Login = {
-      HandlePowerKey = "hibernate";
+      HandleLidSwitch = "suspend-then-hibernate";
       HandleLidSwitchDocked = "ignore";
+      HandleLidSwitchExternalPower = "ignore";
+      HandlePowerKey = "hibernate";
     };
 
     # Enable thermal management to prevent overheating

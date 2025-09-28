@@ -199,7 +199,7 @@ in
       };
 
       gestures = {
-        workspace_swipe = true;
+        # workspace_swipe = true;
       };
 
       # Keybindings
