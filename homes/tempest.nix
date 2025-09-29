@@ -90,7 +90,7 @@
     # Emacs editor
     emacs = {
       enable = true;
-      package = pkgs.emacsPgtkGcc;
+      package = pkgs.emacs-pgtk;
     };
 
     # vscode = {
