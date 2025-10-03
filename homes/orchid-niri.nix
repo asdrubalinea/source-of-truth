@@ -63,7 +63,7 @@ in
 
   programs.emacs = {
     enable = false;
-    package = pkgs.emacsPgtkGcc;
+    package = pkgs.emacs-pgtk;
   };
 
   programs.git = {
