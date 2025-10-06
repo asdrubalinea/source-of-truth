@@ -30,7 +30,7 @@
     homeDirectory = "/home/irene";
     stateVersion = "23.05";
 
-    # packages = [ ];
+    packages = [ (pkgs.callPackage ../packages/cider-2.nix { })];
 
     # persistence."/persist/home/irene" = {
     #   directories = [
