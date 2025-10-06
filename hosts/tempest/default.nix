@@ -30,6 +30,7 @@ in
 
     # Desktop environment
     ../../rices/estradiol/system.nix
+    ../../rices/niri/system.nix
   ];
 
   # System services
