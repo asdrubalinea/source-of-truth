@@ -7,6 +7,7 @@
     inputs.impermanence.homeManagerModules.impermanence
 
     ../rices/estradiol
+    ../rices/niri
 
     # Applications and tools
     ../desktop/zed-editor
