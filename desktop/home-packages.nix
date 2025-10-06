@@ -140,7 +140,7 @@
     libheif
     imagemagick
 
-    (pkgs.callPackage ../packages/cider-2.nix { })
+    # (pkgs.callPackage ../packages/cider-2.nix { })
     # rnix-lsp
     # inputs.mm.packages.x86_64-linux.default
 
