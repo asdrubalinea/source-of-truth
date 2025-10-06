@@ -7,7 +7,7 @@
       # Enhanced graphics packages for gaming
       extraPackages = with pkgs; [
         # AMD Vulkan drivers
-        amdvlk
+        # amdvlk
         vulkan-loader
         vulkan-validation-layers
         vulkan-extension-layer
@@ -27,7 +27,7 @@
       
       # 32-bit graphics packages for Wine compatibility
       extraPackages32 = with pkgs.pkgsi686Linux; [
-        amdvlk
+        # amdvlk
         vulkan-loader
         mesa
         libva
