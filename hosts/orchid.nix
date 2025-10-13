@@ -6,6 +6,7 @@
 {
   imports = [
     inputs.diapee-bot.nixosModules.x86_64-linux.default
+    inputs.tribunale-scrape.nixosModules.x86_64-linux.default
 
     ../rices/estradiol/fonts.nix
 
@@ -343,6 +344,15 @@
       RUST_LOG = "info,diapee_bot=debug";
       DIAPEEBOT_MODEL = "google/gemini-2.5-pro";
       DIAPEEBOT_PRONOUNS = "she/her";
+    };
+  };
+
+  services.tribunale-scrape = {
+    enable = true;
+    environmentFile = "/persist/tribunale-scrape/env";
+    dataDir = "/persist/tribunale-scrape";
+    extraEnvironment = {
+      RUST_LOG = "info,tribunale_scrape=debug";
     };
   };
 
