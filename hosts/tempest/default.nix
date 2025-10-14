@@ -29,7 +29,7 @@ in
     ../../services/syncthing.nix
 
     # Desktop environment
-    ../../rices/estradiol/system.nix
+    # ../../rices/estradiol/system.nix
     ../../rices/niri/system.nix
   ];
 
