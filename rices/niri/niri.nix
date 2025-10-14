@@ -1,71 +1,77 @@
-{ pkgs
-, inputs
-, hostname
-, ...
+{
+  pkgs,
+  inputs,
+  hostname,
+  ...
 }:
 
 {
   services.kanshi = {
-    enable = hostname == "orchid" || hostname == "tempest";
-    profiles =
-      if hostname == "orchid" then {
-        "orchid-docked" = {
+    enable = true;
+    settings = [
+      {
+        profile = {
+          name = "docked";
           outputs = [
             {
-              criteria = "HDMI-A-1";
-              mode = "3440x1440@75";
-              position = "0,0";
-              scale = 1.0;
-            }
-            {
-              criteria = "DP-2";
-              mode = "2560x1440@60";
-              position = "3440,0";
-              scale = 1.0;
-            }
-          ];
-        };
-      } else if hostname == "tempest" then {
-        "tempest-docked" = {
-          outputs = [
-            {
-              criteria = "eDP-1";
-              mode = "2880x1920@120";
-              position = "0,0";
-              scale = 2.0;
-            }
-            {
-              criteria = "desc:Samsung Electric Company S34J55x H4LT300008";
-              mode = "3440x1440@75";
-              position = "0,0";
-              scale = 1.0;
-            }
-            {
-              criteria = "desc:BNQ BenQ GW2765 W6H00193019";
-              mode = "2560x1440@60";
-              position = "3440,0";
-              scale = 1.0;
-            }
-            {
-              criteria = "desc:BOE Display";
-              mode = "2560x1440@144";
+              criteria = "BOE Display Unknown";
+              mode = "2560x1440";
               position = "440,1440";
               scale = 1.0;
             }
-          ];
-        };
 
-        "tempest-mobile" = {
-          outputs = [
+            {
+              criteria = "PNP(BNQ) BenQ GW2765 W6H00193019";
+              mode = "2560x1440";
+              position = "3440,0";
+              scale = 1.0;
+            }
+
+            {
+              criteria = "Samsung Electric Company S34J55x H4LT300008";
+              mode = "3440x1440";
+              position = "0,0";
+              scale = 1.0;
+            }
+
             {
               criteria = "eDP-1";
-              mode = "2880x1920@120";
-              position = "0,0";
-              scale = 2.0;
+              status = "disable";
             }
           ];
         };
-      } else { };
+      }
+
+      {
+        profile = {
+          name = "mobile";
+          outputs = [
+            {
+              criteria = "eDP-1";
+              mode = "2880x1920";
+              position = "0,0";
+              scale = 1.5;
+            }
+            {
+              criteria = "*";
+              status = "disable";
+            }
+          ];
+        };
+      }
+
+      {
+        profile = {
+          name = "fallback";
+          outputs = [
+            {
+              criteria = "*";
+              status = "enable";
+            }
+          ];
+        };
+      }
+    ];
   };
 
   programs.niri.settings = {
@@ -99,24 +105,36 @@
 
     # Animations (conditional on host)
     animations =
-       if hostname == "orchid" then {
-         slowdown = 1.0;
-       } else {
-         slowdown = 0.0;
-       };
+      if hostname == "orchid" then
+        {
+          slowdown = 1.0;
+        }
+      else
+        {
+          slowdown = 0.7;
+        };
 
     # Spawn commands at startup
     spawn-at-startup = [
       { command = [ "${pkgs.waybar}/bin/waybar" ]; }
       { command = [ "${pkgs.swww}/bin/swww-daemon" ]; }
-      { command = [ "${pkgs.swww}/bin/swww" "img" "~/.wallpaper" ]; }
+      {
+        command = [
+          "${pkgs.swww}/bin/swww"
+          "img"
+          "~/.wallpaper"
+        ];
+      }
     ];
 
     # Keybindings
     binds = with pkgs; {
       # Terminal and launcher
       "Mod+Return".action.spawn = [ "${pkgs.alacritty}/bin/alacritty" ];
-      "Mod+Space".action.spawn = [ "${pkgs.tofi}/bin/tofi-drun" "--drun-launch=true" ];
+      "Mod+Space".action.spawn = [
+        "${pkgs.tofi}/bin/tofi-drun"
+        "--drun-launch=true"
+      ];
 
       # Window management
       "Mod+Q".action.close-window = { };
@@ -166,21 +184,49 @@
       "Mod+Shift+0".action.move-window-to-workspace = 10;
 
       # Media keys
-      "XF86AudioRaiseVolume".action.spawn = [ "${pamixer}/bin/pamixer" "-i" "5" ];
-      "XF86AudioLowerVolume".action.spawn = [ "${pamixer}/bin/pamixer" "-d" "5" ];
-      "XF86AudioMute".action.spawn = [ "${pamixer}/bin/pamixer" "--toggle-mute" ];
-      "XF86MonBrightnessUp".action.spawn = [ "${brightnessctl}/bin/brightnessctl" "set" "5%+" ];
-      "XF86MonBrightnessDown".action.spawn = [ "${brightnessctl}/bin/brightnessctl" "set" "5%-" ];
+      "XF86AudioRaiseVolume".action.spawn = [
+        "${pamixer}/bin/pamixer"
+        "-i"
+        "5"
+      ];
+      "XF86AudioLowerVolume".action.spawn = [
+        "${pamixer}/bin/pamixer"
+        "-d"
+        "5"
+      ];
+      "XF86AudioMute".action.spawn = [
+        "${pamixer}/bin/pamixer"
+        "--toggle-mute"
+      ];
+      "XF86MonBrightnessUp".action.spawn = [
+        "${brightnessctl}/bin/brightnessctl"
+        "set"
+        "5%+"
+      ];
+      "XF86MonBrightnessDown".action.spawn = [
+        "${brightnessctl}/bin/brightnessctl"
+        "set"
+        "5%-"
+      ];
 
       # Media control
-      "XF86AudioPlay".action.spawn = [ "${playerctl}/bin/playerctl" "play-pause" ];
-      "XF86AudioNext".action.spawn = [ "${playerctl}/bin/playerctl" "next" ];
-      "XF86AudioPrev".action.spawn = [ "${playerctl}/bin/playerctl" "previous" ];
+      "XF86AudioPlay".action.spawn = [
+        "${playerctl}/bin/playerctl"
+        "play-pause"
+      ];
+      "XF86AudioNext".action.spawn = [
+        "${playerctl}/bin/playerctl"
+        "next"
+      ];
+      "XF86AudioPrev".action.spawn = [
+        "${playerctl}/bin/playerctl"
+        "previous"
+      ];
 
       # Toggle floating (niri alternative - use center-column)
       # "Mod+Shift+Space".action.center-column = { };
 
-      "Mod+E".action.toggle-overview = {};
+      "Mod+E".action.toggle-overview = { };
 
       # Quit niri
       "Mod+Shift+E".action.quit.skip-confirmation = true;
