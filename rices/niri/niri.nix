@@ -42,6 +42,9 @@
           scale = 2.0;
           position = { x = 0; y = 0; };
         };
+        "DP-1" = {
+          mode = { width = 3440; height = 1440; refresh = 100.0; };
+        };
       } else { };
 
     # Layout configuration
@@ -50,15 +53,15 @@
     };
 
     # Prefer no client-side decorations
-    prefer-no-csd = true;
+    # prefer-no-csd = true;
 
     # Animations (conditional on host)
-    animations =
-      if hostname == "orchid" then {
-        slowdown = 1.0;
-      } else {
-        slowdown = 0.0;
-      };
+    # animations =
+    #   if hostname == "orchid" then {
+    #     slowdown = 1.0;
+    #   } else {
+    #     slowdown = 0.0;
+    #   };
 
     # Spawn commands at startup
     spawn-at-startup = [
@@ -70,7 +73,7 @@
     # Keybindings
     binds = with pkgs; {
       # Terminal and launcher
-      "Mod+Return".action.spawn = [ "${alacritty}/bin/alacritty" ];
+      "Mod+Return".action.spawn = [ "${wezterm}/bin/wezerm" ];
       "Mod+Space".action.spawn = [ "${tofi}/bin/tofi-drun" "--drun-launch=true" ];
 
       # Window management
@@ -133,7 +136,9 @@
       "XF86AudioPrev".action.spawn = [ "${playerctl}/bin/playerctl" "previous" ];
 
       # Toggle floating (niri alternative - use center-column)
-      "Mod+Shift+Space".action.center-column = { };
+      # "Mod+Shift+Space".action.center-column = { };
+
+      "Mod+E".action.toggle-overview = {};
 
       # Quit niri
       "Mod+Shift+E".action.quit.skip-confirmation = true;
