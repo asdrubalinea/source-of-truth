@@ -75,10 +75,6 @@
       url = "github:nix-community/emacs-overlay";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    nixvim = {
-      url = "github:asdrubalinea/nixvim";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
     diapee-bot = {
       url = "github:asdrubalinea/diapee-bot/main";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -100,23 +96,24 @@
   };
 
   outputs =
-    inputs@{ nixpkgs
-    , nixpkgs-stable
-    , nixpkgs-trunk
-    , nixpkgs-custom
-    , home-manager
-    , hyprland
-    , niri
-    , vscode-server
-    , disko
-    , impermanence
-    , stylix
-    , sops-nix
-    , nixos-hardware
-    , emacs-overlay
-    , lanzaboote
-    , ucodenix
-    , ...
+    inputs@{
+      nixpkgs,
+      nixpkgs-stable,
+      nixpkgs-trunk,
+      nixpkgs-custom,
+      home-manager,
+      hyprland,
+      niri,
+      vscode-server,
+      disko,
+      impermanence,
+      stylix,
+      sops-nix,
+      nixos-hardware,
+      emacs-overlay,
+      lanzaboote,
+      ucodenix,
+      ...
     }:
     let
       system = "x86_64-linux";
