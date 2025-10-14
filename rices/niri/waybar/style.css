@@ -32,6 +32,7 @@ tooltip {
 #backlight,
 #temperature,
 #custom-fans,
+#custom-power,
 #network {
   margin: 6px 6px 6px 0px;
   padding: 2px 8px;
@@ -90,6 +91,7 @@ tooltip {
 #language,
 #backlight,
 #temperature,
+#custom-power,
 #pulseaudio {
   background-color: #191724; /* was @base */
   border: 2px solid #403d52; /* was @overlay */
