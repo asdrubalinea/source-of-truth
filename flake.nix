@@ -146,6 +146,7 @@
         overlays = [
           multiChannelOverlay
           emacs-overlay.overlay
+          niri.overlays.niri
         ];
       };
 
@@ -166,17 +167,6 @@
             ./hosts/orchid.nix
           ];
         };
-
-        # live = nixpkgs.lib.nixosSystem {
-        #   inherit system pkgs;
-        #   specialArgs = { inherit inputs; };
-
-        #   modules = [
-        #     (nixpkgs + "/nixos/modules/installer/cd-dvd/installation-cd-minimal.nix")
-
-        #     ./hosts/live.nix
-        #   ];
-        # };
 
         tempest = lib.nixosSystem {
           inherit system pkgs;
@@ -210,76 +200,6 @@
                 users = {
                   irene = import ./homes/tempest.nix;
                   # plasma = import ./homes/plasma.nix;
-                };
-              };
-            }
-          ];
-        };
-
-        # vm = lib.nixosSystem {
-        #   inherit system pkgs;
-        #   specialArgs = {
-        #     inherit inputs;
-        #     hostname = "vm";
-        #   };
-
-        #   modules = [
-        #     disko.nixosModules.disko
-        #     impermanence.nixosModules.impermanence
-
-        #     ./disks/vm.nix
-        #     ./hosts/vm.nix
-
-        #     home-manager.nixosModules.home-manager
-        #     {
-        #       home-manager = {
-        #         extraSpecialArgs = {
-        #           inherit inputs;
-        #           hostname = "vm";
-        #         };
-        #         backupFileExtension = "backup";
-        #         useGlobalPkgs = true;
-        #         useUserPackages = true;
-
-        #         users = {
-        #           irene = import ./homes/vm.nix;
-        #         };
-        #       };
-        #     }
-        #   ];
-        # };
-
-        niri-test = lib.nixosSystem {
-          inherit system pkgs;
-          specialArgs = {
-            inherit inputs;
-            hostname = "niri-test";
-          };
-
-          modules = [
-            disko.nixosModules.disko
-            niri.nixosModules.niri
-            stylix.nixosModules.stylix
-
-            ./disks/niri-test.nix
-            ./hosts/niri-test.nix
-
-            home-manager.nixosModules.home-manager
-            {
-              home-manager = {
-                extraSpecialArgs = {
-                  inherit inputs;
-                  hostname = "niri-test";
-                };
-                backupFileExtension = "backup";
-                useGlobalPkgs = true;
-                useUserPackages = true;
-                sharedModules = [
-                  stylix.homeModules.stylix
-                ];
-
-                users = {
-                  irene = import ./homes/niri-test.nix;
                 };
               };
             }

@@ -25,13 +25,12 @@
     ../misc/fish.nix
   ];
 
-
   home = {
     username = "irene";
     homeDirectory = "/home/irene";
     stateVersion = "23.05";
 
-    packages = [ (pkgs.callPackage ../packages/cider-2.nix { })];
+    packages = [ (pkgs.callPackage ../packages/cider-2.nix { }) ];
 
     # persistence."/persist/home/irene" = {
     #   directories = [
@@ -107,7 +106,7 @@
 
   services.wlsunset = {
     enable = true;
-    latitude = 45.4642;    # Milan, Italy
+    latitude = 45.4642; # Milan, Italy
     longitude = 9.1900;
   };
 
