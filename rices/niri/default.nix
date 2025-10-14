@@ -1,11 +1,11 @@
 { ... }:
 {
   imports = [
-    # ./alacritty.nix
+    ./alacritty.nix
     ./niri.nix
-    # ./waybar
-    # ./wallpaper
-    # ./tofi.nix
-    # ./stylix.nix
+    ./waybar
+    ./wallpaper
+    ./tofi.nix
+    ./stylix.nix
   ];
 }

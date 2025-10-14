@@ -1,4 +1,4 @@
-{ lib, pkgs, ... }: {
+{ lib, hostname, ... }: {
   programs.waybar = {
     enable = true;
     settings = lib.importJSON ./config.jsonc;
