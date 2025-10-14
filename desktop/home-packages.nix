@@ -61,7 +61,6 @@
     devenv # Nix-based development environment manager
     devbox # Nix-based development environment manager
     gitui # Terminal UI for Git
-    inputs.nixvim.packages.${pkgs.system}.default # Neovim configuration
     just # Command runner
     lazygit # Simple terminal UI for Git
     lua # Lua programming language
