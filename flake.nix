@@ -79,6 +79,10 @@
       url = "github:asdrubalinea/diapee-bot/main";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    tribunale-scrape = {
+      url = "github:asdrubalinea/tribunale-scrape";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     helix = {
       url = "github:usagi-flow/evil-helix";
       inputs.nixpkgs.follows = "nixpkgs";
