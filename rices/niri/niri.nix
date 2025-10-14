@@ -5,6 +5,69 @@
 }:
 
 {
+  services.kanshi = {
+    enable = hostname == "orchid" || hostname == "tempest";
+    profiles =
+      if hostname == "orchid" then {
+        "orchid-docked" = {
+          outputs = [
+            {
+              criteria = "HDMI-A-1";
+              mode = "3440x1440@75";
+              position = "0,0";
+              scale = 1.0;
+            }
+            {
+              criteria = "DP-2";
+              mode = "2560x1440@60";
+              position = "3440,0";
+              scale = 1.0;
+            }
+          ];
+        };
+      } else if hostname == "tempest" then {
+        "tempest-docked" = {
+          outputs = [
+            {
+              criteria = "eDP-1";
+              mode = "2880x1920@120";
+              position = "0,0";
+              scale = 2.0;
+            }
+            {
+              criteria = "desc:Samsung Electric Company S34J55x H4LT300008";
+              mode = "3440x1440@75";
+              position = "0,0";
+              scale = 1.0;
+            }
+            {
+              criteria = "desc:BNQ BenQ GW2765 W6H00193019";
+              mode = "2560x1440@60";
+              position = "3440,0";
+              scale = 1.0;
+            }
+            {
+              criteria = "desc:BOE Display";
+              mode = "2560x1440@144";
+              position = "440,1440";
+              scale = 1.0;
+            }
+          ];
+        };
+
+        "tempest-mobile" = {
+          outputs = [
+            {
+              criteria = "eDP-1";
+              mode = "2880x1920@120";
+              position = "0,0";
+              scale = 2.0;
+            }
+          ];
+        };
+      } else { };
+  };
+
   programs.niri.settings = {
     # Input configuration
     input = {
@@ -22,27 +85,9 @@
 
       mouse = {
         natural-scroll = false;
+        "accel-speed" = -0.4;
       };
     };
-
-    # Output/Monitor configuration
-    outputs =
-      if hostname == "orchid" then {
-        "HDMI-A-1" = {
-          mode = { width = 3440; height = 1440; refresh = 75.0; };
-          position = { x = 0; y = 0; };
-        };
-        "DP-2" = {
-          mode = { width = 2560; height = 1440; refresh = 60.0; };
-          position = { x = 3440; y = 0; };
-        };
-      } else if hostname == "tempest" then {
-        "eDP-1" = {
-          mode = { width = 2880; height = 1920; refresh = 120.0; };
-          scale = 2.0;
-          position = { x = 0; y = 0; };
-        };
-      } else { };
 
     # Layout configuration
     layout = {
@@ -50,15 +95,15 @@
     };
 
     # Prefer no client-side decorations
-    prefer-no-csd = true;
+    # prefer-no-csd = true;
 
     # Animations (conditional on host)
     animations =
-      if hostname == "orchid" then {
-        slowdown = 1.0;
-      } else {
-        slowdown = 0.0;
-      };
+       if hostname == "orchid" then {
+         slowdown = 1.0;
+       } else {
+         slowdown = 0.0;
+       };
 
     # Spawn commands at startup
     spawn-at-startup = [
@@ -70,8 +115,8 @@
     # Keybindings
     binds = with pkgs; {
       # Terminal and launcher
-      "Mod+Return".action.spawn = [ "${alacritty}/bin/alacritty" ];
-      "Mod+Space".action.spawn = [ "${tofi}/bin/tofi-drun" "--drun-launch=true" ];
+      "Mod+Return".action.spawn = [ "${pkgs.alacritty}/bin/alacritty" ];
+      "Mod+Space".action.spawn = [ "${pkgs.tofi}/bin/tofi-drun" "--drun-launch=true" ];
 
       # Window management
       "Mod+Q".action.close-window = { };
@@ -133,7 +178,9 @@
       "XF86AudioPrev".action.spawn = [ "${playerctl}/bin/playerctl" "previous" ];
 
       # Toggle floating (niri alternative - use center-column)
-      "Mod+Shift+Space".action.center-column = { };
+      # "Mod+Shift+Space".action.center-column = { };
+
+      "Mod+E".action.toggle-overview = {};
 
       # Quit niri
       "Mod+Shift+E".action.quit.skip-confirmation = true;

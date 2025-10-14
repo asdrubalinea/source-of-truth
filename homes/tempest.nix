@@ -6,7 +6,8 @@
     inputs.stylix.homeModules.stylix
     inputs.impermanence.homeManagerModules.impermanence
 
-    ../rices/estradiol
+    # ../rices/estradiol
+    ../rices/niri
 
     # Applications and tools
     ../desktop/zed-editor
