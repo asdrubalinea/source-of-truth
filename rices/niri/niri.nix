@@ -1,7 +1,8 @@
-{ pkgs
-, inputs
-, hostname
-, ...
+{
+  pkgs,
+  inputs,
+  hostname,
+  ...
 }:
 
 {
@@ -36,11 +37,11 @@
 
       # Layout configuration
       layout = {
-        gaps = 5;
+        gaps = 16;
       };
 
       # Prefer no client-side decorations
-      # prefer-no-csd = true;
+      prefer-no-csd = true;
 
       # Animations (conditional on host)
       animations =
@@ -78,6 +79,7 @@
         # Window management
         "Mod+Q".action.close-window = { };
         "Mod+F".action.fullscreen-window = { };
+        "Mod+M".action.maximize-column = { };
 
         # Focus movement
         "Mod+Left".action.focus-column-left = { };
@@ -163,7 +165,7 @@
         ];
 
         # Toggle floating (niri alternative - use center-column)
-        # "Mod+Shift+Space".action.center-column = { };
+        "Mod+Shift+Space".action.center-column = { };
 
         "Mod+E".action.toggle-overview = { };
 
