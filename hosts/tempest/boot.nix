@@ -55,4 +55,6 @@
       };
     };
   };
+
+  systemd.coredump.enable = false;
 }
