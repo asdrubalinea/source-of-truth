@@ -352,7 +352,7 @@
     environmentFile = "/persist/tribunale-scrape/env";
     dataDir = "/persist/tribunale-scrape";
     extraEnvironment = {
-      RUST_LOG = "info,tribunale_scrape=debug";
+      RUST_LOG = "info";
     };
   };
 
