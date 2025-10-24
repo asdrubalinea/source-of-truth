@@ -24,6 +24,9 @@
       127.0.0.1 workspace4tcb.dscovr.test
       127.0.0.1 workspace2tcb.dscovr.test
       127.0.0.1 workspace1basenrt.dscovr.test
+      127.0.0.1 workspace1tcb.dscovr.test
+      127.0.0.1 alotofpeopletcb.dscovr.test
+      127.0.0.1 workspace5tcb.dscovr.test
     '';
   };
 }

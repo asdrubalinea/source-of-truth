@@ -1,22 +1,40 @@
-{
-  pkgs,
-  inputs,
-  hostname,
-  ...
+{ pkgs
+, inputs
+, ...
 }:
-
+let
+  windowRules = import ./window-rules.nix;
+in
 {
   programs.niri = {
     package = pkgs.niri-unstable;
     settings = {
       environment = {
+        CLUTTER_BACKEND = "wayland";
+        GDK_BACKEND = "wayland,x11";
+        MOZ_ENABLE_WAYLAND = "1";
+        NIXOS_OZONE_WL = "1";
+        QT_QPA_PLATFORM = "wayland";
+        QT_WAYLAND_DISABLE_WINDOWDECORATION = "1";
         ELECTRON_OZONE_PLATFORM_HINT = "wayland";
+        XDG_SESSION_TYPE = "wayland";
+        XDG_CURRENT_DESKTOP = "niri";
+      };
+
+      hotkey-overlay = {
+        skip-at-startup = true;
       };
 
       xwayland-satellite.enable = true;
 
+      gestures = {
+        hot-corners.enable = false;
+      };
+
       # Input configuration
       input = {
+        focus-follows-mouse.enable = true;
+
         keyboard = {
           xkb = {
             layout = "us";
@@ -35,24 +53,37 @@
         };
       };
 
-      # Layout configuration
       layout = {
-        gaps = 16;
+        background-color = "#00000000";
+
+        focus-ring = {
+          enable = true;
+          width = 3;
+          active = {
+            color = "#A8AEFF";
+          };
+          inactive = {
+            color = "#505050";
+          };
+        };
+
+        gaps = 6;
+
+        struts = {
+          left = 20;
+          right = 20;
+          top = 20;
+          bottom = 20;
+        };
       };
 
       # Prefer no client-side decorations
       prefer-no-csd = true;
 
       # Animations (conditional on host)
-      animations =
-        if hostname == "orchid" then
-          {
-            slowdown = 1.0;
-          }
-        else
-          {
-            slowdown = 0.7;
-          };
+      animations = {
+        slowdown = 0.7;
+      };
 
       # Spawn commands at startup
       spawn-at-startup = [
@@ -172,7 +203,13 @@
         # Quit niri
         "Mod+Shift+E".action.quit.skip-confirmation = true;
       };
+      window-rules = windowRules;
+      layer-rules = [
+        {
+          matches = [{ namespace = "^swww$"; }];
+          place-within-backdrop = true;
+        }
+      ];
     };
-
   };
 }
