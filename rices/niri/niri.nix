@@ -45,6 +45,8 @@ in
         touchpad = {
           tap = true;
           natural-scroll = true;
+          accel-speed = 0.3;
+          scroll-factor = 0.8;
         };
 
         mouse = {
@@ -54,7 +56,7 @@ in
       };
 
       layout = {
-        background-color = "#00000000";
+        background-color = "transparent";
 
         focus-ring = {
           enable = true;

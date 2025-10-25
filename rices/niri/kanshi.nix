@@ -62,14 +62,14 @@
           outputs = [
             {
               criteria = "eDP-1";
-              mode = "2880x1920";
+              mode = "2880x1920@120.000";
               position = "0,0";
               scale = 1.5;
             }
-            # {
-            #   criteria = "*";
-            #   status = "disable";
-            # }
+            {
+              criteria = "*";
+              status = "disable";
+             }
           ];
         };
       }
