@@ -1,6 +1,7 @@
-{ pkgs
-, inputs
-, ...
+{
+  pkgs,
+  inputs,
+  ...
 }:
 let
   windowRules = import ./window-rules.nix;
@@ -51,12 +52,19 @@ in
 
         mouse = {
           natural-scroll = false;
-          "accel-speed" = -0.4;
+          accel-speed = -0.4;
         };
       };
 
       layout = {
         background-color = "transparent";
+
+        default-column-width.proportion = 0.5;
+
+        shadow = {
+          enable = true;
+          softness = 30;
+        };
 
         focus-ring = {
           enable = true;
@@ -69,14 +77,14 @@ in
           };
         };
 
-        gaps = 6;
+        gaps = 16;
 
-        struts = {
-          left = 20;
-          right = 20;
-          top = 20;
-          bottom = 20;
-        };
+        # struts = {
+        #   left = 20;
+        #   right = 20;
+        #   top = 20;
+        #   bottom = 20;
+        # };
       };
 
       # Prefer no client-side decorations
@@ -108,6 +116,9 @@ in
           "${pkgs.tofi}/bin/tofi-drun"
           "--drun-launch=true"
         ];
+
+        "Mod+B".action.spawn = [ "${pkgs.blueman}/bin/blueman-manager" ];
+        "Mod+P".action.spawn = [ "${pkgs.pavucontrol}/bin/pavucontrol" ];
 
         # Window management
         "Mod+Q".action.close-window = { };
@@ -208,7 +219,7 @@ in
       window-rules = windowRules;
       layer-rules = [
         {
-          matches = [{ namespace = "^swww$"; }];
+          matches = [ { namespace = "^swww$"; } ];
           place-within-backdrop = true;
         }
       ];

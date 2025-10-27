@@ -64,12 +64,8 @@
               criteria = "eDP-1";
               mode = "2880x1920@120.000";
               position = "0,0";
-              scale = 1.5;
+              # scale = 2.0; # Niri only accepts integer scaling on this panel
             }
-            {
-              criteria = "*";
-              status = "disable";
-             }
           ];
         };
       }
