@@ -18,8 +18,10 @@
 
     git = {
       enable = true;
-      userName = "Irene";
-      userEmail = "git@asdrubalini.xyz";
+      settings.user = {
+        name = "Irene";
+        email = "git@asdrubalini.xyz";
+      };
       extraConfig = {
         init.defaultBranch = "main";
         pull.rebase = true;

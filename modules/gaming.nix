@@ -278,12 +278,12 @@
     enableDefaultPackages = true;
     packages = with pkgs; [
       corefonts
-      vistafonts
+      vista-fonts
       liberation_ttf
       dejavu_fonts
       noto-fonts
       noto-fonts-cjk-sans
-      noto-fonts-emoji
+      noto-fonts-color-emoji
     ];
 
     fontconfig = {

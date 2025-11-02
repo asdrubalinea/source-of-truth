@@ -22,7 +22,7 @@
         # Additional video acceleration
         libva
         libvdpau-va-gl
-        vaapiVdpau
+        libva-vdpau-driver
       ];
 
       # 32-bit graphics packages for Wine compatibility
@@ -32,7 +32,7 @@
         mesa
         libva
         libvdpau-va-gl
-        vaapiVdpau
+        libva-vdpau-driver
       ];
     };
   };

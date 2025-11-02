@@ -134,33 +134,42 @@
         };
       };
 
-      pkgs = import nixpkgs {
-        inherit system;
+      overlays = [
+        multiChannelOverlay
+        emacs-overlay.overlay
+        niri.overlays.niri
+      ];
 
-        config = {
-          allowUnfree = true;
-          rocmSupport = true;
-        };
-
-        overlays = [
-          multiChannelOverlay
-          emacs-overlay.overlay
-          niri.overlays.niri
-        ];
+      nixpkgsConfig = {
+        allowUnfree = true;
+        rocmSupport = true;
       };
+
+      mkPkgs = args:
+        import nixpkgs ({
+          inherit system;
+          config = nixpkgsConfig;
+          overlays = overlays;
+        } // args);
 
       lib = nixpkgs.lib;
     in
     {
       nixosConfigurations = {
         "orchid" = lib.nixosSystem {
-          inherit system pkgs;
+          inherit system;
           specialArgs = {
             inherit inputs;
             hostname = "orchid";
           };
 
           modules = [
+            {
+              nixpkgs = {
+                config = nixpkgsConfig;
+                overlays = overlays;
+              };
+            }
             niri.nixosModules.niri
 
             ./hosts/orchid.nix
@@ -168,13 +177,19 @@
         };
 
         tempest = lib.nixosSystem {
-          inherit system pkgs;
+          inherit system;
           specialArgs = {
             inherit inputs;
             hostname = "tempest";
           };
 
           modules = [
+            {
+              nixpkgs = {
+                config = nixpkgsConfig;
+                overlays = overlays;
+              };
+            }
             disko.nixosModules.disko
             impermanence.nixosModules.impermanence
             nixos-hardware.nixosModules.framework-amd-ai-300-series
@@ -193,8 +208,16 @@
                   hostname = "tempest";
                 };
                 backupFileExtension = "backup";
-                useGlobalPkgs = true;
+                useGlobalPkgs = false;
                 useUserPackages = true;
+                sharedModules = [
+                  {
+                    nixpkgs = {
+                      config = nixpkgsConfig;
+                      overlays = overlays;
+                    };
+                  }
+                ];
 
                 users = {
                   irene = import ./homes/tempest.nix;
@@ -208,7 +231,7 @@
 
       homeConfigurations = {
         "irene@orchid" = home-manager.lib.homeManagerConfiguration {
-          inherit pkgs;
+          pkgs = mkPkgs { };
           extraSpecialArgs = {
             inherit inputs;
             hostname = "orchid";

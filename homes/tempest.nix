@@ -63,8 +63,10 @@
     # Version control
     git = {
       enable = true;
-      userName = "Irene";
-      userEmail = "git@irene.foo";
+      settings.user = {
+        name = "Irene";
+        email = "git@irene.foo";
+      };
     };
 
     # Development tools

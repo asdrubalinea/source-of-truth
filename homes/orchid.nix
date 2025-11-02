@@ -77,8 +77,10 @@ in
 
   programs.git = {
     enable = true;
-    userName = "Irene";
-    userEmail = "git@asdrubalini.xyz";
+    settings.user = {
+      name = "Irene";
+      email = "git@asdrubalini.xyz";
+    };
   };
 
   home.packages = with pkgs; [

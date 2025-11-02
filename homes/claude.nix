@@ -34,8 +34,10 @@
 
     git = {
       enable = true;
-      userName = "Claude";
-      userEmail = "claude@localhost";
+      settings.user = {
+        name = "Claude";
+        email = "claude@localhost";
+      };
     };
 
     nix-index = {
