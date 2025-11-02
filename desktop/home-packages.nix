@@ -8,7 +8,7 @@
     fastfetch # System information fetcher
     feh # Lightweight image viewer
     file # Determine file type
-    glxinfo # OpenGL information utility
+    mesa-demos # OpenGL information utility
     gnupg # Encryption and signing
     htop # Interactive process viewer
     hyfetch # System information fetcher (neofetch fork)
