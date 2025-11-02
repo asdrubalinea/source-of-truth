@@ -160,6 +160,6 @@
     upower
     python3
     bun
-    pkgs.trunk.burpsuite
+    pkgs.burpsuite
   ];
 }

@@ -126,18 +126,6 @@
     };
   }
   {
-    matches = [{ app-id = "pavucontrol"; }];
-    open-floating = true;
-  }
-  {
-    matches = [{ app-id = "pavucontrol-qt"; }];
-    open-floating = true;
-  }
-  {
-    matches = [{ app-id = "com.saivert.pwvucontrol"; }];
-    open-floating = true;
-  }
-  {
     matches = [{ app-id = "io.github.fsobolev.Cavalier"; }];
     open-floating = true;
   }
@@ -167,10 +155,6 @@
   }
   {
     matches = [{ app-id = "nm-connection-editor"; }];
-    open-floating = true;
-  }
-  {
-    matches = [{ app-id = "blueman-manager"; }];
     open-floating = true;
   }
   {
