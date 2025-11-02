@@ -299,6 +299,9 @@
     127.0.0.1 workspace2nrt.dscovr.test
     127.0.0.1 workspace5nrt.dscovr.test
     127.0.0.1 workspace6nrt.dscovr.test
+    127.0.0.1 workspace1tcb.dscovr.test
+    127.0.0.1 workspace1basenrt.dscovr.test
+    127.0.0.1 workspace2tcb.dscovr.test
   '';
 
   services.ncps = {
