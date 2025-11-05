@@ -55,7 +55,7 @@
     # --- Development & Nix ---
     # aider-chat # AI coding assistant in the terminal
     alejandra # Nix code formatter
-    android-studio # Android IDE with SDK
+    # android-studio # Android IDE with SDK
     httptoolkit
     cachix # Nix binary cache management
     devenv # Nix-based development environment manager
