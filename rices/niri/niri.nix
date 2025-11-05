@@ -77,7 +77,7 @@ in
           };
         };
 
-        gaps = 16;
+        gaps = 8;
 
         # struts = {
         #   left = 20;
