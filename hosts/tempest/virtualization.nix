@@ -21,7 +21,7 @@
     spiceUSBRedirection.enable = true;
 
     # Docker containers
-    docker.enable = true;
+    docker.enable = false; # nix btw
   };
 
   # Ensure KVM kernel modules are available
