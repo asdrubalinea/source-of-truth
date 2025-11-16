@@ -43,7 +43,7 @@ in
     enable = true;
 
     plugins = [
-      # inputs.hyprtasking.packages.${pkgs.system}.hyprtasking
+      # inputs.hyprtasking.packages.${pkgs.stdenv.hostPlatform.system}.hyprtasking
     ];
 
     # so that we use the version from NixOS

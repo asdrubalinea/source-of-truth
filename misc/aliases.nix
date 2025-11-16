@@ -10,5 +10,5 @@
   please = "${pkgs.doas}/bin/doas";
   neofetch = "${pkgs.hyfetch}/bin/hyfetch";
   fetch = "${pkgs.hyfetch}/bin/hyfetch";
-  hn = "${inputs.hn-tui-flake.packages.${pkgs.system}.hackernews-tui}/bin/hackernews_tui";
+  hn = "${inputs.hn-tui-flake.packages.${pkgs.stdenv.hostPlatform.system}.hackernews-tui}/bin/hackernews_tui";
 }
