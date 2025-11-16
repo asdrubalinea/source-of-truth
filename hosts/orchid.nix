@@ -11,7 +11,7 @@
     ../rices/estradiol/fonts.nix
 
     # ../options/passthrough.nix
-    ../hardware/rocm.nix
+    # ../hardware/rocm.nix
     ../hardware/bluetooth.nix
     ../hardware/zfs.nix
     ../hardware/audio.nix

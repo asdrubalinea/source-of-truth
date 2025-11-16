@@ -142,7 +142,7 @@
 
       nixpkgsConfig = {
         allowUnfree = true;
-        rocmSupport = true;
+        # rocmSupport = true;
       };
 
       mkPkgs = args:
