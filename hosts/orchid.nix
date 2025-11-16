@@ -209,7 +209,7 @@
       vulkan-validation-layers
     ]
     ++ [
-      # inputs.rose-pine-hyprcursor.packages.${pkgs.system}.default
+      # inputs.rose-pine-hyprcursor.packages.${pkgs.stdenv.hostPlatform.system}.default
     ];
 
   programs.fish.enable = true;
@@ -283,7 +283,7 @@
 
   programs.hyprland = {
     enable = true;
-    package = inputs.hyprland.packages.${pkgs.system}.hyprland;
+    package = inputs.hyprland.packages.${pkgs.stdenv.hostPlatform.system}.hyprland;
   };
 
   # networking.firewall.allowedUDPPorts = [ ]

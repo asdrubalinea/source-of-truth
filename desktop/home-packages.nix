@@ -6,7 +6,7 @@
     coreutils # Basic utilities (ls, cp, mv, etc.)
     dool # Resource statistics tool (dstat replacement)
     fastfetch # System information fetcher
-    feh # Lightweight image viewer
+    # feh # Lightweight image viewer
     file # Determine file type
     mesa-demos # OpenGL information utility
     gnupg # Encryption and signing
@@ -16,6 +16,7 @@
     ntfs3g # NTFS filesystem driver
     nvtopPackages.amd # AMD GPU monitoring
     onefetch # Git repository information fetcher
+    jujustsu
     openssl # Cryptography toolkit
     pciutils # PCI utilities (lspci)
     powertop # Power consumption monitoring
@@ -154,7 +155,7 @@
     # opencode
     nodejs
     # inputs.claude-desktop.packages.${system}.claude-desktop
-    inputs.hn-tui-flake.packages.${pkgs.system}.hackernews-tui # hn command for Hacker News TUI
+    inputs.hn-tui-flake.packages.${pkgs.stdenv.hostPlatform.system}.hackernews-tui # hn command for Hacker News TUI
     thunderbird
     uv
     upower
