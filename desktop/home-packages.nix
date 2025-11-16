@@ -16,7 +16,8 @@
     ntfs3g # NTFS filesystem driver
     nvtopPackages.amd # AMD GPU monitoring
     onefetch # Git repository information fetcher
-    jujustsu
+    jujutsu
+    lazyjj
     openssl # Cryptography toolkit
     pciutils # PCI utilities (lspci)
     powertop # Power consumption monitoring
