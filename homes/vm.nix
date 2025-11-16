@@ -110,7 +110,7 @@
   # CLI development packages
   home.packages = with pkgs; [
     # Neovim configuration
-    inputs.nixvim.packages.${pkgs.system}.default
+    inputs.nixvim.packages.${pkgs.stdenv.hostPlatform.system}.default
 
     # Core development tools
     htop
