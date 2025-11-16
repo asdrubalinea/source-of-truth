@@ -91,7 +91,7 @@
 
     # Emacs editor
     emacs = {
-      enable = true;
+      enable = false;
       package = pkgs.emacs-pgtk;
     };
 
