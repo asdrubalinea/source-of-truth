@@ -119,17 +119,17 @@
 
       multiChannelOverlay = final: prev: {
         stable = import nixpkgs-stable {
-          system = final.system;
+          system = final.stdenv.hostPlatform.system;
           config = final.config;
         };
 
         trunk = import nixpkgs-trunk {
-          system = final.system;
+          system = final.stdenv.hostPlatform.system;
           config = final.config;
         };
 
         custom = import nixpkgs-custom {
-          system = final.system;
+          system = final.stdenv.hostPlatform.system;
           config = final.config;
         };
       };
