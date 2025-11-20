@@ -8,7 +8,7 @@
     fastfetch # System information fetcher
     # feh # Lightweight image viewer
     file # Determine file type
-    mesa-demos # OpenGL information utility
+    # mesa-demos # OpenGL information utility
     gnupg # Encryption and signing
     htop # Interactive process viewer
     hyfetch # System information fetcher (neofetch fork)
@@ -24,7 +24,9 @@
     sbctl # UEFI Secure Boot key management
     smartmontools # Disk health monitoring (smartctl)
     usbutils # USB utilities (lsusb)
-    yek # System monitoring tool (check description if needed)
+    yek # System monitoring tool
+    nautilus
+    nnn
 
     # --- File Management & Text Processing ---
     bat # Cat clone with syntax highlighting
@@ -150,7 +152,7 @@
     asciinema
     # ladybird
 
-    kdePackages.dolphin
+    # kdePackages.dolphin
     trunk.claude-code
     trunk.codex
     # opencode
