@@ -111,7 +111,7 @@
     nemo # File manager
     obs-studio # Streaming and recording software
     obsidian # Note-taking application
-    onlyoffice-desktopeditors # Office suite
+    # onlyoffice-desktopeditors # Office suite
     pavucontrol # PulseAudio volume control
     # prismlauncher # MultiMC/PolyMC fork for Minecraft
     seahorse # GPG/SSH key manager GUI
