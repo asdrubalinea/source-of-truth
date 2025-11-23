@@ -22,8 +22,10 @@
     TLP_ENABLE = 1;
 
     # ---------- CPU Governor ----------
-    CPU_SCALING_GOVERNOR_ON_BAT = "powersave";
-    CPU_SCALING_GOVERNOR_ON_AC = "performance";
+    CPU_SCALING_GOVERNOR_ON_BAT = "schedutil";
+    CPU_SCALING_GOVERNOR_ON_AC = "schedutil";
+    CPU_DRIVER_OPMODE_ON_BAT = "guided";
+    CPU_DRIVER_OPMODE_ON_AC = "guided";
 
     # ---------- CPU Energy Policy (EPP) ----------
     CPU_ENERGY_PERF_POLICY_ON_BAT = "power";
@@ -39,7 +41,7 @@
 
     # ---------- PCIe ASPM ----------
     PCIE_ASPM_ON_BAT = "powersave";
-    PCIE_ASPM_ON_AC = "performance";
+    PCIE_ASPM_ON_AC = "default";
 
     # ---------- USB Autosuspend ----------
     USB_AUTOSUSPEND = 1;
@@ -51,6 +53,10 @@
     # ---------- WLAN Power Saving ----------
     WIFI_PWR_ON_BAT = 5;
     WIFI_PWR_ON_AC = 1;
+
+    # ---------- Audio Power Saving ----------
+    SOUND_POWER_SAVE_ON_BAT = 1;
+    SOUND_POWER_SAVE_ON_AC = 1;
 
     # Enable runtime power management for GPU
     RUNTIME_PM_DRIVER_BLACKLIST = "";
