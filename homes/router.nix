@@ -5,7 +5,7 @@ let
     #!${pkgs.stdenv.shell}
     pushd /etc/nixos/source-of-truth
 
-    home-manager switch --flake '.#giovanni-router'
+    home-manager switch --flake '.#irene-router'
 
     popd
   '';

@@ -108,10 +108,15 @@ in
 
   # System packages and programs
   environment.systemPackages = with pkgs; [
-    neovim
     curl
     git
+    helix
+    neovim
   ];
+
+  environment.variables = {
+    EDITOR = "${pkgs.helix}/bin/hx";
+  };
 
   programs = {
     mtr.enable = true;
