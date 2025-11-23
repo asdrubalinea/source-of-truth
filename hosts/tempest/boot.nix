@@ -10,8 +10,8 @@
     # Kernel parameters for AMD CPU/GPU optimization
     kernelParams = [
       "microcode.amd_sha_check=off"
-      "amdgpu.dcdebugmask=0x12"
-      "amd_pstate=active" # Enable modern AMD CPU power management
+      "amd_pstate=guided" # Prefer guided AMD P-state for better efficiency on Ryzen AI
+      "mem_sleep_default=deep" # Default to deepest available suspend state
       # "usbcore.autosuspend=-1" # Disable USB autosuspend for reliability. Consider removing this
     ];
 

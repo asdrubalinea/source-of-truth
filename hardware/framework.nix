@@ -59,10 +59,10 @@
     fstrim.enable = true;
   };
 
-  # Power Management Daemon (PPD) - Framework's recommended approach
-  services.power-profiles-daemon.enable = true;
-  # Explicitly disable conflicting daemons
-  services.tlp.enable = false;
+  # TLP is configured in ./framework-tlp-advanced.nix; keep PPD off to avoid overlap
+  services.power-profiles-daemon.enable = false;
+  services.tlp.enable = true;
 
-  services.auto-cpufreq.enable = true;
+  # Leave CPU scaling to TLP to avoid duelling tuners
+  services.auto-cpufreq.enable = false;
 }
