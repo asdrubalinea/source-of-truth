@@ -1,13 +1,13 @@
 { pkgs, ... }:
 {
   # Virtualization configuration for development
-  programs.virt-manager.enable = true;
+  programs.virt-manager.enable = false;
   users.groups.libvirtd.members = [ "irene" ];
 
   virtualisation = {
     # QEMU/KVM virtualization
     libvirtd = {
-      enable = true;
+      enable = false;
       qemu = {
         package = pkgs.qemu_kvm;
         runAsRoot = false;
