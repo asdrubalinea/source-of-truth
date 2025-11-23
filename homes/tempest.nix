@@ -57,6 +57,10 @@
     # };
   };
 
+  home.sessionVariables = {
+    EDITOR = "${pkgs.helix}/bin/hx";
+  };
+
   programs = {
     home-manager.enable = true;
 

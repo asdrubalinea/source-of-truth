@@ -57,6 +57,10 @@ in
     stateVersion = "23.05";
   };
 
+  home.sessionVariables = {
+    EDITOR = "${pkgs.helix}/bin/hx";
+  };
+
   # programs.nushell.enable = true;
   # services.vscode-server.enable = true;
   # services.vscode-server.enableFHS = true;

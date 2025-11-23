@@ -199,6 +199,7 @@
     [
       neovim
       git
+      helix
       swtpm
       tpm2-tools
       git-crypt
@@ -211,6 +212,9 @@
     ++ [
       # inputs.rose-pine-hyprcursor.packages.${pkgs.stdenv.hostPlatform.system}.default
     ];
+  environment.variables = {
+    EDITOR = "${pkgs.helix}/bin/hx";
+  };
 
   programs.fish.enable = true;
   programs.mosh.enable = true;

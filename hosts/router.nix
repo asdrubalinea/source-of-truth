@@ -252,7 +252,7 @@
     mutableUsers = false;
     extraUsers.root.hashedPassword = (import ../passwords).password;
 
-    users.giovanni = {
+    users.irene = {
       isNormalUser = true;
       extraGroups = [ "wheel" ];
       hashedPassword = (import ../passwords).password;
@@ -281,7 +281,7 @@
   services.qemuGuest.enable = true;
   programs.mosh.enable = true;
 
-  users.users."giovanni".openssh.authorizedKeys.keys =
+  users.users."irene".openssh.authorizedKeys.keys =
     [
       (import ../ssh-keys/the-hydra.nix).key
       (import ../ssh-keys/proxmox.nix).key
