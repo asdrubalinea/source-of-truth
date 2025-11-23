@@ -1,7 +1,8 @@
-{ inputs
-, lib
-, pkgs
-, ...
+{
+  inputs,
+  lib,
+  pkgs,
+  ...
 }:
 {
   imports = [
@@ -175,7 +176,6 @@
         "render"
         "video"
       ];
-      openssh.authorizedKeys.keys = [ (import ../ssh-keys/looking-glass.nix).key ];
       hashedPassword = (import ../passwords).password;
       shell = pkgs.fish;
     };
