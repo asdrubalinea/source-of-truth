@@ -29,7 +29,7 @@
 
     # ---------- CPU Energy Policy (EPP) ----------
     CPU_ENERGY_PERF_POLICY_ON_BAT = "power";
-    CPU_ENERGY_PERF_POLICY_ON_AC = "performance";
+    CPU_ENERGY_PERF_POLICY_ON_AC = "balance_performance";
 
     # ---------- Turbo Boost Control ----------
     CPU_BOOST_ON_BAT = 0;
@@ -37,7 +37,7 @@
 
     # ---------- Platform Profile ----------
     PLATFORM_PROFILE_ON_BAT = "low-power";
-    PLATFORM_PROFILE_ON_AC = "performance";
+    PLATFORM_PROFILE_ON_AC = "balanced";
 
     # ---------- PCIe ASPM ----------
     PCIE_ASPM_ON_BAT = "powersave";
@@ -48,7 +48,7 @@
 
     # ---------- Runtime Power Management ----------
     RUNTIME_PM_ON_BAT = "auto";
-    RUNTIME_PM_ON_AC = "on";
+    RUNTIME_PM_ON_AC = "auto";
 
     # ---------- WLAN Power Saving ----------
     WIFI_PWR_ON_BAT = 5;
