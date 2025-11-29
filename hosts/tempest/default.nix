@@ -125,7 +125,6 @@ in
       enableSSHSupport = true;
     };
     dconf.enable = true;
-    steam.enable = true;
   };
 
   # System Version
