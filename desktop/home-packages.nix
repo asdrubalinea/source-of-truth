@@ -27,6 +27,7 @@
     yek # System monitoring tool
     nautilus
     nnn
+    lm_sensors
 
     # --- File Management & Text Processing ---
     bat # Cat clone with syntax highlighting
