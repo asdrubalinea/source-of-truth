@@ -34,7 +34,7 @@ in
 
     ../rices/estradiol
 
-    ../desktop/zed-editor
+    # ../desktop/zed-editor
     ../desktop/helix.nix
     # ../desktop/emacs
 
