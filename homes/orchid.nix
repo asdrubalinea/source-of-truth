@@ -45,7 +45,7 @@ in
     ../desktop/tmux.nix
 
     ../desktop/home-packages.nix
-    ../desktop/orchid-gaming-packages.nix
+    # ../desktop/orchid-gaming-packages.nix
   ];
 
   # Let Home Manager install and manage itself.

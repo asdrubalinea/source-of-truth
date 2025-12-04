@@ -20,7 +20,7 @@
 
     # Shared system modules
     ../modules/nix.nix
-    ../modules/gaming.nix
+    # ../modules/gaming.nix
 
     # ../services/syncthing.nix
 
