@@ -5,7 +5,7 @@
     hostName = "tempest";
     hostId = "856ff057";
     networkmanager.enable = true;
-    firewall.allowedTCPPorts = [ 8000 ];
+    firewall.allowedTCPPorts = [ 8000 5201 ];
 
     # Development environment hosts
     extraHosts = ''
@@ -27,6 +27,7 @@
       127.0.0.1 workspace1tcb.dscovr.test
       127.0.0.1 alotofpeopletcb.dscovr.test
       127.0.0.1 workspace5tcb.dscovr.test
+      127.0.0.1 workspace-turco-meccanico-dominio.dscovr.test
     '';
   };
 }

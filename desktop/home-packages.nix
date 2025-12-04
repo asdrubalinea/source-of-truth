@@ -28,6 +28,8 @@
     nautilus
     nnn
     lm_sensors
+    nmap
+    restic
 
     # --- File Management & Text Processing ---
     bat # Cat clone with syntax highlighting
