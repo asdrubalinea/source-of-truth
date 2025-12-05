@@ -2,7 +2,7 @@
 {
   boot = {
     # Use recent kernel for Framework hardware support
-    kernelPackages = pkgs.linuxPackages_6_17;
+    kernelPackages = pkgs.stable.linuxPackages_6_17;
 
     # Hibernation support
     resumeDevice = "/dev/mapper/pool-swap";
@@ -20,7 +20,10 @@
 
     # Early boot configuration
     initrd = {
-      systemd.enable = true;
+      systemd = {
+        enable = true;
+        package = pkgs.stable.systemd;
+      };
 
       # Hardware modules needed for boot
       availableKernelModules = [
@@ -54,6 +57,18 @@
         efiSysMountPoint = "/boot/efi";
       };
     };
+  };
+
+  services.kmscon = {
+    enable = true;        # use kmscon instead of gettys on VTs
+    hwRender = true;      # optional: GPU rendering (can help performance)
+    extraConfig = ''
+      font-name=Fira Code
+      font-size=16
+      xkb-layout=us
+      # xkb-variant=
+      # xkb-options=caps:escape
+    '';
   };
 
   systemd.coredump.enable = false;
