@@ -24,9 +24,9 @@
 
     # ../services/syncthing.nix
 
-    ../services/grafana
+    # ../services/grafana
     # ../services/glance
-    # ../services/caddy.nix
+    ../services/caddy
     ../services/syncthing.nix
   ];
 
