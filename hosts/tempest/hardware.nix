@@ -9,7 +9,7 @@
     cpu.amd.updateMicrocode = lib.mkDefault config.hardware.enableRedistributableFirmware;
     enableAllFirmware = true;
     enableRedistributableFirmware = true;
-    firmware = [ pkgs.linux-firmware ];
+    firmware = [ pkgs.stable.linux-firmware ];
 
     # Enable CPU virtualization features
     cpu.amd.sev.enable = true;
