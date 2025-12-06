@@ -12,6 +12,7 @@ in
     ./persistence.nix
     ./networking.nix
     ./virtualization.nix
+    ./thermal-logger.nix
 
     # Shared hardware modules
     ../../hardware/bluetooth.nix
