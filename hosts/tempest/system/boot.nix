@@ -59,17 +59,5 @@
     };
   };
 
-  services.kmscon = {
-    enable = true;        # use kmscon instead of gettys on VTs
-    hwRender = true;      # optional: GPU rendering (can help performance)
-    extraConfig = ''
-      font-name=Fira Code
-      font-size=16
-      xkb-layout=us
-      # xkb-variant=
-      # xkb-options=caps:escape
-    '';
-  };
-
   systemd.coredump.enable = false;
 }
