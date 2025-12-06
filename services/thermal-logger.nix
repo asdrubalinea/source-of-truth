@@ -4,7 +4,7 @@ let
   thermalLogger = pkgs.writeShellApplication {
     name = "thermal-logger";
     runtimeInputs = [ pkgs.coreutils pkgs.gawk ];
-    text = builtins.readFile ../../scripts/thermal-logger.sh;
+    text = builtins.readFile ../scripts/thermal-logger.sh;
   };
   logPath = "/var/log/thermal-logger.csv";
 in

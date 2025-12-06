@@ -23,7 +23,4 @@
     # Docker containers
     docker.enable = false; # nix btw
   };
-
-  # Ensure KVM kernel modules are available
-  boot.kernelModules = [ "kvm-amd" ];
 }
