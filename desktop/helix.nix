@@ -12,6 +12,10 @@
         bufferline = "always";
         cursorline = true;
 
+        lsp = {
+          display-inlay-hints = true;
+        };
+
         cursor-shape = {
           insert = "bar";
           normal = "block";
