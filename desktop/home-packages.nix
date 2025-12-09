@@ -156,7 +156,7 @@
     # ladybird
 
     # kdePackages.dolphin
-    trunk.claude-code
+    # trunk.claude-code
     trunk.codex
     # opencode
     nodejs

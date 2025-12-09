@@ -1,4 +1,4 @@
-{ config, pkgs, ... }:
+{ pkgs, ... }:
 {
   services.displayManager.gdm.enable = true;
   services.desktopManager.gnome.enable = true;
@@ -8,7 +8,7 @@
     evince
     # file-roller
     geary
-    gnome-disk-utility
+    # gnome-disk-utility
     # seahorse
     # sushi
     # sysprof
@@ -22,7 +22,7 @@
     # gnome-color-manager
     # gnome-control-center
     # gnome-shell-extensions
-    gnome-tour # GNOME Shell detects the .desktop file on first log-in.
+    # gnome-tour # GNOME Shell detects the .desktop file on first log-in.
     gnome-user-docs
     # glib # for gsettings program
     # gnome-menus
@@ -35,7 +35,7 @@
     gnome-text-editor
     gnome-calculator
     gnome-calendar
-    gnome-characters
+    # gnome-characters
     # gnome-clocks
     gnome-console
     gnome-contacts
@@ -47,7 +47,7 @@
     gnome-weather
     # loupe
     # nautilus
-    gnome-connections
+    # gnome-connections
     simple-scan
     snapshot
     totem

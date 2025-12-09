@@ -2,6 +2,7 @@
 {
   nix = {
     package = pkgs.nixVersions.stable;
+    nixPath = [ "nixpkgs=flake:nixpkgs" ];
 
     settings = {
       trusted-users = [
