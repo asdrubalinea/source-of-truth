@@ -1,21 +1,16 @@
 { pkgs, ... }:
 {
-  # Virtualization configuration for development
-  programs.virt-manager.enable = false;
+  programs.virt-manager.enable = true;
   users.groups.libvirtd.members = [ "irene" ];
 
   virtualisation = {
     # QEMU/KVM virtualization
     libvirtd = {
-      enable = false;
+      enable = true;
       qemu = {
         package = pkgs.qemu_kvm;
         runAsRoot = false;
         swtpm.enable = true;
-        # ovmf = {
-        #  enable = true;
-        #  packages = [ pkgs.OVMFFull.fd ];
-        #};
       };
     };
     spiceUSBRedirection.enable = true;

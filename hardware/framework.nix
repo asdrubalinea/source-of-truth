@@ -6,8 +6,8 @@
 
   # Install Framework-specific tools for hardware monitoring
   environment.systemPackages = with pkgs; [
-    fw-ectool # Framework EC tool for hardware control and monitoring
-    framework-tool # Framework laptop management tool (if available)
+    fw-ectool
+    framework-tool
   ];
 
   systemd.services = {
@@ -33,7 +33,7 @@
         Type = "oneshot";
         RemainAfterExit = true;
 
-        ExecStart = "${pkgs.brightnessctl}/bin/brightnessctl set 30%";
+        ExecStart = "${pkgs.brightnessctl}/bin/brightnessctl set 42%";
       };
     };
   };

@@ -32,6 +32,6 @@
   # Hardware-specific services
   services = {
     xserver.videoDrivers = [ "amdgpu" ];
-    hardware.bolt.enable = true; # Thunderbolt support for Framework laptop
+    hardware.bolt.enable = true; # Thunderbolt 4 support
   };
 }

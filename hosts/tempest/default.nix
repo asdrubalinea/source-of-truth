@@ -37,6 +37,7 @@
 
     # Desktop environment
     # ../../rices/estradiol/system.nix
+    # ../../desktop/gnome.nix
     ../../rices/niri/system.nix
   ];
 

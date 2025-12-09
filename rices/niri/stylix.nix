@@ -31,7 +31,7 @@
       };
 
       monospace = {
-        package = pkgs.comic-mono;
+        package = pkgs.maple-mono.truetype;
         name = "Maple Mono";
       };
 
