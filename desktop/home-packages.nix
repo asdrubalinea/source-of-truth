@@ -157,7 +157,7 @@
 
     # kdePackages.dolphin
     # trunk.claude-code
-    trunk.codex
+    custom.codex
     # opencode
     nodejs
     # inputs.claude-desktop.packages.${system}.claude-desktop
