@@ -1,4 +1,4 @@
-{ pkgs, inputs, ... }: {
+{ pkgs, ... }: {
   environment.systemPackages = [
     pkgs.twemoji-color-font
   ];
@@ -15,8 +15,8 @@
       nerd-fonts.iosevka-term
       recursive
       comic-mono
+      maple-mono.opentype
     ] ++ [
-      pkgs.stable.maple-mono
       # inputs.operator-mono.packages.x86_64-linux.default
     ];
   };

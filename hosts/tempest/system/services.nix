@@ -1,7 +1,7 @@
 { ... }:
 {
   services = {
-    borg-home-backup = {
+    borg-backup = {
       enable = true;
       name = "home-irene";
       user = "irene";

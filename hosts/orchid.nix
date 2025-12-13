@@ -23,6 +23,7 @@
     # ../modules/gaming.nix
 
     # ../services/syncthing.nix
+    ../services/borg-backup.nix
 
     # ../services/grafana
     # ../services/glance
@@ -193,6 +194,16 @@
       noPass = true;
     }
   ];
+
+  services.borg-backup = {
+    enable = true;
+    name = "vault";
+    user = "irene";
+    repo = "ssh://u518612@u518612.your-storagebox.de:23/./backups/orchid-vault";
+    ssh_key_file = "/home/irene/.ssh/id_ed25519";
+    password_file = "/persist/borg-vault-backup/passphrase";
+    paths = [ "/persist/Vault" ];
+  };
 
   environment.systemPackages =
     with pkgs;

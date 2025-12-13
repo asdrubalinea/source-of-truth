@@ -7,12 +7,12 @@
 
 with lib;
 let
-  cfg = config.services.borg-home-backup;
+  cfg = config.services.borg-backup;
   wait-ac = (pkgs.callPackage ../scripts/wait-ac.nix { }).wait-ac;
 in
 {
-  options.services.borg-home-backup = {
-    enable = mkEnableOption "borg-home-backup";
+  options.services.borg-backup = {
+    enable = mkEnableOption "borg-backup";
 
     name = mkOption { type = types.str; };
     user = mkOption { type = types.str; };
