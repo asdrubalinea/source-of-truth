@@ -30,6 +30,7 @@
     lm_sensors
     nmap
     restic
+    borgbackup
 
     # --- File Management & Text Processing ---
     bat # Cat clone with syntax highlighting

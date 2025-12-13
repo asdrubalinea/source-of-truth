@@ -1,5 +1,5 @@
-{ config, pkgs, ... }: {
-
+{ pkgs, ... }:
+{
   wait-ac = pkgs.writeScriptBin "wait-ac" ''
     #!${pkgs.stdenv.shell}
 

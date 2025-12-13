@@ -31,6 +31,7 @@
 
     # Services
     # ../../services/btrfs-snapshots.nix
+    ../../services/borg-home-backup.nix
     ../../services/nix-cleanup.nix
     ../../services/grafana/default.nix
     # ../../services/syncthing.nix
