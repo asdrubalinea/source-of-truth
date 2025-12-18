@@ -197,12 +197,23 @@
 
   services.borg-backup = {
     enable = true;
-    name = "vault";
-    user = "irene";
-    repo = "ssh://u518612@u518612.your-storagebox.de:23/./backups/orchid-vault";
-    ssh_key_file = "/home/irene/.ssh/id_ed25519";
-    password_file = "/persist/borg-vault-backup/passphrase";
-    paths = [ "/persist/Vault" ];
+    jobs = {
+      vault = {
+        user = "irene";
+        repo = "ssh://u518612@u518612.your-storagebox.de:23/./backups/orchid-vault";
+        ssh_key_file = "/home/irene/.ssh/id_ed25519";
+        password_file = "/persist/borg-vault-backup/passphrase";
+        paths = [ "/persist/Vault" ];
+      };
+
+      home-irene = {
+        user = "irene";
+        repo = "ssh://u518612@u518612.your-storagebox.de:23/./backups/orchid-home-irene";
+        ssh_key_file = "/home/irene/.ssh/id_ed25519";
+        password_file = "/persist/borg-home-backup/passphrase";
+        paths = [ "/home/irene" ];
+      };
+    };
   };
 
   environment.systemPackages =
