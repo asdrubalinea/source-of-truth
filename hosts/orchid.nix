@@ -62,6 +62,7 @@
     "amdgpu"
   ];
   boot.extraModulePackages = [ ];
+  boot.kernelPackages = pkgs.linuxPackages_zen;
 
   hardware.cpu.amd.updateMicrocode = true;
   hardware.enableAllFirmware = true;
