@@ -2,7 +2,7 @@
 {
   boot = {
     # Use recent kernel for Framework hardware support
-    kernelPackages = pkgs.stable.linuxPackages_6_17;
+    kernelPackages = pkgs.linuxPackages_zen;
 
     # Hibernation support
     resumeDevice = "/dev/mapper/pool-swap";
