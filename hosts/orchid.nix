@@ -256,13 +256,13 @@
     extraSetFlags = [ "--advertise-exit-node" ];
   };
 
-  services.ollama = {
-    enable = false;
-    host = "0.0.0.0";
-    acceleration = "rocm";
-    rocmOverrideGfx = "10.3.1";
-    openFirewall = true;
-  };
+  # services.ollama = {
+  #   enable = false;
+  #   host = "0.0.0.0";
+  #   acceleration = "rocm";
+  #   rocmOverrideGfx = "10.3.1";
+  #   openFirewall = true;
+  # };
 
   services.openssh.enable = true;
 
