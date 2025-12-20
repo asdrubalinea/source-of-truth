@@ -1,22 +1,39 @@
 # Repository Guidelines
 
 ## Project Structure & Module Organization
-Core NixOS entries live in `flake.nix`, which wires hosts under `hosts/` (e.g. `hosts/tempest/default.nix`) and user environments under `homes/`. Shared building blocks sit in `modules/`, `services/`, `packages/`, and `desktop/`, while hardware-specific pieces live in `hardware/` and disk layouts in `disks/`. Theming and Hyprland/Niri tweaks are kept in `rices/`, and reusable helper binaries are defined in `scripts/`. Keep new files in the nearest existing module tree to keep host imports lean.
+- `flake.nix` and `flake.lock` define Nix inputs and system outputs.
+- `hosts/` contains per-machine NixOS configs (e.g., `hosts/orchid/`, `hosts/tempest/`).
+- `homes/` holds Home Manager configs per user/host (e.g., `homes/orchid.nix`).
+- `modules/`, `services/`, `hardware/`, and `desktop/` provide reusable Nix modules.
+- `disks/` contains Disko layouts; `packages/` contains custom package definitions.
+- `rices/` holds UI theming, waybar, fonts, and wallpaper assets.
+- `scripts/` and top-level `*.sh` are operational helpers (apply, format, install).
 
 ## Build, Test, and Development Commands
-- `nix flake check` – evaluates all systems and home configurations; run after every change.
-- `nixos-rebuild build --flake '.#<host>'` – builds a host configuration without switching; useful for CI-style verification.
-- `nixos-rebuild switch --flake '.#<host>' --dry-run` – confirm activations before applying on the target machine.
-- `home-manager switch --flake '.#irene@<host>' --dry-run` – validate user profiles.
+- `nixos-rebuild switch --flake '.#<host>' --sudo`: apply a host configuration (used by `scripts/system-apply.nix`).
+- `./update-flakes.sh`: update flake inputs (`nix flake update`).
+- `./tempest-format.sh`: format/mount disks for the `tempest` layout (destructive).
+- `./tempest-install.sh`: install NixOS using the `tempest` Disko layout.
+- `./vm-install.sh`: install the `vm` target to `/dev/vda`.
 
 ## Coding Style & Naming Conventions
-Use two-space indentation in Nix files and keep attribute sets alphabetised when feasible. Prefer lowercase, hyphenated filenames (`hosts/tempest/networking.nix`) and concise option names (`services.monitoring.enable`). Group imports by responsibility with short comments. Format Nix code with `alejandra` or `nixpkgs-fmt` (`nix fmt` honours the flake formatter) before committing, and keep inline comments brief but informative.
+- Nix files use two-space indentation; keep attribute sets aligned and readable.
+- Prefer concise, descriptive file names (e.g., `hosts/<name>/system/networking.nix`).
+- Format Nix with `alejandra` or `nixpkgs-fmt` when available.
+- Shell scripts use `#!/bin/sh` or `#!/usr/bin/env bash` and keep flags explicit.
 
 ## Testing Guidelines
-Every change must at least pass `nix flake check`. For host updates, share the relevant `nixos-rebuild build` or `--dry-run switch` output; for Home Manager tweaks, do the same with `home-manager ... --dry-run`. Desktop or theming adjustments should ship with a screenshot from the target rice. Avoid committing secrets—use `sops-nix` inputs or hashed placeholders under `passwords/`.
+- No automated test framework is defined in this repository.
+- Validate changes by building or switching the relevant host:
+  `nixos-rebuild switch --flake '.#tempest' --sudo`.
 
 ## Commit & Pull Request Guidelines
-Recent history favours short, present-tense summaries (`fix boot`, `trunk update`). Follow that style, optionally prefixing the affected host (`tempest: sync virtualization`). Squash noisy WIP commits locally. Pull requests should call out affected hosts or modules, list the commands you ran, and attach before/after visuals for UI work. Link related issues when available and note any manual follow-up steps the deployer must run.
+- Recent commits use short, lowercase summaries (e.g., `update`, `cleanup things`).
+- Keep commits focused on one logical change; mention the host or module touched.
+- PRs should describe the target host(s), the intent, and any risky operations.
+- Include screenshots for UI changes under `rices/` or `desktop/` when applicable.
 
-## Deployment Safety
-Never auto-apply configurations from automation—provide instructions instead (`nixos-rebuild switch --flake '.#tempest'`). When touching disk layouts or secure boot settings, flag the risk so the maintainer can schedule downtime.
+## Security & Configuration Tips
+- Disk operations (`tempest-format.sh`, `tempest-install.sh`, `vm-install.sh`) are destructive; double-check target disks.
+- Host secrets may be managed via `sops-nix`; avoid committing raw secrets.
+- Review `hosts/<name>/system/security.nix` before changing security-sensitive settings.
