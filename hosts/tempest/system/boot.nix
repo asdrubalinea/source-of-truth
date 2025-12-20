@@ -22,7 +22,7 @@
     initrd = {
       systemd = {
         enable = true;
-        package = pkgs.stable.systemd;
+        package = pkgs.systemd;
       };
 
       # Hardware modules needed for boot
