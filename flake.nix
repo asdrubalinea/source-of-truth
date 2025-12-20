@@ -172,7 +172,7 @@
             }
             niri.nixosModules.niri
 
-            ./hosts/orchid.nix
+            ./hosts/orchid/default.nix
           ];
         };
 
