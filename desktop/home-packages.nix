@@ -31,6 +31,7 @@
     nmap
     restic
     borgbackup
+    vorta
 
     # --- File Management & Text Processing ---
     bat # Cat clone with syntax highlighting
