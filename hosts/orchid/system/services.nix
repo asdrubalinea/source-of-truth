@@ -128,7 +128,7 @@
   };
 
   services.tribunale-scrape = {
-    enable = true;
+    enable = false;
     environmentFile = "/persist/tribunale-scrape/env";
     dataDir = "/persist/tribunale-scrape";
     extraEnvironment = {
