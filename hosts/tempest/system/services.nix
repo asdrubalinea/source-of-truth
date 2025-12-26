@@ -1,5 +1,6 @@
 { ... }:
 {
+  programs.nix-ld.enable = true;
   services = {
     borg-backup = {
       enable = true;
