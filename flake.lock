@@ -250,19 +250,11 @@
         "rust-overlay": "rust-overlay"
       },
       "locked": {
-<<<<<<< HEAD
-        "lastModified": 1766606402,
-        "narHash": "sha256-F2yU46hf/UQlxqkr0b+WgI6xk7Z8xav4Q4ZLCInFCpM=",
-        "owner": "asdrubalinea",
-        "repo": "diapee-bot",
-        "rev": "df1807ed41a24676ac39e2d904923fb85d03e02e",
-=======
         "lastModified": 1766608426,
         "narHash": "sha256-iq7j3gLi131HGYksNUzujD5IXqWeEsRew8cn4/NWSbI=",
         "owner": "asdrubalinea",
         "repo": "diapee-bot",
         "rev": "128947615ca0f07d6bdb64fc8baf1a5887c81a95",
->>>>>>> f6274a7b520c81fb6648fc0488079bbf70993b78
         "type": "github"
       },
       "original": {
