@@ -19,7 +19,7 @@
     ./users/irene.nix
 
     # Shared services
-    ../../services/thermal-logger.nix
+    # ../../services/thermal-logger.nix
 
     # Shared hardware modules
     ../../hardware/bluetooth.nix
