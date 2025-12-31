@@ -56,7 +56,7 @@
     dbBackend = "sqlite";
     backupDir = "/persist/vaultwarden";
     config = {
-      DOMAIN = "https://bitwarden.asdrubalini.com";
+      DOMAIN = "https://bitwarden.irene.foo";
       SIGNUPS_ALLOWED = true;
       ROCKET_ADDRESS = "127.0.0.1";
       ROCKET_PORT = 8222;
