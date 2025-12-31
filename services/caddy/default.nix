@@ -13,7 +13,7 @@ in
 
     globalConfig = ''
       debug
-      email acme@asdrubalini.xyz
+      email acme@irene.foo
       grace_period 60s
     '';
 

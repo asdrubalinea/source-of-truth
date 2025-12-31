@@ -83,7 +83,7 @@ in
     enable = true;
     settings.user = {
       name = "Irene";
-      email = "git@asdrubalini.xyz";
+      email = "git@irene.foo";
     };
   };
 

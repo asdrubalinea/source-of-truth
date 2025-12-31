@@ -9,27 +9,22 @@
   }
 }
 
-asdrubalini.com {
-  import default asdrubalini.com
+irene.foo {
+  import default irene.foo
   respond ":3"
 }
 
-llm.asdrubalini.com {
-  import default llm.asdrubalini.com
-  reverse_proxy 127.0.0.1:7777
-}
-
-grafana.asdrubalini.com {
-  import default grafana.asdrubalini.com
-  reverse_proxy 127.0.0.1:3333
-}
-
-bitwarden.asdrubalini.com {
-  import default bitwarden.asdrubalini.com
+bitwarden.irene.foo {
+  import default bitwarden.irene.foo
   reverse_proxy 127.0.0.1:8222
 }
 
-snugglebum.asdrubalini.com {
-  import default snugglebum.asdrubalini.com
+snugglebum.irene.foo {
+  import default snugglebum.irene.foo
   reverse_proxy 127.0.0.1:3000
+}
+
+gitea.irene.foo {
+  import default gitea.irene.foo
+  reverse_proxy 127.0.0.1:4001
 }

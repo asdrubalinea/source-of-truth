@@ -68,7 +68,7 @@
 
   services.github-runners = {
     leksi = {
-      enable = true;
+      enable = false;
       name = "leksi";
       tokenFile = "/persist/secrets/github-runners/leksi";
       url = "https://github.com/asdrubalinea/leksi";
@@ -133,6 +133,18 @@
     dataDir = "/persist/tribunale-scrape";
     extraEnvironment = {
       RUST_LOG = "info";
+    };
+  };
+
+  services.gitea = {
+    enable = true;
+    stateDir = "/persist/gitea";
+
+    settings.server = {
+      DOMAIN = "gitea.irene.foo";
+      ROOT_URL = "https://gitea.irene.foo/";
+      HTTP_ADDR = "127.0.0.1";
+      HTTP_PORT = 4001;
     };
   };
 }
