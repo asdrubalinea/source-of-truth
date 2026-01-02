@@ -32,8 +32,8 @@
         decorations = "buttonless";
 
         padding = {
-          x = 8;
-          y = 8;
+          x = 4;
+          y = 4;
         };
 
         dimensions = {
