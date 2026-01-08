@@ -34,6 +34,7 @@
     # ../../services/btrfs-snapshots.nix
     ../../services/borg-backup.nix
     ../../services/nix-cleanup.nix
+    ../../services/redshift.nix
     ../../services/grafana/default.nix
     # ../../services/syncthing.nix
 
