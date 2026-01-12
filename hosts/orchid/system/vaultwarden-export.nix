@@ -14,10 +14,8 @@ in
     home = "/var/lib/vwbackup";
     createHome = true;
 
-    # Put the public key (optionally with restrictions) in this file, e.g.:
-    # command="/etc/vwbackup/rsync-snapshot",restrict ssh-ed25519 AAAA...
-    openssh.authorizedKeys.keyFiles = [
-      "/persist/secrets/vaultwarden-backup/authorized_keys"
+    openssh.authorizedKeys.keys = [
+      ''command="/etc/vwbackup/rsync-snapshot",restrict ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAINvjpybr/+VM1dY75+BkISNz3hzwheDMsr9wiN5Dtsdz irene@orchid''
     ];
   };
 
@@ -38,6 +36,7 @@ in
   systemd.services.vaultwarden-export-snapshot = {
     description = "Create consistent Vaultwarden export snapshot for rsync pulls";
     wantedBy = [ "multi-user.target" ];
+    unitConfig.RequiresMountsFor = [ "/persist" ];
 
     serviceConfig = {
       Type = "oneshot";
@@ -88,4 +87,3 @@ in
     };
   };
 }
-

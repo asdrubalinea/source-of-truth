@@ -24,5 +24,7 @@
       enable = false;
       powerEfficient = true;
     };
+
+    flatpak.enable = true;
   };
 }

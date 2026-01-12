@@ -17,6 +17,7 @@ in
 
   systemd.services.vaultwarden-mirror-pull = {
     description = "Pull Vaultwarden export snapshot via rsync";
+    unitConfig.RequiresMountsFor = [ "/persist" ];
 
     wants = [
       "network-online.target"
@@ -62,4 +63,3 @@ in
     };
   };
 }
-

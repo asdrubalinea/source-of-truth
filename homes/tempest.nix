@@ -4,7 +4,6 @@
     # Desktop environment and theming
     inputs.hyprland.homeManagerModules.default
     inputs.stylix.homeModules.stylix
-    inputs.impermanence.homeManagerModules.impermanence
 
     # ../rices/estradiol
     ../rices/niri
