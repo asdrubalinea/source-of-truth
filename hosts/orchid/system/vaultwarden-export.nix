@@ -13,6 +13,7 @@ in
     group = "vwbackup";
     home = "/var/lib/vwbackup";
     createHome = true;
+    shell = pkgs.bashInteractive;
 
     openssh.authorizedKeys.keys = [
       ''command="/etc/vwbackup/rsync-snapshot",restrict ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAINvjpybr/+VM1dY75+BkISNz3hzwheDMsr9wiN5Dtsdz irene@orchid''

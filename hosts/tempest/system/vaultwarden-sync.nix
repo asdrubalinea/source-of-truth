@@ -6,6 +6,8 @@ let
 
   localData = "/persist/vaultwarden";
   localIncoming = "/persist/vaultwarden.incoming";
+  sshStateDir = "/persist/vaultwarden-mirror/ssh";
+  sshKnownHosts = "${sshStateDir}/known_hosts";
   sshKeyPath = "/persist/secrets/vaultwarden-backup/id_ed25519";
 in
 {
@@ -13,6 +15,7 @@ in
 
   systemd.tmpfiles.rules = [
     "d ${localIncoming} 0700 root root -"
+    "d ${sshStateDir} 0700 root root -"
   ];
 
   systemd.services.vaultwarden-mirror-pull = {
@@ -40,7 +43,7 @@ in
       mkdir -p ${localIncoming}
 
       ${pkgs.rsync}/bin/rsync -a --delete \
-        -e "${pkgs.openssh}/bin/ssh -i ${sshKeyPath} -o IdentitiesOnly=yes -o StrictHostKeyChecking=accept-new" \
+        -e "${pkgs.openssh}/bin/ssh -T -i ${sshKeyPath} -o BatchMode=yes -o IdentitiesOnly=yes -o StrictHostKeyChecking=accept-new -o UserKnownHostsFile=${sshKnownHosts} -o GlobalKnownHostsFile=/dev/null -o LogLevel=ERROR" \
         ${primaryUser}@${primaryHost}:${remoteSnapshot} \
         ${localIncoming}/
 
