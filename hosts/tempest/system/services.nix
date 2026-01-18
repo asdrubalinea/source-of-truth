@@ -26,5 +26,34 @@
     };
 
     flatpak.enable = true;
+
+    vaultwarden = {
+      enable = true;
+      dbBackend = "sqlite";
+      backupDir = "/persist/vaultwarden";
+      config = {
+        DOMAIN = "https://bitwarden.irene.foo";
+        SIGNUPS_ALLOWED = true;
+        ROCKET_ADDRESS = "127.0.0.1";
+        ROCKET_PORT = 8222;
+        WEBSOCKET_ADDRESS = "127.0.0.1";
+        ENABLE_WEBSOCKET = true;
+        SENDS_ALLOWED = true;
+        ROCKET_LOG = "critical";
+      };
+    };
+  };
+
+  services.caddy = {
+    enable = true;
+    extraConfig = ''
+      https://localhost {
+        bind 127.0.0.1 ::1
+        tls internal
+
+        reverse_proxy /notifications/hub* 127.0.0.1:3012
+        reverse_proxy 127.0.0.1:8222
+      }
+    '';
   };
 }

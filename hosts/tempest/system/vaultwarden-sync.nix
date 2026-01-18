@@ -13,6 +13,31 @@ in
 {
   users.groups.vwbackup = { };
 
+  systemd.services.vaultwarden-fix-permissions = {
+    description = "Fix Vaultwarden data permissions";
+    unitConfig.RequiresMountsFor = [ "/persist" ];
+
+    requiredBy = [
+      "vaultwarden.service"
+      "backup-vaultwarden.service"
+    ];
+    before = [
+      "vaultwarden.service"
+      "backup-vaultwarden.service"
+    ];
+
+    serviceConfig.Type = "oneshot";
+    path = [ pkgs.coreutils ];
+    script = ''
+      set -euo pipefail
+
+      if [ -d ${localData} ]; then
+        chown -R vaultwarden:vaultwarden ${localData}
+        chmod -R u=rwX,go= ${localData}
+      fi
+    '';
+  };
+
   systemd.tmpfiles.rules = [
     "d ${localIncoming} 0700 root root -"
     "d ${sshStateDir} 0700 root root -"
@@ -43,6 +68,8 @@ in
       mkdir -p ${localIncoming}
 
       ${pkgs.rsync}/bin/rsync -a --delete \
+        --chown=vaultwarden:vaultwarden \
+        --chmod=D0700,F0600 \
         -e "${pkgs.openssh}/bin/ssh -T -i ${sshKeyPath} -o BatchMode=yes -o IdentitiesOnly=yes -o StrictHostKeyChecking=accept-new -o UserKnownHostsFile=${sshKnownHosts} -o GlobalKnownHostsFile=/dev/null -o LogLevel=ERROR" \
         ${primaryUser}@${primaryHost}:${remoteSnapshot} \
         ${localIncoming}/
@@ -52,6 +79,8 @@ in
         mv ${localData} ${localData}.old
       fi
       mv ${localIncoming} ${localData}
+      ${pkgs.coreutils}/bin/chown -R vaultwarden:vaultwarden ${localData}
+      ${pkgs.coreutils}/bin/chmod -R u=rwX,go= ${localData}
       rm -rf ${localData}.old || true
     '';
   };
