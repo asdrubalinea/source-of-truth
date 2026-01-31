@@ -32,6 +32,7 @@
     restic
     borgbackup
     vorta
+    feh
 
     # --- File Management & Text Processing ---
     bat # Cat clone with syntax highlighting
