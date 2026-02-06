@@ -121,6 +121,7 @@
     brave
     chromium
     firefox
+    tor-browser
     google-chrome
     inputs.zen-browser.packages.x86_64-linux.default # Zen Browser
 
