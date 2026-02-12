@@ -6,7 +6,7 @@
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
     nixpkgs-stable.url = "github:nixos/nixpkgs/nixos-25.11";
     nixpkgs-trunk.url = "github:nixos/nixpkgs";
-    nixpkgs-custom.url = "github:nixos/nixpkgs";
+    nixpkgs-custom.url = "github:realbogart/nixpkgs/codex-0.98.0";
     
     # --- Core Components ---
     home-manager = {

@@ -42,15 +42,18 @@
           name = "lg-office";
           outputs = [
             {
-              criteria = "LG Electronics LG FHD 0x0004BE08";
-              mode = "1920x1080@100.000";
+              criteria = "eDP-1";
+              status = "enable";
+              mode = "2880x1920@120.000";
               position = "0,0";
-              scale = 1.0;
+              scale = 2.0; # Niri only accepts integer scaling on this panel
             }
 
             {
-              criteria = "eDP-1";
-              status = "disable";
+              criteria = "LG Electronics LG FHD 0x0004BE08";
+              mode = "1920x1080@100.000";
+              position = "1440,0";
+              scale = 1.0;
             }
           ];
         };

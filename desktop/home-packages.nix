@@ -77,7 +77,7 @@
     nix-tree
     nixd # Nix LSP
     nixpkgs-fmt
-    trunk.codex
+    custom.codex
 
     inputs.hn-tui-flake.packages.${stdenv.hostPlatform.system}.hackernews-tui # hn TUI
 
