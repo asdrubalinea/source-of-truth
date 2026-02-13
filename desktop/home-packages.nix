@@ -147,6 +147,7 @@
     nemo
     obs-studio
     vlc
+    libreoffice
 
     # --- Data & databases ---
     dbeaver-bin
