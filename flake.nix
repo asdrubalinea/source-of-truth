@@ -87,12 +87,11 @@
       url = "github:usagi-flow/evil-helix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    # claude-desktop.url = "github:k3d3/claude-desktop-linux-flake";
-    # claude-desktop.inputs.nixpkgs.follows = "nixpkgs";
     hn-tui-flake = {
       url = "github:asdrubalinea/hn-tui-flake";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    codex.url = "github:sadjow/codex-cli-nix";
   };
 
   outputs =
@@ -112,6 +111,7 @@
     , emacs-overlay
     , lanzaboote
     , ucodenix
+    , codex
     , ...
     }:
     let

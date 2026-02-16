@@ -87,11 +87,13 @@ in
     };
   };
 
-  home.packages = with pkgs; [
+  home.packages = [
     user-apply
     system-apply
     arc-size
     nix-size
+
+    inputs.codex.packages.${pkgs.stdenv.hostPlatform.system}.default
   ];
 
   # programs.neovim = {
