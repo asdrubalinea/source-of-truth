@@ -115,7 +115,7 @@
     , ...
     }:
     let
-      system = "x86_64-linux";
+      defaultSystem = "x86_64-linux";
 
       multiChannelOverlay = final: prev: {
         stable = import nixpkgs-stable {
@@ -147,7 +147,7 @@
 
       mkPkgs = args:
         import nixpkgs ({
-          inherit system;
+          system = defaultSystem;
           config = nixpkgsConfig;
           overlays = overlays;
         } // args);
@@ -157,7 +157,6 @@
     {
       nixosConfigurations = {
         "orchid" = lib.nixosSystem {
-          inherit system;
           specialArgs = {
             inherit inputs;
             hostname = "orchid";
@@ -166,6 +165,7 @@
           modules = [
             {
               nixpkgs = {
+                hostPlatform = defaultSystem;
                 config = nixpkgsConfig;
                 overlays = overlays;
               };
@@ -177,7 +177,6 @@
         };
 
         tempest = lib.nixosSystem {
-          inherit system;
           specialArgs = {
             inherit inputs;
             hostname = "tempest";
@@ -186,6 +185,7 @@
           modules = [
             {
               nixpkgs = {
+                hostPlatform = defaultSystem;
                 config = nixpkgsConfig;
                 overlays = overlays;
               };

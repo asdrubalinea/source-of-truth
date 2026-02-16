@@ -1,8 +1,16 @@
 { inputs, ... }:
+let
+  system = "x86_64-linux";
+  getNixosModule = flake:
+    if flake ? nixosModules && flake.nixosModules ? default then
+      flake.nixosModules.default
+    else
+      flake.nixosModules.${system}.default;
+in
 {
   imports = [
-    inputs.diapee-bot.nixosModules.x86_64-linux.default
-    inputs.tribunale-scrape.nixosModules.x86_64-linux.default
+    (getNixosModule inputs.diapee-bot)
+    (getNixosModule inputs.tribunale-scrape)
   ];
 
   nix.gc = {
@@ -83,20 +91,6 @@
 
   services.ncps = {
     enable = true;
-    upstream = {
-      caches = [
-        "https://cache.nixos.org/"
-        "https://hyprland.cachix.org"
-        "https://cosmic.cachix.org/"
-      ];
-
-      publicKeys = [
-        "cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY="
-        "hyprland.cachix.org-1:a7pgxzMz7+chwVL3/pzj6jIBMioiJM7ypFP8PwtkuGc="
-        "cosmic.cachix.org-1:Dya9IyXD4xdBehWjrkPv6rtxpmMdRel02smYzA85dPE="
-      ];
-    };
-
     server = {
       addr = ":8501";
     };
@@ -106,6 +100,18 @@
     cache = {
       maxSize = "500G";
       hostName = "orchid.boreal-city.ts";
+      upstream = {
+        urls = [
+          "https://cache.nixos.org/"
+          "https://hyprland.cachix.org"
+          "https://cosmic.cachix.org/"
+        ];
+        publicKeys = [
+          "cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY="
+          "hyprland.cachix.org-1:a7pgxzMz7+chwVL3/pzj6jIBMioiJM7ypFP8PwtkuGc="
+          "cosmic.cachix.org-1:Dya9IyXD4xdBehWjrkPv6rtxpmMdRel02smYzA85dPE="
+        ];
+      };
     };
   };
 
