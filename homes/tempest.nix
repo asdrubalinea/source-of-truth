@@ -78,7 +78,7 @@
     # Development tools
     nix-index = {
       enable = true;
-      # enableFishIntegration = true;
+      enableFishIntegration = true;
     };
 
     # Enhanced shell prompt
@@ -100,16 +100,6 @@
       enable = false;
       package = pkgs.emacs-pgtk;
     };
-
-    # vscode = {
-    #   enable = true;
-    #   package = pkgs.vscode.fhsWithPackages (ps: with ps; [
-    #     rustup
-    #     zlib
-    #     openssl.dev
-    #     pkg-config
-    #   ]);
-    # };
   };
 
   services.wlsunset = {
@@ -117,14 +107,4 @@
     latitude = 45.4642; # Milan, Italy
     longitude = 9.1900;
   };
-
-  # Security services
-  # services.gnome-keyring = {
-  # enable = false;
-  # components = [
-  # "pkcs11"
-  # "secrets"
-  # "ssh"
-  # ];
-  # };
 }
