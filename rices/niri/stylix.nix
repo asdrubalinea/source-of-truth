@@ -13,7 +13,7 @@
       sizes = {
         terminal =
           if hostname == "tempest" then
-            14
+            16
           else if hostname == "orchid" then
             20
           else
