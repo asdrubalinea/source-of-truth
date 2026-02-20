@@ -147,7 +147,8 @@
     nemo
     obs-studio
     vlc
-    libreoffice
+    onlyoffice-desktopeditors
+    xournalpp
 
     # --- Data & databases ---
     dbeaver-bin
