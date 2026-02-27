@@ -13,6 +13,8 @@
     smartmontools # smartctl
     usbutils
     upower
+    bubblewrap
+    trunk.opencode
 
     # --- System info & monitoring ---
     btop
@@ -129,6 +131,7 @@
     keepassxc
     obsidian
     telegram-desktop
+    signal-desktop
     thunderbird
     vesktop
     zoom-us
