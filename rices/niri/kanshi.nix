@@ -61,6 +61,25 @@
 
       {
         profile = {
+          name = "portable-only";
+          outputs = [
+            {
+              criteria = "BOE Display Unknown";
+              mode = "2560x1440";
+              position = "440,1440";
+              scale = 1.0;
+            }
+
+            {
+              criteria = "eDP-1";
+              status = "disable";
+            }
+          ];
+        };
+      }
+
+      {
+        profile = {
           name = "mobile";
           outputs = [
             {
