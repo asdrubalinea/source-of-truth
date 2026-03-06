@@ -61,18 +61,21 @@
 
       {
         profile = {
-          name = "portable-only";
+          name = "portable-and-integrated";
           outputs = [
             {
               criteria = "BOE Display Unknown";
               mode = "2560x1440";
-              position = "440,1440";
+              position = "0,0";
               scale = 1.0;
             }
 
             {
               criteria = "eDP-1";
-              status = "disable";
+              status = "enable";
+              mode = "2880x1920@120.000";
+              position = "2560,0";
+              # scale = 2.0; # Niri only accepts integer scaling on this panel
             }
           ];
         };
