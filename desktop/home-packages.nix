@@ -15,6 +15,7 @@
     upower
     bubblewrap
     trunk.opencode
+    ddcutil
 
     # --- System info & monitoring ---
     btop
@@ -79,7 +80,7 @@
     nix-tree
     nixd # Nix LSP
     nixpkgs-fmt
-    # custom.codex
+    # trunk.codex
 
     inputs.hn-tui-flake.packages.${stdenv.hostPlatform.system}.hackernews-tui # hn TUI
 
