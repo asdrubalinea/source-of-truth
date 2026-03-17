@@ -70,7 +70,7 @@
     devenv
     devbox
     gitui
-    httptoolkit
+    # httptoolkit
     just
     jujutsu # VCS
     lazygit
@@ -113,7 +113,7 @@
 
     # --- Desktop integration ---
     appimage-run # run AppImages via Nix
-    blueberry
+    blueman
     networkmanagerapplet
     pavucontrol
     seahorse
@@ -122,7 +122,6 @@
 
     # --- Browsers ---
     brave
-    chromium
     firefox
     tor-browser
     google-chrome
@@ -134,7 +133,7 @@
     telegram-desktop
     signal-desktop
     thunderbird
-    vesktop
+    # vesktop
     zoom-us
 
     # --- Media, graphics & documents ---
