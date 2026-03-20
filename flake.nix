@@ -227,6 +227,27 @@
             }
           ];
         };
+
+        hydra = lib.nixosSystem {
+          specialArgs = {
+            inherit inputs;
+            hostname = "hydra";
+          };
+
+          modules = [
+            {
+              nixpkgs = {
+                hostPlatform = defaultSystem;
+                config = nixpkgsConfig;
+                overlays = overlays;
+              };
+            }
+            disko.nixosModules.disko
+
+            ./disks/hydra.nix
+            ./hosts/hydra/default.nix
+          ];
+        };
       };
 
       homeConfigurations = {
