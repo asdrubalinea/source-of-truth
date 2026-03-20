@@ -1,5 +1,8 @@
-{ pkgs, inputs, ... }:
 {
+  pkgs,
+  inputs,
+  ...
+}: {
   home.packages = with pkgs; [
     # --- Core system utilities ---
     coreutils
@@ -103,6 +106,7 @@
     direnv
     fzf
     ghostty
+    (callPackage ../packages/drift.nix {})
     grc
     kitty
     screen
