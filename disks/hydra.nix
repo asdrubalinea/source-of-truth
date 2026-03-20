@@ -3,8 +3,7 @@
     disk = {
       main = {
         type = "disk";
-        # Replace this with the target installation disk before applying.
-        device = "/dev/disk/by-id/replace-me";
+        device = "/dev/disk/by-id/scsi-0QEMU_QEMU_HARDDISK_114191637";
         content = {
           type = "gpt";
           partitions = {
