@@ -13,13 +13,11 @@
 
       supportedFilesystems = [
         "ext4"
-        "vfat"
       ];
     };
 
     loader = {
-      systemd-boot.enable = true;
-      efi.canTouchEfiVariables = true;
+      grub.enable = true;
     };
   };
 
