@@ -9,6 +9,9 @@
         "usbhid"
         "usb_storage"
         "sd_mod"
+        "virtio_pci"
+        "virtio_blk"
+        "virtio_scsi"
       ];
 
       supportedFilesystems = [
