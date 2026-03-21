@@ -1,12 +1,17 @@
-{ pkgs, ... }:
+{ ... }:
 {
   security = {
-    sudo = {
-      package = pkgs.sudo-rs;
-      execWheelOnly = true;
+    doas = {
+      enable = true;
       wheelNeedsPassword = false;
-    };
 
-    sudo-rs.enable = true;
+      extraRules = [
+        {
+          users = [ "irene" ];
+          keepEnv = true;
+          noPass = true;
+        }
+      ];
+    };
   };
 }
