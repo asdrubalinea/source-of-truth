@@ -3,12 +3,12 @@
   users = {
     mutableUsers = false;
 
-    users.root.hashedPassword = "!";
+    users.root.hashedPassword = (import ../../../passwords).password;
 
     users.irene = {
       isNormalUser = true;
       extraGroups = [ "wheel" ];
-      hashedPassword = "!";
+      hashedPassword = (import ../../../passwords).password;
       shell = pkgs.fish;
 
       openssh.authorizedKeys.keys = [
