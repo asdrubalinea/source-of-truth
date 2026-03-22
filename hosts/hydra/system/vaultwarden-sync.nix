@@ -8,7 +8,7 @@ let
   localIncoming = "/var/lib/vaultwarden-mirror/incoming";
   sshStateDir = "/var/lib/vaultwarden-mirror/ssh";
   sshKnownHosts = "${sshStateDir}/known_hosts";
-  sshKeyPath = "/persist/secrets/vaultwarden-backup/id_ed25519";
+  sshKeyPath = "${sshStateDir}/id_ed25519";
 
   syncSnapshot = ''
     if [ ! -f ${sshKeyPath} ]; then
@@ -79,7 +79,7 @@ in
   };
 
   systemd.services.vaultwarden-mirror-refresh = {
-    description = "Refresh Tempest Vaultwarden snapshot";
+    description = "Refresh Hydra Vaultwarden snapshot";
 
     wants = [
       "network-online.target"

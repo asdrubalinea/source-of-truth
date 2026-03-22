@@ -1,6 +1,12 @@
-{ pkgs, ... }:
+{ hostname ? null, pkgs, ... }:
 let
-  config = builtins.readFile ./Caddyfile;
+  hostConfigFile = if hostname != null then ./. + "/${hostname}.Caddyfile" else null;
+  config =
+    if hostConfigFile != null && builtins.pathExists hostConfigFile then
+      builtins.readFile hostConfigFile
+    else
+      builtins.readFile ./Caddyfile;
+  environmentFile = if hostname == "hydra" then "/var/lib/caddy/env" else "/persist/caddy/env";
 in
 {
   services.caddy = {
@@ -8,7 +14,7 @@ in
 
     package = pkgs.caddy.withPlugins {
       plugins = [ "github.com/caddy-dns/cloudflare@v0.2.2" ];
-      hash = "sha256-ea8PC/+SlPRdEVVF/I3c1CBprlVp1nrumKM5cMwJJ3U=";
+      hash = "sha256-Gb1nC5fZfj7IodQmKmEPGygIHNYhKWV1L0JJiqnVtbs=";
     };
 
     globalConfig = ''
@@ -20,5 +26,5 @@ in
     extraConfig = config;
   };
 
-  systemd.services.caddy.serviceConfig.EnvironmentFile = [ "/persist/caddy/env" ];
+  systemd.services.caddy.serviceConfig.EnvironmentFile = [ environmentFile ];
 }

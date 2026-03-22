@@ -1,6 +1,10 @@
-{ pkgs, ... }:
+{ config, lib, pkgs, ... }:
 let
-  vwData = "/persist/vaultwarden";
+  vwData =
+    if lib.versionOlder config.system.stateVersion "24.11" then
+      "/var/lib/bitwarden_rs"
+    else
+      "/var/lib/vaultwarden";
   exportRoot = "/persist/vaultwarden-export";
   exportCurrent = "${exportRoot}/current";
   exportNext = "${exportRoot}/next";

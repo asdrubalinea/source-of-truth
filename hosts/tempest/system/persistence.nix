@@ -45,6 +45,7 @@
       "/var/lib/grafana"
       "/var/lib/prometheus2"
       "/var/lib/prometheus-node-exporter"
+      "/var/lib/vaultwarden"
       "/var/lib/docker"
 
       "/home/irene"

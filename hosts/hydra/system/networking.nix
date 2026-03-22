@@ -11,6 +11,10 @@
       enable = true;
       allowedTCPPorts = [ ];
       allowedUDPPorts = [ ];
+      interfaces.tailscale0.allowedTCPPorts = [
+        80
+        443
+      ];
       checkReversePath = "loose";
     };
   };
