@@ -83,6 +83,10 @@
       url = "github:asdrubalinea/tribunale-scrape";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    auxologico-check = {
+      url = "github:asdrubalinea/auxologico-check";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     helix = {
       url = "github:usagi-flow/evil-helix";
       inputs.nixpkgs.follows = "nixpkgs";
