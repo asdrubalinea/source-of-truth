@@ -11,6 +11,7 @@ in
   imports = [
     (getNixosModule inputs.diapee-bot)
     (getNixosModule inputs.tribunale-scrape)
+    (getNixosModule inputs.auxologico-check)
   ];
 
   nix.gc = {
@@ -140,6 +141,13 @@ in
     extraEnvironment = {
       RUST_LOG = "info";
     };
+  };
+
+  services.auxologico-check = {
+    enable = true;
+    startDate = "20/02/2026";
+    environmentFile = "/persist/auxologico-check/env";
+    dataDir = "/persist/auxologico-check";
   };
 
   services.gitea = {
