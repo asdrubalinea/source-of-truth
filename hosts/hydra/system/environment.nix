@@ -27,6 +27,8 @@ in
     openssh
     systemClear
     tailscale
+    hyfetch
+    htop
   ];
 
   environment.variables = {
