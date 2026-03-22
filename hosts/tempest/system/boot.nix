@@ -16,7 +16,7 @@
     ];
 
     # KVM support for virtualization
-    kernelModules = [ "kvm-amd" ];
+    kernelModules = [ "kvm-amd" "i2c-dev" ];
 
     # Early boot configuration
     initrd = {

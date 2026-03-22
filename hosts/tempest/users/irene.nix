@@ -7,6 +7,7 @@
       "networkmanager"
       "docker"
       "kvm"
+      "i2c"
     ];
 
     hashedPassword = (import ../../../passwords).password;

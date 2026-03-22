@@ -1,4 +1,4 @@
-{ config, pkgs, ... }:
+{ pkgs, ... }:
 {
   services.desktopManager.plasma6.enable = true;
   services.displayManager.sddm.enable = true;
@@ -15,6 +15,7 @@
     filelight
     gwenview
     partitionmanager
+    qtstyleplugin-kvantum
   ];
 
   programs.kdeconnect.enable = true;

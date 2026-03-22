@@ -1,5 +1,8 @@
-{ pkgs, inputs, ... }:
 {
+  pkgs,
+  inputs,
+  ...
+}: {
   home.packages = with pkgs; [
     # --- Core system utilities ---
     coreutils
@@ -13,6 +16,9 @@
     smartmontools # smartctl
     usbutils
     upower
+    bubblewrap
+    trunk.opencode
+    ddcutil
 
     # --- System info & monitoring ---
     btop
@@ -67,7 +73,7 @@
     devenv
     devbox
     gitui
-    httptoolkit
+    # httptoolkit
     just
     jujutsu # VCS
     lazygit
@@ -77,7 +83,7 @@
     nix-tree
     nixd # Nix LSP
     nixpkgs-fmt
-    # custom.codex
+    # trunk.codex
 
     inputs.hn-tui-flake.packages.${stdenv.hostPlatform.system}.hackernews-tui # hn TUI
 
@@ -100,6 +106,7 @@
     direnv
     fzf
     ghostty
+    (callPackage ../packages/drift.nix {})
     grc
     kitty
     screen
@@ -110,7 +117,7 @@
 
     # --- Desktop integration ---
     appimage-run # run AppImages via Nix
-    blueberry
+    blueman
     networkmanagerapplet
     pavucontrol
     seahorse
@@ -119,7 +126,6 @@
 
     # --- Browsers ---
     brave
-    chromium
     firefox
     tor-browser
     google-chrome
@@ -129,8 +135,9 @@
     keepassxc
     obsidian
     telegram-desktop
+    signal-desktop
     thunderbird
-    vesktop
+    # vesktop
     zoom-us
 
     # --- Media, graphics & documents ---
