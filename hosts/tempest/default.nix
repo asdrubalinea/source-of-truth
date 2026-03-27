@@ -12,7 +12,7 @@
     ./system/environment.nix
     ./system/security.nix
     ./system/services.nix
-    # ./system/vaultwarden-sync.nix
+    ./system/vaultwarden-sync.nix
     ./system/virtualization.nix
 
     # User accounts

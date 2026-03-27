@@ -21,23 +21,26 @@ let
     rm -rf ${localIncoming}
     mkdir -p ${localIncoming}
 
-    ${pkgs.rsync}/bin/rsync -a --delete \
+    if ${pkgs.rsync}/bin/rsync -a --delete \
       --chown=vaultwarden:vaultwarden \
       --chmod=D0700,F0600 \
-      -e "${pkgs.openssh}/bin/ssh -T -i ${sshKeyPath} -o BatchMode=yes -o IdentitiesOnly=yes -o StrictHostKeyChecking=accept-new -o UserKnownHostsFile=${sshKnownHosts} -o GlobalKnownHostsFile=/dev/null -o LogLevel=ERROR" \
+      -e "${pkgs.openssh}/bin/ssh -T -i ${sshKeyPath} -o BatchMode=yes -o IdentitiesOnly=yes -o StrictHostKeyChecking=accept-new -o UserKnownHostsFile=${sshKnownHosts} -o GlobalKnownHostsFile=/dev/null -o LogLevel=ERROR -o ConnectTimeout=10" \
       ${primaryUser}@${primaryHost}:${remoteSnapshot} \
-      ${localIncoming}/
+      ${localIncoming}/; then
 
-    mkdir -p ${localData}
+      mkdir -p ${localData}
 
-    ${pkgs.rsync}/bin/rsync -a --delete \
-      --chown=vaultwarden:vaultwarden \
-      --chmod=D0700,F0600 \
-      ${localIncoming}/ \
-      ${localData}/
+      ${pkgs.rsync}/bin/rsync -a --delete \
+        --chown=vaultwarden:vaultwarden \
+        --chmod=D0700,F0600 \
+        ${localIncoming}/ \
+        ${localData}/
 
-    ${pkgs.coreutils}/bin/chown -R vaultwarden:vaultwarden ${localData}
-    ${pkgs.coreutils}/bin/chmod -R u=rwX,go= ${localData}
+      ${pkgs.coreutils}/bin/chown -R vaultwarden:vaultwarden ${localData}
+      ${pkgs.coreutils}/bin/chmod -R u=rwX,go= ${localData}
+    else
+      printf >&2 'Warning: could not reach %s, using existing local data\n' '${primaryHost}'
+    fi
   '';
 in
 {
@@ -62,7 +65,7 @@ in
       "vaultwarden.service"
       "backup-vaultwarden.service"
     ];
-    requiredBy = [
+    wantedBy = [
       "vaultwarden.service"
       "backup-vaultwarden.service"
     ];
@@ -73,7 +76,7 @@ in
     };
 
     script = ''
-      set -euo pipefail
+      set -uo pipefail
       ${syncSnapshot}
     '';
   };
