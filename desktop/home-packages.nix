@@ -139,6 +139,7 @@
     thunderbird
     # vesktop
     zoom-us
+    claude-code
 
     # --- Media, graphics & documents ---
     feh

@@ -9,7 +9,7 @@
     ./system/networking.nix
     ./system/security.nix
     ./system/services.nix
-    ./system/vaultwarden-sync.nix
+    # ./system/vaultwarden-sync.nix
     ./system/environment.nix
 
     ./users/irene.nix

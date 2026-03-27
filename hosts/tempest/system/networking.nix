@@ -29,6 +29,7 @@
       127.0.0.1 alotofpeopletcb.dscovr.test
       127.0.0.1 workspace5tcb.dscovr.test
       127.0.0.1 workspace-turco-meccanico-dominio.dscovr.test
+      127.0.0.1 complexcasenrt.dscovr.test
     '';
   };
 }

@@ -96,6 +96,7 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
     codex.url = "github:sadjow/codex-cli-nix";
+    claude-code.url = "github:sadjow/claude-code-nix";
   };
 
   outputs =
@@ -116,6 +117,7 @@
     , lanzaboote
     , ucodenix
     , codex
+    , claude-code
     , ...
     }:
     let
@@ -142,6 +144,7 @@
         multiChannelOverlay
         emacs-overlay.overlay
         niri.overlays.niri
+        claude-code.overlays.default
       ];
 
       nixpkgsConfig = {
