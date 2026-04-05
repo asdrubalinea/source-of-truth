@@ -7,6 +7,7 @@
     targets = {
       neovim.enable = false;
       ghostty.enable = true;
+      wezterm.enable = true;
     };
 
     fonts = {

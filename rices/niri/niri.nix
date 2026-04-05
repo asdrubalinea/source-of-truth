@@ -111,7 +111,7 @@ in
       # Keybindings
       binds = with pkgs; {
         # Terminal and launcher
-        "Mod+Return".action.spawn = [ "${pkgs.kitty}/bin/kitty" ];
+        "Mod+Return".action.spawn = [ "${pkgs.wezterm}/bin/wezterm" ];
         "Mod+Space".action.spawn = [
           "${pkgs.tofi}/bin/tofi-drun"
           "--drun-launch=true"

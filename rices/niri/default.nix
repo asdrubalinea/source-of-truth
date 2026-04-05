@@ -2,6 +2,7 @@
 {
   imports = [
     ./alacritty.nix
+    ./wezterm.nix
     ./niri.nix
     ./kanshi.nix
     ./waybar
