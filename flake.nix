@@ -32,6 +32,10 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
     ucodenix.url = "github:e-tho/ucodenix";
+    nix-cachyos-kernel = {
+      url = "github:xddxdd/nix-cachyos-kernel/release";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
 
     # --- Desktop/UI Components ---
     hyprland = {
@@ -118,6 +122,7 @@
     , ucodenix
     , codex
     , claude-code
+    , nix-cachyos-kernel
     , ...
     }:
     let
@@ -145,6 +150,7 @@
         emacs-overlay.overlay
         niri.overlays.niri
         claude-code.overlays.default
+        nix-cachyos-kernel.overlays.default
       ];
 
       nixpkgsConfig = {

@@ -102,6 +102,13 @@
     };
   };
 
+  services.mako = {
+    enable = true;
+    settings = {
+      default-timeout = 5000;
+    };
+  };
+
   services.wlsunset = {
     enable = true;
     latitude = 45.4642; # Milan, Italy

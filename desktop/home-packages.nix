@@ -118,6 +118,7 @@
     # --- Desktop integration ---
     appimage-run # run AppImages via Nix
     blueman
+    libnotify # notify-send
     networkmanagerapplet
     pavucontrol
     seahorse

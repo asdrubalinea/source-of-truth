@@ -1,8 +1,8 @@
 { pkgs, ... }:
 {
   boot = {
-    # Use recent kernel for Framework hardware support
-    kernelPackages = pkgs.linuxPackages_zen;
+    # CachyOS kernel with BORE scheduler
+    kernelPackages = pkgs.cachyosKernels.linuxPackages-cachyos-latest-lto-x86_64-v4;
 
     # Hibernation support
     resumeDevice = "/dev/mapper/pool-swap";
