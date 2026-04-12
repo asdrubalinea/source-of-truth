@@ -2,7 +2,7 @@
 let
   configApply = pkgs.writeScriptBin "config-apply" ''
     #!${pkgs.stdenv.shell}
-    pushd /persist/source-of-truth
+    pushd /home/irene/source-of-truth
 
     nixos-rebuild switch --flake '.#hydra' --sudo
 
