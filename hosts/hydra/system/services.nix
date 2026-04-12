@@ -1,5 +1,12 @@
 { ... }:
 {
+  systemd.services.vaultwarden = {
+    serviceConfig = {
+      Restart = "always";
+      RestartSec = 5;
+    };
+  };
+
   services = {
     openssh = {
       enable = true;
