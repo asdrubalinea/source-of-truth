@@ -127,6 +127,7 @@
 
     # --- Browsers ---
     brave
+    (callPackage ../packages/brave-origin.nix {})
     firefox
     tor-browser
     google-chrome
