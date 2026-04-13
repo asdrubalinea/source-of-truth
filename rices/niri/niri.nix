@@ -98,10 +98,10 @@ in
       # Spawn commands at startup
       spawn-at-startup = [
         { command = [ "${pkgs.waybar}/bin/waybar" ]; }
-        { command = [ "${pkgs.swww}/bin/swww-daemon" ]; }
+        { command = [ "${pkgs.awww}/bin/awww-daemon" ]; }
         {
           command = [
-            "${pkgs.swww}/bin/swww"
+            "${pkgs.awww}/bin/awww"
             "img"
             "~/.wallpaper"
           ];
@@ -220,7 +220,7 @@ in
       window-rules = windowRules;
       layer-rules = [
         {
-          matches = [ { namespace = "^swww$"; } ];
+          matches = [ { namespace = "^awww$"; } ];
           place-within-backdrop = true;
         }
       ];

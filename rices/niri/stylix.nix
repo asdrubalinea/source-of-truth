@@ -1,5 +1,7 @@
 { pkgs, hostname, ... }:
 {
+  gtk.gtk4.theme = null;
+
   stylix = {
     enable = true;
     base16Scheme = "${pkgs.base16-schemes}/share/themes/framer.yaml";

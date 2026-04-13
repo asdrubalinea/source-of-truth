@@ -69,6 +69,7 @@
     # Version control
     git = {
       enable = true;
+      signing.format = null;
       settings.user = {
         name = "Irene";
         email = "git@irene.foo";

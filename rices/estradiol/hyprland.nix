@@ -88,12 +88,12 @@ in
 
       exec-once = [
         "${pkgs.waybar}/bin/waybar &"
-        "${pkgs.swww}/bin/swww-daemon &"
+        "${pkgs.awww}/bin/awww-daemon &"
         "${detectLidState}/bin/hypr-detect-lid-state"
       ];
 
       exec = [
-        "${pkgs.swww}/bin/swww img ~/.wallpaper"
+        "${pkgs.awww}/bin/awww img ~/.wallpaper"
       ];
 
       # Environment variables

@@ -1,5 +1,11 @@
 { pkgs, ... }:
 {
+  services.scx = {
+    # Enable the sched_ext framework and the scx_bpfland scheduler
+    enable = true;
+    scheduler = "scx_bpfland"; # Prioritizes foreground interactive tasks
+  };
+
   boot = {
     # CachyOS kernel with BORE scheduler
     kernelPackages = pkgs.cachyosKernels.linuxPackages-cachyos-latest-lto-x86_64-v4;
