@@ -32,10 +32,17 @@
         name = "DejaVu Sans";
       };
 
-      monospace = {
-        package = pkgs.maple-mono.truetype;
-        name = "Maple Mono";
-      };
+      monospace =
+        if hostname == "tempest" then
+          {
+            package = pkgs.nerd-fonts.iosevka-term;
+            name = "IosevkaTerm Nerd Font";
+          }
+        else
+          {
+            package = pkgs.maple-mono.truetype;
+            name = "Maple Mono";
+          };
 
       emoji = {
         package = pkgs.noto-fonts-color-emoji;
