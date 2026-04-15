@@ -53,6 +53,7 @@ in
         mouse = {
           natural-scroll = false;
           accel-speed = -0.4;
+          scroll-factor = 0.8;
         };
       };
 
