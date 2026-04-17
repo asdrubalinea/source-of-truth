@@ -8,7 +8,7 @@
 
   boot = {
     # CachyOS kernel with BORE scheduler
-    kernelPackages = pkgs.cachyosKernels.linuxPackages-cachyos-latest-lto-x86_64-v4;
+    kernelPackages = pkgs.cachyosKernels.linuxPackages-cachyos-latest-lto-zen4;
 
     # Hibernation support
     resumeDevice = "/dev/mapper/pool-swap";
