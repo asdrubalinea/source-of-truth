@@ -50,6 +50,7 @@
         bmewburn.vscode-intelephense-client
         xdebug.php-debug
         mkhl.direnv
+        vue.volar
       ];
       keybindings = [
         {
