@@ -1,14 +1,13 @@
-{ config, pkgs, ... }:
+{ pkgs, ... }:
 
-{
-  programs.emacs = {
-    enable = true;
-    extraPackages = epkgs: [ epkgs.vterm ];
-    extraConfig = builtins.readFile ./init.el;
+let
+  myEmacs = pkgs.emacsWithPackagesFromUsePackage {
+    package = pkgs.emacs-pgtk;
+    config = ./init.el;
+    defaultInitFile = true;
+    alwaysEnsure = true;
   };
-
-  # Ensure git is available for Elpaca package manager
-  home.packages = with pkgs; [
-    git
-  ];
+in
+{
+  home.packages = [ myEmacs ];
 }

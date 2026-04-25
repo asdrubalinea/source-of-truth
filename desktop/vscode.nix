@@ -20,6 +20,7 @@
             formatting.command = [ "alejandra" ];
           };
         };
+        "nix.hiddenLanguageServerErrors" = [ "textDocument/definition" ];
         "[nix]" = {
           "editor.defaultFormatter" = "jnoortheen.nix-ide";
           "editor.formatOnSave" = true;

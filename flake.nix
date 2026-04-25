@@ -7,7 +7,7 @@
     nixpkgs-stable.url = "github:nixos/nixpkgs/nixos-25.11";
     nixpkgs-trunk.url = "github:nixos/nixpkgs";
     nixpkgs-custom.url = "github:nixos/nixpkgs";
-    
+
     # --- Core Components ---
     home-manager = {
       url = "github:nix-community/home-manager";
@@ -103,191 +103,190 @@
     claude-code.url = "github:sadjow/claude-code-nix";
   };
 
-  outputs =
-    inputs@{ nixpkgs
-    , nixpkgs-stable
-    , nixpkgs-trunk
-    , nixpkgs-custom
-    , home-manager
-    , hyprland
-    , niri
-    , vscode-server
-    , disko
-    , impermanence
-    , stylix
-    , sops-nix
-    , nixos-hardware
-    , emacs-overlay
-    , lanzaboote
-    , ucodenix
-    , codex
-    , claude-code
-    , nix-cachyos-kernel
-    , ...
-    }:
-    let
-      defaultSystem = "x86_64-linux";
+  outputs = inputs @ {
+    nixpkgs,
+    nixpkgs-stable,
+    nixpkgs-trunk,
+    nixpkgs-custom,
+    home-manager,
+    hyprland,
+    niri,
+    vscode-server,
+    disko,
+    impermanence,
+    stylix,
+    sops-nix,
+    nixos-hardware,
+    emacs-overlay,
+    lanzaboote,
+    ucodenix,
+    codex,
+    claude-code,
+    nix-cachyos-kernel,
+    ...
+  }: let
+    defaultSystem = "x86_64-linux";
 
-      multiChannelOverlay = final: prev: {
-        stable = import nixpkgs-stable {
-          system = final.stdenv.hostPlatform.system;
-          config = final.config;
-        };
-
-        trunk = import nixpkgs-trunk {
-          system = final.stdenv.hostPlatform.system;
-          config = final.config;
-        };
-
-        custom = import nixpkgs-custom {
-          system = final.stdenv.hostPlatform.system;
-          config = final.config;
-        };
+    multiChannelOverlay = final: prev: {
+      stable = import nixpkgs-stable {
+        system = final.stdenv.hostPlatform.system;
+        config = final.config;
       };
 
-      overlays = [
-        multiChannelOverlay
-        emacs-overlay.overlay
-        niri.overlays.niri
-        claude-code.overlays.default
-        nix-cachyos-kernel.overlays.default
-      ];
-
-      nixpkgsConfig = {
-        allowUnfree = true;
-        # rocmSupport = true;
+      trunk = import nixpkgs-trunk {
+        system = final.stdenv.hostPlatform.system;
+        config = final.config;
       };
 
-      mkPkgs = args:
-        import nixpkgs ({
+      custom = import nixpkgs-custom {
+        system = final.stdenv.hostPlatform.system;
+        config = final.config;
+      };
+    };
+
+    overlays = [
+      multiChannelOverlay
+      emacs-overlay.overlay
+      niri.overlays.niri
+      claude-code.overlays.default
+      nix-cachyos-kernel.overlays.default
+    ];
+
+    nixpkgsConfig = {
+      allowUnfree = true;
+      # rocmSupport = true;
+    };
+
+    mkPkgs = args:
+      import nixpkgs ({
           system = defaultSystem;
           config = nixpkgsConfig;
           overlays = overlays;
-        } // args);
+        }
+        // args);
 
-      lib = nixpkgs.lib;
-    in
-    {
-      nixosConfigurations = {
-        "orchid" = lib.nixosSystem {
-          specialArgs = {
-            inherit inputs;
-            hostname = "orchid";
-          };
-
-          modules = [
-            {
-              nixpkgs = {
-                hostPlatform = defaultSystem;
-                config = nixpkgsConfig;
-                overlays = overlays;
-              };
-            }
-            niri.nixosModules.niri
-
-            ./hosts/orchid/default.nix
-          ];
+    lib = nixpkgs.lib;
+  in {
+    nixosConfigurations = {
+      "orchid" = lib.nixosSystem {
+        specialArgs = {
+          inherit inputs;
+          hostname = "orchid";
         };
 
-        tempest = lib.nixosSystem {
-          specialArgs = {
-            inherit inputs;
-            hostname = "tempest";
-          };
+        modules = [
+          {
+            nixpkgs = {
+              hostPlatform = defaultSystem;
+              config = nixpkgsConfig;
+              overlays = overlays;
+            };
+          }
+          niri.nixosModules.niri
 
-          modules = [
-            {
-              nixpkgs = {
-                hostPlatform = defaultSystem;
-                config = nixpkgsConfig;
-                overlays = overlays;
-              };
-            }
-            disko.nixosModules.disko
-            impermanence.nixosModules.impermanence
-            nixos-hardware.nixosModules.framework-amd-ai-300-series
-            lanzaboote.nixosModules.lanzaboote
-            ucodenix.nixosModules.default
-            niri.nixosModules.niri
-
-            ./disks/tempest.nix
-            ./hosts/tempest/default.nix
-
-            home-manager.nixosModules.home-manager
-            {
-              home-manager = {
-                extraSpecialArgs = {
-                  inherit inputs;
-                  hostname = "tempest";
-                };
-                backupFileExtension = "backup";
-                useGlobalPkgs = false;
-                useUserPackages = true;
-                sharedModules = [
-                  {
-                    nixpkgs = {
-                      config = nixpkgsConfig;
-                      overlays = overlays;
-                    };
-                  }
-                ];
-
-                users = {
-                  irene = import ./homes/tempest.nix;
-                  # plasma = import ./homes/plasma.nix;
-                };
-              };
-            }
-          ];
-        };
-
-        hydra = lib.nixosSystem {
-          specialArgs = {
-            inherit inputs;
-            hostname = "hydra";
-          };
-
-          modules = [
-            {
-              nixpkgs = {
-                hostPlatform = defaultSystem;
-                config = nixpkgsConfig;
-                overlays = overlays;
-              };
-            }
-            disko.nixosModules.disko
-
-            ./disks/hydra.nix
-            ./hosts/hydra/default.nix
-          ];
-        };
+          ./hosts/orchid/default.nix
+        ];
       };
 
-      homeConfigurations = {
-        "irene@orchid" = home-manager.lib.homeManagerConfiguration {
-          pkgs = mkPkgs { };
-          extraSpecialArgs = {
-            inherit inputs;
-            hostname = "orchid";
-          };
-
-          modules = [
-            hyprland.homeManagerModules.default
-            vscode-server.homeModules.default
-            niri.homeModules.config
-            stylix.homeModules.stylix
-
-            ./homes/orchid.nix
-
-            {
-              home = {
-                username = "irene";
-                homeDirectory = "/home/irene";
-                stateVersion = "23.05";
-              };
-            }
-          ];
+      tempest = lib.nixosSystem {
+        specialArgs = {
+          inherit inputs;
+          hostname = "tempest";
         };
+
+        modules = [
+          {
+            nixpkgs = {
+              hostPlatform = defaultSystem;
+              config = nixpkgsConfig;
+              overlays = overlays;
+            };
+          }
+          disko.nixosModules.disko
+          impermanence.nixosModules.impermanence
+          nixos-hardware.nixosModules.framework-amd-ai-300-series
+          lanzaboote.nixosModules.lanzaboote
+          ucodenix.nixosModules.default
+          niri.nixosModules.niri
+
+          ./disks/tempest.nix
+          ./hosts/tempest/default.nix
+
+          home-manager.nixosModules.home-manager
+          {
+            home-manager = {
+              extraSpecialArgs = {
+                inherit inputs;
+                hostname = "tempest";
+              };
+              backupFileExtension = "backup";
+              useGlobalPkgs = false;
+              useUserPackages = true;
+              sharedModules = [
+                {
+                  nixpkgs = {
+                    config = nixpkgsConfig;
+                    overlays = overlays;
+                  };
+                }
+              ];
+
+              users = {
+                irene = import ./homes/tempest.nix;
+                # plasma = import ./homes/plasma.nix;
+              };
+            };
+          }
+        ];
+      };
+
+      hydra = lib.nixosSystem {
+        specialArgs = {
+          inherit inputs;
+          hostname = "hydra";
+        };
+
+        modules = [
+          {
+            nixpkgs = {
+              hostPlatform = defaultSystem;
+              config = nixpkgsConfig;
+              overlays = overlays;
+            };
+          }
+          disko.nixosModules.disko
+
+          ./disks/hydra.nix
+          ./hosts/hydra/default.nix
+        ];
       };
     };
+
+    homeConfigurations = {
+      "irene@orchid" = home-manager.lib.homeManagerConfiguration {
+        pkgs = mkPkgs {};
+        extraSpecialArgs = {
+          inherit inputs;
+          hostname = "orchid";
+        };
+
+        modules = [
+          hyprland.homeManagerModules.default
+          vscode-server.homeModules.default
+          niri.homeModules.config
+          stylix.homeModules.stylix
+
+          ./homes/orchid.nix
+
+          {
+            home = {
+              username = "irene";
+              homeDirectory = "/home/irene";
+              stateVersion = "23.05";
+            };
+          }
+        ];
+      };
+    };
+  };
 }

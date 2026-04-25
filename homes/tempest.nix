@@ -12,7 +12,7 @@
     ../desktop/zed-editor
     ../desktop/vscode.nix
     ../desktop/helix.nix
-    # ../desktop/emacs
+    ../desktop/emacs
     ../desktop/tmux.nix
     ../desktop/home-packages.nix
 
@@ -95,12 +95,6 @@
           style = "bold green";
         };
       };
-    };
-
-    # Emacs editor
-    emacs = {
-      enable = false;
-      package = pkgs.emacs-pgtk;
     };
   };
 
