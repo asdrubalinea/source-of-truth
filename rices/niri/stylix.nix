@@ -11,6 +11,7 @@
       ghostty.enable = true;
       kitty.enable = true;
       wezterm.enable = true;
+      vscode.enable = false;
     };
 
     fonts = {

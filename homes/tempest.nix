@@ -10,6 +10,7 @@
 
     # Applications and tools
     ../desktop/zed-editor
+    ../desktop/vscode.nix
     ../desktop/helix.nix
     # ../desktop/emacs
     ../desktop/tmux.nix
