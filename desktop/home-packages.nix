@@ -83,6 +83,7 @@
     nix-tree
     nixd # Nix LSP
     nixpkgs-fmt
+    gh # GitHub CLI (used by magit/forge)
     # trunk.codex
 
     inputs.hn-tui-flake.packages.${stdenv.hostPlatform.system}.hackernews-tui # hn TUI
@@ -92,8 +93,23 @@
     lua
     luarocks
     nodejs
+    php
     python3
     uv # Python package manager
+
+    # Language servers (consumed by emacs eglot, helix, etc.)
+    pyright
+    ruff
+    rust-analyzer
+    gopls
+    clang-tools
+    typescript-language-server
+    tinymist # Typst LSP
+    texlab # LaTeX LSP
+    bash-language-server
+    marksman # Markdown LSP
+    phpactor # PHP LSP
+    vue-language-server # Vue 3 LSP (Volar)
 
     # --- Containers & virtualization ---
     distrobox
@@ -159,6 +175,9 @@
     vlc
     onlyoffice-desktopeditors
     xournalpp
+    typst
+    (texlive.combine { inherit (texlive) scheme-full; })
+    zathura # PDF viewer with SyncTeX inverse search
 
     # --- Data & databases ---
     dbeaver-bin

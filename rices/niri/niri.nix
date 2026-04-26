@@ -98,6 +98,17 @@ in
 
       # Spawn commands at startup
       spawn-at-startup = [
+        {
+          command = [
+            "${pkgs.systemd}/bin/systemctl"
+            "--user"
+            "import-environment"
+            "WAYLAND_DISPLAY"
+            "XDG_CURRENT_DESKTOP"
+            "DBUS_SESSION_BUS_ADDRESS"
+            "XAUTHORITY"
+          ];
+        }
         { command = [ "${pkgs.waybar}/bin/waybar" ]; }
         { command = [ "${pkgs.awww}/bin/awww-daemon" ]; }
         {
@@ -113,6 +124,10 @@ in
       binds = with pkgs; {
         # Terminal and launcher
         "Mod+Return".action.spawn = [ "${pkgs.kitty}/bin/kitty" ];
+        # New Emacs frame on the running daemon. Bare "emacsclient" so niri
+        # picks up the home-manager-installed myEmacs from PATH rather than
+        # pulling a second emacs build into the niri closure.
+        "Mod+Shift+Return".action.spawn = [ "emacsclient" "-c" ];
         "Mod+Space".action.spawn = [
           "${pkgs.tofi}/bin/tofi-drun"
           "--drun-launch=true"
