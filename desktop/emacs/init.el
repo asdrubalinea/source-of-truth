@@ -442,13 +442,7 @@
   :ensure nil
   :custom
   (project-vc-extra-root-markers '(".project" ".git"))
-  (project-switch-commands
-   '((project-find-file "Find file")
-     (project-find-regexp "Regexp")
-     (project-dired "Dired")
-     (project-vc-dir "VC-Dir")
-     (magit-project-status "Magit")
-     (project-eshell "Eshell")))
+  (project-switch-commands #'project-dired)
   :config
   (defun my/project-switch-in-new-frame ()
     "Pick a project and open it in a new frame named after the project."
