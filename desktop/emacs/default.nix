@@ -13,7 +13,6 @@ let
       use-package
       treesit-grammars.with-all-grammars
       vterm
-      pdf-tools
     ];
   };
 in

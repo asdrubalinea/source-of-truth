@@ -57,34 +57,12 @@
       mouse-wheel-follow-mouse t)
 
 ;;; Theme ----------------------------------------------------------------------
-;; Themes are loaded lazily — only `load-theme` (or `consult-theme` at SPC t t)
-;; pulls a given theme in.  Settings below tune each family in case it's picked.
-
-(setq modus-themes-italic-constructs t
-      modus-themes-bold-constructs t
-      modus-themes-mixed-fonts t
-      modus-themes-org-blocks 'gray-background)
-
-(use-package ef-themes
-  :defer t
-  :custom
-  (ef-themes-mixed-fonts t)
-  (ef-themes-variable-pitch-ui t))
-
-(use-package doom-themes
-  :defer t
-  :custom
-  (doom-themes-enable-bold t)
-  (doom-themes-enable-italic t)
-  :config
-  (doom-themes-org-config))
 
 ;; Flavors: latte (light), frappe, macchiato, mocha (darkest).
 (use-package catppuccin-theme
   :defer t
   :custom (catppuccin-flavor 'mocha))
 
-;; Hot-swap any time via `SPC t t' (consult-theme).
 (load-theme 'catppuccin t)
 
 ;;; UI polish ------------------------------------------------------------------
@@ -92,18 +70,6 @@
 (use-package nerd-icons
   :demand t
   :custom (nerd-icons-font-family "Symbols Nerd Font Mono"))
-
-(use-package nerd-icons-completion
-  :after marginalia
-  :config (nerd-icons-completion-mode)
-  :hook (marginalia-mode . nerd-icons-completion-marginalia-setup))
-
-(use-package nerd-icons-corfu
-  :after corfu
-  :config (add-to-list 'corfu-margin-formatters #'nerd-icons-corfu-formatter))
-
-(use-package nerd-icons-dired
-  :hook (dired-mode . nerd-icons-dired-mode))
 
 (use-package doom-modeline
   :init (doom-modeline-mode 1)
@@ -114,97 +80,11 @@
   (doom-modeline-minor-modes nil)
   (doom-modeline-bar-width 4))
 
-(use-package breadcrumb
-  :hook ((prog-mode . breadcrumb-local-mode)
-         (text-mode . breadcrumb-local-mode)))
-
-(use-package indent-bars
-  :hook (prog-mode . indent-bars-mode)
-  :custom
-  (indent-bars-color '(highlight :face-bg t :blend 0.2))
-  (indent-bars-pattern ".")
-  (indent-bars-width-frac 0.15)
-  (indent-bars-pad-frac 0.1)
-  (indent-bars-zigzag nil)
-  (indent-bars-color-by-depth nil)
-  (indent-bars-highlight-current-depth '(:blend 0.4))
-  (indent-bars-display-on-blank-lines nil))
-
-(use-package rainbow-delimiters
-  :hook (prog-mode . rainbow-delimiters-mode))
-
-(use-package hl-todo
-  :hook (prog-mode . hl-todo-mode)
-  :custom
-  (hl-todo-keyword-faces
-   '(("TODO"  . "#fabd2f")
-     ("FIXME" . "#fb4934")
-     ("HACK"  . "#fe8019")
-     ("NOTE"  . "#83a598")
-     ("XXX"   . "#fb4934"))))
-
 (use-package diff-hl
   :hook ((prog-mode . diff-hl-mode)
          (magit-pre-refresh . diff-hl-magit-pre-refresh)
          (magit-post-refresh . diff-hl-magit-post-refresh))
   :config (diff-hl-flydiff-mode 1))
-
-;; Breathing room around mode-line / header-line / fringe / internal border.
-;; Overrides the 8px `internal-border-width' from early-init.el at runtime.
-(use-package spacious-padding
-  :demand t
-  :custom
-  (spacious-padding-widths
-   '( :internal-border-width 16
-      :header-line-width 4
-      :mode-line-width 6
-      :tab-width 4
-      :right-divider-width 24
-      :scroll-bar-width 8
-      :fringe-width 12))
-  (spacious-padding-subtle-mode-line
-   '(:mode-line-active default :mode-line-inactive vertical-border))
-  :config (spacious-padding-mode 1))
-
-;; Brief flash on big jumps / yank / kill — visual feedback for motion.
-(use-package pulsar
-  :demand t
-  :custom
-  (pulsar-pulse t)
-  (pulsar-delay 0.04)
-  (pulsar-iterations 8)
-  (pulsar-face 'pulsar-cyan)
-  :config
-  (dolist (cmd '(evil-scroll-up evil-scroll-down
-                                evil-goto-line evil-goto-first-line
-                                recenter-top-bottom other-window
-                                xref-find-definitions xref-go-back
-                                consult-line consult-imenu))
-    (add-to-list 'pulsar-pulse-functions cmd))
-  (pulsar-global-mode 1)
-  (add-hook 'next-error-hook #'pulsar-pulse-line)
-  (add-hook 'minibuffer-setup-hook #'pulsar-pulse-line))
-
-;; Shade non-file buffers (popups, sidebar, magit, help) so they read as chrome.
-(use-package solaire-mode
-  :demand t
-  :config (solaire-global-mode 1))
-
-;; Centered text column in prose buffers.
-(use-package olivetti
-  :hook ((text-mode . olivetti-mode)
-         (markdown-mode . olivetti-mode))
-  :custom
-  (olivetti-body-width 100)
-  (olivetti-style 'fancy))
-
-;; Proportional prose with monospace code blocks (uses fontaine's Inter).
-(use-package mixed-pitch
-  :hook (markdown-mode . mixed-pitch-mode))
-
-;; Render ^L page breaks as horizontal rules in elisp / help buffers.
-(use-package page-break-lines
-  :hook ((prog-mode help-mode) . page-break-lines-mode))
 
 ;; Workflow is one frame per project, tiled by niri — no in-Emacs tab-bar.
 ;; Frame title carries the project name so niri window-rules can match on it.
@@ -418,12 +298,6 @@ Currently only Vue single-file components get one."
 
 ;;; Help & docs ---------------------------------------------------------------
 
-(use-package eldoc-box
-  :hook (eglot-managed-mode . eldoc-box-hover-at-point-mode)
-  :custom
-  (eldoc-box-max-pixel-width 600)
-  (eldoc-box-max-pixel-height 400))
-
 (use-package helpful
   :bind (("C-h f" . helpful-callable)
          ("C-h v" . helpful-variable)
@@ -564,9 +438,7 @@ Currently only Vue single-file components get one."
 (use-package org
   :defer t
   :hook ((org-mode . org-indent-mode)
-         (org-mode . mixed-pitch-mode)
-         (org-mode . visual-line-mode)
-         (org-mode . olivetti-mode))
+         (org-mode . visual-line-mode))
   :custom
   (org-directory "~/org")
   (org-startup-folded 'content)
@@ -588,37 +460,6 @@ Currently only Vue single-file components get one."
 
 (use-package org-appear
   :hook (org-mode . org-appear-mode))
-
-(use-package org-roam
-  :defer t
-  :custom (org-roam-directory "~/org/roam")
-  :config (org-roam-db-autosync-mode 1))
-
-;;; LaTeX / AUCTeX / pdf-tools -------------------------------------------------
-
-(use-package auctex
-  :defer t
-  :hook ((LaTeX-mode . prettify-symbols-mode)
-         (LaTeX-mode . turn-on-reftex)
-         (LaTeX-mode . eglot-ensure))
-  :custom
-  (TeX-auto-save t)
-  (TeX-parse-self t)
-  (TeX-master nil)
-  (TeX-PDF-mode t)
-  (TeX-source-correlate-mode t)
-  (TeX-source-correlate-method 'synctex)
-  (TeX-source-correlate-start-server t)
-  (TeX-view-program-selection '((output-pdf "Zathura"))))
-
-(use-package cdlatex
-  :hook ((LaTeX-mode . turn-on-cdlatex)
-         (org-mode . turn-on-org-cdlatex)))
-
-(use-package pdf-tools
-  :defer t
-  :magic ("%PDF" . pdf-view-mode)
-  :config (pdf-tools-install :no-query))
 
 ;;; Leader keybindings --------------------------------------------------------
 
