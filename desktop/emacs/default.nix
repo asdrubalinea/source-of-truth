@@ -5,6 +5,9 @@ let
     package = pkgs.emacs-pgtk;
     config = ./init.el;
     defaultInitFile = false;
+    # Parse-time: install every use-package'd package unless it has :ensure nil.
+    # Runtime: init.el sets `use-package-always-ensure nil` so Emacs never
+    # tries to install at startup — packages come from this Nix wrapper.
     alwaysEnsure = true;
     extraEmacsPackages = epkgs: with epkgs; [
       use-package

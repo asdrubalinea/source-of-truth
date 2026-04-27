@@ -56,8 +56,6 @@
       mouse-wheel-progressive-speed nil
       mouse-wheel-follow-mouse t)
 
-(when (fboundp 'which-key-mode) (which-key-mode 1))
-
 ;;; Theme ----------------------------------------------------------------------
 ;; Themes are loaded lazily — only `load-theme` (or `consult-theme` at SPC t t)
 ;; pulls a given theme in.  Settings below tune each family in case it's picked.
@@ -81,7 +79,13 @@
   :config
   (doom-themes-org-config))
 
-(load-theme 'modus-vivendi-tinted t)
+;; Flavors: latte (light), frappe, macchiato, mocha (darkest).
+(use-package catppuccin-theme
+  :defer t
+  :custom (catppuccin-flavor 'mocha))
+
+;; Hot-swap any time via `SPC t t' (consult-theme).
+(load-theme 'catppuccin t)
 
 ;;; UI polish ------------------------------------------------------------------
 
@@ -144,6 +148,63 @@
          (magit-pre-refresh . diff-hl-magit-pre-refresh)
          (magit-post-refresh . diff-hl-magit-post-refresh))
   :config (diff-hl-flydiff-mode 1))
+
+;; Breathing room around mode-line / header-line / fringe / internal border.
+;; Overrides the 8px `internal-border-width' from early-init.el at runtime.
+(use-package spacious-padding
+  :demand t
+  :custom
+  (spacious-padding-widths
+   '( :internal-border-width 16
+      :header-line-width 4
+      :mode-line-width 6
+      :tab-width 4
+      :right-divider-width 24
+      :scroll-bar-width 8
+      :fringe-width 12))
+  (spacious-padding-subtle-mode-line
+   '(:mode-line-active default :mode-line-inactive vertical-border))
+  :config (spacious-padding-mode 1))
+
+;; Brief flash on big jumps / yank / kill — visual feedback for motion.
+(use-package pulsar
+  :demand t
+  :custom
+  (pulsar-pulse t)
+  (pulsar-delay 0.04)
+  (pulsar-iterations 8)
+  (pulsar-face 'pulsar-cyan)
+  :config
+  (dolist (cmd '(evil-scroll-up evil-scroll-down
+                                evil-goto-line evil-goto-first-line
+                                recenter-top-bottom other-window
+                                xref-find-definitions xref-go-back
+                                consult-line consult-imenu))
+    (add-to-list 'pulsar-pulse-functions cmd))
+  (pulsar-global-mode 1)
+  (add-hook 'next-error-hook #'pulsar-pulse-line)
+  (add-hook 'minibuffer-setup-hook #'pulsar-pulse-line))
+
+;; Shade non-file buffers (popups, sidebar, magit, help) so they read as chrome.
+(use-package solaire-mode
+  :demand t
+  :config (solaire-global-mode 1))
+
+;; Centered text column in prose buffers.
+(use-package olivetti
+  :hook ((text-mode . olivetti-mode)
+         (markdown-mode . olivetti-mode))
+  :custom
+  (olivetti-body-width 100)
+  (olivetti-style 'fancy))
+
+;; Proportional prose with monospace code blocks (uses fontaine's Inter).
+(use-package mixed-pitch
+  :hook (markdown-mode . mixed-pitch-mode))
+
+;; Render ^L page breaks as horizontal rules in elisp / help buffers.
+(use-package page-break-lines
+  :hook ((prog-mode help-mode) . page-break-lines-mode))
 
 ;; Workflow is one frame per project, tiled by niri — no in-Emacs tab-bar.
 ;; Frame title carries the project name so niri window-rules can match on it.
@@ -276,12 +337,6 @@
   (add-hook 'completion-at-point-functions #'cape-dabbrev)
   (add-hook 'completion-at-point-functions #'cape-file))
 
-(use-package kind-icon
-  :after corfu
-  :custom (kind-icon-default-face 'corfu-default)
-  :config
-  (add-to-list 'corfu-margin-formatters #'kind-icon-margin-formatter))
-
 (use-package which-key
   :init (which-key-mode 1)
   :custom
@@ -319,19 +374,14 @@
                (php-mode . php-ts-mode)))
     (add-to-list 'major-mode-remap-alist m)))
 
-(use-package treesit-auto
-  :demand t
-  :custom (treesit-auto-install nil)
-  :config (global-treesit-auto-mode))
-
 ;;; LSP / diagnostics / docs ---------------------------------------------------
 
 (use-package eglot
   :ensure nil
   :hook ((python-ts-mode rust-ts-mode go-ts-mode
-          c-ts-mode c++-ts-mode tsx-ts-mode typescript-ts-mode
-          nix-mode typst-ts-mode
-          php-ts-mode vue-mode) . eglot-ensure)
+                         c-ts-mode c++-ts-mode tsx-ts-mode typescript-ts-mode
+                         nix-mode typst-ts-mode
+                         php-ts-mode) . eglot-ensure)
   :custom
   (eglot-autoshutdown t)
   (eglot-events-buffer-size 0)
@@ -339,12 +389,18 @@
   (eglot-extend-to-xref t)
   :config
   (fset #'jsonrpc--log-event #'ignore)
+  (defun my/eglot-web-mode-server (_interactive)
+    "Pick a language server for the current `web-mode' buffer.
+Currently only Vue single-file components get one."
+    (cond
+     ((and buffer-file-name (string-match-p "\\.vue\\'" buffer-file-name))
+      '("vue-language-server" "--stdio"))))
   (add-to-list 'eglot-server-programs '(nix-mode . ("nil")))
   (add-to-list 'eglot-server-programs '(typst-ts-mode . ("tinymist")))
   (add-to-list 'eglot-server-programs
                '(php-ts-mode . ("phpactor" "language-server")))
   (add-to-list 'eglot-server-programs
-               '(vue-mode . ("vue-language-server" "--stdio"))))
+               '(web-mode . my/eglot-web-mode-server)))
 
 (use-package flymake
   :ensure nil
@@ -388,8 +444,10 @@
   :mode ("\\.typ\\'" . typst-ts-mode))
 
 (use-package web-mode
-  :mode (("\\.html?\\'" . web-mode)
-         ("\\.blade\\.php\\'" . web-mode))
+  :mode (("\\.html?\\'"      . web-mode)
+         ("\\.blade\\.php\\'" . web-mode)
+         ("\\.vue\\'"         . web-mode))
+  :hook (web-mode . my/maybe-vue-eglot)
   :custom
   (web-mode-markup-indent-offset 2)
   (web-mode-css-indent-offset 2)
@@ -398,9 +456,11 @@
   (web-mode-enable-auto-quoting nil)
   (web-mode-enable-current-element-highlight t)
   :config
-  (define-derived-mode vue-mode web-mode "Vue"
-    "Major mode for Vue single-file components.")
-  (add-to-list 'auto-mode-alist '("\\.vue\\'" . vue-mode)))
+  (defun my/maybe-vue-eglot ()
+    "Start eglot in `web-mode' buffers visiting Vue single-file components."
+    (when (and buffer-file-name
+               (string-match-p "\\.vue\\'" buffer-file-name))
+      (eglot-ensure))))
 
 ;;; Project & workspace -------------------------------------------------------
 
@@ -418,13 +478,13 @@
   (with-eval-after-load 'consult
     (defvar beframe-consult-source
       `(:name "Frame buffers"
-        :narrow ?F
-        :category buffer
-        :face beframe-face
-        :history beframe-history
-        :items ,#'beframe-buffer-names
-        :action ,#'switch-to-buffer
-        :state ,#'consult--buffer-state))
+              :narrow ?F
+              :category buffer
+              :face beframe-face
+              :history beframe-history
+              :items ,#'beframe-buffer-names
+              :action ,#'switch-to-buffer
+              :state ,#'consult--buffer-state))
     (add-to-list 'consult-buffer-sources 'beframe-consult-source)))
 
 (use-package dired-sidebar
@@ -455,8 +515,6 @@
 
 ;;; Magit ----------------------------------------------------------------------
 
-(use-package transient :defer t)
-
 (use-package magit
   :defer t
   :bind (("C-x g" . magit-status))
@@ -473,9 +531,9 @@
 (use-package claude-code
   :defer t
   :commands (claude-code-run claude-code-transient claude-code-send-region
-             claude-code-switch-to-buffer claude-code-quit
-             claude-code-insert-current-file-path-to-session
-             claude-code-open-prompt-file)
+                             claude-code-switch-to-buffer claude-code-quit
+                             claude-code-insert-current-file-path-to-session
+                             claude-code-open-prompt-file)
   :init
   ;; Package autoloads point at subfiles (claude-code-core, -ui, ...) which
   ;; don't (require 'vterm); only the umbrella claude-code.el does. Without
@@ -506,8 +564,9 @@
 (use-package org
   :defer t
   :hook ((org-mode . org-indent-mode)
-         (org-mode . variable-pitch-mode)
-         (org-mode . visual-line-mode))
+         (org-mode . mixed-pitch-mode)
+         (org-mode . visual-line-mode)
+         (org-mode . olivetti-mode))
   :custom
   (org-directory "~/org")
   (org-startup-folded 'content)
