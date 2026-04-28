@@ -10,6 +10,24 @@
       use-package-always-ensure nil
       use-package-expand-minimally t)
 
+;;; Profiling infrastructure --------------------------------------------------
+
+;; Native-compile every elisp file we load (and on save). Catches packages
+;; whose maintainers didn't ship .eln/.elc.
+(use-package compile-angel
+  :demand t
+  :custom (compile-angel-verbose nil)
+  :config
+  (compile-angel-on-load-mode)
+  (add-hook 'emacs-lisp-mode-hook #'compile-angel-on-save-local-mode))
+
+;; Startup profiler — only loaded under EMACS_BENCH=1.
+;; Run: `EMACS_BENCH=1 emacs` then M-x benchmark-init/show-durations-tree.
+(when (getenv "EMACS_BENCH")
+  (use-package benchmark-init
+    :demand t
+    :config (add-hook 'after-init-hook #'benchmark-init/deactivate)))
+
 ;;; Core defaults --------------------------------------------------------------
 
 (setopt
@@ -24,19 +42,34 @@
  ring-bell-function 'ignore
  read-process-output-max (* 4 1024 1024)
  process-adaptive-read-buffering nil
- inhibit-compacting-font-caches t
  redisplay-skip-fontification-on-input t
+ redisplay-skip-cursor-motion t
  fast-but-imprecise-scrolling t
- jit-lock-defer-time 0
+ jit-lock-defer-time 0.05
+ jit-lock-stealth-time 1
+ idle-update-delay 1.0
+ auto-window-vscroll nil
+ frame-resize-pixelwise t
+ window-resize-pixelwise t
+ highlight-nonselected-windows nil
  bidi-inhibit-bpa t)
 
 (setq-default indent-tabs-mode nil
               tab-width 2
+              cursor-in-non-selected-windows nil
               bidi-display-reordering 'left-to-right
               bidi-paragraph-direction 'left-to-right)
 
-(setq display-line-numbers-type 'relative)
-(global-display-line-numbers-mode 1)
+;; Absolute numbers redraw the gutter only when crossing a line; relative
+;; redraws every cursor motion. Opt-in to prog/text rather than global so
+;; magit/help/dired/vterm don't pay the cost.
+(setq display-line-numbers-type t
+      display-line-numbers-width-start t
+      display-line-numbers-grow-only t)
+(dolist (h '(prog-mode-hook text-mode-hook conf-mode-hook))
+  (add-hook h #'display-line-numbers-mode))
+
+(blink-cursor-mode -1)
 
 (global-auto-revert-mode 1)
 (savehist-mode 1)
@@ -47,6 +80,27 @@
 (repeat-mode 1)
 (global-so-long-mode 1)
 (pixel-scroll-precision-mode 1)
+
+;; Demote the expensive minor modes when a buffer is big enough that they
+;; show up in profiles. Complements `global-so-long-mode' (which catches
+;; minified single-line files).
+(defun my/buffer-is-heavy-p ()
+  (or (> (buffer-size) (* 256 1024))
+      (and buffer-file-name
+           (> (or (file-attribute-size (file-attributes buffer-file-name)) 0)
+              (* 256 1024)))))
+
+(defun my/tame-heavy-buffer ()
+  (when (my/buffer-is-heavy-p)
+    (when (bound-and-true-p display-line-numbers-mode) (display-line-numbers-mode -1))
+    (when (bound-and-true-p diff-hl-mode)              (diff-hl-mode -1))
+    (when (bound-and-true-p flymake-mode)              (flymake-mode -1))
+    (when (fboundp 'eldoc-mode)                        (eldoc-mode -1))
+    (setq-local bidi-paragraph-direction 'left-to-right
+                bidi-inhibit-bpa t)))
+
+(add-hook 'find-file-hook #'my/tame-heavy-buffer)
+(add-hook 'after-change-major-mode-hook #'my/tame-heavy-buffer)
 ;; Touchpad keeps pixel-precision (smooth glide); discrete mouse-wheel events
 ;; skip interpolation and fall through to plain `mouse-wheel-scroll-amount'.
 (setq pixel-scroll-precision-interpolate-mice nil)
@@ -83,8 +137,13 @@
 (use-package diff-hl
   :hook ((prog-mode . diff-hl-mode)
          (magit-pre-refresh . diff-hl-magit-pre-refresh)
-         (magit-post-refresh . diff-hl-magit-post-refresh))
-  :config (diff-hl-flydiff-mode 1))
+         (magit-post-refresh . diff-hl-magit-post-refresh)))
+
+;; Project / file / imenu path in the header line. Imenu is lazy and the
+;; refresh is throttled, so this is cheap even in big buffers.
+(use-package breadcrumb
+  :demand t
+  :config (breadcrumb-mode 1))
 
 ;; Workflow is one frame per project, tiled by niri — no in-Emacs tab-bar.
 ;; Frame title carries the project name so niri window-rules can match on it.
@@ -100,7 +159,7 @@
   :config
   (setq gcmh-idle-delay 'auto
         gcmh-auto-idle-delay-factor 10
-        gcmh-high-cons-threshold (* 32 1024 1024))
+        gcmh-high-cons-threshold (* 128 1024 1024))
   (gcmh-mode 1))
 
 ;;; Keep state out of ~/.config/emacs ------------------------------------------
@@ -202,7 +261,7 @@
   :init (global-corfu-mode)
   :custom
   (corfu-auto t)
-  (corfu-auto-delay 0.1)
+  (corfu-auto-delay 0.15)
   (corfu-auto-prefix 2)
   (corfu-cycle t)
   (corfu-popupinfo-delay '(0.3 . 0.1)))
@@ -265,8 +324,11 @@
   :custom
   (eglot-autoshutdown t)
   (eglot-events-buffer-size 0)
+  (eglot-events-buffer-config '(:size 0 :format short))
   (eglot-sync-connect 0)
   (eglot-extend-to-xref t)
+  (eglot-send-changes-idle-time 0.5)
+  (eglot-report-progress nil)
   :config
   (fset #'jsonrpc--log-event #'ignore)
   (defun my/eglot-web-mode-server (_interactive)
@@ -285,7 +347,7 @@ Currently only Vue single-file components get one."
 (use-package flymake
   :ensure nil
   :hook (prog-mode . flymake-mode)
-  :custom (flymake-no-changes-timeout 0.5))
+  :custom (flymake-no-changes-timeout 1.0))
 
 (use-package eldoc
   :ensure nil
@@ -363,8 +425,6 @@ Currently only Vue single-file components get one."
 
 (use-package dired-sidebar
   :commands (dired-sidebar-toggle-sidebar dired-sidebar-show-sidebar)
-  :hook ((server-after-make-frame . dired-sidebar-show-sidebar)
-         (window-setup . dired-sidebar-show-sidebar))
   :custom
   (dired-sidebar-theme 'nerd-icons)
   (dired-sidebar-use-term-integration t)
@@ -460,6 +520,16 @@ Currently only Vue single-file components get one."
 
 (use-package org-appear
   :hook (org-mode . org-appear-mode))
+
+;;; Centered prose --------------------------------------------------------------
+
+(use-package olivetti
+  :hook ((text-mode . olivetti-mode)
+         (org-mode  . olivetti-mode))
+  :custom
+  (olivetti-body-width 100)
+  (olivetti-minimum-body-width 80)
+  (olivetti-style 'fancy))
 
 ;;; Leader keybindings --------------------------------------------------------
 
@@ -571,6 +641,7 @@ search with `/' (evil) or C-s, dismiss with q."
     "t l" '(display-line-numbers-mode :wk "line numbers")
     "t w" '(visual-line-mode        :wk "wrap")
     "t s" '(flyspell-mode           :wk "spell")
+    "t o" '(olivetti-mode           :wk "olivetti (center)")
 
     "a"   '(:ignore t :wk "ai / claude")
     "a a" '(claude-code-transient   :wk "claude menu")

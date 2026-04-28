@@ -3,6 +3,20 @@
 (setq gc-cons-threshold most-positive-fixnum
       gc-cons-percentage 0.6)
 
+;; PGTK input loop: default 0.1 means up to 100ms latency per keystroke.
+;; Drop to ~1ms — a few extra wakeups, sub-frame responsiveness.
+(setq pgtk-wait-for-event-timeout 0.001)
+
+;; Cover the first frame's font lookups too — moved out of init.el.
+(setq inhibit-compacting-font-caches t)
+
+;; Belt-and-braces alongside the home-manager onChange that removes
+;; ~/.emacs.d/{early-,}init.elc whenever the source changes: nix store
+;; symlinks have mtime 1970, so any locally-compiled .elc looks "newer"
+;; and would shadow the source. The onChange is the real fix; this just
+;; covers any edge case where it didn't run.
+(setq load-prefer-newer t)
+
 (defvar my/file-name-handler-alist file-name-handler-alist)
 (setq file-name-handler-alist nil)
 (add-hook 'emacs-startup-hook
