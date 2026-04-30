@@ -109,15 +109,6 @@ in
             "XAUTHORITY"
           ];
         }
-        { command = [ "${pkgs.waybar}/bin/waybar" ]; }
-        { command = [ "${pkgs.awww}/bin/awww-daemon" ]; }
-        {
-          command = [
-            "${pkgs.awww}/bin/awww"
-            "img"
-            "~/.wallpaper"
-          ];
-        }
       ];
 
       # Keybindings
@@ -141,6 +132,28 @@ in
         "Mod+Q".action.close-window = { };
         "Mod+F".action.fullscreen-window = { };
         "Mod+M".action.maximize-column = { };
+
+        # Even 50/50 split: resize focused column + its neighbor to 50% each.
+        "Mod+G".action.spawn = [
+          "sh"
+          "-c"
+          ''
+            set -e
+            n=${pkgs.niri-unstable}/bin/niri
+            "$n" msg action set-column-width "50%"
+            before=$("$n" msg --json focused-window | ${pkgs.jq}/bin/jq -r .id)
+            "$n" msg action focus-column-right
+            after=$("$n" msg --json focused-window | ${pkgs.jq}/bin/jq -r .id)
+            if [ "$before" = "$after" ]; then
+              "$n" msg action focus-column-left
+              "$n" msg action set-column-width "50%"
+              "$n" msg action focus-column-right
+            else
+              "$n" msg action set-column-width "50%"
+              "$n" msg action focus-column-left
+            fi
+          ''
+        ];
 
         # Focus movement
         "Mod+Left".action.focus-column-left = { };

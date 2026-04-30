@@ -112,12 +112,10 @@
 
 ;;; Theme ----------------------------------------------------------------------
 
-;; Flavors: latte (light), frappe, macchiato, mocha (darkest).
-(use-package catppuccin-theme
-  :defer t
-  :custom (catppuccin-flavor 'mocha))
-
-(load-theme 'catppuccin t)
+;; `nano-dark' / `nano-light' are themes (deftheme), not functions.
+(use-package nano-theme
+  :demand t
+  :config (load-theme 'nano-dark t))
 
 ;;; UI polish ------------------------------------------------------------------
 
@@ -125,14 +123,15 @@
   :demand t
   :custom (nerd-icons-font-family "Symbols Nerd Font Mono"))
 
-(use-package doom-modeline
-  :init (doom-modeline-mode 1)
-  :custom
-  (doom-modeline-height 28)
-  (doom-modeline-icon t)
-  (doom-modeline-buffer-encoding nil)
-  (doom-modeline-minor-modes nil)
-  (doom-modeline-bar-width 4))
+;; nano-modeline 1.x has no global mode; you install per-major-mode functions
+;; via hooks. `nano-modeline-position' picks header vs footer placement.
+(use-package nano-modeline
+  :demand t
+  :custom (nano-modeline-position #'nano-modeline-footer)
+  :hook ((prog-mode . nano-modeline-prog-mode)
+         (text-mode . nano-modeline-text-mode)
+         (org-mode  . nano-modeline-org-mode)
+         (messages-buffer-mode . nano-modeline-message-mode)))
 
 (use-package diff-hl
   :hook ((prog-mode . diff-hl-mode)
@@ -177,11 +176,11 @@
   :demand t
   :config
   (setq fontaine-presets
-        '((regular :default-family "Maple Mono" :default-height 150
+        '((regular :default-family "Ioskeley Mono" :default-height 150
                    :variable-pitch-family "Inter")
-          (large   :default-family "Maple Mono" :default-height 180
+          (large   :default-family "Ioskeley Mono" :default-height 180
                    :variable-pitch-family "Inter")
-          (presentation :default-family "Maple Mono" :default-height 220
+          (presentation :default-family "Ioskeley Mono" :default-height 220
                         :variable-pitch-family "Inter")))
   (fontaine-mode 1)
   (fontaine-set-preset 'regular)
@@ -662,7 +661,17 @@ search with `/' (evil) or C-s, dismiss with q."
 
     "q"   '(:ignore t :wk "quit")
     "q q" '(save-buffers-kill-emacs :wk "save & quit")
-    "q f" '(delete-frame            :wk "frame")))
+    "q f" '(delete-frame            :wk "frame"))
+
+  ;; Belt-and-suspenders: also bind SPC to the leader map directly in evil's
+  ;; state maps. `:keymaps 'override' above puts the binding in
+  ;; `general-override-mode-map', which sometimes loses priority to evil's
+  ;; default motion bindings — when that happens, SPC falls through to
+  ;; `evil-forward-char' and signals "End of line" instead of opening the leader.
+  (dolist (map (list evil-normal-state-map
+                     evil-visual-state-map
+                     evil-motion-state-map))
+    (define-key map (kbd "SPC") my/leader-map)))
 
 ;;; Startup banner -------------------------------------------------------------
 

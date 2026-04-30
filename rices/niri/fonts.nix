@@ -21,6 +21,7 @@
       ibm-plex
       stix-two
       lmodern
+      (callPackage ../../packages/ioskeley-mono.nix { })
     ] ++ [
       # pkgs.maple-mono
       # inputs.operator-mono.packages.x86_64-linux.default
