@@ -107,7 +107,7 @@
 
   services.wlsunset = {
     enable = true;
-    latitude = 45.4642; # Milan, Italy
-    longitude = 9.1900;
+    latitude = 28.1235; # Las Palmas de Gran Canaria, Spain
+    longitude = -15.4363;
   };
 }
