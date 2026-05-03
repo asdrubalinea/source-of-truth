@@ -1,4 +1,4 @@
-;;; init.el --- -*- lexical-binding: t; -*-
+;;; init.el --- -*- lexical-binding: t; no-byte-compile: t; -*-
 
 ;; Packages are installed by Nix via emacsWithPackagesFromUsePackage,
 ;; which parses the (use-package ...) declarations below at flake-eval

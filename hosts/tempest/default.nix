@@ -45,6 +45,11 @@
     ../../rices/niri/system.nix
   ];
 
+  programs.nh = {
+    enable = true;
+    flake = "/persist/source-of-truth";
+  };
+
   # System Version
   system.stateVersion = "24.11";
 }

@@ -17,7 +17,7 @@
     usbutils
     upower
     bubblewrap
-    trunk.opencode
+    # trunk.opencode
     ddcutil
 
     # --- System info & monitoring ---
@@ -187,6 +187,7 @@
 
     # --- Security testing ---
     burpsuite
+    caido-desktop
 
     # --- Fun & misc ---
     blahaj

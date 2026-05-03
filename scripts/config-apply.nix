@@ -5,7 +5,7 @@ let
     #!${pkgs.stdenv.shell}
     pushd /persist/source-of-truth
 
-    nixos-rebuild switch --flake '.#' --sudo
+    nixos-rebuild switch --flake '.#' --sudo --fallback
 
     popd
   '';

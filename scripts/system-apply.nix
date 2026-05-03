@@ -3,7 +3,7 @@
     #!${pkgs.stdenv.shell}
     pushd ${configPath}
 
-    nixos-rebuild switch --flake '.#' --sudo
+    nixos-rebuild switch --flake '.#' --sudo --fallback
 
     popd
   '';

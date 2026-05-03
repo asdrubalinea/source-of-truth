@@ -66,4 +66,8 @@
   };
 
   systemd.coredump.enable = false;
+  # Without this, the kernel default pattern "core" dumps into the crashing
+  # process's cwd — which for GUI apps is usually $HOME.
+  systemd.tmpfiles.rules = [ "d /var/lib/coredump 1777 root root -" ];
+  boot.kernel.sysctl."kernel.core_pattern" = "/var/lib/coredump/core.%e.%p.%s.%t";
 }
