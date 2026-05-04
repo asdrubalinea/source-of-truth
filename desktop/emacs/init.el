@@ -112,10 +112,7 @@
 
 ;;; Theme ----------------------------------------------------------------------
 
-;; `nano-dark' / `nano-light' are themes (deftheme), not functions.
-(use-package nano-theme
-  :demand t
-  :config (load-theme 'nano-dark t))
+(load-theme 'modus-vivendi-tinted t)
 
 ;;; UI polish ------------------------------------------------------------------
 
@@ -279,7 +276,10 @@
   :init (which-key-mode 1)
   :custom
   (which-key-idle-delay 0.3)
-  (which-key-idle-secondary-delay 0.05))
+  (which-key-idle-secondary-delay 0.05)
+  (which-key-allow-imprecise-window-fit nil)
+  (which-key-side-window-max-height 0.33)
+  (which-key-min-display-lines 5))
 
 ;;; Snippets ------------------------------------------------------------------
 
@@ -406,7 +406,10 @@ Currently only Vue single-file components get one."
   :demand t
   :custom
   (beframe-functions-in-frames '(clone-frame))
-  (beframe-global-buffers '("*scratch*" "*Messages*" "*Backtrace*" "*claude-*"))
+  (beframe-global-buffers
+   '("*scratch*" "*Messages*" "*Backtrace*" "*claude-*"
+     "*Help*" "*helpful" "*compilation*" "*Async Shell Command"
+     "magit" "*vterm" "*eshell" "*shell"))
   :config
   (beframe-mode 1)
   ;; Make consult-buffer respect beframe's per-frame scope.
@@ -421,6 +424,39 @@ Currently only Vue single-file components get one."
               :action ,#'switch-to-buffer
               :state ,#'consult--buffer-state))
     (add-to-list 'consult-buffer-sources 'beframe-consult-source)))
+
+;;; Hand persistent popup buffers off to the WM as their own frame ------------
+;; Transient popups (which-key, corfu, eldoc) use child frames and stay inside
+;; Emacs. Frames named `popup:*' are matched by a niri window-rule and float
+;; at a sane default size.
+
+(defun my/popup-frame-params (kind)
+  "Frame params for a popup of KIND. The name drives niri's window-rule match."
+  `((name . ,(format "popup:%s" kind))
+    (width . 100) (height . 32)
+    (unsplittable . t)))
+
+(setq display-buffer-alist
+      `(("\\`\\*\\(magit\\|magit-diff\\|magit-log\\|magit-process\\|magit-revision\\):"
+         (display-buffer-reuse-window display-buffer-pop-up-frame)
+         (reusable-frames . t)
+         (pop-up-frame-parameters . ,(my/popup-frame-params "magit")))
+        ("\\`\\*\\(compilation\\|Async Shell Command\\)\\*"
+         (display-buffer-reuse-window display-buffer-pop-up-frame)
+         (reusable-frames . t)
+         (pop-up-frame-parameters . ,(my/popup-frame-params "compile")))
+        ("\\`\\*\\(Help\\|helpful .*\\)\\*"
+         (display-buffer-reuse-window display-buffer-pop-up-frame)
+         (reusable-frames . t)
+         (pop-up-frame-parameters . ,(my/popup-frame-params "help")))
+        ("\\`\\*\\(vterm\\|eshell\\|shell\\).*\\*"
+         (display-buffer-reuse-window display-buffer-pop-up-frame)
+         (reusable-frames . t)
+         (pop-up-frame-parameters . ,(my/popup-frame-params "term")))
+        ("\\`\\*claude-"
+         (display-buffer-reuse-window display-buffer-pop-up-frame)
+         (reusable-frames . t)
+         (pop-up-frame-parameters . ,(my/popup-frame-params "claude")))))
 
 (use-package dired-sidebar
   :commands (dired-sidebar-toggle-sidebar dired-sidebar-show-sidebar)
@@ -614,12 +650,13 @@ search with `/' (evil) or C-s, dismiss with q."
     "s i" '(consult-imenu           :wk "imenu")
     "s y" '(consult-yasnippet       :wk "snippet")
 
-    ;; Splits inside a frame stay rare in this workflow — niri does the tiling.
-    ;; Keep just enough to manage popups (magit, help) and tear them off via SPC F t.
+    ;; In-frame splits are out — niri does the tiling. SPC w v / w s spawn a
+    ;; new frame instead, so "side by side" means two niri-managed windows.
+    ;; SPC F t still tears off any in-frame popup that slipped through.
     "w"   '(:ignore t :wk "window")
     "w w" '(other-window            :wk "other")
-    "w s" '(split-window-below      :wk "split horiz")
-    "w v" '(split-window-right      :wk "split vert")
+    "w s" '(make-frame-command      :wk "new frame")
+    "w v" '(make-frame-command      :wk "new frame")
     "w d" '(delete-window           :wk "delete")
     "w o" '(delete-other-windows    :wk "only")
 

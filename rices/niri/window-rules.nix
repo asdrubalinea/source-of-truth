@@ -1,20 +1,5 @@
 [
   {
-    # rounded corners
-    geometry-corner-radius =
-      let
-        radius = 12.0;
-      in
-      {
-        bottom-left = radius;
-        bottom-right = radius;
-        top-left = radius;
-        top-right = radius;
-      };
-    clip-to-geometry = true;
-    draw-border-with-background = false;
-  }
-  {
     matches = [
       { is-floating = true; }
     ];
@@ -216,5 +201,23 @@
   {
     matches = [{ title = "Error"; }];
     open-floating = true;
+  }
+  {
+    # Emacs popup frames (magit, *Help*, *compilation*, vterm…) — see
+    # display-buffer-alist in desktop/emacs/init.el. Project frames keep
+    # their default tiled behavior because they don't carry the popup: prefix.
+    matches = [
+      {
+        app-id = "^emacs$";
+        title = "^popup:";
+      }
+    ];
+    open-floating = true;
+    default-column-width = {
+      fixed = 1100;
+    };
+    default-window-height = {
+      fixed = 720;
+    };
   }
 ]
