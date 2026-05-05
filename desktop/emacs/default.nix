@@ -28,24 +28,25 @@ let
     # Runtime: init.el sets `use-package-always-ensure nil` so Emacs never
     # tries to install at startup — packages come from this Nix wrapper.
     alwaysEnsure = true;
-    # MELPA's `claude-code` recipe points at yuya373/claude-code-emacs
-    # (multi-file, vterm + projectile only). We want stevemolitor/claude-code.el
-    # (single-file, exposes `claude-code-terminal-backend` for eat). Has to go
-    # through `override` rather than `extraEmacsPackages`: the use-package
-    # parser pulls `epkgs.claude-code` directly, so an overrideScope is the
-    # only way to make that lookup return the swapped derivation.
+    # claude-code-ide isn't on MELPA, so build it from a pinned upstream rev.
+    # Goes through `override` (not `extraEmacsPackages`) because the
+    # use-package parser resolves names against `epkgs.<name>` directly — a
+    # `melpaBuild` injected here makes `epkgs.claude-code-ide` resolve.
     override = self: super: {
-      claude-code = super.claude-code.overrideAttrs (_: {
-        version = "0.4.5-unstable-2026-04-30";
+      claude-code-ide = self.melpaBuild {
+        pname = "claude-code-ide";
+        version = "0-unstable-2026-04-02";
         src = pkgs.fetchFromGitHub {
-          owner = "stevemolitor";
-          repo = "claude-code.el";
-          rev = "03199df8b3a1e9cd4857f0851f7a912ba524aff3";
-          hash = "sha256-5QJrWIu4EgnHcOqMwlrs2JBBx7aI9OaSJswesr6Apfk=";
+          owner = "manzaltu";
+          repo = "claude-code-ide.el";
+          rev = "56db02ee386d009ddb8b1482310f1f9beeefb810";
+          hash = "sha256-qH1QnG5G+0UiH/v0KaS7oSpQZY+BkUMZvrjbx6kyFhg=";
         };
-        propagatedBuildInputs = [ self.transient self.inheritenv ];
-        propagatedUserEnvPkgs = [ self.transient self.inheritenv ];
-      });
+        packageRequires = [ self.transient self.websocket self.web-server ];
+        recipe = pkgs.writeText "claude-code-ide-recipe" ''
+          (claude-code-ide :fetcher github :repo "manzaltu/claude-code-ide.el")
+        '';
+      };
     };
     extraEmacsPackages = epkgs: with epkgs; [
       use-package

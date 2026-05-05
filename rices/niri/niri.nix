@@ -118,7 +118,16 @@ in
         # New Emacs frame on the running daemon. Bare "emacsclient" so niri
         # picks up the home-manager-installed myEmacs from PATH rather than
         # pulling a second emacs build into the niri closure.
-        "Mod+Shift+Return".action.spawn = [ "emacsclient" "-c" ];
+        # Pass `-d $WAYLAND_DISPLAY` (e.g. "wayland-1") so the pgtk daemon
+        # asks GDK for a Wayland display rather than inheriting niri's
+        # xwayland DISPLAY=:0 and opening an X11 frame ("pure-GTK under X"
+        # warning). Wayland frame shows up in `niri msg windows` with the
+        # lowercase app id "emacs"; the X11 fallback is "Emacs".
+        "Mod+Shift+Return".action.spawn = [
+          "sh"
+          "-c"
+          ''exec emacsclient -c -d "$WAYLAND_DISPLAY"''
+        ];
         "Mod+Space".action.spawn = [
           "${pkgs.tofi}/bin/tofi-drun"
           "--drun-launch=true"

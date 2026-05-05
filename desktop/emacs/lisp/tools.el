@@ -2,13 +2,18 @@
 
 ;;; AI assistant --------------------------------------------------------------
 
-(use-package claude-code
+(use-package claude-code-ide
   :defer t
-  :commands (claude-code claude-code-transient claude-code-send-region
-                         claude-code-switch-to-buffer claude-code-kill
-                         claude-code-send-buffer-file claude-code-cycle-mode)
+  :commands (claude-code-ide claude-code-ide-menu
+                             claude-code-ide-switch-to-buffer
+                             claude-code-ide-send-prompt
+                             claude-code-ide-continue
+                             claude-code-ide-resume
+                             claude-code-ide-stop
+                             claude-code-ide-list-sessions)
   :custom
-  (claude-code-terminal-backend 'ghostel))
+  (claude-code-ide-terminal-backend 'eat)
+  (claude-code-ide-no-flicker t))
 
 ;;; Terminal -------------------------------------------------------------------
 
@@ -63,6 +68,25 @@
 
 (use-package org-appear
   :hook (org-mode . org-appear-mode))
+
+;;; PDF viewing ----------------------------------------------------------------
+
+;; epdfinfo (the poppler helper) is built by nixpkgs `emacsPackages.pdf-tools`,
+;; so no `pdf-tools-install` prompt at runtime — the binary is already on disk.
+(use-package pdf-tools
+  :magic ("%PDF" . pdf-view-mode)
+  :hook (pdf-view-mode . (lambda () (display-line-numbers-mode -1)))
+  :custom
+  (pdf-view-display-size 'fit-page)
+  (pdf-view-use-scaling t)
+  (pdf-annot-activate-created-annotations t)
+  :config
+  (pdf-tools-install :no-query))
+
+(use-package saveplace-pdf-view
+  :after pdf-tools
+  :config
+  (save-place-mode 1))
 
 ;;; Centered prose --------------------------------------------------------------
 

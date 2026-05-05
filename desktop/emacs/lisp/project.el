@@ -11,7 +11,7 @@
   :custom
   (beframe-functions-in-frames '(clone-frame))
   (beframe-global-buffers
-   '("*scratch*" "*Messages*" "*Backtrace*" "*claude:*"
+   '("*scratch*" "*Messages*" "*Backtrace*" "*claude-code\\["
      "*Help*" "*helpful" "*compilation*" "*Async Shell Command"
      "magit" "*vterm" "*eshell" "*shell"))
   :config
@@ -41,7 +41,7 @@
                 ("\\`\\*\\(compilation\\|Async Shell Command\\)\\*" "compile")
                 ("\\`\\*\\(Help\\|helpful .*\\)\\*"                 "help")
                 ("\\`\\*\\(vterm\\|eat\\|eshell\\|shell\\).*\\*"    "term")
-                ("\\`\\*claude:"                                    "claude"))))
+                ("\\`\\*claude-code\\["                              "claude"))))
 
 (use-package dired-sidebar
   :commands (dired-sidebar-toggle-sidebar dired-sidebar-show-sidebar)
