@@ -1,9 +1,28 @@
 { pkgs, ... }:
 
 let
+  # The parser in `emacsWithPackagesFromUsePackage` reads a single source for
+  # `(use-package ...)' decls — it doesn't follow runtime `(load ...)' calls.
+  # Concatenate init.el + every lisp/*.el so the parser sees every package
+  # that any module declares. The on-disk delivery below stays split into
+  # separate files; this concat exists only at flake-eval time.
+  elispModules = [
+    ./init.el
+    ./lisp/ui.el
+    ./lisp/editor.el
+    ./lisp/completion.el
+    ./lisp/code.el
+    ./lisp/project.el
+    ./lisp/tools.el
+    ./lisp/mail.el
+    ./lisp/keys.el
+  ];
+  parserConfig = pkgs.writeText "init-concat.el"
+    (builtins.concatStringsSep "\n" (map builtins.readFile elispModules));
+
   myEmacs = pkgs.emacsWithPackagesFromUsePackage {
     package = pkgs.emacs-pgtk;
-    config = ./init.el;
+    config = parserConfig;
     defaultInitFile = false;
     # Parse-time: install every use-package'd package unless it has :ensure nil.
     # Runtime: init.el sets `use-package-always-ensure nil` so Emacs never
@@ -63,6 +82,11 @@ in
   home.file.".emacs.d/init.el" = {
     source = ./init.el;
     onChange = "rm -f $HOME/.emacs.d/init.elc";
+  };
+  home.file.".emacs.d/lisp" = {
+    source = ./lisp;
+    recursive = true;
+    onChange = "rm -f $HOME/.emacs.d/lisp/*.elc";
   };
 
   services.emacs = {
