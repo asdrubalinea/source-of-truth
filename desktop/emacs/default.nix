@@ -15,6 +15,11 @@ let
       vterm
       compile-angel
       benchmark-init
+      # Provided as a manual emacs package in nixpkgs (the elisp ships as
+      # the `mu4e` output of `pkgs.mu`, but `epkgs.mu4e` already wraps it
+      # properly for the load-path). `(use-package mu4e :ensure nil)' in
+      # init.el resolves against this.
+      mu4e
     ];
   };
 in
