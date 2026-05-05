@@ -4,8 +4,8 @@
       gc-cons-percentage 0.6)
 
 ;; PGTK input loop: default 0.1 means up to 100ms latency per keystroke.
-;; Drop to ~1ms — a few extra wakeups, sub-frame responsiveness.
-(setq pgtk-wait-for-event-timeout 0.001)
+;; 0.01 (10ms) is sub-frame and keeps idle CPU low on battery.
+(setq pgtk-wait-for-event-timeout 0.01)
 
 ;; Cover the first frame's font lookups too — moved out of init.el.
 (setq inhibit-compacting-font-caches t)
@@ -32,7 +32,9 @@
         (tool-bar-lines . 0)
         (vertical-scroll-bars)
         (horizontal-scroll-bars)
-        (internal-border-width . 8)))
+        (internal-border-width . 12)
+        (left-fringe . 8)
+        (right-fringe . 8)))
 
 (setq inhibit-startup-screen t
       inhibit-startup-message t

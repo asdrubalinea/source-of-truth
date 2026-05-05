@@ -9,6 +9,25 @@ let
     # Runtime: init.el sets `use-package-always-ensure nil` so Emacs never
     # tries to install at startup — packages come from this Nix wrapper.
     alwaysEnsure = true;
+    # MELPA's `claude-code` recipe points at yuya373/claude-code-emacs
+    # (multi-file, vterm + projectile only). We want stevemolitor/claude-code.el
+    # (single-file, exposes `claude-code-terminal-backend` for eat). Has to go
+    # through `override` rather than `extraEmacsPackages`: the use-package
+    # parser pulls `epkgs.claude-code` directly, so an overrideScope is the
+    # only way to make that lookup return the swapped derivation.
+    override = self: super: {
+      claude-code = super.claude-code.overrideAttrs (_: {
+        version = "0.4.5-unstable-2026-04-30";
+        src = pkgs.fetchFromGitHub {
+          owner = "stevemolitor";
+          repo = "claude-code.el";
+          rev = "03199df8b3a1e9cd4857f0851f7a912ba524aff3";
+          hash = "sha256-5QJrWIu4EgnHcOqMwlrs2JBBx7aI9OaSJswesr6Apfk=";
+        };
+        propagatedBuildInputs = [ self.transient self.inheritenv ];
+        propagatedUserEnvPkgs = [ self.transient self.inheritenv ];
+      });
+    };
     extraEmacsPackages = epkgs: with epkgs; [
       use-package
       treesit-grammars.with-all-grammars
@@ -20,6 +39,10 @@ let
       # properly for the load-path). `(use-package mu4e :ensure nil)' in
       # init.el resolves against this.
       mu4e
+      # Manual-package in nixpkgs: builds the native ghostel-module.so with
+      # zig at flake-eval time, so `M-x ghostel` doesn't try to download or
+      # compile a module at runtime.
+      ghostel
     ];
   };
 in

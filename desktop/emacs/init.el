@@ -28,6 +28,107 @@
     :demand t
     :config (add-hook 'after-init-hook #'benchmark-init/deactivate)))
 
+;;; Helpers --------------------------------------------------------------------
+;; Top-level so they show up in imenu and grep, instead of being buried inside
+;; `use-package' :config blocks. Referenced by name from the relevant blocks
+;; below; nothing here is invoked at load time.
+
+(defun my/popup-frame-params (kind)
+  "Frame params for a popup of KIND. The name drives niri's window-rule match."
+  `((name . ,(format "popup:%s" kind))
+    (width . 100) (height . 32)
+    (unsplittable . t)))
+
+(defun my/popup-rule (regex kind)
+  "`display-buffer-alist' rule that pops a niri-managed frame for REGEX.
+Frame is named `popup:KIND' so niri's window-rule can match on it."
+  `(,regex
+    (display-buffer-reuse-window display-buffer-pop-up-frame)
+    (reusable-frames . t)
+    (pop-up-frame-parameters . ,(my/popup-frame-params kind))))
+
+(defun my/eglot-web-mode-server (_interactive)
+  "Pick a language server for the current `web-mode' buffer.
+Currently only Vue single-file components get one."
+  (cond
+   ((and buffer-file-name (string-match-p "\\.vue\\'" buffer-file-name))
+    '("vue-language-server" "--stdio"))))
+
+(defun my/maybe-vue-eglot ()
+  "Start eglot in `web-mode' buffers visiting Vue single-file components."
+  (when (and buffer-file-name
+             (string-match-p "\\.vue\\'" buffer-file-name))
+    (eglot-ensure)))
+
+(defvar my/envrc--prompted-dirs nil
+  "Directories already prompted about a blocked .envrc this session.")
+
+(defun my/envrc-maybe-prompt-allow ()
+  "Offer `direnv allow' when the buffer's .envrc is blocked.
+Fires from `envrc-mode-hook' for file-visiting buffers where envrc
+flagged an error; spawns `direnv status' to confirm the cause is
+specifically a blocked rc (not a syntax error or failing build).
+Each dir is prompted at most once per session."
+  (when (and (bound-and-true-p envrc-mode)
+             buffer-file-name
+             (eq envrc--status 'error)
+             (executable-find "direnv"))
+    (when-let* ((dir (locate-dominating-file default-directory ".envrc")))
+      (unless (member dir my/envrc--prompted-dirs)
+        (push dir my/envrc--prompted-dirs)
+        (let ((blocked
+               (with-temp-buffer
+                 (let ((default-directory dir))
+                   (call-process "direnv" nil t nil "status"))
+                 (goto-char (point-min))
+                 (re-search-forward "Found RC allowed false" nil t))))
+          (when (and blocked
+                     (y-or-n-p
+                      (format ".envrc in %s is blocked. Run `direnv allow'? "
+                              (abbreviate-file-name dir))))
+            (envrc-allow)))))))
+
+(defun my/project-switch-in-new-frame ()
+  "Pick a project and open it in a new frame named after the project."
+  (interactive)
+  (let* ((dir (project-prompt-project-dir))
+         (name (file-name-nondirectory (directory-file-name dir))))
+    (select-frame (make-frame `((name . ,name))))
+    (let ((default-directory dir))
+      (project-switch-project dir))))
+
+(defun my/show-leader-bindings ()
+  "Pop up a tall right-side help buffer listing all SPC leader bindings.
+The buffer is a regular `help-mode' buffer: scroll with C-v / M-v,
+search with `/' (evil) or C-s, dismiss with q."
+  (interactive)
+  (let ((display-buffer-alist
+         (cons '("\\*Help\\*\\'"
+                 (display-buffer-in-side-window)
+                 (side . right)
+                 (slot . 0)
+                 (window-width . 0.4)
+                 (preserve-size . (t . nil)))
+               display-buffer-alist)))
+    (describe-keymap my/leader-map)))
+
+(defun my/announce-init-time ()
+  "Log emacs init time to *Messages*."
+  (message "Emacs init in %s with %d GCs"
+           (emacs-init-time) gcs-done))
+
+;;; Hand off post-startup GC to gcmh ------------------------------------------
+;; Lives up here (rather than after UI polish) so later `use-package' loads
+;; run with the lower idle GC threshold once gcmh has settled in.
+
+(use-package gcmh
+  :demand t
+  :config
+  (setq gcmh-idle-delay 'auto
+        gcmh-auto-idle-delay-factor 10
+        gcmh-high-cons-threshold (* 128 1024 1024))
+  (gcmh-mode 1))
+
 ;;; Core defaults --------------------------------------------------------------
 
 (setopt
@@ -49,7 +150,6 @@
  jit-lock-stealth-time 1
  idle-update-delay 1.0
  auto-window-vscroll nil
- frame-resize-pixelwise t
  window-resize-pixelwise t
  highlight-nonselected-windows nil
  bidi-inhibit-bpa t)
@@ -69,6 +169,11 @@
 (dolist (h '(prog-mode-hook text-mode-hook conf-mode-hook))
   (add-hook h #'display-line-numbers-mode))
 
+;; Vertical line at fill-column — code-as-architecture.
+(add-hook 'prog-mode-hook #'display-fill-column-indicator-mode)
+
+;; Solid block cursor, non-blinking.
+(setq-default cursor-type 'box)
 (blink-cursor-mode -1)
 
 (global-auto-revert-mode 1)
@@ -106,9 +211,9 @@
 (setq pixel-scroll-precision-interpolate-mice nil)
 
 ;; Mouse wheel: one notch = one line, no progressive acceleration on fast spins.
+;; (`mouse-wheel-follow-mouse' is already t by default.)
 (setq mouse-wheel-scroll-amount '(1 ((shift) . hscroll) ((control) . text-scale))
-      mouse-wheel-progressive-speed nil
-      mouse-wheel-follow-mouse t)
+      mouse-wheel-progressive-speed nil)
 
 ;;; Theme ----------------------------------------------------------------------
 
@@ -135,6 +240,19 @@
 
 ;;; UI polish ------------------------------------------------------------------
 
+;; Workflow is one frame per project, tiled by niri — no in-Emacs tab-bar.
+;; Frame title carries the project name so niri window-rules can match on it.
+(setq frame-title-format
+      '((:eval (or (frame-parameter nil 'name)
+                   (when-let* ((p (project-current))) (project-name p))
+                   (buffer-name)))))
+
+;; Hairline window dividers — the "Lisp Machine window" feel without the cost.
+(setq window-divider-default-right-width 1
+      window-divider-default-bottom-width 1
+      window-divider-default-places t)
+(window-divider-mode 1)
+
 (use-package nerd-icons
   :demand t
   :custom (nerd-icons-font-family "Symbols Nerd Font Mono"))
@@ -160,23 +278,6 @@
   :demand t
   :config (breadcrumb-mode 1))
 
-;; Workflow is one frame per project, tiled by niri — no in-Emacs tab-bar.
-;; Frame title carries the project name so niri window-rules can match on it.
-(setq frame-title-format
-      '((:eval (or (frame-parameter nil 'name)
-                   (when-let* ((p (project-current))) (project-name p))
-                   (buffer-name)))))
-
-;;; Hand off post-startup GC to gcmh ------------------------------------------
-
-(use-package gcmh
-  :demand t
-  :config
-  (setq gcmh-idle-delay 'auto
-        gcmh-auto-idle-delay-factor 10
-        gcmh-high-cons-threshold (* 128 1024 1024))
-  (gcmh-mode 1))
-
 ;;; Keep state out of ~/.config/emacs ------------------------------------------
 
 (use-package no-littering
@@ -199,11 +300,13 @@
           (presentation :default-family "Ioskeley Mono" :default-height 220
                         :variable-pitch-family "Inter")))
   (fontaine-mode 1)
-  (fontaine-set-preset 'regular)
-  (set-fontset-font t 'emoji
-                    (font-spec :family "Noto Color Emoji") nil 'append)
-  (set-fontset-font t 'symbol
-                    (font-spec :family "Symbols Nerd Font Mono") nil 'append))
+  (fontaine-set-preset 'regular))
+
+;; Fontset extensions live outside fontaine's :config so they don't re-fire
+;; on every preset switch / theme reload.
+(when (display-graphic-p)
+  (set-fontset-font t 'emoji  (font-spec :family "Noto Color Emoji") nil 'append)
+  (set-fontset-font t 'symbol (font-spec :family "Symbols Nerd Font Mono") nil 'append))
 
 ;;; Modal editing --------------------------------------------------------------
 
@@ -296,15 +399,13 @@
   :custom
   (which-key-idle-delay 0.3)
   (which-key-idle-secondary-delay 0.05)
-  (which-key-allow-imprecise-window-fit nil)
   (which-key-side-window-max-height 0.33)
   (which-key-min-display-lines 5))
 
 ;;; Snippets ------------------------------------------------------------------
 
 (use-package yasnippet
-  :defer 1
-  :config (yas-global-mode 1))
+  :hook (prog-mode . yas-minor-mode))
 
 (use-package yasnippet-snippets
   :after yasnippet)
@@ -316,6 +417,7 @@
 
 (use-package treesit
   :ensure nil
+  :demand t
   :config
   (setq treesit-font-lock-level 4)
   ;; php-ts-mode (built-in) is omitted: its bundled font-lock query references
@@ -356,16 +458,10 @@
   (eglot-events-buffer-config '(:size 0 :format short))
   (eglot-sync-connect 0)
   (eglot-extend-to-xref t)
-  (eglot-send-changes-idle-time 0.5)
+  (eglot-send-changes-idle-time 0.2)
   (eglot-report-progress nil)
   :config
   (fset #'jsonrpc--log-event #'ignore)
-  (defun my/eglot-web-mode-server (_interactive)
-    "Pick a language server for the current `web-mode' buffer.
-Currently only Vue single-file components get one."
-    (cond
-     ((and buffer-file-name (string-match-p "\\.vue\\'" buffer-file-name))
-      '("vue-language-server" "--stdio"))))
   (add-to-list 'eglot-server-programs '(nix-mode . ("nil")))
   (add-to-list 'eglot-server-programs '(typst-ts-mode . ("tinymist")))
   (add-to-list 'eglot-server-programs
@@ -376,7 +472,7 @@ Currently only Vue single-file components get one."
 (use-package flymake
   :ensure nil
   :hook (prog-mode . flymake-mode)
-  :custom (flymake-no-changes-timeout 1.0))
+  :custom (flymake-no-changes-timeout 0.5))
 
 (use-package eldoc
   :ensure nil
@@ -385,7 +481,8 @@ Currently only Vue single-file components get one."
   (eldoc-idle-delay 0.2))
 
 (use-package apheleia
-  :init (apheleia-global-mode 1))
+  :demand t
+  :config (apheleia-global-mode 1))
 
 ;;; Help & docs ---------------------------------------------------------------
 
@@ -422,48 +519,13 @@ Currently only Vue single-file components get one."
   (web-mode-code-indent-offset 2)
   (web-mode-enable-auto-pairing t)
   (web-mode-enable-auto-quoting nil)
-  (web-mode-enable-current-element-highlight t)
-  :config
-  (defun my/maybe-vue-eglot ()
-    "Start eglot in `web-mode' buffers visiting Vue single-file components."
-    (when (and buffer-file-name
-               (string-match-p "\\.vue\\'" buffer-file-name))
-      (eglot-ensure))))
+  (web-mode-enable-current-element-highlight t))
 
 ;;; Project & workspace -------------------------------------------------------
 
 (use-package envrc
-  :hook (after-init . envrc-global-mode)
-  :config
-  (defvar my/envrc--prompted-dirs nil
-    "Directories already prompted about a blocked .envrc this session.")
-
-  (defun my/envrc-maybe-prompt-allow ()
-    "Offer `direnv allow' when the buffer's .envrc is blocked.
-Fires from `envrc-mode-hook' for file-visiting buffers where envrc
-flagged an error; spawns `direnv status' to confirm the cause is
-specifically a blocked rc (not a syntax error or failing build).
-Each dir is prompted at most once per session."
-    (when (and (bound-and-true-p envrc-mode)
-               buffer-file-name
-               (eq envrc--status 'error)
-               (executable-find "direnv"))
-      (when-let* ((dir (locate-dominating-file default-directory ".envrc")))
-        (unless (member dir my/envrc--prompted-dirs)
-          (push dir my/envrc--prompted-dirs)
-          (let ((blocked
-                 (with-temp-buffer
-                   (let ((default-directory dir))
-                     (call-process "direnv" nil t nil "status"))
-                   (goto-char (point-min))
-                   (re-search-forward "Found RC allowed false" nil t))))
-            (when (and blocked
-                       (y-or-n-p
-                        (format ".envrc in %s is blocked. Run `direnv allow'? "
-                                (abbreviate-file-name dir))))
-              (envrc-allow)))))))
-
-  (add-hook 'envrc-mode-hook #'my/envrc-maybe-prompt-allow))
+  :hook ((after-init  . envrc-global-mode)
+         (envrc-mode  . my/envrc-maybe-prompt-allow)))
 
 (use-package beframe
   :demand t
@@ -491,35 +553,16 @@ Each dir is prompted at most once per session."
 ;;; Hand persistent popup buffers off to the WM as their own frame ------------
 ;; Transient popups (which-key, corfu, eldoc) use child frames and stay inside
 ;; Emacs. Frames named `popup:*' are matched by a niri window-rule and float
-;; at a sane default size.
-
-(defun my/popup-frame-params (kind)
-  "Frame params for a popup of KIND. The name drives niri's window-rule match."
-  `((name . ,(format "popup:%s" kind))
-    (width . 100) (height . 32)
-    (unsplittable . t)))
+;; at a sane default size. See `my/popup-rule' / `my/popup-frame-params' in
+;; the Helpers section.
 
 (setq display-buffer-alist
-      `(("\\`\\*\\(magit\\|magit-diff\\|magit-log\\|magit-process\\|magit-revision\\):"
-         (display-buffer-reuse-window display-buffer-pop-up-frame)
-         (reusable-frames . t)
-         (pop-up-frame-parameters . ,(my/popup-frame-params "magit")))
-        ("\\`\\*\\(compilation\\|Async Shell Command\\)\\*"
-         (display-buffer-reuse-window display-buffer-pop-up-frame)
-         (reusable-frames . t)
-         (pop-up-frame-parameters . ,(my/popup-frame-params "compile")))
-        ("\\`\\*\\(Help\\|helpful .*\\)\\*"
-         (display-buffer-reuse-window display-buffer-pop-up-frame)
-         (reusable-frames . t)
-         (pop-up-frame-parameters . ,(my/popup-frame-params "help")))
-        ("\\`\\*\\(vterm\\|eshell\\|shell\\).*\\*"
-         (display-buffer-reuse-window display-buffer-pop-up-frame)
-         (reusable-frames . t)
-         (pop-up-frame-parameters . ,(my/popup-frame-params "term")))
-        ("\\`\\*claude:"
-         (display-buffer-reuse-window display-buffer-pop-up-frame)
-         (reusable-frames . t)
-         (pop-up-frame-parameters . ,(my/popup-frame-params "claude")))))
+      (mapcar (pcase-lambda (`(,re ,kind)) (my/popup-rule re kind))
+              '(("\\`\\*magit[^*]*\\*"                              "magit")
+                ("\\`\\*\\(compilation\\|Async Shell Command\\)\\*" "compile")
+                ("\\`\\*\\(Help\\|helpful .*\\)\\*"                 "help")
+                ("\\`\\*\\(vterm\\|eat\\|eshell\\|shell\\).*\\*"    "term")
+                ("\\`\\*claude:"                                    "claude"))))
 
 (use-package dired-sidebar
   :commands (dired-sidebar-toggle-sidebar dired-sidebar-show-sidebar)
@@ -534,16 +577,7 @@ Each dir is prompted at most once per session."
   :ensure nil
   :custom
   (project-vc-extra-root-markers '(".project" ".git"))
-  (project-switch-commands #'project-dired)
-  :config
-  (defun my/project-switch-in-new-frame ()
-    "Pick a project and open it in a new frame named after the project."
-    (interactive)
-    (let* ((dir (project-prompt-project-dir))
-           (name (file-name-nondirectory (directory-file-name dir))))
-      (select-frame (make-frame `((name . ,name))))
-      (let ((default-directory dir))
-        (project-switch-project dir)))))
+  (project-switch-commands #'project-dired))
 
 ;;; Magit ----------------------------------------------------------------------
 
@@ -562,25 +596,11 @@ Each dir is prompted at most once per session."
 
 (use-package claude-code
   :defer t
-  :commands (claude-code-run claude-code-transient claude-code-send-region
-                             claude-code-switch-to-buffer claude-code-quit
-                             claude-code-insert-current-file-path-to-session
-                             claude-code-open-prompt-file)
-  :init
-  ;; Package autoloads point at subfiles (claude-code-core, -ui, ...) which
-  ;; don't (require 'vterm); only the umbrella claude-code.el does. Without
-  ;; this hook, claude-code-vterm-mode's parent vterm-mode is undefined and
-  ;; calls fail with "void function: vterm-mode".
-  (with-eval-after-load 'claude-code-core (require 'claude-code))
-  ;; claude-code-run uses (projectile-project-root), which returns nil in
-  ;; buffers with no project (e.g. *scratch*) → get-buffer-create chokes on
-  ;; "Wrong type argument: stringp, nil". Fall back to project.el or pwd.
-  (with-eval-after-load 'projectile
-    (define-advice projectile-project-root
-        (:around (orig &rest args) my/fallback-to-project-or-pwd)
-      (or (apply orig args)
-          (when-let ((p (project-current))) (project-root p))
-          default-directory))))
+  :commands (claude-code claude-code-transient claude-code-send-region
+                         claude-code-switch-to-buffer claude-code-kill
+                         claude-code-send-buffer-file claude-code-cycle-mode)
+  :custom
+  (claude-code-terminal-backend 'ghostel))
 
 ;;; Terminal -------------------------------------------------------------------
 
@@ -590,6 +610,23 @@ Each dir is prompted at most once per session."
   :custom
   (vterm-max-scrollback 100000)
   (vterm-timer-delay 0.01))
+
+(use-package eat
+  :defer t
+  :commands (eat eat-project eat-other-window)
+  :custom
+  (eat-kill-buffer-on-exit t)
+  (eat-enable-mouse t)
+  :hook ((eshell-load-hook . eat-eshell-mode)
+         (eshell-load-hook . eat-eshell-visual-command-mode)))
+
+(use-package ghostel
+  :defer t
+  :commands (ghostel ghostel-project)
+  :custom
+  ;; Module .so ships in the nix-built elpa dir — never download or compile
+  ;; at runtime.
+  (ghostel-module-auto-install nil))
 
 ;;; Org ------------------------------------------------------------------------
 
@@ -709,28 +746,13 @@ Each dir is prompted at most once per session."
   :demand t
   :after evil
   :config
-  (general-evil-setup t)
+  (general-evil-setup)
   (general-create-definer my/leader
     :states '(normal visual motion emacs)
     :keymaps 'override
     :prefix "SPC"
     :prefix-map 'my/leader-map
     :non-normal-prefix "M-SPC")
-
-  (defun my/show-leader-bindings ()
-    "Pop up a tall right-side help buffer listing all SPC leader bindings.
-The buffer is a regular `help-mode' buffer: scroll with C-v / M-v,
-search with `/' (evil) or C-s, dismiss with q."
-    (interactive)
-    (let ((display-buffer-alist
-           (cons '("\\*Help\\*\\'"
-                   (display-buffer-in-side-window)
-                   (side . right)
-                   (slot . 0)
-                   (window-width . 0.4)
-                   (preserve-size . (t . nil)))
-                 display-buffer-alist)))
-      (describe-keymap my/leader-map)))
 
   (my/leader
     "SPC" '(project-find-file       :wk "find file in project")
@@ -745,6 +767,7 @@ search with `/' (evil) or C-s, dismiss with q."
     "b"   '(:ignore t :wk "buffer")
     "b b" '(consult-buffer          :wk "switch")
     "b d" '(kill-current-buffer     :wk "kill")
+    "b k" '(kill-buffer             :wk "kill (pick)")
     "b r" '(revert-buffer-quick     :wk "revert")
     "b s" '(save-buffer             :wk "save")
 
@@ -817,13 +840,13 @@ search with `/' (evil) or C-s, dismiss with q."
     "t o" '(olivetti-mode           :wk "olivetti (center)")
 
     "a"   '(:ignore t :wk "ai / claude")
-    "a a" '(claude-code-transient   :wk "claude menu")
-    "a s" '(claude-code-run         :wk "start session")
+    "a a" '(claude-code-transient        :wk "claude menu")
+    "a s" '(claude-code                  :wk "start session")
     "a w" '(claude-code-switch-to-buffer :wk "switch to claude buf")
-    "a r" '(claude-code-send-region :wk "send region")
-    "a b" '(claude-code-insert-current-file-path-to-session :wk "send file path")
-    "a o" '(claude-code-open-prompt-file :wk "open prompt file")
-    "a q" '(claude-code-quit        :wk "quit session")
+    "a r" '(claude-code-send-region      :wk "send region")
+    "a b" '(claude-code-send-buffer-file :wk "send buffer file")
+    "a m" '(claude-code-cycle-mode       :wk "cycle mode (auto/plan)")
+    "a q" '(claude-code-kill             :wk "kill session")
 
     "c"   '(:ignore t :wk "code")
     "c a" '(eglot-code-actions      :wk "actions")
@@ -902,30 +925,8 @@ search with `/' (evil) or C-s, dismiss with q."
   (highlight-parentheses-colors '("#7aa2f7" "#9d7cd8" "#7dcfff" "#bb9af7"))
   (highlight-parentheses-attributes '((:weight bold))))
 
-;; Bezel + dividers — the "Lisp Machine window" feel.
-(setq-default
- default-frame-alist
- (append '((internal-border-width . 12)
-           (left-fringe . 8)
-           (right-fringe . 8))
-         default-frame-alist))
-
-(setq window-divider-default-right-width 1
-      window-divider-default-bottom-width 1
-      window-divider-default-places t)
-(window-divider-mode 1)
-
-;; Solid block cursor (already non-blinking via `blink-cursor-mode -1' above).
-(setq-default cursor-type 'box)
-
-;; Vertical line at fill-column — code-as-architecture.
-(add-hook 'prog-mode-hook #'display-fill-column-indicator-mode)
-
 ;;; Startup banner -------------------------------------------------------------
 
-(add-hook 'emacs-startup-hook
-          (lambda ()
-            (message "Emacs init in %s with %d GCs"
-                     (emacs-init-time) gcs-done)))
+(add-hook 'emacs-startup-hook #'my/announce-init-time)
 
 ;;; init.el ends here
