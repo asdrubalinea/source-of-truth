@@ -112,6 +112,25 @@
 
 ;;; Theme ----------------------------------------------------------------------
 
+;; modus-themes ships with Emacs but its lisp library isn't on the default
+;; load-path until a modus-* theme is first loaded — `(require 'modus-themes)'
+;; fails before that.  Set the customize vars via plain setq (the variables
+;; are autoloaded by the theme file itself) and let `load-theme' pull in the
+;; library.  Palette overrides apply to every modus variant so `SPC t t'
+;; toggling preserves the aesthetic.
+(setq modus-themes-italic-constructs t
+      modus-themes-bold-constructs t
+      modus-themes-mixed-fonts nil
+      modus-themes-variable-pitch-ui nil
+      modus-themes-common-palette-overrides
+      '((fg-paren-match    fg-main)
+        (bg-paren-match    bg-cyan-subtle)
+        (comment           fg-dim)
+        (string            fg-alt)
+        (fringe            unspecified)
+        (border-mode-line-active   bg-mode-line-active)
+        (border-mode-line-inactive bg-mode-line-inactive)))
+
 (load-theme 'modus-vivendi-tinted t)
 
 ;;; UI polish ------------------------------------------------------------------
@@ -414,7 +433,37 @@ Currently only Vue single-file components get one."
 ;;; Project & workspace -------------------------------------------------------
 
 (use-package envrc
-  :hook (after-init . envrc-global-mode))
+  :hook (after-init . envrc-global-mode)
+  :config
+  (defvar my/envrc--prompted-dirs nil
+    "Directories already prompted about a blocked .envrc this session.")
+
+  (defun my/envrc-maybe-prompt-allow ()
+    "Offer `direnv allow' when the buffer's .envrc is blocked.
+Fires from `envrc-mode-hook' for file-visiting buffers where envrc
+flagged an error; spawns `direnv status' to confirm the cause is
+specifically a blocked rc (not a syntax error or failing build).
+Each dir is prompted at most once per session."
+    (when (and (bound-and-true-p envrc-mode)
+               buffer-file-name
+               (eq envrc--status 'error)
+               (executable-find "direnv"))
+      (when-let* ((dir (locate-dominating-file default-directory ".envrc")))
+        (unless (member dir my/envrc--prompted-dirs)
+          (push dir my/envrc--prompted-dirs)
+          (let ((blocked
+                 (with-temp-buffer
+                   (let ((default-directory dir))
+                     (call-process "direnv" nil t nil "status"))
+                   (goto-char (point-min))
+                   (re-search-forward "Found RC allowed false" nil t))))
+            (when (and blocked
+                       (y-or-n-p
+                        (format ".envrc in %s is blocked. Run `direnv allow'? "
+                                (abbreviate-file-name dir))))
+              (envrc-allow)))))))
+
+  (add-hook 'envrc-mode-hook #'my/envrc-maybe-prompt-allow))
 
 (use-package beframe
   :demand t
@@ -801,6 +850,76 @@ search with `/' (evil) or C-s, dismiss with q."
                      evil-visual-state-map
                      evil-motion-state-map))
     (define-key map (kbd "SPC") my/leader-map)))
+
+;;; Lisp Machine aesthetic ----------------------------------------------------
+
+;; Dim parens — Symbolics philosophy: parens are quiet punctuation, the
+;; structure lives in the indentation. `paren-face' adds a `parenthesis'
+;; face that the modus theme styles muted by default.
+(use-package paren-face
+  :hook ((emacs-lisp-mode lisp-mode lisp-data-mode
+          scheme-mode clojure-mode lisp-interaction-mode)
+         . paren-face-mode))
+
+;; λ for lambda. Built-in, no package needed. `unprettify-at-point' makes
+;; the literal `lambda' reappear when the cursor is on it, so editing
+;; semantics are unchanged — only the displayed glyph shifts.
+;; Codepoints (not `?λ' literals) sidestep emacsWithPackagesFromUsePackage's
+;; regex parser, which doesn't tokenize multi-byte char literals.
+(defun my/lispy-prettify ()
+  (setq prettify-symbols-alist
+        '(("lambda"  . 955)    ; λ
+          ("defun"   . 402)    ; ƒ
+          (">="      . 8805)   ; ≥
+          ("<="      . 8804)   ; ≤
+          ("not"     . 172)))  ; ¬
+  (prettify-symbols-mode 1))
+
+(setq prettify-symbols-unprettify-at-point 'right-edge)
+
+(dolist (h '(emacs-lisp-mode-hook lisp-mode-hook
+             lisp-interaction-mode-hook scheme-mode-hook))
+  (add-hook h #'my/lispy-prettify))
+
+;; Subtle vertical indent bars — depth-of-form at a glance.
+(use-package indent-bars
+  :hook (prog-mode . indent-bars-mode)
+  :custom
+  (indent-bars-color '(highlight :face-bg t :blend 0.2))
+  (indent-bars-pattern ".")
+  (indent-bars-width-frac 0.15)
+  (indent-bars-pad-frac 0.4)
+  (indent-bars-zigzag nil)
+  (indent-bars-display-on-blank-lines nil))
+
+;; Soft glow on the parens enclosing point — your current scope, faintly
+;; visible at every nesting depth.
+(use-package highlight-parentheses
+  :hook ((emacs-lisp-mode lisp-mode lisp-data-mode
+          scheme-mode clojure-mode lisp-interaction-mode)
+         . highlight-parentheses-mode)
+  :custom
+  (highlight-parentheses-colors '("#7aa2f7" "#9d7cd8" "#7dcfff" "#bb9af7"))
+  (highlight-parentheses-attributes '((:weight bold))))
+
+;; Bezel + dividers — the "Lisp Machine window" feel.
+(setq-default
+ default-frame-alist
+ (append '((internal-border-width . 12)
+           (left-fringe . 8)
+           (right-fringe . 8))
+         default-frame-alist))
+
+(setq window-divider-default-right-width 1
+      window-divider-default-bottom-width 1
+      window-divider-default-places t)
+(window-divider-mode 1)
+
+;; Solid block cursor (already non-blinking via `blink-cursor-mode -1' above).
+(setq-default cursor-type 'box)
+
+;; Vertical line at fill-column — code-as-architecture.
+(add-hook 'prog-mode-hook #'display-fill-column-indicator-mode)
 
 ;;; Startup banner -------------------------------------------------------------
 

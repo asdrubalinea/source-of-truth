@@ -203,21 +203,18 @@
     open-floating = true;
   }
   {
-    # Emacs popup frames (magit, *Help*, *compilation*, vterm…) — see
-    # display-buffer-alist in desktop/emacs/init.el. Project frames keep
-    # their default tiled behavior because they don't carry the popup: prefix.
+    # Emacs popup frames (magit, *Help*, *compilation*, vterm, claude…) —
+    # see display-buffer-alist in desktop/emacs/init.el. They tile as a
+    # side column at full column height; project frames keep their default
+    # behavior because they don't carry the popup: prefix.
     matches = [
       {
         app-id = "^emacs$";
         title = "^popup:";
       }
     ];
-    open-floating = true;
     default-column-width = {
       fixed = 1100;
-    };
-    default-window-height = {
-      fixed = 720;
     };
   }
 ]
