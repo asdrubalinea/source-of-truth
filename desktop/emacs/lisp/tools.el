@@ -13,7 +13,19 @@
                              claude-code-ide-list-sessions)
   :custom
   (claude-code-ide-terminal-backend 'eat)
-  (claude-code-ide-no-flicker t))
+  (claude-code-ide-no-flicker t)
+  ;; Bypass the built-in side window so display-buffer-alist takes over.
+  (claude-code-ide-use-side-window nil)
+  :config
+  (add-to-list
+   'display-buffer-alist
+   '("\\*claude-code\\["
+     (display-buffer-reuse-window display-buffer-pop-up-frame)
+     (reusable-frames . visible)
+     (pop-up-frame-parameters . ((name . "Claude Code")
+                                 (width . 120)
+                                 (height . 40)
+                                 (unsplittable . t))))))
 
 ;;; Terminal -------------------------------------------------------------------
 
@@ -40,6 +52,34 @@
   ;; Module .so ships in the nix-built elpa dir — never download or compile
   ;; at runtime.
   (ghostel-module-auto-install nil))
+
+;;; Telegram -------------------------------------------------------------------
+
+;; telega-server (the tdlib helper) is built by nixpkgs `emacsPackages.telega'
+;; and lives in the wrapped-emacs bin dir, so no `M-x telega-server-build'
+;; prompt at runtime. api-id/api-hash are read from ~/.config/telega/ —
+;; upstream's `telega-app' defconst is the revoked demo pair which TDLib now
+;; rejects with "Valid api_id must be provided".
+(use-package telega
+  :defer t
+  :commands (telega telega-account-switch)
+  :init
+  (let* ((dir (expand-file-name "telega" (or (getenv "XDG_CONFIG_HOME") "~/.config")))
+         (id-file (expand-file-name "api-id" dir))
+         (hash-file (expand-file-name "api-hash" dir)))
+    (when (and (file-readable-p id-file) (file-readable-p hash-file))
+      (setq telega-app
+            (cons (string-to-number
+                   (string-trim (with-temp-buffer
+                                  (insert-file-contents id-file)
+                                  (buffer-string))))
+                  (string-trim (with-temp-buffer
+                                 (insert-file-contents hash-file)
+                                 (buffer-string)))))))
+  :custom
+  (telega-use-images t)
+  (telega-emoji-use-images t)
+  (telega-chat-input-markups '("markdown2" "org")))
 
 ;;; Org ------------------------------------------------------------------------
 

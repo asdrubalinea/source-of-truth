@@ -51,18 +51,13 @@ Frame is named `popup:KIND' so niri's window-rule can match on it."
     (reusable-frames . t)
     (pop-up-frame-parameters . ,(my/popup-frame-params kind))))
 
-(defun my/eglot-web-mode-server (_interactive)
-  "Pick a language server for the current `web-mode' buffer.
-Currently only Vue single-file components get one."
-  (cond
-   ((and buffer-file-name (string-match-p "\\.vue\\'" buffer-file-name))
-    '("vue-language-server" "--stdio"))))
-
-(defun my/maybe-vue-eglot ()
-  "Start eglot in `web-mode' buffers visiting Vue single-file components."
+(defun my/maybe-vue-lsp ()
+  "Start lsp-mode in `web-mode' buffers visiting Vue single-file components.
+lsp-volar registers a Vue client by file extension, so simply asking
+lsp-mode to start in the buffer is enough."
   (when (and buffer-file-name
              (string-match-p "\\.vue\\'" buffer-file-name))
-    (eglot-ensure)))
+    (lsp-deferred)))
 
 (defvar my/envrc--prompted-dirs nil
   "Directories already prompted about a blocked .envrc this session.")
@@ -95,11 +90,12 @@ Each dir is prompted at most once per session."
 (defun my/project-switch-in-new-frame ()
   "Pick a project and open it in a new frame named after the project."
   (interactive)
-  (let* ((dir (project-prompt-project-dir))
+  (let* ((dir (projectile-completing-read
+               "Project: " (projectile-relevant-known-projects)))
          (name (file-name-nondirectory (directory-file-name dir))))
     (select-frame (make-frame `((name . ,name))))
     (let ((default-directory dir))
-      (project-switch-project dir))))
+      (projectile-switch-project-by-name dir))))
 
 (defun my/show-leader-bindings ()
   "Pop up a tall right-side help buffer listing all SPC leader bindings.
@@ -185,7 +181,6 @@ search with `/' (evil) or C-s, dismiss with q."
 (save-place-mode 1)
 (recentf-mode 1)
 (delete-selection-mode 1)
-(electric-pair-mode 1)
 (repeat-mode 1)
 (global-so-long-mode 1)
 (pixel-scroll-precision-mode 1)
@@ -203,7 +198,8 @@ search with `/' (evil) or C-s, dismiss with q."
   (when (my/buffer-is-heavy-p)
     (when (bound-and-true-p display-line-numbers-mode) (display-line-numbers-mode -1))
     (when (bound-and-true-p diff-hl-mode)              (diff-hl-mode -1))
-    (when (bound-and-true-p flymake-mode)              (flymake-mode -1))
+    (when (bound-and-true-p flycheck-mode)             (flycheck-mode -1))
+    (when (bound-and-true-p lsp-mode)                  (lsp-mode -1))
     (when (fboundp 'eldoc-mode)                        (eldoc-mode -1))
     (setq-local bidi-paragraph-direction 'left-to-right
                 bidi-inhibit-bpa t)))
@@ -223,7 +219,7 @@ search with `/' (evil) or C-s, dismiss with q."
 ;; Each module is a plain `.el' under `lisp/', loaded by absolute path so it
 ;; never collides with any feature of the same name on `load-path'. Order is
 ;; deliberate: editor before completion (evil binds before vertico), code
-;; before project (eglot before envrc hook), keys last (binds reach commands
+;; before project (lsp before envrc hook), keys last (binds reach commands
 ;; from every other module).
 
 (dolist (mod '("ui" "editor" "completion" "code" "project" "tools" "mail" "keys"))

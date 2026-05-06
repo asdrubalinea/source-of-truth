@@ -33,6 +33,18 @@
   :after evil
   :config (evil-commentary-mode 1))
 
+;;; Structural editing --------------------------------------------------------
+
+(use-package smartparens
+  :demand t
+  :hook ((prog-mode . smartparens-mode)
+         (text-mode . smartparens-mode)
+         ((emacs-lisp-mode lisp-mode lisp-data-mode
+           scheme-mode lisp-interaction-mode)
+          . smartparens-strict-mode))
+  :config
+  (require 'smartparens-config))
+
 ;;; Wayland clipboard fallback -------------------------------------------------
 
 (when (and (eq window-system 'pgtk)

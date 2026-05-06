@@ -101,3 +101,16 @@ tooltip {
   background-color: #191724;
   color: #eb6f92;
 }
+
+#custom-cpu-hog,
+#custom-mem-hog {
+  background-color: #191724;
+  color: #c4a7e7;
+  padding: 4px 10px;
+}
+
+#custom-cpu-hog.hog,
+#custom-mem-hog.hog {
+  background-color: #eb6f92;
+  color: #191724;
+}

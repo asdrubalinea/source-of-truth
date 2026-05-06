@@ -189,6 +189,9 @@
     burpsuite
     caido-desktop
 
+    # --- Games ---
+    prismlauncher
+
     # --- Fun & misc ---
     blahaj
     gay # rainbow output filter

@@ -52,11 +52,16 @@
   (dired-sidebar-should-follow-file t)
   (dired-sidebar-width 32))
 
-(use-package project
-  :ensure nil
+(use-package projectile
+  :demand t
+  :init (projectile-mode 1)
   :custom
-  (project-vc-extra-root-markers '(".project" ".git"))
-  (project-switch-commands #'project-dired))
+  ;; Vertico/consult drive the picker via plain `completing-read'.
+  (projectile-completion-system 'default)
+  (projectile-switch-project-action #'projectile-dired)
+  (projectile-project-root-files-bottom-up '(".project" ".git"))
+  (projectile-indexing-method 'alien)
+  (projectile-enable-caching t))
 
 ;;; Magit ----------------------------------------------------------------------
 

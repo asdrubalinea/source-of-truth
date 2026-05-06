@@ -63,6 +63,9 @@ let
       # zig at flake-eval time, so `M-x ghostel` doesn't try to download or
       # compile a module at runtime.
       ghostel
+      # Bundles `telega-server` linked against pkgs.tdlib; api-id/api-hash
+      # come from ~/.config/telega/{api-id,api-hash} at runtime.
+      telega
     ];
   };
 in

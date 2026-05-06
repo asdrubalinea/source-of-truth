@@ -32,34 +32,60 @@
 
 ;;; LSP / diagnostics / docs ---------------------------------------------------
 
-(use-package eglot
-  :ensure nil
+(use-package lsp-mode
+  :commands (lsp lsp-deferred)
   :hook ((python-ts-mode rust-ts-mode go-ts-mode
-                         c-ts-mode c++-ts-mode
-                         js-ts-mode typescript-ts-mode tsx-ts-mode
-                         nix-mode typst-ts-mode
-                         php-mode) . eglot-ensure)
+          c-ts-mode c++-ts-mode
+          js-ts-mode typescript-ts-mode tsx-ts-mode
+          nix-mode typst-ts-mode php-mode) . lsp-deferred)
+  :init
+  (setq lsp-keymap-prefix "C-c l"
+        lsp-idle-delay 0.5
+        lsp-log-io nil
+        ;; corfu owns completion — don't let lsp-mode pull in company.
+        lsp-completion-provider :none
+        ;; breadcrumb-mode already covers this; avoid duplicate UI.
+        lsp-headerline-breadcrumb-enable nil
+        lsp-modeline-diagnostics-enable t
+        lsp-modeline-code-actions-enable t
+        lsp-nix-nil-server-path "nil")
   :custom
-  (eglot-autoshutdown t)
-  (eglot-events-buffer-size 0)
-  (eglot-events-buffer-config '(:size 0 :format short))
-  (eglot-sync-connect 0)
-  (eglot-extend-to-xref t)
-  (eglot-send-changes-idle-time 0.2)
-  (eglot-report-progress nil)
+  (lsp-eldoc-render-all nil)
   :config
-  (fset #'jsonrpc--log-event #'ignore)
-  (add-to-list 'eglot-server-programs '(nix-mode . ("nil")))
-  (add-to-list 'eglot-server-programs '(typst-ts-mode . ("tinymist")))
-  (add-to-list 'eglot-server-programs
-               '(php-mode . ("phpactor" "language-server")))
-  (add-to-list 'eglot-server-programs
-               '(web-mode . my/eglot-web-mode-server)))
+  (lsp-register-client
+   (make-lsp-client
+    :new-connection (lsp-stdio-connection "tinymist")
+    :major-modes '(typst-ts-mode)
+    :server-id 'tinymist))
+  (lsp-register-client
+   (make-lsp-client
+    :new-connection (lsp-stdio-connection '("phpactor" "language-server"))
+    :major-modes '(php-mode)
+    :server-id 'phpactor)))
 
-(use-package flymake
-  :ensure nil
-  :hook (prog-mode . flymake-mode)
-  :custom (flymake-no-changes-timeout 0.5))
+(use-package lsp-ui
+  :hook (lsp-mode . lsp-ui-mode)
+  :custom
+  (lsp-ui-doc-enable t)
+  (lsp-ui-doc-position 'at-point)
+  (lsp-ui-doc-show-with-cursor nil)
+  (lsp-ui-doc-show-with-mouse nil)
+  (lsp-ui-sideline-show-diagnostics t)
+  (lsp-ui-sideline-show-hover nil)
+  (lsp-ui-sideline-show-code-actions t)
+  (lsp-ui-peek-enable t))
+
+(use-package consult-lsp
+  :after (consult lsp-mode))
+
+(use-package flycheck
+  :init (global-flycheck-mode)
+  :custom
+  (flycheck-check-syntax-automatically '(save idle-change mode-enabled))
+  (flycheck-idle-change-delay 0.5))
+
+(use-package consult-flycheck
+  :after (consult flycheck))
 
 (use-package eldoc
   :ensure nil
@@ -99,7 +125,7 @@
   :mode (("\\.html?\\'"      . web-mode)
          ("\\.blade\\.php\\'" . web-mode)
          ("\\.vue\\'"         . web-mode))
-  :hook (web-mode . my/maybe-vue-eglot)
+  :hook (web-mode . my/maybe-vue-lsp)
   :custom
   (web-mode-markup-indent-offset 2)
   (web-mode-css-indent-offset 2)

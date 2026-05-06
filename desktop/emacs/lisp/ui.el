@@ -29,7 +29,9 @@
 ;; Frame title carries the project name so niri window-rules can match on it.
 (setq frame-title-format
       '((:eval (or (frame-parameter nil 'name)
-                   (when-let* ((p (project-current))) (project-name p))
+                   (and (fboundp 'projectile-project-p)
+                        (projectile-project-p)
+                        (projectile-project-name))
                    (buffer-name)))))
 
 ;; Hairline window dividers — the "Lisp Machine window" feel without the cost.
