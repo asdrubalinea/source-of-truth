@@ -32,6 +32,7 @@ let
       --ro-bind /run/wrappers /run/wrappers \
       --tmpfs "$HOME" \
       --bind "$HOME/.claude" "$HOME/.claude" \
+      --bind-try "$HOME/.claude.json" "$HOME/.claude.json" \
       --bind-try "$HOME/.cache" "$HOME/.cache" \
       --ro-bind-try "$HOME/.gitconfig" "$HOME/.gitconfig" \
       --ro-bind-try "$HOME/.config/git" "$HOME/.config/git" \

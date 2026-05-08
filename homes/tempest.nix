@@ -16,6 +16,7 @@
     ../desktop/mail
     ../desktop/tmux.nix
     ../desktop/home-packages.nix
+    ../desktop/telegram-sandbox.nix
 
     # System utilities
     ../scripts/system-clean.nix
