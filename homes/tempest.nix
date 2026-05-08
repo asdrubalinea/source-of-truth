@@ -21,6 +21,7 @@
     ../scripts/system-clean.nix
     ../scripts/config-apply.nix
     ../scripts/port-forward.nix
+    ../scripts/claude-sandboxed.nix
 
     # Shell and configuration
     ../misc/fish.nix

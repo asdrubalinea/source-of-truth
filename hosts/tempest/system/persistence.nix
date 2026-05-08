@@ -35,6 +35,7 @@
       "/var/lib/bluetooth"
       "/var/lib/nixos"
       "/var/lib/systemd/coredump"
+      "/var/lib/coredump"
 
       # Network configuration
       "/etc/NetworkManager/system-connections"

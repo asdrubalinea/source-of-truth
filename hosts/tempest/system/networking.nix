@@ -31,6 +31,7 @@
       127.0.0.1 workspace-turco-meccanico-dominio.dscovr.test
       127.0.0.1 complexcasenrt.dscovr.test
       127.0.0.1 workspace3tcb.dscovr.test
+      127.0.0.1 workspace8nrt.dscovr.test
     '';
   };
 }
