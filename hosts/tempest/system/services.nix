@@ -52,6 +52,14 @@
     };
   };
 
+  services.keyd = {
+    enable = true;
+    keyboards.g502 = {
+      ids = [ "046d:c547" ];
+      settings.main.C-up = "macro(super+e)";
+    };
+  };
+
   services.caddy = {
     enable = true;
     extraConfig = ''

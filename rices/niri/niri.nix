@@ -62,30 +62,13 @@ in
 
         default-column-width.proportion = 1.0;
 
-        shadow = {
-          enable = true;
-          softness = 30;
-        };
+        shadow.enable = false;
 
-        focus-ring = {
-          enable = true;
-          width = 3;
-          active = {
-            color = "#A8AEFF";
-          };
-          inactive = {
-            color = "#505050";
-          };
-        };
+        focus-ring.enable = false;
 
-        gaps = 8;
+        border.enable = false;
 
-        # struts = {
-        #   left = 20;
-        #   right = 20;
-        #   top = 20;
-        #   bottom = 20;
-        # };
+        gaps = 0;
       };
 
       # Prefer no client-side decorations
@@ -135,7 +118,7 @@ in
 
         "Mod+B".action.spawn = [ "${pkgs.blueman}/bin/blueman-manager" ];
         "Mod+P".action.spawn = [ "${pkgs.pavucontrol}/bin/pavucontrol" ];
-        "Mod+N".action.spawn = [ "${pkgs.nautilus}/bin/nautilus"];
+        "Mod+N".action.spawn = [ "${pkgs.nautilus}/bin/nautilus" ];
 
         # Window management
         "Mod+Q".action.close-window = { };
@@ -258,7 +241,7 @@ in
       window-rules = windowRules;
       layer-rules = [
         {
-          matches = [ { namespace = "^awww$"; } ];
+          matches = [{ namespace = "^awww$"; }];
           place-within-backdrop = true;
         }
       ];

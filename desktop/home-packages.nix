@@ -109,6 +109,7 @@
     bash-language-server
     marksman # Markdown LSP
     phpactor # PHP LSP
+    vscode-langservers-extracted # HTML/CSS/JSON/ESLint LSPs
     vue-language-server # Vue 3 LSP (Volar)
 
     # --- Containers & virtualization ---

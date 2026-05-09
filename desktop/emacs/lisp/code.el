@@ -27,7 +27,10 @@
   (dolist (entry '(("\\.tsx\\'" . tsx-ts-mode)
                    ("\\.ts\\'"  . typescript-ts-mode)
                    ("\\.mjs\\'" . js-ts-mode)
-                   ("\\.cjs\\'" . js-ts-mode)))
+                   ("\\.cjs\\'" . js-ts-mode)
+                   ("\\.json\\'"  . json-ts-mode)
+                   ("\\.jsonc\\'" . json-ts-mode)
+                   ("\\.json5\\'" . json-ts-mode)))
     (add-to-list 'auto-mode-alist entry)))
 
 ;;; LSP / diagnostics / docs ---------------------------------------------------
@@ -37,6 +40,7 @@
   :hook ((python-ts-mode rust-ts-mode go-ts-mode
           c-ts-mode c++-ts-mode
           js-ts-mode typescript-ts-mode tsx-ts-mode
+          json-ts-mode
           nix-mode typst-ts-mode php-mode) . lsp-deferred)
   :init
   (setq lsp-keymap-prefix "C-c l"

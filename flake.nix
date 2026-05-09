@@ -144,8 +144,13 @@
       };
     };
 
+    evilHelixOverlay = final: prev: {
+      helix = inputs.helix.packages.${final.stdenv.hostPlatform.system}.default;
+    };
+
     overlays = [
       multiChannelOverlay
+      evilHelixOverlay
       emacs-overlay.overlay
       niri.overlays.niri
       claude-code.overlays.default
