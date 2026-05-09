@@ -5,8 +5,6 @@
     enable = true;
 
     settings = {
-      theme = "boo_berry";
-
       editor = {
         line-number = "relative";
         bufferline = "always";

@@ -12,7 +12,6 @@
       kitty.enable = true;
       wezterm.enable = true;
       vscode.enable = false;
-      helix.enable = false;
     };
 
     fonts = {
