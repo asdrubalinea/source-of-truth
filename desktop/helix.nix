@@ -5,7 +5,7 @@
     enable = true;
 
     settings = {
-      # theme = "ayu_dark";
+      theme = "boo_berry";
 
       editor = {
         line-number = "relative";
