@@ -21,7 +21,9 @@ Disk / install helpers are **destructive** — they wipe and reformat the target
 - `./tempest-install.sh` — disko-install `.#tempest` to `/dev/nvme0n1`.
 - `./vm-install.sh` — disko-install `.#vm` to `/dev/vda` (note: no `vm` entry currently exists in `flake.nix`; check before running).
 
-No test framework — validation is "does `nixos-rebuild` evaluate and switch successfully on the relevant host". Prefer `nixos-rebuild build --flake '.#<host>'` (no `switch`) for a dry eval when iterating on a host you're not running on.
+No test framework — validation is "does `nixos-rebuild` evaluate and switch successfully on the relevant host".
+
+**Do not run `nixos-rebuild` (build, switch, dry-build, dry-activate, …), `home-manager switch`, `config-apply`, `system-apply`, or any other command that builds or activates the system config.** The user runs all rebuilds themselves. Make the edits and stop — do not "verify" by building.
 
 ## Architecture
 

@@ -101,6 +101,7 @@
     };
     codex.url = "github:sadjow/codex-cli-nix";
     claude-code.url = "github:sadjow/claude-code-nix";
+    framework-control.url = "github:ozturkkl/framework-control";
   };
 
   outputs = inputs @ {
@@ -213,6 +214,7 @@
           lanzaboote.nixosModules.lanzaboote
           ucodenix.nixosModules.default
           niri.nixosModules.niri
+          inputs.framework-control.nixosModules.default
 
           ./disks/tempest.nix
           ./hosts/tempest/default.nix

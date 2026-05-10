@@ -67,17 +67,60 @@ let
       '{text: $text, tooltip: $tooltip, class: "hog", alt: "hog"}'
   '';
 
+  # Reads fan RPMs from hwmon. Bar shows the max across fans; tooltip lists each.
+  # hwmon indices reshuffle across boots, so we discover at runtime instead of
+  # hardcoding a path.
+  fanWatch = pkgs.writeShellScript "fan-watch" ''
+    set -eu
+
+    rows=""
+    for input in /sys/class/hwmon/hwmon*/fan*_input; do
+      [ -r "$input" ] || continue
+      rpm=$(cat "$input" 2>/dev/null || echo "")
+      case "$rpm" in ""|*[!0-9]*) continue ;; esac
+
+      dir=$(dirname "$input")
+      base=$(basename "$input" _input)
+      chip=$(cat "$dir/name" 2>/dev/null || basename "$dir")
+      label=$(cat "$dir/''${base}_label" 2>/dev/null || echo "$base")
+      rows="$rows''${chip}/''${label}	''${rpm}
+    "
+    done
+
+    if [ -z "$rows" ]; then
+      printf '{"text":"","tooltip":"no fan sensors","class":"off","alt":"off"}\n'
+      exit 0
+    fi
+
+    max=$(printf '%s' "$rows" | ${pkgs.gawk}/bin/awk -F'\t' 'BEGIN{m=0} NF>=2 {if ($2+0 > m) m=$2+0} END{print m}')
+    tooltip=$(printf '%s' "$rows" | ${pkgs.gawk}/bin/awk -F'\t' 'NF>=2 {printf "%-24s %5d rpm\n", $1, $2}')
+
+    if [ "$max" -gt 0 ]; then class="on"; else class="off"; fi
+
+    ${pkgs.jq}/bin/jq -nc \
+      --arg text "󰈐 $max" \
+      --arg tooltip "$tooltip" \
+      --arg class "$class" \
+      '{text: $text, tooltip: $tooltip, class: $class, alt: $class}'
+  '';
+
   c = config.lib.stylix.colors.withHashtag;
   monoFont = config.stylix.fonts.monospace.name;
 
   baseSettings = lib.importJSON ./config.jsonc;
   withHogModules = map (bar: bar // {
-    "modules-left" = bar."modules-left" ++ [ "custom/cpu-hog" "custom/mem-hog" ];
+    "modules-left" = bar."modules-left" ++ [ "custom/fans" "custom/cpu-hog" "custom/mem-hog" ];
     "cpu" = bar."cpu" // {
       states = { warning = 70; critical = 90; };
     };
     "memory" = bar."memory" // {
       states = { warning = 70; critical = 90; };
+    };
+    "custom/fans" = {
+      exec = "${fanWatch}";
+      return-type = "json";
+      interval = 2;
+      tooltip = true;
     };
     "custom/cpu-hog" = {
       exec = "${cpuHogWatch}";

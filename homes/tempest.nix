@@ -91,6 +91,7 @@
       enable = true;
       enableFishIntegration = true;
       settings = {
+        add_newline = false;
         format = "$hostname$all";
         hostname = {
           ssh_only = false;

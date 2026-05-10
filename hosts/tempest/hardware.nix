@@ -5,6 +5,7 @@
 
   # CPU and microcode configuration
   services.ucodenix.enable = true;
+
   hardware = {
     cpu.amd.updateMicrocode = lib.mkDefault config.hardware.enableRedistributableFirmware;
     enableAllFirmware = true;
