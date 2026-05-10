@@ -7,6 +7,11 @@
         live_config_reload = true;
       };
 
+      scrolling = {
+        history = 100000;
+        multiplier = 10;
+      };
+
       cursor = {
         thickness = 0.15;
         unfocused_hollow = true;

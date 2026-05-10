@@ -49,9 +49,28 @@
         };
       };
 
-      language = [{
-        name = "rust";
-        language-servers = [ "rust-analyzer" ];
+      language = [
+        {
+          name = "rust";
+          language-servers = [ "rust-analyzer" ];
+        }
+        {
+          name = "org";
+          scope = "source.org";
+          file-types = [ "org" ];
+          roots = [ ];
+          comment-token = "#";
+          indent = { tab-width = 2; unit = "  "; };
+          grammar = "org";
+        }
+      ];
+
+      grammar = [{
+        name = "org";
+        source = {
+          git = "https://github.com/milisims/tree-sitter-org";
+          rev = "698bb1a34331e68f83fc24bdd1b6f97016bb30de";
+        };
       }];
     };
   };

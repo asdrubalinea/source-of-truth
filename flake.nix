@@ -34,7 +34,9 @@
     ucodenix.url = "github:e-tho/ucodenix";
     nix-cachyos-kernel = {
       url = "github:xddxdd/nix-cachyos-kernel/release";
-      inputs.nixpkgs.follows = "nixpkgs";
+      # Do NOT override nixpkgs — upstream's lantian attic cache only has
+      # store paths built against its pinned nixpkgs. Following ours forces
+      # a full local kernel rebuild on every change.
     };
 
     # --- Desktop/UI Components ---
