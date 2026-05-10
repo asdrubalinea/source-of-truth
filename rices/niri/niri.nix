@@ -97,7 +97,7 @@ in
       # Keybindings
       binds = with pkgs; {
         # Terminal and launcher
-        "Mod+Return".action.spawn = [ "${pkgs.kitty}/bin/kitty" ];
+        "Mod+Return".action.spawn = [ "${pkgs.alacritty}/bin/alacritty" ];
         # New Emacs frame on the running daemon. Bare "emacsclient" so niri
         # picks up the home-manager-installed myEmacs from PATH rather than
         # pulling a second emacs build into the niri closure.

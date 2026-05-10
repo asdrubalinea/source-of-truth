@@ -1,4 +1,4 @@
-{ lib, pkgs, hostname, ... }:
+{ config, lib, pkgs, hostname, ... }:
 let
   # Detects sustained per-process CPU usage and surfaces the worst offender.
   # %CPU is per-core (so 100 = one full core pegged).
@@ -67,6 +67,9 @@ let
       '{text: $text, tooltip: $tooltip, class: "hog", alt: "hog"}'
   '';
 
+  c = config.lib.stylix.colors.withHashtag;
+  monoFont = config.stylix.fonts.monospace.name;
+
   baseSettings = lib.importJSON ./config.jsonc;
   withHogModules = map (bar: bar // {
     "modules-left" = bar."modules-left" ++ [ "custom/cpu-hog" "custom/mem-hog" ];
@@ -80,13 +83,13 @@ let
       exec = "${cpuHogWatch}";
       return-type = "json";
       interval = 10;
-      on-click = "${pkgs.kitty}/bin/kitty -e ${pkgs.btop}/bin/btop";
+      on-click = "${pkgs.alacritty}/bin/alacritty -e ${pkgs.btop}/bin/btop";
     };
     "custom/mem-hog" = {
       exec = "${memHogWatch}";
       return-type = "json";
       interval = 10;
-      on-click = "${pkgs.kitty}/bin/kitty -e ${pkgs.btop}/bin/btop";
+      on-click = "${pkgs.alacritty}/bin/alacritty -e ${pkgs.btop}/bin/btop";
     };
   }) baseSettings;
 in
@@ -95,6 +98,118 @@ in
     enable = true;
     systemd.enable = true;
     settings = withHogModules;
-    style = builtins.readFile ./style.css;
+    style = ''
+      * {
+        border: none;
+        border-radius: 0;
+        min-height: 0;
+        font-family: "${monoFont}", monospace;
+        font-weight: bold;
+        font-size: 14px;
+        padding: 0;
+      }
+
+      window#waybar {
+        background-color: ${c.base00};
+      }
+
+      tooltip {
+        background-color: ${c.base01};
+        border: 2px solid ${c.base03};
+      }
+
+      #clock,
+      #tray,
+      #cpu,
+      #memory,
+      #battery,
+      #language,
+      #backlight,
+      #temperature,
+      #custom-fans,
+      #custom-power,
+      #network,
+      #pulseaudio {
+        padding: 4px 10px;
+      }
+
+      #workspaces {
+        background-color: ${c.base00};
+      }
+
+      #workspaces button {
+        all: initial;
+        min-width: 0;
+        box-shadow: inset 0 -3px transparent;
+        padding: 4px 10px;
+        color: ${c.base0E};
+      }
+
+      #workspaces button.active {
+        color: ${c.base05};
+      }
+
+      #workspaces button.urgent {
+        background-color: ${c.base08};
+      }
+
+      #clock {
+        background-color: ${c.base00};
+        color: ${c.base05};
+      }
+
+      #tray {
+        background-color: ${c.base00};
+      }
+
+      #battery,
+      #battery.charging,
+      #battery.plugged,
+      #custom-fans.on {
+        background-color: ${c.base00};
+        color: ${c.base0B};
+      }
+
+      #cpu,
+      #memory,
+      #network,
+      #language,
+      #backlight,
+      #temperature,
+      #custom-power,
+      #pulseaudio {
+        background-color: ${c.base00};
+        color: ${c.base0E};
+      }
+
+      #cpu.critical,
+      #memory.critical,
+      #temperature.critical,
+      #custom-fans.off,
+      #custom-fans {
+        background-color: ${c.base00};
+        color: ${c.base08};
+      }
+
+      #battery.warning,
+      #battery.critical,
+      #battery.urgent {
+        background-color: ${c.base00};
+        color: ${c.base08};
+      }
+
+      #custom-cpu-hog,
+      #custom-mem-hog {
+        background-color: ${c.base00};
+        color: ${c.base0E};
+        padding: 4px 10px;
+      }
+
+      #custom-cpu-hog.hog,
+      #custom-mem-hog.hog {
+        background-color: ${c.base08};
+        color: ${c.base00};
+      }
+    '';
   };
 }

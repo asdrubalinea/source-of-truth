@@ -3,7 +3,8 @@
   stylix = {
     enable = true;
     autoEnable = true;
-    base16Scheme = "${pkgs.base16-schemes}/share/themes/framer.yaml";
+    base16Scheme = "${pkgs.base16-schemes}/share/themes/catppuccin-mocha.yaml";
+    # base16Scheme = "${pkgs.base16-schemes}/share/themes/framer.yaml";
     # base16Scheme = "${pkgs.base16-schemes}/share/themes/qualia.yaml";
     # base16Scheme = "${pkgs.base16-schemes}/share/themes/gruvbox-dark-hard.yaml";
 
@@ -16,11 +17,11 @@
       sizes = {
         terminal =
           if hostname == "tempest" then
-            16
+            18
           else if hostname == "orchid" then
-            20
+            22
           else
-            16;
+            18;
       };
 
       serif = {

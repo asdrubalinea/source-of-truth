@@ -163,19 +163,19 @@
     # --- Media, graphics & documents ---
     feh
     ffmpeg
-    gimp3
+    # gimp3
     imagemagick
-    inkscape
+    # inkscape
     kdePackages.okular
     krita
     libheif
     mpv
     nautilus
     nemo
-    obs-studio
+    # obs-studio
     vlc
     onlyoffice-desktopeditors
-    xournalpp
+    # xournalpp
     typst
     (texlive.combine { inherit (texlive) scheme-full; })
     zathura # PDF viewer with SyncTeX inverse search

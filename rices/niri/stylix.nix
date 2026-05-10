@@ -4,25 +4,26 @@
 
   stylix = {
     enable = true;
-    base16Scheme = "${pkgs.base16-schemes}/share/themes/framer.yaml";
+    base16Scheme = "${pkgs.base16-schemes}/share/themes/catppuccin-mocha.yaml";
 
     targets = {
       neovim.enable = false;
-      ghostty.enable = true;
+      alacritty.enable = true;
       kitty.enable = true;
       wezterm.enable = true;
       vscode.enable = false;
+      waybar.enable = false;
     };
 
     fonts = {
       sizes = {
         terminal =
           if hostname == "tempest" then
-            16
+            18
           else if hostname == "orchid" then
-            20
+            22
           else
-            16;
+            18;
       };
 
       serif = {
