@@ -73,7 +73,7 @@ in
       );
 
       # Variables
-      "$terminal" = "${pkgs.alacritty}/bin/alacritty";
+      "$terminal" = "${pkgs.kitty}/bin/kitty";
       "$browser" = "${inputs.zen-browser.packages.x86_64-linux.beta}/bin/zen-beta";
       # "$menu" = "${pkgs.anyrun}/bin/anyrun";
       "$menu" = "${pkgs.tofi}/bin/tofi-run | xargs hyprctl dispatch exec --";

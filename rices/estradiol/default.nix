@@ -1,7 +1,7 @@
 { ... }:
 {
   imports = [
-    ./alacritty.nix
+    ./kitty.nix
     ./hyprland.nix
     ./waybar
     ./wallpaper
