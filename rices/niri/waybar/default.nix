@@ -126,13 +126,13 @@ let
       exec = "${cpuHogWatch}";
       return-type = "json";
       interval = 10;
-      on-click = "${pkgs.kitty}/bin/kitty -e ${pkgs.btop}/bin/btop";
+      on-click = "${pkgs.kitty}/bin/kitty --single-instance -e ${pkgs.btop}/bin/btop";
     };
     "custom/mem-hog" = {
       exec = "${memHogWatch}";
       return-type = "json";
       interval = 10;
-      on-click = "${pkgs.kitty}/bin/kitty -e ${pkgs.btop}/bin/btop";
+      on-click = "${pkgs.kitty}/bin/kitty --single-instance -e ${pkgs.btop}/bin/btop";
     };
   }) baseSettings;
 in
