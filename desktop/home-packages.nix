@@ -118,6 +118,7 @@
     docker-compose
 
     # --- Shell & terminal ---
+    alacritty
     asciinema # terminal session recorder
     direnv
     fzf

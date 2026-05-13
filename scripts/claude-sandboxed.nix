@@ -18,6 +18,18 @@ let
       SSH_BIND=(--ro-bind-try "$SSH_AUTH_SOCK" "$SSH_AUTH_SOCK")
     fi
 
+    # Forward the Wayland socket so wl-paste works (needed for Claude Code
+    # image-paste — without this `--tmpfs /run/user` below hides the socket).
+    WAYLAND_BIND=()
+    if [ -n "''${WAYLAND_DISPLAY:-}" ] && [ -n "''${XDG_RUNTIME_DIR:-}" ] \
+       && [ -S "$XDG_RUNTIME_DIR/$WAYLAND_DISPLAY" ]; then
+      WAYLAND_BIND=(
+        --bind "$XDG_RUNTIME_DIR/$WAYLAND_DISPLAY" "$XDG_RUNTIME_DIR/$WAYLAND_DISPLAY"
+        --setenv XDG_RUNTIME_DIR "$XDG_RUNTIME_DIR"
+        --setenv WAYLAND_DISPLAY "$WAYLAND_DISPLAY"
+      )
+    fi
+
     exec ${pkgs.bubblewrap}/bin/bwrap \
       --die-with-parent \
       --unshare-pid --unshare-ipc --unshare-uts \
@@ -30,6 +42,8 @@ let
       --ro-bind /etc /etc \
       --ro-bind /run/current-system /run/current-system \
       --ro-bind /run/wrappers /run/wrappers \
+      --ro-bind-try /bin /bin \
+      --ro-bind-try /usr /usr \
       --tmpfs "$HOME" \
       --bind "$HOME/.claude" "$HOME/.claude" \
       --bind-try "$HOME/.claude.json" "$HOME/.claude.json" \
@@ -37,6 +51,7 @@ let
       --ro-bind-try "$HOME/.gitconfig" "$HOME/.gitconfig" \
       --ro-bind-try "$HOME/.config/git" "$HOME/.config/git" \
       "''${SSH_BIND[@]}" \
+      "''${WAYLAND_BIND[@]}" \
       --bind "$PROJECT_DIR" "$PROJECT_DIR" \
       --chdir "$PROJECT_DIR" \
       --setenv HOME "$HOME" \
