@@ -163,6 +163,7 @@
     # --- Media, graphics & documents ---
     feh
     ffmpeg
+    ghostscript
     # gimp3
     imagemagick
     # inkscape
