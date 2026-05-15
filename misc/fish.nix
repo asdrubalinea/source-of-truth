@@ -5,7 +5,6 @@
     shellAliases = import ./aliases.nix { inherit pkgs inputs; };
 
     shellAbbrs = {
-      claude = "claude-sandboxed";
     };
 
     interactiveShellInit = ''
