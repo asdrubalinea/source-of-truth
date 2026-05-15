@@ -90,6 +90,7 @@
 
     # --- Languages & runtimes ---
     bun
+    jdk21
     lua
     luarocks
     nodejs
@@ -111,6 +112,7 @@
     phpactor # PHP LSP
     vscode-langservers-extracted # HTML/CSS/JSON/ESLint LSPs
     vue-language-server # Vue 3 LSP (Volar)
+    jdt-language-server # Java LSP (Eclipse JDT.LS)
 
     # --- Containers & virtualization ---
     distrobox

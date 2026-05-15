@@ -99,7 +99,6 @@ in
         # Terminal and launcher
         "Mod+Return".action.spawn = [
           "${pkgs.kitty}/bin/kitty"
-          "--single-instance"
         ];
         # New Emacs frame on the running daemon. Bare "emacsclient" so niri
         # picks up the home-manager-installed myEmacs from PATH rather than

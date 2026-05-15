@@ -1,4 +1,4 @@
-{ ... }:
+{ pkgs, ... }:
 
 {
   programs.helix = {
@@ -49,10 +49,95 @@
         };
       };
 
+      language-server.typescript-language-server = {
+        command = "typescript-language-server";
+        args = [ "--stdio" ];
+      };
+
+      language-server.phpactor = {
+        command = "phpactor";
+        args = [ "language-server" ];
+      };
+
+      language-server.vuels = {
+        command = "vue-language-server";
+        args = [ "--stdio" ];
+        config.typescript.tsdk = "${pkgs.typescript}/lib/node_modules/typescript/lib";
+      };
+
+      language-server.vscode-eslint-language-server = {
+        command = "vscode-eslint-language-server";
+        args = [ "--stdio" ];
+      };
+
+      language-server.nil = {
+        command = "nil";
+        config.nil.formatting.command = [ "alejandra" "--quiet" "-" ];
+      };
+
+      language-server.marksman = {
+        command = "marksman";
+        args = [ "server" ];
+      };
+
+      language-server.tinymist = {
+        command = "tinymist";
+      };
+
+      language-server.jdtls = {
+        command = "jdtls";
+      };
+
       language = [
         {
           name = "rust";
           language-servers = [ "rust-analyzer" ];
+        }
+        {
+          name = "typescript";
+          auto-format = true;
+          language-servers = [ "typescript-language-server" "vscode-eslint-language-server" ];
+        }
+        {
+          name = "tsx";
+          auto-format = true;
+          language-servers = [ "typescript-language-server" "vscode-eslint-language-server" ];
+        }
+        {
+          name = "javascript";
+          auto-format = true;
+          language-servers = [ "typescript-language-server" "vscode-eslint-language-server" ];
+        }
+        {
+          name = "jsx";
+          auto-format = true;
+          language-servers = [ "typescript-language-server" "vscode-eslint-language-server" ];
+        }
+        {
+          name = "php";
+          language-servers = [ "phpactor" ];
+        }
+        {
+          name = "vue";
+          language-servers = [ "vuels" ];
+        }
+        {
+          name = "nix";
+          auto-format = true;
+          language-servers = [ "nil" ];
+          formatter = { command = "alejandra"; args = [ "--quiet" "-" ]; };
+        }
+        {
+          name = "markdown";
+          language-servers = [ "marksman" ];
+        }
+        {
+          name = "typst";
+          language-servers = [ "tinymist" ];
+        }
+        {
+          name = "java";
+          language-servers = [ "jdtls" ];
         }
         {
           name = "org";
