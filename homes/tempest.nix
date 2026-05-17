@@ -21,6 +21,8 @@
     # System utilities
     ../scripts/system-clean.nix
     ../scripts/config-apply.nix
+    ../scripts/user-apply.nix
+    ../scripts/update-home.nix
     ../scripts/port-forward.nix
     ../scripts/claude-sandboxed.nix
 

@@ -11,8 +11,9 @@ Personal NixOS flake configuring three hosts (`tempest`, `orchid`, `hydra`) plus
 Rebuilds are done from the flake root against `.#<host>`:
 
 - `nixos-rebuild switch --flake '.#tempest' --sudo` — apply a host config. Wrapped as `config-apply` / `system-apply` (installed via home-manager from `scripts/config-apply.nix` and `scripts/system-apply.nix`) — both `pushd` into `/persist/source-of-truth` and run `nixos-rebuild switch --flake '.#' --sudo`, so `.#` resolves to the current host's `nixosConfigurations` entry by hostname.
-- `home-manager switch --flake '.#irene@orchid'` — apply a standalone Home Manager config (only `orchid` has one under `homeConfigurations`; `tempest` integrates home-manager as a NixOS module, so `nixos-rebuild` is enough there).
-- `./update-flakes.sh` — `nix flake update`.
+- `home-manager switch --flake '.#irene@<host>'` — apply a standalone Home Manager config. Both `orchid` and `tempest` have entries under `homeConfigurations` (`irene@orchid`, `irene@tempest`). On tempest there's a `user-apply` wrapper (`scripts/user-apply.nix`) that runs this with `-b backup`. On tempest a system change therefore needs **both** `system-apply` and `user-apply`.
+- `update-home` (tempest only, `scripts/update-home.nix`) — `nix flake update` for the subset of inputs that only affect tempest's HM closure (`nixpkgs-home`, `claude-code`, `codex`, `zen-browser`, `hn-tui-flake`, `emacs-overlay`, `stylix`, `hyprland`). `niri` and `helix` are intentionally excluded because both also live in tempest's system layer.
+- `./update-flakes.sh` — `nix flake update` (everything).
 - `system-clean` (from `scripts/system-clean.nix`) — delete old generations, GC, optimize the store.
 
 Disk / install helpers are **destructive** — they wipe and reformat the target device. Only run when actually installing:
@@ -23,7 +24,7 @@ Disk / install helpers are **destructive** — they wipe and reformat the target
 
 No test framework — validation is "does `nixos-rebuild` evaluate and switch successfully on the relevant host".
 
-**Do not run `nixos-rebuild` (build, switch, dry-build, dry-activate, …), `home-manager switch`, `config-apply`, `system-apply`, or any other command that builds or activates the system config.** The user runs all rebuilds themselves. Make the edits and stop — do not "verify" by building.
+**Do not run `nixos-rebuild` (build, switch, dry-build, dry-activate, …), `home-manager switch`, `config-apply`, `system-apply`, `user-apply`, or any other command that builds or activates the system config.** The user runs all rebuilds themselves. Make the edits and stop — do not "verify" by building.
 
 ## Architecture
 
@@ -48,9 +49,9 @@ Each host's `default.nix` is the composition root: imports its own `system/*.nix
 
 **Nixpkgs channels**: `flake.nix` builds a `multiChannelOverlay` exposing `pkgs.stable` (nixos-25.11), `pkgs.trunk`, and `pkgs.custom` (both `github:nixos/nixpkgs`). Default `nixpkgs` is `nixos-unstable`. Reach for `pkgs.stable.foo` when unstable breaks something. Other overlays active globally: `emacs-overlay`, `niri`, `claude-code`, `nix-cachyos-kernel`. `allowUnfree = true`.
 
-**Home Manager integration** differs by host:
-- On `tempest`, HM is wired in via `home-manager.nixosModules.home-manager` inside `nixosConfigurations.tempest`, with `useUserPackages = true` and `backupFileExtension = "backup"`. `homes/tempest.nix` is the user entry point.
-- On `orchid`, HM runs standalone via `homeConfigurations."irene@orchid"` and `homes/orchid.nix`. Rebuild with `home-manager switch --flake '.#irene@orchid'`.
+**Home Manager integration**: both desktop hosts now run HM **standalone** via `homeConfigurations` — `irene@orchid` and `irene@tempest`. On both hosts a system change requires two activations: `system-apply` (or `config-apply`) for NixOS, then `home-manager switch --flake '.#irene@<host>'` (wrapped as `user-apply` on tempest) for HM.
+
+Tempest's HM build uses a separate `nixpkgs-home` flake input (also tracking `nixos-unstable`) consumed via `mkHomePkgs` in `flake.nix`. This lets `update-home` advance the HM channel without touching the system channel. The same `overlays` list is applied to both `mkPkgs` and `mkHomePkgs`, so `pkgs.stable.foo` still resolves identically in HM modules. `flake.nix` also exposes the locked HM CLI as `packages.<system>.home-manager` so you can bootstrap with `nix run /persist/source-of-truth#home-manager -- switch --flake '.#irene@tempest' -b backup` when `home-manager` isn't on PATH yet.
 
 Home configs themselves are composition roots that import a rice, desktop modules, and script modules — same pattern as host configs.
 

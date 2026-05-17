@@ -4,6 +4,9 @@
   inputs = {
     # --- Nixpkgs Channels ---
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
+    # Separate unstable input so tempest's standalone home build can be advanced
+    # independently of the system channel (nix flake update nixpkgs-home).
+    nixpkgs-home.url = "github:nixos/nixpkgs/nixos-unstable";
     nixpkgs-stable.url = "github:nixos/nixpkgs/nixos-25.11";
     nixpkgs-trunk.url = "github:nixos/nixpkgs";
     nixpkgs-custom.url = "github:nixos/nixpkgs";
@@ -108,6 +111,7 @@
 
   outputs = inputs @ {
     nixpkgs,
+    nixpkgs-home,
     nixpkgs-stable,
     nixpkgs-trunk,
     nixpkgs-custom,
@@ -173,8 +177,29 @@
         }
         // args);
 
+    # Same shape as mkPkgs but built from the independent nixpkgs-home input,
+    # so tempest's standalone home generation can be bumped without touching
+    # the system channel. The stable/trunk/custom overlays continue to pull
+    # from their own inputs, so `pkgs.stable.foo` still works.
+    mkHomePkgs = args:
+      import nixpkgs-home ({
+          system = defaultSystem;
+          config = nixpkgsConfig;
+          overlays = overlays;
+        }
+        // args);
+
     lib = nixpkgs.lib;
   in {
+    # Expose the locked home-manager CLI so it can be bootstrapped without
+    # relying on whatever's in PATH — useful right after a config-apply that
+    # tears down /etc/profiles/per-user/irene before the first standalone HM
+    # activation:
+    #   nix run /persist/source-of-truth#home-manager -- switch \
+    #     --flake '.#irene@tempest' -b backup
+    packages.${defaultSystem}.home-manager =
+      home-manager.packages.${defaultSystem}.default;
+
     nixosConfigurations = {
       "orchid" = lib.nixosSystem {
         specialArgs = {
@@ -220,32 +245,6 @@
 
           ./disks/tempest.nix
           ./hosts/tempest/default.nix
-
-          home-manager.nixosModules.home-manager
-          {
-            home-manager = {
-              extraSpecialArgs = {
-                inherit inputs;
-                hostname = "tempest";
-              };
-              backupFileExtension = "backup";
-              useGlobalPkgs = false;
-              useUserPackages = true;
-              sharedModules = [
-                {
-                  nixpkgs = {
-                    config = nixpkgsConfig;
-                    overlays = overlays;
-                  };
-                }
-              ];
-
-              users = {
-                irene = import ./homes/tempest.nix;
-                # plasma = import ./homes/plasma.nix;
-              };
-            };
-          }
         ];
       };
 
@@ -294,6 +293,25 @@
               stateVersion = "23.05";
             };
           }
+        ];
+      };
+
+      "irene@tempest" = home-manager.lib.homeManagerConfiguration {
+        pkgs = mkHomePkgs {};
+        extraSpecialArgs = {
+          inherit inputs;
+          hostname = "tempest";
+        };
+
+        modules = [
+          # hyprland + stylix HM modules are imported inside homes/tempest.nix.
+          # niri.homeModules.config has to be added here because in the previous
+          # nixos-module form it was auto-wired by niri.nixosModules.niri; in
+          # standalone HM it has to be imported explicitly so programs.niri.*
+          # options exist.
+          niri.homeModules.config
+
+          ./homes/tempest.nix
         ];
       };
     };
