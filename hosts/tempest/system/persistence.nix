@@ -1,4 +1,9 @@
-{ ... }:
+{ lib, config, ... }:
+let
+  persistedFiles = map (
+    f: if builtins.isString f then f else f.file
+  ) config.environment.persistence."/persist".files;
+in
 {
   # Filesystem configuration for impermanence setup
   fileSystems = {
@@ -63,6 +68,19 @@
       "/etc/ssh/ssh_host_rsa_key.pub"
     ];
   };
+
+  # After `systemctl soft-reboot` the tmpfs root persists but impermanence's
+  # bind mounts are torn down; systemd then regenerates /etc/machine-id and the
+  # SSH host keys directly on tmpfs before activation runs, which trips
+  # mount-file's "A file already exists" guard. Drop any persisted file that
+  # isn't currently bind-mounted so persist-files can re-establish the mount.
+  system.activationScripts.persist-files.text = lib.mkBefore ''
+    for _imperm_f in ${lib.escapeShellArgs persistedFiles}; do
+      if ! findmnt -- "$_imperm_f" >/dev/null 2>&1; then
+        rm -f -- "$_imperm_f"
+      fi
+    done
+  '';
 
   # programs.fuse.userAllowOther = true;
 }

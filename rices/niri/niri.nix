@@ -121,6 +121,7 @@ in
         "Mod+B".action.spawn = [ "${pkgs.blueman}/bin/blueman-manager" ];
         "Mod+P".action.spawn = [ "${pkgs.pavucontrol}/bin/pavucontrol" ];
         "Mod+N".action.spawn = [ "${pkgs.nautilus}/bin/nautilus" ];
+        "Mod+L".action.spawn = [ "${pkgs.systemd}/bin/loginctl" "lock-session" ];
 
         # Window management
         "Mod+Q".action.close-window = { };

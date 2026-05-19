@@ -8,4 +8,6 @@
     niri.enable = true;
     fish.enable = true;
   };
+
+  security.pam.services.swaylock = { };
 }

@@ -1,4 +1,4 @@
-{ ... }: {
+{ lib, ... }: {
   programs.tofi = {
     enable = true;
 
@@ -14,4 +14,8 @@
       # Font and colors handled by stylix
     };
   };
+
+  home.activation.clearTofiCache = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+    rm -f "$HOME/.cache/tofi-drun" "$HOME/.cache/tofi-compgen"
+  '';
 }

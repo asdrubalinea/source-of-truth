@@ -5,6 +5,7 @@
     ./kitty.nix
     ./wezterm.nix
     ./niri.nix
+    ./swayidle.nix
     ./kanshi.nix
     ./waybar
     ./wallpaper
