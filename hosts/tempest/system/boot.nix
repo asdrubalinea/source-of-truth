@@ -65,13 +65,6 @@
     };
   };
 
-  # NixOS strips soft-reboot's upstream units; opt back in so
-  # `systemctl soft-reboot` works (userspace-only restart, no kernel reinit).
-  systemd.additionalUpstreamSystemUnits = [
-    "soft-reboot.target"
-    "systemd-soft-reboot.service"
-  ];
-
   systemd.coredump.enable = false;
   # Without this, the kernel default pattern "core" dumps into the crashing
   # process's cwd — which for GUI apps is usually $HOME.
