@@ -53,6 +53,11 @@
     open-maximized = true;
   }
   {
+    matches = [{ app-id = "^drift-screensaver$"; }];
+    open-fullscreen = true;
+    open-focused = true;
+  }
+  {
     matches = [
       {
         app-id = "firefox";
