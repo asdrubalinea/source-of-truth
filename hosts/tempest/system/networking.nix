@@ -1,12 +1,11 @@
-{ ... }:
-{
+{...}: {
   # Basic network configuration
   networking = {
     hostName = "tempest";
     hostId = "856ff057";
     networkmanager.enable = true;
-    firewall.allowedTCPPorts = [ ];
-    firewall.allowedUDPPorts = [ ];
+    firewall.allowedTCPPorts = [];
+    firewall.allowedUDPPorts = [];
 
     # Development environment hosts
     extraHosts = ''
@@ -34,6 +33,7 @@
       127.0.0.1 workspace8nrt.dscovr.test
       127.0.0.1 bofrost.dscovr.test
       127.0.0.1 complexcasenrt.dscovr.test
+      127.0.0.1 workspace7communicationnrt.dscovr.test
     '';
   };
 }

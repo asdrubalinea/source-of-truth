@@ -1,5 +1,8 @@
-{ pkgs, hostname, ... }:
 {
+  pkgs,
+  hostname,
+  ...
+}: {
   gtk.gtk4.theme = null;
 
   stylix = {
@@ -18,12 +21,11 @@
     fonts = {
       sizes = {
         terminal =
-          if hostname == "tempest" then
-            18
-          else if hostname == "orchid" then
-            22
-          else
-            18;
+          if hostname == "tempest"
+          then 16
+          else if hostname == "orchid"
+          then 22
+          else 18;
       };
 
       serif = {
