@@ -107,6 +107,10 @@
     codex.url = "github:sadjow/codex-cli-nix";
     claude-code.url = "github:sadjow/claude-code-nix";
     framework-control.url = "github:ozturkkl/framework-control";
+    drift = {
+      url = "github:phlx0/drift";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs = inputs @ {

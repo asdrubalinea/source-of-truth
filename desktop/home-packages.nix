@@ -125,7 +125,7 @@
     direnv
     fzf
     ghostty
-    (callPackage ../packages/drift.nix {})
+    inputs.drift.packages.${stdenv.hostPlatform.system}.default
     grc
     kitty
     screen
