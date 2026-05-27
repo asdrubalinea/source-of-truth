@@ -37,15 +37,9 @@ in
         resumeCommand = "${pkgs.niri-unstable}/bin/niri msg action power-on-monitors";
       }
     ];
-    events = [
-      {
-        event = "before-sleep";
-        command = "${pkgs.systemd}/bin/loginctl lock-session";
-      }
-      {
-        event = "lock";
-        command = "${pkgs.swaylock-effects}/bin/swaylock -f";
-      }
-    ];
+    events = {
+      before-sleep.command = "${pkgs.systemd}/bin/loginctl lock-session";
+      lock.command = "${pkgs.swaylock-effects}/bin/swaylock -f";
+    };
   };
 }
