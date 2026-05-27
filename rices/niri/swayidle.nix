@@ -1,6 +1,6 @@
 { pkgs, inputs, ... }:
 let
-  drift = inputs.drift.packages.${pkgs.stdenv.hostPlatform.system}.default;
+  drift = pkgs.callPackage ../../packages/drift.nix { src = inputs.drift; };
 
   driftStart = pkgs.writeShellScript "drift-screensaver-start" ''
     ${pkgs.kitty}/bin/kitty --class=drift-screensaver -e ${drift}/bin/drift --scene waveform &

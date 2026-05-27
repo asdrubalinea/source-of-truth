@@ -1,10 +1,12 @@
 {
+  config,
   pkgs,
   inputs,
   ...
 }:
 let
   windowRules = import ./window-rules.nix;
+  c = config.lib.stylix.colors.withHashtag;
 in
 {
   programs.niri = {
@@ -66,7 +68,12 @@ in
 
         focus-ring.enable = false;
 
-        border.enable = false;
+        border = {
+          enable = true;
+          width = 2;
+          active.color = c.base07;
+          inactive.color = c.base03;
+        };
 
         gaps = 0;
       };

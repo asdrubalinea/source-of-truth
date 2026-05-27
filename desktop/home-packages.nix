@@ -125,7 +125,7 @@
     direnv
     fzf
     ghostty
-    inputs.drift.packages.${stdenv.hostPlatform.system}.default
+    (callPackage ../packages/drift.nix {src = inputs.drift;})
     grc
     kitty
     screen
@@ -178,9 +178,9 @@
     # obs-studio
     vlc
     onlyoffice-desktopeditors
-    # xournalpp
+    xournalpp
     typst
-    (texlive.combine { inherit (texlive) scheme-full; })
+    (texlive.combine {inherit (texlive) scheme-full;})
     zathura # PDF viewer with SyncTeX inverse search
 
     # --- Data & databases ---
