@@ -38,8 +38,8 @@ in
       }
     ];
     events = {
-      before-sleep.command = "${pkgs.systemd}/bin/loginctl lock-session";
-      lock.command = "${pkgs.swaylock-effects}/bin/swaylock -f";
+      before-sleep = "${pkgs.systemd}/bin/loginctl lock-session";
+      lock = "${pkgs.swaylock-effects}/bin/swaylock -f";
     };
   };
 }
