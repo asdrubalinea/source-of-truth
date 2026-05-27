@@ -97,7 +97,7 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
     helix = {
-      url = "github:usagi-flow/evil-helix";
+      url = "github:mattwparas/helix/steel-event-system";
       inputs.nixpkgs.follows = "nixpkgs";
     };
     hn-tui-flake = {
@@ -155,13 +155,24 @@
       };
     };
 
-    evilHelixOverlay = final: prev: {
-      helix = inputs.helix.packages.${final.stdenv.hostPlatform.system}.default;
+    # Steel plugin language is not a default cargo feature
+    # (helix-term: `default = ["git"]`), so enable it here. The fork's
+    # default.nix vendors deps via cargoLock + allowBuiltinFetchGit, so adding
+    # a build feature needs no hash change. Note: buildRustPackage reads the
+    # `cargoBuildFeatures` env var (mapped from its `buildFeatures` arg *inside*
+    # the function), so overriding `buildFeatures` here would be ignored — we
+    # must set `cargoBuildFeatures` directly via overrideAttrs.
+    helixSteelOverlay = final: prev: {
+      helix =
+        (inputs.helix.packages.${final.stdenv.hostPlatform.system}.default).overrideAttrs
+        (old: {
+          cargoBuildFeatures = (old.cargoBuildFeatures or []) ++ ["steel"];
+        });
     };
 
     overlays = [
       multiChannelOverlay
-      evilHelixOverlay
+      helixSteelOverlay
       emacs-overlay.overlay
       niri.overlays.niri
       claude-code.overlays.default

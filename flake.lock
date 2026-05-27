@@ -804,16 +804,17 @@
         "rust-overlay": "rust-overlay_2"
       },
       "locked": {
-        "lastModified": 1775336644,
-        "narHash": "sha256-debbUtuOO7sEvKfCVV2MUGiYag193bDg78HuVbvuVUw=",
-        "owner": "usagi-flow",
-        "repo": "evil-helix",
-        "rev": "a034ec2f6abd82be44d8eddb6ef74444108fce29",
+        "lastModified": 1779375398,
+        "narHash": "sha256-qAUODNxHM9K6CrRCFgfBcbqzRd+YHiWn9fEfmIzrohA=",
+        "owner": "mattwparas",
+        "repo": "helix",
+        "rev": "4d86612df48447088ef4190bf503fd54a7562aa9",
         "type": "github"
       },
       "original": {
-        "owner": "usagi-flow",
-        "repo": "evil-helix",
+        "owner": "mattwparas",
+        "ref": "steel-event-system",
+        "repo": "helix",
         "type": "github"
       }
     },
@@ -1777,11 +1778,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1740623427,
-        "narHash": "sha256-3SdPQrZoa4odlScFDUHd4CUPQ/R1gtH4Mq9u8CBiK8M=",
+        "lastModified": 1775358767,
+        "narHash": "sha256-f2eC+WIfhjevCPQILuV08i/kmKZzYZpUvkom/33VxCA=",
         "owner": "oxalica",
         "repo": "rust-overlay",
-        "rev": "d342e8b5fd88421ff982f383c853f0fc78a847ab",
+        "rev": "20fd44bc663daa53a2575e01293e24e681d62244",
         "type": "github"
       },
       "original": {

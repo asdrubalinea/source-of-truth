@@ -1,10 +1,23 @@
 { pkgs, ... }:
 
 {
+  # Steel scheme config + recentf cog (recent-files picker on `space f`).
+  # These are code, so they're pointed at rather than derived from Nix. The cog
+  # is a local fork of mattwparas/helix-config's recentf.scm (see the header in
+  # that file for what was changed and why).
+  xdg.configFile = {
+    "helix/helix.scm".source = ./helix/helix.scm;
+    "helix/init.scm".source = ./helix/init.scm;
+    "helix/cogs/recentf.scm".source = ./helix/cogs/recentf.scm;
+  };
+
   programs.helix = {
     enable = true;
 
     settings = {
+      # space f: recent files first, then all other workspace files (one picker).
+      keys.normal.space.f = ":recent-files";
+
       editor = {
         line-number = "relative";
         bufferline = "always";
