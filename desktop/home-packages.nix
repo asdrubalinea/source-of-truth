@@ -113,6 +113,9 @@
     vscode-langservers-extracted # HTML/CSS/JSON/ESLint LSPs
     vue-language-server # Vue 3 LSP (Volar)
     jdt-language-server # Java LSP (Eclipse JDT.LS)
+    harper # Grammar/spell LSP for prose (markdown/typst/org)
+    taplo # TOML LSP + formatter
+    yaml-language-server
 
     # --- Containers & virtualization ---
     distrobox

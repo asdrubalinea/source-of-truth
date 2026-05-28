@@ -1,11 +1,10 @@
 ;; Vendored + extended from github:mattwparas/helix-config cogs/recentf.scm.
 ;; Changes vs upstream:
 ;;  - Store lives OUTSIDE the project tree: per-project history under the XDG
-;;    state dir, keyed by repo root. Nothing is ever written into the working
-;;    tree, so no .gitignore entry is ever needed. The path is resolved once
-;;    via a single `sh -c` (Steel exposes no env-var reader, and this also
-;;    handles $XDG_STATE_HOME defaulting, the git-root lookup and `mkdir -p` in
-;;    one place). Falls back to ".helix/recent-files.txt" only if that fails.
+;;    state dir, keyed by repo root (resolved by the shared helper in
+;;    cogs/store.scm — see there for why it's a shell one-liner). Nothing is
+;;    ever written into the working tree, so no .gitignore entry is needed.
+;;    Falls back to ".helix/recent-files.txt" only if resolution fails.
 ;;  - Lazy + deferred I/O: the store path is resolved, and the on-disk list is
 ;;    read, on first use rather than at module load — so no subprocess/IO runs
 ;;    while helix is still loading config. recentf-init schedules the first
@@ -26,57 +25,24 @@
 (require "helix/editor.scm")
 (require "helix/misc.scm")
 (require (prefix-in helix.static. "helix/static.scm"))
-(require-builtin steel/process)
 (require "steel/result")
+(require (only-in "store.scm" capture resolve-store-path))
 
-(provide refresh-files
-         flush-recent-files
-         recentf-open-files
-         recentf-snapshot
-         recentf-init
-         get-recent-files
-         recentf-store-path)
+(provide recentf-open-files
+         recentf-init)
 
 (define MAX-FILE-COUNT 25)
 
 ;; --- store location -------------------------------------------------------
 
-;; Resolves the absolute store path and ensures its directory exists, all in
-;; one shell call. helix's cwd is passed as $1; the repo root (or that cwd,
-;; outside a repo) is path-escaped into the filename so every project gets its
-;; own list and subdirectories of one project share it. $ and {} are literal
-;; here — Steel does not interpolate.
-(define STORE-RESOLVER
-  (string-append
-   "base=\"${XDG_STATE_HOME:-$HOME/.local/state}/helix/recentf\"\n"
-   "mkdir -p \"$base\" 2>/dev/null\n"
-   "root=\"$(git -C \"$1\" rev-parse --show-toplevel 2>/dev/null || printf %s \"$1\")\"\n"
-   "key=\"$(printf %s \"$root\" | sed 's#/#%#g')\"\n"
-   "printf %s \"$base/$key.txt\""))
-
-;; Run argv, return trimmed stdout (or "" on any failure). stderr is piped and
-;; discarded so a tool's diagnostics never leak into the terminal.
-(define (capture prog args)
-  (with-handler
-   (lambda (_err) "")
-   (let ([spawned (~> (command prog args)
-                      with-stdout-piped
-                      with-stderr-piped
-                      spawn-process)])
-     (if (Ok? spawned)
-         (let ([out (wait->stdout (unwrap-ok spawned))])
-           (if (Ok? out) (unwrap-ok out) ""))
-         ""))))
-
 (define *store-path* #false)
 
-;; Resolved lazily and memoised — the first call spawns the resolver, passing
-;; helix's cwd as $1 (same cwd the picker lists files from).
+;; Resolved lazily and memoised — the first call shells out via the shared
+;; resolver (cogs/store.scm), passing helix's cwd (the same cwd the picker
+;; lists files from). Falls back to ".helix/recent-files.txt" if that fails.
 (define (recentf-store-path)
   (unless *store-path*
-    (let ([p (trim (capture "sh"
-                            (list "-c" STORE-RESOLVER "sh"
-                                  (helix.static.get-helix-cwd))))])
+    (let ([p (resolve-store-path (helix.static.get-helix-cwd) "recentf" "txt" #false)])
       (set! *store-path* (if (equal? p "") ".helix/recent-files.txt" p))))
   *store-path*)
 
@@ -104,20 +70,15 @@
     (set! *recent-files* (read-recent-files (recentf-store-path)))
     (set! *loaded?* #true)))
 
-(define (get-recent-files)
-  (ensure-loaded!)
-  *recent-files*)
-
+;; Dedup preserving first-seen order. The lists here are small (≤ MAX-FILE-COUNT
+;; plus the workspace listing), so a linear `member` scan is plenty — no hashset.
 (define (remove-duplicates lst)
-  (define (remove-duplicates-via-hash lst accum set)
+  (define (go lst acc)
     (cond
-      [(null? lst) accum]
-      [else
-       (let ([elem (car lst)])
-         (if (hashset-contains? set elem)
-             (remove-duplicates-via-hash (cdr lst) accum set)
-             (remove-duplicates-via-hash (cdr lst) (cons elem accum) (hashset-insert set elem))))]))
-  (reverse (remove-duplicates-via-hash lst '() (hashset))))
+      [(null? lst) (reverse acc)]
+      [(member (car lst) acc) (go (cdr lst) acc)]
+      [else (go (cdr lst) (cons (car lst) acc))]))
+  (go lst '()))
 
 ;; Like `take`, but clamps instead of erroring when the list is shorter than n.
 (define (take-at-most lst n)
