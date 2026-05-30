@@ -39,6 +39,7 @@
     czkawka # duplicate finder/cleanup
     eza
     fd
+    kdePackages.dolphin # KDE file manager
     jq
     lz4
     ncdu
@@ -172,6 +173,7 @@
     # gimp3
     imagemagick
     # inkscape
+    kdePackages.gwenview # KDE image viewer
     kdePackages.okular
     krita
     libheif
