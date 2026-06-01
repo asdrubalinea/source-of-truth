@@ -96,6 +96,10 @@
       url = "github:asdrubalinea/auxologico-check";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    flights = {
+      url = "github:asdrubalinea/flights";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     helix = {
       url = "github:mattwparas/helix/steel-event-system";
       inputs.nixpkgs.follows = "nixpkgs";

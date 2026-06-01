@@ -1,5 +1,9 @@
-{ config, lib, pkgs, hostname, ... }:
+{ config, lib, pkgs, inputs, hostname, ... }:
 let
+  # The flights radar package (TUI + waybar client), backed by the always-on
+  # flights-server enabled in ../flights.nix.
+  flights = inputs.flights.packages.${pkgs.system}.flights;
+
   # Detects sustained per-process CPU usage and surfaces the worst offender.
   # %CPU is per-core (so 100 = one full core pegged).
   cpuHogWatch = pkgs.writeShellScript "cpu-hog-watch" ''
@@ -110,6 +114,7 @@ let
   baseSettings = lib.importJSON ./config.jsonc;
   withHogModules = map (bar: bar // {
     "modules-left" = bar."modules-left" ++ [ "custom/fans" "custom/cpu-hog" "custom/mem-hog" ];
+    "modules-center" = [ "custom/flights" ] ++ bar."modules-center";
     "cpu" = bar."cpu" // {
       states = { warning = 70; critical = 90; };
     };
@@ -133,6 +138,14 @@ let
       return-type = "json";
       interval = 10;
       on-click = "${pkgs.kitty}/bin/kitty --single-instance -e ${pkgs.btop}/bin/btop";
+    };
+    # Nearest flight overhead — reads the always-on flights-server (../flights.nix).
+    # Empty when the sky is clear; click to open the full radar TUI.
+    "custom/flights" = {
+      exec = "${flights}/bin/flights-waybar";
+      return-type = "json";
+      interval = 5;
+      on-click = "${pkgs.kitty}/bin/kitty --single-instance -e ${flights}/bin/flights";
     };
   }) baseSettings;
 in
@@ -252,6 +265,29 @@ in
       #custom-mem-hog.hog {
         background-color: ${c.base08};
         color: ${c.base00};
+      }
+
+      /* live nearest flight — bright cyan accent so it stands out in the centre */
+      #custom-flights {
+        background-color: ${c.base00};
+        color: ${c.base0C};
+        font-weight: bold;
+        padding: 4px 10px;
+      }
+
+      /* nearest flight froze: retained and badged, never dropped */
+      #custom-flights.lost {
+        color: ${c.base03};
+      }
+
+      /* the whole picture has aged */
+      #custom-flights.stale {
+        color: ${c.base0A};
+      }
+
+      /* server unreachable / no data */
+      #custom-flights.error {
+        color: ${c.base08};
       }
     '';
   };
