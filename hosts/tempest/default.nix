@@ -6,6 +6,7 @@
 
     # System configuration
     ./system/boot.nix
+    ./system/zfs.nix
     ./system/localization.nix
     ./system/networking.nix
     ./system/persistence.nix
@@ -28,7 +29,7 @@
     ../../hardware/framework.nix
 
     # System modules
-    # ../../modules/secure-boot.nix
+    ../../modules/secure-boot.nix
     ../../modules/nix.nix
 
     # Services

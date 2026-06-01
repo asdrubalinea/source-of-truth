@@ -11,7 +11,8 @@ let
   defaultExclude = [
     "**/Cache"
     "**/cache2"
-    "**/node_modules"
+    "**/node_modules*"
+    "**/*_DEAD"
     "**/target"
     "**/venv"
     "**/.BurpSuite"
@@ -79,6 +80,10 @@ in
       exclude = defaultExclude;
       extraArgs = "--verbose";
       extraCreateArgs = "--stats";
+
+      # Don't fail the whole job on per-file warnings (e.g. an unreadable file
+      # on a degrading disk); the archive still completes.
+      failOnWarnings = false;
 
       encryption = {
         mode = "repokey-blake2";

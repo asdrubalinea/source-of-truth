@@ -8,7 +8,10 @@
 
   boot = {
     # CachyOS kernel with BORE scheduler
-    kernelPackages = pkgs.cachyosKernels.linuxPackages-cachyos-latest-lto-zen4;
+    # LTS (not -latest): ZFS is out-of-tree and nixpkgs refuses to evaluate when
+    # the kernel outruns OpenZFS support. LTS keeps CachyOS/BORE + scx on a base
+    # zfs_unstable supports. See docs/adr/0001-zfs-on-luks-tempest.md.
+    kernelPackages = pkgs.cachyosKernels.linuxPackages-cachyos-lts-lto-zen4;
 
     # Hibernation support
     resumeDevice = "/dev/mapper/pool-swap";
@@ -28,7 +31,6 @@
     initrd = {
       systemd = {
         enable = true;
-        package = pkgs.systemd;
       };
 
       # Hardware modules needed for boot
@@ -48,19 +50,18 @@
         "xhci_hcd"
       ];
 
-      # Filesystem support for early boot
+      # Filesystem support for early boot (zfs is added by system/zfs.nix)
       supportedFilesystems = [
-        "btrfs"
         "vfat"
       ];
     };
 
-    # UEFI boot configuration
+    # UEFI boot configuration. systemd-boot is force-disabled by
+    # modules/secure-boot.nix, which switches the loader to lanzaboote.
     loader = {
-      systemd-boot.enable = true;
       efi = {
         canTouchEfiVariables = true;
-        efiSysMountPoint = "/boot/efi";
+        efiSysMountPoint = "/boot";
       };
     };
   };
