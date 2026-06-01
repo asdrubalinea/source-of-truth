@@ -1,0 +1,216 @@
+[   68.817462] wlp192s0: associated
+[   68.820626] wlp192s0: Limiting TX power to 30 (30 - 0) dBm as advertised by 08:33:ed:34:90:3f
+[   69.018889] systemd-journald[1261]: /var/log/journal/ae641dd6c0ce46a1bca379510a8a2ae1/user-1000.journal: Journal file corrupted, rotating.
+[   70.423152] amdgpu 0000:c1:00.0: [drm] DMUB HPD RX IRQ callback: link_index=6
+[   70.500234] amdgpu 0000:c1:00.0: [drm] DMUB HPD RX IRQ callback: link_index=5
+[   71.716252] amdgpu 0000:c1:00.0: [drm] DMUB HPD RX IRQ callback: link_index=5
+[   72.228657] Bluetooth: RFCOMM TTY layer initialized
+[   72.228667] Bluetooth: RFCOMM socket layer initialized
+[   72.228673] Bluetooth: RFCOMM ver 1.11
+[   74.415990] logitech-hidpp-device 0003:046D:409F.000B: HID++ 4.2 device connected.
+[   77.374502] warning: `ThreadPoolForeg' uses wireless extensions which will stop working for Wi-Fi 7 hardware; use nl80211
+[   77.672322] BTRFS error (device dm-2): parent transid verify failed on logical 1450719019008 mirror 1 wanted 709692 found 708663
+[   77.672431] BTRFS error (device dm-2): parent transid verify failed on logical 1450719019008 mirror 2 wanted 709692 found 708663
+[   77.730886] BTRFS error (device dm-2): parent transid verify failed on logical 1450719019008 mirror 1 wanted 709692 found 708663
+[   77.730998] BTRFS error (device dm-2): parent transid verify failed on logical 1450719019008 mirror 2 wanted 709692 found 708663
+[   77.737566] BTRFS error (device dm-2): parent transid verify failed on logical 1450719019008 mirror 1 wanted 709692 found 708663
+[   77.737681] BTRFS error (device dm-2): parent transid verify failed on logical 1450719019008 mirror 2 wanted 709692 found 708663
+[   77.746288] BTRFS error (device dm-2): parent transid verify failed on logical 1450719019008 mirror 1 wanted 709692 found 708663
+[   77.746411] BTRFS error (device dm-2): parent transid verify failed on logical 1450719019008 mirror 2 wanted 709692 found 708663
+[   77.755004] BTRFS error (device dm-2): parent transid verify failed on logical 1450719019008 mirror 1 wanted 709692 found 708663
+[   77.755110] BTRFS error (device dm-2): parent transid verify failed on logical 1450719019008 mirror 2 wanted 709692 found 708663
+[   80.942217] input: Irene\xe2\x80\x99s AirPods Pro 3 (AVRCP) as /devices/virtual/input/input32
+[   83.021890] btrfs_validate_extent_buffer: 384 callbacks suppressed
+[   83.021894] BTRFS error (device dm-2): parent transid verify failed on logical 1450719019008 mirror 1 wanted 709692 found 708663
+[   83.022038] BTRFS error (device dm-2): parent transid verify failed on logical 1450719019008 mirror 2 wanted 709692 found 708663
+[   83.022139] BTRFS error (device dm-2): parent transid verify failed on logical 1450719019008 mirror 1 wanted 709692 found 708663
+[   83.022197] BTRFS error (device dm-2): parent transid verify failed on logical 1450719019008 mirror 2 wanted 709692 found 708663
+[   83.022337] BTRFS error (device dm-2): parent transid verify failed on logical 1450719019008 mirror 1 wanted 709692 found 708663
+[   83.022475] BTRFS error (device dm-2): parent transid verify failed on logical 1450719019008 mirror 2 wanted 709692 found 708663
+[   83.097476] BTRFS error (device dm-2): parent transid verify failed on logical 1450719019008 mirror 1 wanted 709692 found 708663
+[   83.097535] BTRFS error (device dm-2): parent transid verify failed on logical 1450719019008 mirror 2 wanted 709692 found 708663
+[   83.941225] wlp192s0: disconnect from AP 08:33:ed:34:90:3f for new auth to 08:33:ed:34:90:3e
+[   84.165355] wlp192s0: authenticate with 08:33:ed:34:90:3e (local address=d8:b3:2f:bd:d9:d9)
+[   84.523206] wlp192s0: send auth to 08:33:ed:34:90:3e (try 1/3)
+[   84.535956] wlp192s0: authenticated
+[   84.540454] wlp192s0: associate with 08:33:ed:34:90:3e (try 1/3)
+[   84.559400] wlp192s0: RX ReassocResp from 08:33:ed:34:90:3e (capab=0x1931 status=0 aid=11)
+[   84.593721] wlp192s0: associated
+[   84.596316] wlp192s0: Limiting TX power to 30 (30 - 0) dBm as advertised by 08:33:ed:34:90:3e
+[   99.914918] input: Irene\xe2\x80\x99s AirPods Pro 3 (AVRCP) as /devices/virtual/input/input33
+[  143.251487] cros-ec-dev cros-ec-dev.0.auto: Some logs may have been dropped...
+[  180.091386] BTRFS error (device dm-2): parent transid verify failed on logical 1450719019008 mirror 1 wanted 709692 found 708663
+[  180.091515] BTRFS error (device dm-2): parent transid verify failed on logical 1450719019008 mirror 2 wanted 709692 found 708663
+[  723.946652] BTRFS error (device dm-2): parent transid verify failed on logical 1450719019008 mirror 1 wanted 709692 found 708663
+[  723.946770] BTRFS error (device dm-2): parent transid verify failed on logical 1450719019008 mirror 2 wanted 709692 found 708663
+[  723.946817] BTRFS error (device dm-2): parent transid verify failed on logical 1450719019008 mirror 1 wanted 709692 found 708663
+[  723.946839] BTRFS error (device dm-2): parent transid verify failed on logical 1450719019008 mirror 2 wanted 709692 found 708663
+[  723.946915] BTRFS error (device dm-2): parent transid verify failed on logical 1450719019008 mirror 1 wanted 709692 found 708663
+[  723.946966] BTRFS error (device dm-2): parent transid verify failed on logical 1450719019008 mirror 2 wanted 709692 found 708663
+[  724.000756] BTRFS error (device dm-2): parent transid verify failed on logical 1450719019008 mirror 1 wanted 709692 found 708663
+[  724.000868] BTRFS error (device dm-2): parent transid verify failed on logical 1450719019008 mirror 2 wanted 709692 found 708663
+[  916.964060] BTRFS error (device dm-2): parent transid verify failed on logical 1450719019008 mirror 1 wanted 709692 found 708663
+[  916.964173] BTRFS error (device dm-2): parent transid verify failed on logical 1450719019008 mirror 2 wanted 709692 found 708663
+[  916.964215] BTRFS error (device dm-2): parent transid verify failed on logical 1450719019008 mirror 1 wanted 709692 found 708663
+[  916.964238] BTRFS error (device dm-2): parent transid verify failed on logical 1450719019008 mirror 2 wanted 709692 found 708663
+[  916.964280] BTRFS error (device dm-2): parent transid verify failed on logical 1450719019008 mirror 1 wanted 709692 found 708663
+[  916.964301] BTRFS error (device dm-2): parent transid verify failed on logical 1450719019008 mirror 2 wanted 709692 found 708663
+[  917.912850] BTRFS error (device dm-2): parent transid verify failed on logical 1450719019008 mirror 1 wanted 709692 found 708663
+[  917.912966] BTRFS error (device dm-2): parent transid verify failed on logical 1450719019008 mirror 2 wanted 709692 found 708663
+[  954.438271] BTRFS error (device dm-2): parent transid verify failed on logical 1450719019008 mirror 1 wanted 709692 found 708663
+[  954.438402] BTRFS error (device dm-2): parent transid verify failed on logical 1450719019008 mirror 2 wanted 709692 found 708663
+[  954.438467] BTRFS error (device dm-2): parent transid verify failed on logical 1450719019008 mirror 1 wanted 709692 found 708663
+[  954.438502] BTRFS error (device dm-2): parent transid verify failed on logical 1450719019008 mirror 2 wanted 709692 found 708663
+[  954.438614] BTRFS error (device dm-2): parent transid verify failed on logical 1450719019008 mirror 1 wanted 709692 found 708663
+[  954.438651] BTRFS error (device dm-2): parent transid verify failed on logical 1450719019008 mirror 2 wanted 709692 found 708663
+[  954.584084] BTRFS error (device dm-2): parent transid verify failed on logical 1450719019008 mirror 1 wanted 709692 found 708663
+[  954.584210] BTRFS error (device dm-2): parent transid verify failed on logical 1450719019008 mirror 2 wanted 709692 found 708663
+[ 1017.849226] BTRFS error (device dm-2): parent transid verify failed on logical 1450719019008 mirror 1 wanted 709692 found 708663
+[ 1017.849339] BTRFS error (device dm-2): parent transid verify failed on logical 1450719019008 mirror 2 wanted 709692 found 708663
+[ 1017.849408] BTRFS error (device dm-2): parent transid verify failed on logical 1450719019008 mirror 1 wanted 709692 found 708663
+[ 1017.849463] BTRFS error (device dm-2): parent transid verify failed on logical 1450719019008 mirror 2 wanted 709692 found 708663
+[ 1017.849547] BTRFS error (device dm-2): parent transid verify failed on logical 1450719019008 mirror 1 wanted 709692 found 708663
+[ 1017.849580] BTRFS error (device dm-2): parent transid verify failed on logical 1450719019008 mirror 2 wanted 709692 found 708663
+[ 1017.883820] BTRFS error (device dm-2): parent transid verify failed on logical 1450719019008 mirror 1 wanted 709692 found 708663
+[ 1017.883930] BTRFS error (device dm-2): parent transid verify failed on logical 1450719019008 mirror 2 wanted 709692 found 708663
+[ 1017.896524] BTRFS error (device dm-2): parent transid verify failed on logical 1450719019008 mirror 1 wanted 709692 found 708663
+[ 1017.896573] BTRFS error (device dm-2): parent transid verify failed on logical 1450719019008 mirror 2 wanted 709692 found 708663
+[ 1027.244114] btrfs_validate_extent_buffer: 2 callbacks suppressed
+[ 1027.244118] BTRFS error (device dm-2): parent transid verify failed on logical 1450719019008 mirror 1 wanted 709692 found 708663
+[ 1027.244221] BTRFS error (device dm-2): parent transid verify failed on logical 1450719019008 mirror 2 wanted 709692 found 708663
+[ 1027.244649] BTRFS error (device dm-2): parent transid verify failed on logical 1450719019008 mirror 1 wanted 709692 found 708663
+[ 1027.244753] BTRFS error (device dm-2): parent transid verify failed on logical 1450719019008 mirror 2 wanted 709692 found 708663
+[ 1030.432435] BTRFS error (device dm-2): tree first key mismatch detected, bytenr=1824568410112 parent_transid=607006 key expected=(29253883,12,2176737527) has=(29253883,12,29253879)
+[ 1030.432531] BTRFS error (device dm-2): tree first key mismatch detected, bytenr=1824568410112 parent_transid=607006 key expected=(29253883,12,2176737527) has=(29253883,12,29253879)
+[ 1030.433191] BTRFS error (device dm-2): parent transid verify failed on logical 1824568393728 mirror 1 wanted 607134 found 607006
+[ 1030.433287] BTRFS error (device dm-2): parent transid verify failed on logical 1824568393728 mirror 2 wanted 607134 found 607006
+[ 1030.433433] BTRFS error (device dm-2): tree first key mismatch detected, bytenr=1824568410112 parent_transid=607006 key expected=(29253883,12,2176737527) has=(29253883,12,29253879)
+[ 1030.433522] BTRFS error (device dm-2): tree first key mismatch detected, bytenr=1824568410112 parent_transid=607006 key expected=(29253883,12,2176737527) has=(29253883,12,29253879)
+[ 1030.433582] BTRFS error (device dm-2): tree first key mismatch detected, bytenr=1824568410112 parent_transid=607006 key expected=(29253883,12,2176737527) has=(29253883,12,29253879)
+[ 1030.433604] BTRFS error (device dm-2): tree first key mismatch detected, bytenr=1824568410112 parent_transid=607006 key expected=(29253883,12,2176737527) has=(29253883,12,29253879)
+[ 1030.433662] BTRFS error (device dm-2): tree first key mismatch detected, bytenr=1824568410112 parent_transid=607006 key expected=(29253883,12,2176737527) has=(29253883,12,29253879)
+[ 1030.433683] BTRFS error (device dm-2): tree first key mismatch detected, bytenr=1824568410112 parent_transid=607006 key expected=(29253883,12,2176737527) has=(29253883,12,29253879)
+[ 1030.433738] BTRFS error (device dm-2): tree first key mismatch detected, bytenr=1824568410112 parent_transid=607006 key expected=(29253883,12,2176737527) has=(29253883,12,29253879)
+[ 1030.433759] BTRFS error (device dm-2): tree first key mismatch detected, bytenr=1824568410112 parent_transid=607006 key expected=(29253883,12,2176737527) has=(29253883,12,29253879)
+[ 1030.433863] BTRFS error (device dm-2): tree first key mismatch detected, bytenr=1824568410112 parent_transid=607006 key expected=(29253883,12,2176737527) has=(29253883,12,29253879)
+[ 1030.433905] BTRFS error (device dm-2): tree first key mismatch detected, bytenr=1824568410112 parent_transid=607006 key expected=(29253883,12,2176737527) has=(29253883,12,29253879)
+[ 1031.804907] BTRFS error (device dm-2): parent transid verify failed on logical 1824568393728 mirror 1 wanted 607134 found 607006
+[ 1031.805006] BTRFS error (device dm-2): parent transid verify failed on logical 1824568393728 mirror 2 wanted 607134 found 607006
+[ 1031.805182] BTRFS error (device dm-2): parent transid verify failed on logical 1824568393728 mirror 1 wanted 607134 found 607006
+[ 1031.805205] BTRFS error (device dm-2): parent transid verify failed on logical 1824568393728 mirror 2 wanted 607134 found 607006
+[ 1032.143954] BTRFS error (device dm-2): tree first key mismatch detected, bytenr=1824568410112 parent_transid=607006 key expected=(29253883,12,2176737527) has=(29253883,12,29253879)
+[ 1032.144066] BTRFS error (device dm-2): tree first key mismatch detected, bytenr=1824568410112 parent_transid=607006 key expected=(29253883,12,2176737527) has=(29253883,12,29253879)
+[ 1032.144183] BTRFS error (device dm-2): tree first key mismatch detected, bytenr=1824568410112 parent_transid=607006 key expected=(29253883,12,2176737527) has=(29253883,12,29253879)
+[ 1032.144206] BTRFS error (device dm-2): tree first key mismatch detected, bytenr=1824568410112 parent_transid=607006 key expected=(29253883,12,2176737527) has=(29253883,12,29253879)
+[ 1032.144284] BTRFS error (device dm-2): tree first key mismatch detected, bytenr=1824568410112 parent_transid=607006 key expected=(29253883,12,2176737527) has=(29253883,12,29253879)
+[ 1032.144314] BTRFS error (device dm-2): tree first key mismatch detected, bytenr=1824568410112 parent_transid=607006 key expected=(29253883,12,2176737527) has=(29253883,12,29253879)
+[ 1032.144385] BTRFS error (device dm-2): tree first key mismatch detected, bytenr=1824568410112 parent_transid=607006 key expected=(29253883,12,2176737527) has=(29253883,12,29253879)
+[ 1032.144409] BTRFS error (device dm-2): tree first key mismatch detected, bytenr=1824568410112 parent_transid=607006 key expected=(29253883,12,2176737527) has=(29253883,12,29253879)
+[ 1032.924849] btrfs_validate_extent_buffer: 4 callbacks suppressed
+[ 1032.924853] BTRFS error (device dm-2): parent transid verify failed on logical 1824568393728 mirror 1 wanted 607134 found 607006
+[ 1032.924958] BTRFS error (device dm-2): parent transid verify failed on logical 1824568393728 mirror 2 wanted 607134 found 607006
+[ 1032.925209] BTRFS error (device dm-2): parent transid verify failed on logical 1824568393728 mirror 1 wanted 607134 found 607006
+[ 1032.925320] BTRFS error (device dm-2): parent transid verify failed on logical 1824568393728 mirror 2 wanted 607134 found 607006
+[ 1032.925463] BTRFS error (device dm-2): parent transid verify failed on logical 1824568393728 mirror 1 wanted 607134 found 607006
+[ 1032.925505] BTRFS error (device dm-2): parent transid verify failed on logical 1824568393728 mirror 2 wanted 607134 found 607006
+[ 1032.925684] BTRFS error (device dm-2): parent transid verify failed on logical 1824568393728 mirror 1 wanted 607134 found 607006
+[ 1032.925707] BTRFS error (device dm-2): parent transid verify failed on logical 1824568393728 mirror 2 wanted 607134 found 607006
+[ 1032.925770] BTRFS error (device dm-2): parent transid verify failed on logical 1824568393728 mirror 1 wanted 607134 found 607006
+[ 1032.925792] BTRFS error (device dm-2): parent transid verify failed on logical 1824568393728 mirror 2 wanted 607134 found 607006
+[ 1032.926072] BTRFS error (device dm-2): tree first key mismatch detected, bytenr=1824568410112 parent_transid=607006 key expected=(29253883,12,2176737527) has=(29253883,12,29253879)
+[ 1032.926162] BTRFS error (device dm-2): tree first key mismatch detected, bytenr=1824568410112 parent_transid=607006 key expected=(29253883,12,2176737527) has=(29253883,12,29253879)
+[ 1032.926222] BTRFS error (device dm-2): tree first key mismatch detected, bytenr=1824568410112 parent_transid=607006 key expected=(29253883,12,2176737527) has=(29253883,12,29253879)
+[ 1032.926243] BTRFS error (device dm-2): tree first key mismatch detected, bytenr=1824568410112 parent_transid=607006 key expected=(29253883,12,2176737527) has=(29253883,12,29253879)
+[ 1032.926303] BTRFS error (device dm-2): tree first key mismatch detected, bytenr=1824568410112 parent_transid=607006 key expected=(29253883,12,2176737527) has=(29253883,12,29253879)
+[ 1032.926325] BTRFS error (device dm-2): tree first key mismatch detected, bytenr=1824568410112 parent_transid=607006 key expected=(29253883,12,2176737527) has=(29253883,12,29253879)
+[ 1032.926381] BTRFS error (device dm-2): tree first key mismatch detected, bytenr=1824568410112 parent_transid=607006 key expected=(29253883,12,2176737527) has=(29253883,12,29253879)
+[ 1032.926403] BTRFS error (device dm-2): tree first key mismatch detected, bytenr=1824568410112 parent_transid=607006 key expected=(29253883,12,2176737527) has=(29253883,12,29253879)
+[ 1032.926462] BTRFS error (device dm-2): tree first key mismatch detected, bytenr=1824568410112 parent_transid=607006 key expected=(29253883,12,2176737527) has=(29253883,12,29253879)
+[ 1032.926483] BTRFS error (device dm-2): tree first key mismatch detected, bytenr=1824568410112 parent_transid=607006 key expected=(29253883,12,2176737527) has=(29253883,12,29253879)
+[ 1032.926543] BTRFS error (device dm-2): tree first key mismatch detected, bytenr=1824568410112 parent_transid=607006 key expected=(29253883,12,2176737527) has=(29253883,12,29253879)
+[ 1032.926565] BTRFS error (device dm-2): tree first key mismatch detected, bytenr=1824568410112 parent_transid=607006 key expected=(29253883,12,2176737527) has=(29253883,12,29253879)
+[ 1032.926622] BTRFS error (device dm-2): tree first key mismatch detected, bytenr=1824568410112 parent_transid=607006 key expected=(29253883,12,2176737527) has=(29253883,12,29253879)
+[ 1032.926644] BTRFS error (device dm-2): tree first key mismatch detected, bytenr=1824568410112 parent_transid=607006 key expected=(29253883,12,2176737527) has=(29253883,12,29253879)
+[ 2280.092676] btrfs_validate_extent_buffer: 12 callbacks suppressed
+[ 2280.092681] BTRFS error (device dm-2): parent transid verify failed on logical 1450719019008 mirror 1 wanted 709692 found 708663
+[ 2280.092780] BTRFS error (device dm-2): parent transid verify failed on logical 1450719019008 mirror 2 wanted 709692 found 708663
+[ 3115.724288] BTRFS error (device dm-2): parent transid verify failed on logical 1450719019008 mirror 1 wanted 709692 found 708663
+[ 3115.724422] BTRFS error (device dm-2): parent transid verify failed on logical 1450719019008 mirror 2 wanted 709692 found 708663
+[ 3115.724657] BTRFS error (device dm-2): parent transid verify failed on logical 1450719019008 mirror 1 wanted 709692 found 708663
+[ 3115.724694] BTRFS error (device dm-2): parent transid verify failed on logical 1450719019008 mirror 2 wanted 709692 found 708663
+[ 3419.950099] BTRFS error (device dm-2): parent transid verify failed on logical 1450719019008 mirror 1 wanted 709692 found 708663
+[ 3419.950205] BTRFS error (device dm-2): parent transid verify failed on logical 1450719019008 mirror 2 wanted 709692 found 708663
+[ 3446.376201] wlp192s0: deauthenticated from 08:33:ed:34:90:3e (Reason: 6=CLASS2_FRAME_FROM_NONAUTH_STA)
+[ 3446.560550] wlp192s0: authenticate with 08:33:ed:34:90:3e (local address=d8:b3:2f:bd:d9:d9)
+[ 3446.570238] wlp192s0: send auth to 08:33:ed:34:90:3e (try 1/3)
+[ 3446.581908] wlp192s0: authenticated
+[ 3446.584451] wlp192s0: associate with 08:33:ed:34:90:3e (try 1/3)
+[ 3446.622879] wlp192s0: RX AssocResp from 08:33:ed:34:90:3e (capab=0x1931 status=0 aid=10)
+[ 3446.657265] wlp192s0: associated
+[ 3446.686457] wlp192s0: Limiting TX power to 30 (30 - 0) dBm as advertised by 08:33:ed:34:90:3e
+[ 3480.066899] BTRFS error (device dm-2): parent transid verify failed on logical 1450719019008 mirror 1 wanted 709692 found 708663
+[ 3480.067044] BTRFS error (device dm-2): parent transid verify failed on logical 1450719019008 mirror 2 wanted 709692 found 708663
+[ 3480.072985] BTRFS error (device dm-2): parent transid verify failed on logical 1450719019008 mirror 1 wanted 709692 found 708663
+[ 3480.073119] BTRFS error (device dm-2): parent transid verify failed on logical 1450719019008 mirror 2 wanted 709692 found 708663
+[ 3768.165550] BTRFS error (device dm-2): parent transid verify failed on logical 1450719019008 mirror 1 wanted 709692 found 708663
+[ 3768.165662] BTRFS error (device dm-2): parent transid verify failed on logical 1450719019008 mirror 2 wanted 709692 found 708663
+[ 3768.165774] BTRFS error (device dm-2): parent transid verify failed on logical 1450719019008 mirror 1 wanted 709692 found 708663
+[ 3768.165862] BTRFS error (device dm-2): parent transid verify failed on logical 1450719019008 mirror 2 wanted 709692 found 708663
+[ 3768.165966] BTRFS error (device dm-2): parent transid verify failed on logical 1450719019008 mirror 1 wanted 709692 found 708663
+[ 3768.166012] BTRFS error (device dm-2): parent transid verify failed on logical 1450719019008 mirror 2 wanted 709692 found 708663
+[ 3768.195280] BTRFS error (device dm-2): parent transid verify failed on logical 1450719019008 mirror 1 wanted 709692 found 708663
+[ 3768.195394] BTRFS error (device dm-2): parent transid verify failed on logical 1450719019008 mirror 2 wanted 709692 found 708663
+[ 3768.734513] BTRFS error (device dm-2): parent transid verify failed on logical 1450719019008 mirror 1 wanted 709692 found 708663
+[ 3768.734615] BTRFS error (device dm-2): parent transid verify failed on logical 1450719019008 mirror 2 wanted 709692 found 708663
+[ 3779.998330] BTRFS error (device dm-2): parent transid verify failed on logical 1450719019008 mirror 1 wanted 709692 found 708663
+[ 3779.998449] BTRFS error (device dm-2): parent transid verify failed on logical 1450719019008 mirror 2 wanted 709692 found 708663
+[ 4813.077031] BTRFS error (device dm-2): parent transid verify failed on logical 1450719019008 mirror 1 wanted 709692 found 708663
+[ 4813.077146] BTRFS error (device dm-2): parent transid verify failed on logical 1450719019008 mirror 2 wanted 709692 found 708663
+[ 4813.077226] BTRFS error (device dm-2): parent transid verify failed on logical 1450719019008 mirror 1 wanted 709692 found 708663
+[ 4813.077249] BTRFS error (device dm-2): parent transid verify failed on logical 1450719019008 mirror 2 wanted 709692 found 708663
+[ 4813.077292] BTRFS error (device dm-2): parent transid verify failed on logical 1450719019008 mirror 1 wanted 709692 found 708663
+[ 4813.077311] BTRFS error (device dm-2): parent transid verify failed on logical 1450719019008 mirror 2 wanted 709692 found 708663
+[ 4813.133588] BTRFS error (device dm-2): parent transid verify failed on logical 1450719019008 mirror 1 wanted 709692 found 708663
+[ 4813.133633] BTRFS error (device dm-2): parent transid verify failed on logical 1450719019008 mirror 2 wanted 709692 found 708663
+[ 4993.370261] Bluetooth: hci0: ACL packet for unknown connection handle 3837
+[ 5053.370884] Bluetooth: hci0: ACL packet for unknown connection handle 3837
+[ 5099.889398] BTRFS error (device dm-2): parent transid verify failed on logical 1450719019008 mirror 1 wanted 709692 found 708663
+[ 5099.889504] BTRFS error (device dm-2): parent transid verify failed on logical 1450719019008 mirror 2 wanted 709692 found 708663
+[ 5639.950936] BTRFS error (device dm-2): parent transid verify failed on logical 1450719019008 mirror 1 wanted 709692 found 708663
+[ 5639.951049] BTRFS error (device dm-2): parent transid verify failed on logical 1450719019008 mirror 2 wanted 709692 found 708663
+[ 5669.306935] BTRFS error (device dm-2): parent transid verify failed on logical 1450719019008 mirror 1 wanted 709692 found 708663
+[ 5669.307084] BTRFS error (device dm-2): parent transid verify failed on logical 1450719019008 mirror 2 wanted 709692 found 708663
+[ 6066.693576] BTRFS error (device dm-2): parent transid verify failed on logical 1450719019008 mirror 1 wanted 709692 found 708663
+[ 6066.693751] BTRFS error (device dm-2): parent transid verify failed on logical 1450719019008 mirror 2 wanted 709692 found 708663
+[ 7052.302449] BTRFS error (device dm-2): parent transid verify failed on logical 1450719019008 mirror 1 wanted 709692 found 708663
+[ 7052.302571] BTRFS error (device dm-2): parent transid verify failed on logical 1450719019008 mirror 2 wanted 709692 found 708663
+[ 7052.302637] BTRFS error (device dm-2): parent transid verify failed on logical 1450719019008 mirror 1 wanted 709692 found 708663
+[ 7052.302662] BTRFS error (device dm-2): parent transid verify failed on logical 1450719019008 mirror 2 wanted 709692 found 708663
+[ 7052.302709] BTRFS error (device dm-2): parent transid verify failed on logical 1450719019008 mirror 1 wanted 709692 found 708663
+[ 7052.302728] BTRFS error (device dm-2): parent transid verify failed on logical 1450719019008 mirror 2 wanted 709692 found 708663
+[ 7052.366447] BTRFS error (device dm-2): parent transid verify failed on logical 1450719019008 mirror 1 wanted 709692 found 708663
+[ 7052.366496] BTRFS error (device dm-2): parent transid verify failed on logical 1450719019008 mirror 2 wanted 709692 found 708663
+[ 7089.513877] BTRFS error (device dm-2): parent transid verify failed on logical 1450719019008 mirror 1 wanted 709692 found 708663
+[ 7089.513990] BTRFS error (device dm-2): parent transid verify failed on logical 1450719019008 mirror 2 wanted 709692 found 708663
+[ 7089.514046] BTRFS error (device dm-2): parent transid verify failed on logical 1450719019008 mirror 1 wanted 709692 found 708663
+[ 7089.514072] BTRFS error (device dm-2): parent transid verify failed on logical 1450719019008 mirror 2 wanted 709692 found 708663
+[ 7089.514128] BTRFS error (device dm-2): parent transid verify failed on logical 1450719019008 mirror 1 wanted 709692 found 708663
+[ 7089.514161] BTRFS error (device dm-2): parent transid verify failed on logical 1450719019008 mirror 2 wanted 709692 found 708663
+[ 7089.585997] BTRFS error (device dm-2): parent transid verify failed on logical 1450719019008 mirror 1 wanted 709692 found 708663
+[ 7089.586114] BTRFS error (device dm-2): parent transid verify failed on logical 1450719019008 mirror 2 wanted 709692 found 708663
+[ 8215.470445] BTRFS error (device dm-2): parent transid verify failed on logical 1450719019008 mirror 1 wanted 709692 found 708663
+[ 8215.470550] BTRFS error (device dm-2): parent transid verify failed on logical 1450719019008 mirror 2 wanted 709692 found 708663
+[ 8215.470620] BTRFS error (device dm-2): parent transid verify failed on logical 1450719019008 mirror 1 wanted 709692 found 708663
+[ 8215.470661] BTRFS error (device dm-2): parent transid verify failed on logical 1450719019008 mirror 2 wanted 709692 found 708663
+[ 8215.470710] BTRFS error (device dm-2): parent transid verify failed on logical 1450719019008 mirror 1 wanted 709692 found 708663
+[ 8215.470758] BTRFS error (device dm-2): parent transid verify failed on logical 1450719019008 mirror 2 wanted 709692 found 708663
+[ 8215.596632] BTRFS error (device dm-2): parent transid verify failed on logical 1450719019008 mirror 1 wanted 709692 found 708663
+[ 8215.596710] BTRFS error (device dm-2): parent transid verify failed on logical 1450719019008 mirror 2 wanted 709692 found 708663
+[ 9003.183377] BTRFS error (device dm-2): parent transid verify failed on logical 1450719019008 mirror 1 wanted 709692 found 708663
+[ 9003.183512] BTRFS error (device dm-2): parent transid verify failed on logical 1450719019008 mirror 2 wanted 709692 found 708663
+[ 9003.183530] BTRFS error (device dm-2 state A): Transaction aborted (error -5)
+[ 9003.183536] BTRFS: error (device dm-2 state A) in btrfs_add_link:6936: errno=-5 IO failure
+[ 9003.183539] BTRFS info (device dm-2 state EA): forced readonly
+[ 9003.183540] BTRFS: error (device dm-2 state EA) in btrfs_create_new_inode:6872: errno=-5 IO failure
+[ 9104.039874] BTRFS error (device dm-2 state EA): parent transid verify failed on logical 1450719019008 mirror 1 wanted 709692 found 708663
+[ 9104.040027] BTRFS error (device dm-2 state EA): parent transid verify failed on logical 1450719019008 mirror 2 wanted 709692 found 708663
