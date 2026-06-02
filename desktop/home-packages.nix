@@ -64,6 +64,7 @@
 
     # --- Backup & sync ---
     borgbackup
+    httm # Time-Machine-style TUI to browse/restore ZFS snapshots
     rclone
     restic
     vorta # Borg GUI

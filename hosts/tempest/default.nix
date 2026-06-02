@@ -7,6 +7,7 @@
     # System configuration
     ./system/boot.nix
     ./system/zfs.nix
+    ./system/backup-external.nix
     ./system/localization.nix
     ./system/networking.nix
     ./system/persistence.nix
