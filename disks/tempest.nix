@@ -25,7 +25,7 @@
         type = "disk";
         # Stable by-id path (model+serial) — NOT /dev/sdX, which re-enumerates
         # across reboots/USB hotplug and could point at the wrong disk at install.
-        device = "/dev/disk/by-id/usb-SanDisk_Portable_SSD_323532353952343031333638-0:0";
+        device = "/dev/disk/by-id/nvme-Corsair_MP700_PRO_SE_A8WFB416001JKK";
         content = {
           type = "gpt";
           partitions = {
