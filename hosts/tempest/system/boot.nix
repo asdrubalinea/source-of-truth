@@ -84,4 +84,14 @@
   # process's cwd — which for GUI apps is usually $HOME.
   systemd.tmpfiles.rules = [ "d /var/lib/coredump 1777 root root -" ];
   boot.kernel.sysctl."kernel.core_pattern" = "/var/lib/coredump/core.%e.%p.%s.%t";
+
+  # Full Magic SysRq for an orderly emergency reboot when the desktop locks up.
+  # The kernel keeps servicing SysRq through most GPU/compositor freezes, so
+  # Alt+SysRq+R,E,I,S,U,B (sync -> remount-ro -> reboot) flushes dirty buffers
+  # and quiesces the filesystems instead of a raw power cut — and a clean
+  # power-off is the cheapest defense against the lost-write corruption that
+  # forced the old btrfs root read-only (75 unsafe shutdowns on this drive; see
+  # crash/crash_report.md). At minimum use S -> U -> B. Default was 16 (sync
+  # only); 1 enables all functions.
+  boot.kernel.sysctl."kernel.sysrq" = 1;
 }

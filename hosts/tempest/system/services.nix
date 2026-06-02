@@ -10,6 +10,19 @@
   };
 
   services = {
+    # earlyoom: SIGTERM the biggest memory hog before the box livelocks under
+    # memory pressure — the usual cause of the hard freezes that force a power
+    # cut (and thus unclean-shutdown lost writes). Decide on RAM alone: the 40G
+    # swap is sized for hibernation (>= RAM, see disks/tempest.nix), not a
+    # runtime cushion to thrash into, so don't wait for it to fill. SIGTERM at
+    # <5% available RAM, SIGKILL at half that. Raise freeMemThreshold if it ever
+    # fires too eagerly.
+    earlyoom = {
+      enable = true;
+      freeMemThreshold = 5;
+      freeSwapThreshold = 100;
+    };
+
     borg-backup = {
       enable = true;
       jobs.home-irene = {
