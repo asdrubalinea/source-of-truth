@@ -36,9 +36,14 @@
                 type = "filesystem";
                 format = "vfat";
                 mountpoint = "/boot";
+                # No "nofail": the ESP is required (lanzaboote writes signed
+                # UKIs here). nofail also makes disko's install-time `mount`
+                # exit 0 when the partlabel symlink isn't ready yet (a USB
+                # target races udev), so a missing /boot is swallowed and only
+                # surfaces later as the systemd-boot "efiSysMountPoint = '/boot'
+                # is not a mounted partition" failure. Fail loudly instead.
                 mountOptions = [
                   "defaults"
-                  "nofail"
                   "nosuid"
                   "nodev"
                   "umask=0077"
