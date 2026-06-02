@@ -2,22 +2,22 @@
 {
   imports = [
     # Desktop environment and theming
-    inputs.hyprland.homeManagerModules.default
-    inputs.stylix.homeModules.stylix
+    # inputs.hyprland.homeManagerModules.default
+    # inputs.stylix.homeModules.stylix
 
     # ../rices/estradiol
-    ../rices/niri
+    # ../rices/niri
 
     # Applications and tools
-    ../desktop/zed-editor
-    ../desktop/vscode.nix
-    ../desktop/helix.nix
-    ../desktop/emacs
-    ../desktop/mail
+    # ../desktop/zed-editor
+    # ../desktop/vscode.nix
+    # ../desktop/helix.nix
+    # ../desktop/emacs
+    # ../desktop/mail
     ../desktop/tmux.nix
-    ../desktop/home-packages.nix
-    ../desktop/mimeapps.nix
-    ../desktop/telegram-sandbox.nix
+    # ../desktop/home-packages.nix
+    # ../desktop/mimeapps.nix
+    # ../desktop/telegram-sandbox.nix
 
     # System utilities
     ../scripts/system-clean.nix
@@ -25,7 +25,7 @@
     ../scripts/user-apply.nix
     ../scripts/update-home.nix
     ../scripts/port-forward.nix
-    ../scripts/claude-sandboxed.nix
+    # ../scripts/claude-sandboxed.nix
 
     # Shell and configuration
     ../misc/fish.nix
@@ -37,8 +37,8 @@
     stateVersion = "23.05";
 
     packages = [
-      (pkgs.callPackage ../packages/cider-2.nix { })
-      inputs.codex.packages.${pkgs.stdenv.hostPlatform.system}.default
+      # (pkgs.callPackage ../packages/cider-2.nix { })
+      # inputs.codex.packages.${pkgs.stdenv.hostPlatform.system}.default
     ];
 
     # persistence."/persist/home/irene" = {

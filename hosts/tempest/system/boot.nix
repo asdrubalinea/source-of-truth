@@ -11,10 +11,9 @@
     # LTS (not -latest): ZFS is out-of-tree and nixpkgs refuses to evaluate when
     # the kernel outruns OpenZFS support. LTS keeps CachyOS/BORE + scx on a base
     # zfs_unstable supports. See docs/adr/0001-zfs-on-luks-tempest.md.
-    kernelPackages = pkgs.cachyosKernels.linuxPackages-cachyos-lts-lto-zen4;
 
     # Hibernation support
-    resumeDevice = "/dev/mapper/pool-swap";
+    resumeDevice = "/dev/mapper/tpool-swap";
 
     # Kernel parameters for AMD CPU/GPU optimization
     kernelParams = [
@@ -59,6 +58,7 @@
     # UEFI boot configuration. systemd-boot is force-disabled by
     # modules/secure-boot.nix, which switches the loader to lanzaboote.
     loader = {
+      systemd-boot.enable = true;
       efi = {
         canTouchEfiVariables = true;
         efiSysMountPoint = "/boot";

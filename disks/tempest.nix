@@ -3,8 +3,8 @@
   #
   #   GPT
   #   ├── ESP    (4G, vfat)            → /boot   (lanzaboote signed UKIs)
-  #   └── luks   (100%, LUKS2)         → "crypt"  (--sector-size 4096)
-  #         └── LVM PV → VG "pool"
+  #   └── luks   (100%, LUKS2)         → "tcrypt"  (--sector-size 4096)
+  #         └── LVM PV → VG "tpool"
   #               ├── swap (40G)       plain LV, hibernation/resume
   #               ├── root (95%)       → zpool "zroot"
   #               └── (~5% unallocated VG headroom — see root below)
@@ -21,9 +21,11 @@
   # then ashift=12 and --sector-size 4096 below align natively.
   disko.devices = {
     disk = {
-      main = {
+      master = {
         type = "disk";
-        device = "/dev/nvme0n1";
+        # Stable by-id path (model+serial) — NOT /dev/sdX, which re-enumerates
+        # across reboots/USB hotplug and could point at the wrong disk at install.
+        device = "/dev/disk/by-id/usb-SanDisk_Portable_SSD_323532353952343031333638-0:0";
         content = {
           type = "gpt";
           partitions = {
@@ -48,18 +50,18 @@
               size = "100%";
               content = {
                 type = "luks";
-                name = "crypt";
-                extraOpenArgs = [ ];
+                name = "tcrypt";
+                extraOpenArgs = [];
                 # 4K sector size: align crypto to NAND pages / a 4K-LBA drive.
                 # Format-time only — cannot change without reformatting.
-                extraFormatArgs = [ "--sector-size 4096" ];
+                extraFormatArgs = ["--sector-size 4096"];
                 settings = {
                   allowDiscards = true;
                 };
 
                 content = {
                   type = "lvm_pv";
-                  vg = "pool";
+                  vg = "tpool";
                 };
               };
             };
@@ -69,11 +71,11 @@
     };
 
     lvm_vg = {
-      pool = {
+      tpool = {
         type = "lvm_vg";
         lvs = {
           # Plain swap LV (not a zvol) so hibernation is safe under ZFS.
-          # boot.resumeDevice = /dev/mapper/pool-swap is set in system/boot.nix.
+          # boot.resumeDevice = /dev/mapper/tpool-swap is set in system/boot.nix.
           # 40G > 32G RAM (hibernation needs swap >= RAM).
           swap = {
             size = "40G";
