@@ -12,15 +12,36 @@
 
   # zfs_unstable tracks the newest OpenZFS, matching the CachyOS LTS kernel.
   boot.zfs.package = pkgs.zfs_unstable;
-  # Force-import the root pool. `disko-install` leaves zroot imported/active
-  # under the *installer's* hostid (its EXIT trap only `umount -R`s the mount
-  # point — it never `zpool export`s), so on first boot the pool looks foreign
-  # to our hostId (networking.hostId) and a non-forced `zpool import` is refused,
-  # dropping us into emergency mode. Forcing is safe here: this is a single-disk
-  # laptop pool that is never shared with another live machine. (Alternatively,
-  # `zpool export zroot` from the installer before the first boot avoids needing
-  # this — but force is the robust default.)
+  # Force-import the root pool. `disko-install`'s EXIT trap only `umount -R`s the
+  # mount point — it never `zpool export`s — so right after install the pool can
+  # be left marked active under the installer's hostid. Forcing avoids a
+  # first-boot refusal; it is safe here, a single-disk laptop pool never shared
+  # with another live machine.
   boot.zfs.forceImportRoot = true;
+
+  # Explicitly activate the LVM volume group that backs the pool, in the initrd,
+  # before the pool import. The zroot vdev is the logical volume /dev/tpool/root
+  # (disko ZFS-on-LVM-on-LUKS layout). Because the real root is tmpfs + ZFS, the
+  # LV is NOT in the `fileSystems` dependency graph, so NixOS adds no device unit
+  # for it and never orders the import after an LVM activation — it relies purely
+  # on udev event autoactivation firing when the LUKS-backed PV (tcrypt) appears.
+  # That did not happen on tempest: the initrd `zfs-import-zroot` service polls
+  # for 60s, `tpool-root` never shows up, and the boot drops to emergency mode.
+  # (The old btrfs install never hit this — its root was /dev/mapper/pool-root, a
+  # tracked block device, so the VG was brought up as a normal fileSystems dep.)
+  # `vgchange -ay` here makes the LV deterministically present for the import.
+  boot.initrd.systemd.services.activate-tpool = {
+    description = "Activate LVM volume group tpool (holds the zroot vdev)";
+    after = [ "cryptsetup.target" ];
+    before = [ "zfs-import-zroot.service" ];
+    wantedBy = [ "zfs-import-zroot.service" ];
+    unitConfig.DefaultDependencies = false;
+    serviceConfig = {
+      Type = "oneshot";
+      RemainAfterExit = true;
+      ExecStart = "${pkgs.lvm2.bin}/bin/vgchange --activate y tpool";
+    };
+  };
 
   services.zfs = {
     autoScrub = {
