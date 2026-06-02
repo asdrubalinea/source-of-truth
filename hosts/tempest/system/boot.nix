@@ -38,6 +38,17 @@
         "xhci_pci" # USB 3.0 support
         "thunderbolt" # Framework Thunderbolt ports
         "usbhid" # USB input devices
+
+        # USB mass-storage drivers — REQUIRED because the root pool lives on a
+        # USB SanDisk Portable SSD (see disks/tempest.nix). Without these the
+        # initrd loads the xhci host controller but never binds the storage
+        # device, so no /dev/sd* (and thus no /dev/disk/by-partlabel/
+        # disk-master-luks) ever appears: systemd-cryptsetup@tcrypt times out
+        # waiting for the LUKS partition, the password is never prompted, and the
+        # boot drops to emergency mode. `sd_mod` (the SCSI disk layer) is already
+        # pulled in by the defaults; these bridge USB → SCSI.
+        "uas" # USB Attached SCSI — used by modern USB SSDs like this SanDisk
+        "usb_storage" # USB Bulk-Only Transport — fallback for non-UAS enclosures
       ];
 
       # Additional kernel modules for disk encryption and GPU
