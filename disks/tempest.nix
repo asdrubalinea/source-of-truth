@@ -3,10 +3,10 @@
   #
   #   GPT
   #   ├── ESP    (4G, vfat)            → /boot   (lanzaboote signed UKIs)
-  #   └── luks   (100%, LUKS2)         → "tcrypt"  (--sector-size 4096)
-  #         └── LVM PV → VG "tpool"
+  #   └── luks   (100%, LUKS2)         → "crypt"  (--sector-size 4096)
+  #         └── LVM PV → VG "pool"
   #               ├── swap (40G)       plain LV, hibernation/resume
-  #               ├── root (95%)       → zpool "zroot"
+  #               ├── root (95%)       → zpool "rpool"
   #               └── (~5% unallocated VG headroom — see root below)
   #
   # Everything in this file is fixed at install time and cannot be changed
@@ -21,7 +21,7 @@
   # then ashift=12 and --sector-size 4096 below align natively.
   disko.devices = {
     disk = {
-      master = {
+      main = {
         type = "disk";
         # Stable by-id path (model+serial) — NOT /dev/sdX, which re-enumerates
         # across reboots/USB hotplug and could point at the wrong disk at install.
@@ -55,7 +55,7 @@
               size = "100%";
               content = {
                 type = "luks";
-                name = "tcrypt";
+                name = "crypt";
                 extraOpenArgs = [];
                 # 4K sector size: align crypto to NAND pages / a 4K-LBA drive.
                 # Format-time only — cannot change without reformatting.
@@ -66,7 +66,7 @@
 
                 content = {
                   type = "lvm_pv";
-                  vg = "tpool";
+                  vg = "pool";
                 };
               };
             };
@@ -93,11 +93,11 @@
     };
 
     lvm_vg = {
-      tpool = {
+      pool = {
         type = "lvm_vg";
         lvs = {
           # Plain swap LV (not a zvol) so hibernation is safe under ZFS.
-          # boot.resumeDevice = /dev/mapper/tpool-swap is set in system/boot.nix.
+          # boot.resumeDevice = /dev/mapper/pool-swap is set in system/boot.nix.
           # 40G > 32G RAM (hibernation needs swap >= RAM).
           swap = {
             size = "40G";
@@ -109,13 +109,13 @@
           # ZFS pool vdev. Deliberately NOT 100%: leaving ~5% of the VG
           # unallocated lets swap be grown later (ZFS can't shrink, so once root
           # claims the space it is gone). After a RAM upgrade, either lvextend
-          # swap into the gap, or `lvextend` root + `zpool online -e zroot ...`
+          # swap into the gap, or `lvextend` root + `zpool online -e rpool ...`
           # to expand the pool.
           root = {
             size = "95%";
             content = {
               type = "zfs";
-              pool = "zroot";
+              pool = "rpool";
             };
           };
         };
@@ -123,7 +123,7 @@
     };
 
     zpool = {
-      zroot = {
+      rpool = {
         type = "zpool";
         # Single-vdev pool on a 4K-sector NVMe.
         options.ashift = "12";

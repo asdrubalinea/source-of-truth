@@ -99,8 +99,8 @@ yet). You should land in a working ZFS system on systemd-boot.
 
 ```sh
 # Verify the foundation:
-zpool status                 # zroot ONLINE, no errors
-zfs list                     # zroot/{nix,persist,persist/home,sbctl,reserved}
+zpool status                 # rpool ONLINE, no errors
+zfs list                     # rpool/{nix,persist,persist/home,sbctl,reserved}
 findmnt /persist /persist/home /nix /var/lib/sbctl
 swapon --show                # /dev/dm-? (pool-swap), 40G
 cat /sys/power/state         # contains "disk" → hibernation available
@@ -115,7 +115,7 @@ sudo sbctl create-keys       # writes the key hierarchy into /var/lib/sbctl
 sudo sbctl status
 ```
 
-These keys now live on the `zroot/sbctl` dataset and persist across reboots.
+These keys now live on the `rpool/sbctl` dataset and persist across reboots.
 
 ---
 

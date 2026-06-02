@@ -20,26 +20,26 @@
   boot.zfs.forceImportRoot = true;
 
   # Explicitly activate the LVM volume group that backs the pool, in the initrd,
-  # before the pool import. The zroot vdev is the logical volume /dev/tpool/root
+  # before the pool import. The rpool vdev is the logical volume /dev/pool/root
   # (disko ZFS-on-LVM-on-LUKS layout). Because the real root is tmpfs + ZFS, the
   # LV is NOT in the `fileSystems` dependency graph, so NixOS adds no device unit
   # for it and never orders the import after an LVM activation — it relies purely
-  # on udev event autoactivation firing when the LUKS-backed PV (tcrypt) appears.
-  # That did not happen on tempest: the initrd `zfs-import-zroot` service polls
-  # for 60s, `tpool-root` never shows up, and the boot drops to emergency mode.
+  # on udev event autoactivation firing when the LUKS-backed PV (crypt) appears.
+  # That did not happen on tempest: the initrd `zfs-import-rpool` service polls
+  # for 60s, `pool-root` never shows up, and the boot drops to emergency mode.
   # (The old btrfs install never hit this — its root was /dev/mapper/pool-root, a
   # tracked block device, so the VG was brought up as a normal fileSystems dep.)
   # `vgchange -ay` here makes the LV deterministically present for the import.
-  boot.initrd.systemd.services.activate-tpool = {
-    description = "Activate LVM volume group tpool (holds the zroot vdev)";
+  boot.initrd.systemd.services.activate-pool = {
+    description = "Activate LVM volume group pool (holds the rpool vdev)";
     after = [ "cryptsetup.target" ];
-    before = [ "zfs-import-zroot.service" ];
-    wantedBy = [ "zfs-import-zroot.service" ];
+    before = [ "zfs-import-rpool.service" ];
+    wantedBy = [ "zfs-import-rpool.service" ];
     unitConfig.DefaultDependencies = false;
     serviceConfig = {
       Type = "oneshot";
       RemainAfterExit = true;
-      ExecStart = "${pkgs.lvm2.bin}/bin/vgchange --activate y tpool";
+      ExecStart = "${pkgs.lvm2.bin}/bin/vgchange --activate y pool";
     };
   };
 
@@ -76,7 +76,7 @@
     enable = true;
     # Service/config state: frequent, short retention (non-recursive, so the
     # /home child dataset is governed separately below).
-    datasets."zroot/persist" = {
+    datasets."rpool/persist" = {
       autosnap = true;
       autoprune = true;
       hourly = 24;
@@ -85,7 +85,7 @@
       monthly = 0;
     };
     # Home: the irreplaceable user data — longer retention.
-    datasets."zroot/persist/home" = {
+    datasets."rpool/persist/home" = {
       autosnap = true;
       autoprune = true;
       hourly = 24;

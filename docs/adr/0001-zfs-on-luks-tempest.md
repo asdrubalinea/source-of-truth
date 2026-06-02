@@ -13,7 +13,7 @@ ways, so the layout is deliberate, not incidental.
 ## Decision
 
 - **ZFS on LUKS**, not ZFS-native encryption. Disk stack is
-  `LUKS2 → LVM → { swap LV, root LV → zpool zroot }`.
+  `LUKS2 → LVM → { swap LV, root LV → zpool rpool }`.
 - **Keep the LVM layer** so swap stays a plain LV (never a zvol) and there is a
   single LUKS container → a single TPM2 enrollment.
 - **tmpfs root** for impermanence (unchanged from btrfs); only `/nix`,
@@ -26,7 +26,7 @@ ways, so the layout is deliberate, not incidental.
   4K LBA (`nvme format -b 4096`) with LUKS `--sector-size 4096` and ZFS
   `ashift=12` for native 4K alignment; 40 GB swap with the root LV at **95%** of
   the VG (leaving ~5% headroom so swap can grow later — ZFS can't shrink);
-  `/home` as its own dataset (`zroot/persist/home`).
+  `/home` as its own dataset (`rpool/persist/home`).
 
 ## Why
 
@@ -61,7 +61,7 @@ ways, so the layout is deliberate, not incidental.
   permanent fallback.
 - Root-on-ZFS hibernation is "supported, use at your own risk" per OpenZFS, even
   with swap off-pool.
-- Secure Boot signing keys live in a dedicated `zroot/sbctl` dataset, isolated
+- Secure Boot signing keys live in a dedicated `rpool/sbctl` dataset, isolated
   from the `/persist` backup scope.
 
 ## Rejected alternatives

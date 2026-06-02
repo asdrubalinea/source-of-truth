@@ -14,7 +14,7 @@
     kernelPackages = pkgs.cachyosKernels.linuxPackages-cachyos-lts-lto-zen4;
 
     # Hibernation support
-    resumeDevice = "/dev/mapper/tpool-swap";
+    resumeDevice = "/dev/mapper/pool-swap";
 
     # Kernel parameters for AMD CPU/GPU optimization
     kernelParams = [
@@ -44,7 +44,7 @@
         # USB SanDisk Portable SSD (see disks/tempest.nix). Without these the
         # initrd loads the xhci host controller but never binds the storage
         # device, so no /dev/sd* (and thus no /dev/disk/by-partlabel/
-        # disk-master-luks) ever appears: systemd-cryptsetup@tcrypt times out
+        # disk-main-luks) ever appears: systemd-cryptsetup@crypt times out
         # waiting for the LUKS partition, the password is never prompted, and the
         # boot drops to emergency mode. `sd_mod` (the SCSI disk layer) is already
         # pulled in by the defaults; these bridge USB → SCSI.

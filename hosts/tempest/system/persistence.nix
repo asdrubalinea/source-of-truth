@@ -11,7 +11,7 @@ in
   # emits fileSystems."/"). Here we only re-assert that /persist must be mounted
   # early for impermanence's bind-mounts.
   fileSystems = {
-    # device + fsType come from disko's zroot/persist datasets. Both must be
+    # device + fsType come from disko's rpool/persist datasets. Both must be
     # mounted before impermanence binds /home/irene from /persist/home/irene.
     "/persist".neededForBoot = true;
     "/persist/home".neededForBoot = true;
