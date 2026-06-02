@@ -12,8 +12,15 @@
 
   # zfs_unstable tracks the newest OpenZFS, matching the CachyOS LTS kernel.
   boot.zfs.package = pkgs.zfs_unstable;
-  # Correct hostId is set, so don't force-import a foreign pool.
-  boot.zfs.forceImportRoot = false;
+  # Force-import the root pool. `disko-install` leaves zroot imported/active
+  # under the *installer's* hostid (its EXIT trap only `umount -R`s the mount
+  # point — it never `zpool export`s), so on first boot the pool looks foreign
+  # to our hostId (networking.hostId) and a non-forced `zpool import` is refused,
+  # dropping us into emergency mode. Forcing is safe here: this is a single-disk
+  # laptop pool that is never shared with another live machine. (Alternatively,
+  # `zpool export zroot` from the installer before the first boot avoids needing
+  # this — but force is the robust default.)
+  boot.zfs.forceImportRoot = true;
 
   services.zfs = {
     autoScrub = {
