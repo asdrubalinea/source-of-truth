@@ -6,6 +6,7 @@
 
     # System configuration
     ./system/boot.nix
+    ./system/zfs.nix
     ./system/localization.nix
     ./system/networking.nix
     ./system/persistence.nix
@@ -28,6 +29,11 @@
     ../../hardware/framework.nix
 
     # System modules
+    # secure-boot.nix (lanzaboote) is intentionally left disabled for the FIRST
+    # install: it mkForce-disables systemd-boot and signs UKIs against keys in
+    # /var/lib/sbctl, which don't exist yet on a fresh disk. Boot once with
+    # systemd-boot (system/boot.nix), run `sbctl create-keys`, then enable this
+    # and enroll keys.
     # ../../modules/secure-boot.nix
     ../../modules/nix.nix
 

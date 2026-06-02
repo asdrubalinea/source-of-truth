@@ -8,10 +8,13 @@
 
   boot = {
     # CachyOS kernel with BORE scheduler
-    kernelPackages = pkgs.cachyosKernels.linuxPackages-cachyos-latest-lto-zen4;
+    # LTS (not -latest): ZFS is out-of-tree and nixpkgs refuses to evaluate when
+    # the kernel outruns OpenZFS support. LTS keeps CachyOS/BORE + scx on a base
+    # zfs_unstable supports. See docs/adr/0001-zfs-on-luks-tempest.md.
+    kernelPackages = pkgs.cachyosKernels.linuxPackages-cachyos-lts-lto-zen4;
 
     # Hibernation support
-    resumeDevice = "/dev/mapper/pool-swap";
+    resumeDevice = "/dev/mapper/tpool-swap";
 
     # Kernel parameters for AMD CPU/GPU optimization
     kernelParams = [
@@ -28,7 +31,6 @@
     initrd = {
       systemd = {
         enable = true;
-        package = pkgs.systemd;
       };
 
       # Hardware modules needed for boot
@@ -37,6 +39,17 @@
         "xhci_pci" # USB 3.0 support
         "thunderbolt" # Framework Thunderbolt ports
         "usbhid" # USB input devices
+
+        # USB mass-storage drivers — REQUIRED because the root pool lives on a
+        # USB SanDisk Portable SSD (see disks/tempest.nix). Without these the
+        # initrd loads the xhci host controller but never binds the storage
+        # device, so no /dev/sd* (and thus no /dev/disk/by-partlabel/
+        # disk-master-luks) ever appears: systemd-cryptsetup@tcrypt times out
+        # waiting for the LUKS partition, the password is never prompted, and the
+        # boot drops to emergency mode. `sd_mod` (the SCSI disk layer) is already
+        # pulled in by the defaults; these bridge USB → SCSI.
+        "uas" # USB Attached SCSI — used by modern USB SSDs like this SanDisk
+        "usb_storage" # USB Bulk-Only Transport — fallback for non-UAS enclosures
       ];
 
       # Additional kernel modules for disk encryption and GPU
@@ -48,19 +61,20 @@
         "xhci_hcd"
       ];
 
-      # Filesystem support for early boot
+      # Filesystem support for early boot (zfs is added by system/zfs.nix)
       supportedFilesystems = [
-        "btrfs"
         "vfat"
       ];
     };
 
-    # UEFI boot configuration
+    # UEFI boot configuration. For the first install we boot with systemd-boot;
+    # once sbctl keys exist, enabling modules/secure-boot.nix mkForce-disables
+    # systemd-boot and switches the loader to lanzaboote.
     loader = {
       systemd-boot.enable = true;
       efi = {
         canTouchEfiVariables = true;
-        efiSysMountPoint = "/boot/efi";
+        efiSysMountPoint = "/boot";
       };
     };
   };

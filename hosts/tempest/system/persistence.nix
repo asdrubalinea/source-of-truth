@@ -5,25 +5,16 @@ let
   ) config.environment.persistence."/persist".files;
 in
 {
-  # Filesystem configuration for impermanence setup
+  # Filesystem configuration for impermanence setup.
+  # The tmpfs root, plus /persist, /nix and /var/lib/sbctl, are all owned by
+  # disko (disks/tempest.nix — the root via disko.devices.nodev."/", which also
+  # emits fileSystems."/"). Here we only re-assert that /persist must be mounted
+  # early for impermanence's bind-mounts.
   fileSystems = {
-    # Root filesystem on tmpfs for impermanence
-    "/" = {
-      fsType = "tmpfs";
-      options = [
-        "defaults"
-        "size=32G" # 32GB tmpfs for root
-        "mode=755"
-      ];
-    };
-
-    # Persistent storage subvolume
-    "/persist" = {
-      device = "/dev/pool/root";
-      neededForBoot = true;
-      fsType = "btrfs";
-      options = [ "subvol=/@persist" ];
-    };
+    # device + fsType come from disko's zroot/persist datasets. Both must be
+    # mounted before impermanence binds /home/irene from /persist/home/irene.
+    "/persist".neededForBoot = true;
+    "/persist/home".neededForBoot = true;
   };
 
   # Impermanence configuration - what to persist across reboots
@@ -52,7 +43,6 @@ in
       "/var/lib/prometheus2"
       "/var/lib/prometheus-node-exporter"
       "/var/lib/vaultwarden"
-      "/var/lib/docker"
 
       "/home/irene"
     ];

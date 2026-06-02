@@ -37,8 +37,8 @@
     stateVersion = "23.05";
 
     packages = [
-      (pkgs.callPackage ../packages/cider-2.nix { })
-      inputs.codex.packages.${pkgs.stdenv.hostPlatform.system}.default
+      # (pkgs.callPackage ../packages/cider-2.nix { })
+      # inputs.codex.packages.${pkgs.stdenv.hostPlatform.system}.default
     ];
 
     # persistence."/persist/home/irene" = {
