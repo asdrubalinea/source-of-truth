@@ -70,6 +70,23 @@
       };
     };
 
+    # tmpfs root for impermanence — MUST be declared here, not only as a
+    # hand-written fileSystems."/". `disko-install` mounts *only* what lives
+    # under disko.devices, so without this entry it never mounts a root:
+    # /mnt/disko-install-root stays a bare directory, the install tree has no
+    # mounted root, and nixos-install's systemd-boot step aborts with
+    # "efiSysMountPoint = '/boot' is not a mounted partition". disko also emits
+    # the matching fileSystems."/" from this, so system/persistence.nix no
+    # longer declares it. (cf. disko example/hybrid-tmpfs-on-root.nix)
+    nodev."/" = {
+      fsType = "tmpfs";
+      mountOptions = [
+        "defaults"
+        "size=32G"
+        "mode=755"
+      ];
+    };
+
     lvm_vg = {
       tpool = {
         type = "lvm_vg";
