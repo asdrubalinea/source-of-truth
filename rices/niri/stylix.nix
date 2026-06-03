@@ -24,14 +24,20 @@
       alacritty.enable = true;
       # Disabled on purpose: stylix's kitty target emits
       #   include /nix/store/<hash>-base16-<scheme>.conf
-      # into kitty.conf — a file sitting at the *root* of /nix/store. kitty's
-      # config-reload watcher (`kitten __watch_conf__`) watches each config
-      # file's parent directory *recursively*, so that one include makes every
-      # kitty instance recursively watch the entire store (~266k inotify
-      # watches each). Two terminals exhausted fs.inotify.max_user_watches and
-      # broke Vite/yarn dev with ENOSPC. We inline the palette into
-      # programs.kitty.settings from config.lib.stylix.colors instead (see
-      # kitty.nix) — same theme, no store-root include, bounded watches.
+      # into kitty.conf. We inline the palette into programs.kitty.settings
+      # from config.lib.stylix.colors instead (see kitty.nix) — same theme,
+      # no store-root include.
+      #
+      # NOTE: removing this include does NOT bound kitty's inotify watches —
+      # that was a misdiagnosis. kitty's config-reload watcher
+      # (`kitten __watch_conf__`) watches each config file's parent directory
+      # *recursively*, and Home Manager materializes kitty.conf itself as a
+      # symlink whose realpath is a store-root file
+      # (/nix/store/<hash>-hm_kittykitty.conf). So kitty recurses over all of
+      # /nix/store (~470k watches) regardless of any include, exhausting
+      # fs.inotify.max_user_watches and breaking Vite/yarn dev with ENOSPC.
+      # The actual fix is `auto_reload_config = -1` in kitty.nix, which stops
+      # the watcher from spawning. This target stays off for theme reasons.
       kitty.enable = false;
       wezterm.enable = true;
       vscode.enable = false;

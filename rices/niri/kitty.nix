@@ -1,10 +1,10 @@
 { config, ... }:
 let
   # base16 palette from stylix (with leading '#'). Inlined here instead of
-  # using stylix's kitty target, which would `include` a base16 .conf living at
-  # the root of /nix/store — kitty's config watcher watches that file's parent
-  # dir recursively, dragging the whole store into inotify (~266k watches per
-  # terminal → ENOSPC). See the note in stylix.nix.
+  # using stylix's kitty target so kitty.conf has no `include` of a base16
+  # .conf from /nix/store. (The inotify/ENOSPC blowup is handled separately by
+  # `auto_reload_config = -1` below — the include was never its cause; see the
+  # note in stylix.nix.)
   c = config.lib.stylix.colors.withHashtag;
 in
 {
@@ -15,6 +15,18 @@ in
       # font_family/font_size lines stylix used to inject).
       font_family = config.stylix.fonts.monospace.name;
       font_size = config.stylix.fonts.sizes.terminal;
+
+      # Disable kitty's config auto-reload watcher. Home Manager materializes
+      # kitty.conf as a symlink whose realpath is a store-root file
+      # (/nix/store/<hash>-hm_kittykitty.conf), and kitty's `__watch_conf__`
+      # kitten watches each config file's parent dir *recursively* — so the
+      # watcher recurses over all of /nix/store (~470k inotify watches),
+      # exhausting fs.inotify.max_user_watches and breaking Vite/yarn dev with
+      # ENOSPC. A negative value turns the watcher off (boss.py gates it on
+      # `auto_reload_config >= 0`). This is the real fix for the watch blowup
+      # the stylix-include note in stylix.nix was chasing — the include was
+      # never the trigger; the store-root config symlink is.
+      auto_reload_config = -1;
 
       dynamic_title = true;
       term = "xterm-256color";
