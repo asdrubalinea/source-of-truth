@@ -22,7 +22,17 @@
     targets = {
       neovim.enable = false;
       alacritty.enable = true;
-      kitty.enable = true;
+      # Disabled on purpose: stylix's kitty target emits
+      #   include /nix/store/<hash>-base16-<scheme>.conf
+      # into kitty.conf — a file sitting at the *root* of /nix/store. kitty's
+      # config-reload watcher (`kitten __watch_conf__`) watches each config
+      # file's parent directory *recursively*, so that one include makes every
+      # kitty instance recursively watch the entire store (~266k inotify
+      # watches each). Two terminals exhausted fs.inotify.max_user_watches and
+      # broke Vite/yarn dev with ENOSPC. We inline the palette into
+      # programs.kitty.settings from config.lib.stylix.colors instead (see
+      # kitty.nix) — same theme, no store-root include, bounded watches.
+      kitty.enable = false;
       wezterm.enable = true;
       vscode.enable = false;
       waybar.enable = false;

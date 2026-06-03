@@ -108,12 +108,99 @@ let
       '{text: $text, tooltip: $tooltip, class: $class, alt: $class}'
   '';
 
+  # Combined storage/backup health pill — always visible. Green check when the
+  # internal pool is healthy AND neither backup unit has failed; red and naming
+  # the problem(s) otherwise. Tooltip always lists every subsystem.
+  #
+  # Signals it folds together:
+  #  - rpool: `zpool status -x` flags not just DEGRADED/FAULTED but
+  #    checksum/read/write and scrub-found errors even while the pool reads
+  #    ONLINE. Scoped to rpool — the external backup pool is exported except
+  #    during a run, so its integrity is gated inside tempest-backup-external
+  #    (system/backup-external.nix), surfacing here as a syncoid unit failure.
+  #  - borg / syncoid units: both oneshots, so systemd latches `failed` until
+  #    the next good run. A unit that never ran reports `inactive` (not
+  #    `failed`), so a fresh boot or unrelated host never false-alarms.
+  # All checks are unprivileged.
+  healthWatch = pkgs.writeShellScript "health-watch" ''
+    set -eu
+    export PATH=${lib.makeBinPath [ pkgs.coreutils pkgs.gnugrep pkgs.gawk pkgs.systemd pkgs.zfs pkgs.jq ]}
+
+    borg_unit="borgbackup-job-home-irene.service"
+    usb_unit="tempest-backup-external.service"
+
+    unit_failed() { [ "$(systemctl is-failed "$1" 2>/dev/null || true)" = failed ]; }
+
+    # Epoch of a unit's last finish. Falls back to the matching .timer's last
+    # trigger, which survives reboots (the service's InactiveEnterTimestamp
+    # resets each boot). 0 if it has genuinely never run.
+    unit_last_epoch() {
+      ts=$(systemctl show -p InactiveEnterTimestamp --value "$1" 2>/dev/null || true)
+      [ -n "$ts" ] || ts=$(systemctl show -p LastTriggerUSec --value "''${1%.service}.timer" 2>/dev/null || true)
+      [ -n "$ts" ] || { echo 0; return; }
+      date -d "$ts" +%s 2>/dev/null || echo 0
+    }
+
+    # Epoch -> "Xh ago"; 0/blank -> "never".
+    ago() {
+      e=''${1:-0}
+      [ "$e" -gt 0 ] 2>/dev/null || { echo never; return; }
+      now=$(date +%s); d=$(( now - e ))
+      if   [ "$d" -lt 0 ];     then echo "just now"
+      elif [ "$d" -lt 3600 ];  then echo "$(( d / 60 ))m ago"
+      elif [ "$d" -lt 86400 ]; then echo "$(( d / 3600 ))h ago"
+      else echo "$(( d / 86400 ))d ago"
+      fi
+    }
+
+    # rpool: status -x catches checksum/read/write/scrub errors even while ONLINE.
+    rpool_state=$(zpool list -H -o health rpool 2>/dev/null || echo "?")
+    if zpool status -x rpool 2>/dev/null | grep -q "is healthy"; then rpool_ok=yes; else rpool_ok=no; fi
+    rpool_errors=$(zpool status rpool 2>/dev/null | awk -F'errors: ' '/^errors:/ {print $2}')
+    [ -n "$rpool_errors" ] || rpool_errors="—"
+    scrub=$(zpool status rpool 2>/dev/null | awk -F' on ' '/scan:/ {print $2}')
+    [ -n "$scrub" ] || scrub="never"
+
+    # borg: oneshot last-finish time is a faithful "last backup" (it never no-ops).
+    if unit_failed "$borg_unit"; then borg_stat=FAILED; else borg_stat=ok; fi
+    borg_last=$(ago "$(unit_last_epoch "$borg_unit")")
+
+    # USB: the syncoid service no-ops when the drive is absent, so its run time
+    # lies. The truthful "last backup" is the newest syncoid_* sync-snapshot on
+    # the SOURCE (always readable, created only on a real replication).
+    if unit_failed "$usb_unit"; then usb_stat=FAILED; else usb_stat=ok; fi
+    usb_epoch=$(zfs list -H -p -t snapshot -o creation,name 2>/dev/null \
+      | grep -F syncoid_tempest | sort -n | tail -1 | cut -f1)
+    usb_last=$(ago "''${usb_epoch:-0}")
+
+    problems=""
+    if [ "$rpool_ok" = no ];      then problems="rpool $rpool_state"; fi
+    if unit_failed "$borg_unit";  then problems="''${problems:+$problems, }borg"; fi
+    if unit_failed "$usb_unit";   then problems="''${problems:+$problems, }syncoid"; fi
+
+    if [ -z "$problems" ]; then header="󰄬 storage & backups healthy"; else header="󰀦 PROBLEMS: $problems"; fi
+
+    tooltip=$(printf '%s\n\n%-12s %s\n%-12s %s\n%-12s %s\n%-12s %s' \
+      "$header" \
+      "rpool"      "$rpool_state · errors: $rpool_errors" \
+      "last scrub" "$scrub" \
+      "borg"       "$borg_stat · last $borg_last" \
+      "USB backup" "$usb_stat · last $usb_last")
+
+    if [ -z "$problems" ]; then
+      jq -nc --arg tooltip "$tooltip" '{text: "󰄬", tooltip: $tooltip, class: "ok", alt: "ok"}'
+    else
+      jq -nc --arg text "󰀦 $problems" --arg tooltip "$tooltip" \
+        '{text: $text, tooltip: $tooltip, class: "failed", alt: "failed"}'
+    fi
+  '';
+
   c = config.lib.stylix.colors.withHashtag;
   monoFont = config.stylix.fonts.monospace.name;
 
   baseSettings = lib.importJSON ./config.jsonc;
   withHogModules = map (bar: bar // {
-    "modules-left" = bar."modules-left" ++ [ "custom/fans" "custom/cpu-hog" "custom/mem-hog" ];
+    "modules-left" = bar."modules-left" ++ [ "custom/fans" "custom/cpu-hog" "custom/mem-hog" "custom/health" ];
     "modules-center" = [ "custom/flights" ] ++ bar."modules-center";
     "cpu" = bar."cpu" // {
       states = { warning = 70; critical = 90; };
@@ -126,6 +213,14 @@ let
       return-type = "json";
       interval = 2;
       tooltip = true;
+    };
+    "custom/health" = {
+      exec = "${healthWatch}";
+      return-type = "json";
+      interval = 60;
+      tooltip = true;
+      # Click → a one-shot snapshot of everything, then an interactive shell.
+      on-click = "${pkgs.kitty}/bin/kitty --single-instance -e ${pkgs.fish}/bin/fish -C '${pkgs.zfs}/bin/zpool status -v; ${pkgs.systemd}/bin/systemctl --no-pager --full status borgbackup-job-home-irene.service tempest-backup-external.service'";
     };
     "custom/cpu-hog" = {
       exec = "${cpuHogWatch}";
@@ -263,6 +358,22 @@ in
 
       #custom-cpu-hog.hog,
       #custom-mem-hog.hog {
+        background-color: ${c.base08};
+        color: ${c.base00};
+      }
+
+      /* combined storage/backup health pill — green check when all is well,
+         red alarm naming the problem otherwise (always visible) */
+      #custom-health {
+        background-color: ${c.base00};
+        padding: 4px 10px;
+      }
+
+      #custom-health.ok {
+        color: ${c.base0B};
+      }
+
+      #custom-health.failed {
         background-color: ${c.base08};
         color: ${c.base00};
       }

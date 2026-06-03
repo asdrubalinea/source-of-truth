@@ -8,7 +8,7 @@ let
   '';
 in
 {
-  home.file.".wallpaper".source = ./747-geneva.jpg;
+  home.file.".wallpaper".source = ./boeing-747.jpg;
   home.packages = [ pkgs.awww ];
 
   systemd.user.services.awww-daemon = {

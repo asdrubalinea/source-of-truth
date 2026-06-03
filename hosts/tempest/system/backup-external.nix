@@ -51,6 +51,11 @@ let
   parent = "${pool}/tempest";
   altroot = "/mnt/backup";
 
+  # Integrity-scrub cadence for the backup pool. The pool is only importable
+  # during a run, so a periodic scrub has to ride along with the backup
+  # (scrub-if-stale, see the orchestrator script below).
+  scrubMaxAgeSec = 30 * 24 * 3600; # 30 days
+
   # Replication pairs. /persist and /persist/home carry independent sanoid
   # retention (system/zfs.nix), so they are sent as separate non-recursive
   # datasets rather than one recursive stream. /nix is reproducible and
@@ -140,6 +145,36 @@ let
 
       # Expire old snapshots on the backup per the deep-retention policy above.
       sanoid --configdir=${pruneConfDir} --prune-snapshots --verbose
+
+      # Scrub-if-stale. This run is the only window the pool is imported, so a
+      # periodic integrity scrub has to ride along. -w blocks until the scrub
+      # finishes (the oneshot has no timeout) — so on a scrub run the drive must
+      # stay attached for potentially hours. We stamp the completion time as a
+      # user property on the pool itself (it travels with the drive and is
+      # readable exactly when we need it — while imported), rather than parsing
+      # the free-form `zpool status` scan line.
+      last_scrub=$(zfs get -H -o value tempest:scrubbed ${pool} 2>/dev/null || echo "")
+      now=$(date +%s)
+      case "$last_scrub" in
+        "" | "-") due=yes ;;
+        *) if [ "$(( now - last_scrub ))" -ge ${toString scrubMaxAgeSec} ]; then due=yes; else due=no; fi ;;
+      esac
+      if [ "$due" = yes ]; then
+        log "integrity scrub due (last=''${last_scrub:-never}); scrubbing '${pool}' — may take hours, keep the drive attached."
+        zpool scrub -w ${pool}
+        zfs set tempest:scrubbed="$(date +%s)" ${pool}
+        log "scrub finished."
+      fi
+
+      # Surface external-SSD health while the pool is still imported (the only
+      # chance). A pool can read ONLINE yet carry checksum/read/write or
+      # scrub-found errors; `status -x` catches those. A non-zero exit here fails
+      # the unit, which lights the waybar backup badge red.
+      if ! zpool status -x ${pool} | grep -q "is healthy"; then
+        log "POOL '${pool}' UNHEALTHY:"
+        zpool status -v ${pool} || true
+        exit 1
+      fi
 
       log "done."
     '';

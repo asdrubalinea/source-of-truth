@@ -15,7 +15,7 @@
     ../desktop/zed-editor
     ../desktop/vscode.nix
     # ../desktop/helix.nix
-    ../desktop/emacs
+    # ../desktop/emacs
     ../desktop/mail
     ../desktop/tmux.nix
     ../desktop/home-packages.nix
