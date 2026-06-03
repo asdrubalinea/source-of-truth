@@ -187,6 +187,12 @@ let
       "borg"       "$borg_stat · last $borg_last" \
       "USB backup" "$usb_stat · last $usb_last")
 
+    # Waybar renders tooltips as Pango markup, so a literal '&' (or '<'/'>')
+    # makes the whole tooltip fail to parse and show empty. Escape them.
+    tooltip=''${tooltip//&/&amp;}
+    tooltip=''${tooltip//</&lt;}
+    tooltip=''${tooltip//>/&gt;}
+
     if [ -z "$problems" ]; then
       jq -nc --arg tooltip "$tooltip" '{text: "󰄬", tooltip: $tooltip, class: "ok", alt: "ok"}'
     else
