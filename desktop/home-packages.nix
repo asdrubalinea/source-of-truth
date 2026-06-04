@@ -97,7 +97,9 @@
     luarocks
     nodejs
     php
-    python3
+    # pygobject3 (the `gi` module) rides on the interpreter for niri's noctalia
+    # Screen Toolkit webcam-mirror tool; a bare python3 can't import it.
+    (python3.withPackages (ps: with ps; [ pygobject3 ]))
     uv # Python package manager
 
     # Language servers (consumed by emacs eglot, helix, etc.)
