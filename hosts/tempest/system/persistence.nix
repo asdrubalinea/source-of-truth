@@ -44,7 +44,20 @@ in
       "/var/lib/prometheus-node-exporter"
       "/var/lib/vaultwarden"
 
-      "/home/irene"
+      # Own the home explicitly. As a bare string, impermanence creates the
+      # /persist source dir as root:root and never enforces ownership — so on a
+      # FRESH dataset (a clean install, or the tempest-vm image) /home/irene
+      # comes up root-owned, the user can't write their own home, and the
+      # first-boot home-manager activation fails ("could not find suitable
+      # profile directory"). It only "works" on this laptop because the dir was
+      # fixed once and persists. Setting user/group/mode makes impermanence
+      # create AND enforce irene:users 0700, so first boot is correct everywhere.
+      {
+        directory = "/home/irene";
+        user = "irene";
+        group = "users";
+        mode = "0700";
+      }
     ];
 
     # Individual files that need persistence

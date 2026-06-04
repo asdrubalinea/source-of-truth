@@ -1,0 +1,13 @@
+#!/bin/sh
+# DESTRUCTIVE: disko-installs .#tempest onto the target disk. The device must be
+# passed explicitly — there is no default, so an accidental bare run can't wipe
+# the wrong disk.
+set -eu
+if [ "$#" -lt 1 ]; then
+  echo "usage: $0 /dev/disk/by-id/<target>" >&2
+  echo "refusing to run without an explicit target device (DESTROYS it)." >&2
+  echo "tempest's NVMe is /dev/disk/by-id/nvme-Corsair_MP700_PRO_SE_A8WFB416001JKK" >&2
+  exit 1
+fi
+sudo nix --extra-experimental-features nix-command --extra-experimental-features flakes run 'github:nix-community/disko/latest#disko-install' -- \
+  --flake '.#tempest' --write-efi-boot-entries --disk main "$1"

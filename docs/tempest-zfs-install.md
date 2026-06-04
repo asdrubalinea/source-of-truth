@@ -85,11 +85,12 @@ systemd-boot first. Apply this temporary override (reverted in Phase 5):
 
 ## Phase 3 — Partition, format, install
 
-`tempest-install.sh` runs disko (destroy → format → mount) **and**
-`nixos-install` in one shot, targeting `/dev/nvme0n1`.
+`tempest-install <device>` runs disko (destroy → format → mount) **and**
+`nixos-install` in one shot. The target device is a required argument (no
+default), so pass the NVMe by-id path explicitly.
 
 ```sh
-./tempest-install.sh
+./tempest-install /dev/disk/by-id/nvme-Corsair_MP700_PRO_SE_A8WFB416001JKK
 # disko prompts for the LUKS passphrase → set a STRONG one.
 # This is your permanent fallback once the TPM is enrolled. Do not lose it.
 ```

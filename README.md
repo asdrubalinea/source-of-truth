@@ -59,7 +59,7 @@ system-apply && user-apply
 
 ```sh
 update-home        # tempest: bump only the HM-side flake inputs
-./update-flakes.sh # nix flake update — everything
+nix flake update   # bump everything (old ./update-flakes.sh wrapper removed)
 system-clean       # drop old generations, GC, optimize the store
 ```
 
@@ -68,8 +68,9 @@ system-clean       # drop old generations, GC, optimize the store
 > Only run them when actually installing.
 >
 > ```sh
-> ./tempest-format.sh    # disko destroy,format,mount on disks/tempest.nix
-> ./tempest-install.sh   # disko-install .#tempest → /dev/nvme0n1
+> ./tempest-format  /dev/disk/by-id/<target>   # disko destroy,format,mount
+> ./tempest-install /dev/disk/by-id/<target>   # disko-install .#tempest
+> # target device is a required arg (no default) — a bare run won't wipe a disk
 > ```
 
 ---

@@ -13,14 +13,17 @@ Rebuilds are done from the flake root against `.#<host>`:
 - `nixos-rebuild switch --flake '.#tempest' --sudo` — apply a host config. Wrapped as `config-apply` / `system-apply` (installed via home-manager from `scripts/config-apply.nix` and `scripts/system-apply.nix`) — both `pushd` into `/persist/source-of-truth` and run `nixos-rebuild switch --flake '.#' --sudo`, so `.#` resolves to the current host's `nixosConfigurations` entry by hostname.
 - `home-manager switch --flake '.#irene@<host>'` — apply a standalone Home Manager config. Both `orchid` and `tempest` have entries under `homeConfigurations` (`irene@orchid`, `irene@tempest`). On tempest there's a `user-apply` wrapper (`scripts/user-apply.nix`) that runs this with `-b backup`. On tempest a system change therefore needs **both** `system-apply` and `user-apply`.
 - `update-home` (tempest only, `scripts/update-home.nix`) — `nix flake update` for the subset of inputs that only affect tempest's HM closure (`nixpkgs-home`, `claude-code`, `codex`, `zen-browser`, `hn-tui-flake`, `emacs-overlay`, `stylix`, `hyprland`). `niri` and `helix` are intentionally excluded because both also live in tempest's system layer.
-- `./update-flakes.sh` — `nix flake update` (everything).
+- `nix flake update` — update all flake inputs (the old `./update-flakes.sh` wrapper was removed).
 - `system-clean` (from `scripts/system-clean.nix`) — delete old generations, GC, optimize the store.
+
+A non-destructive `tempest-vm` clone exists for testing the full config (disko layout + impermanence + niri) in QEMU without touching hardware:
+
+- `./build-vm` — `nix build .#nixosConfigurations.tempest-vm.config.system.build.vmWithDisko`; run the result with `./result/bin/disko-vm`. (Do NOT use `nixos-rebuild build-vm` — it builds a generic VM that ignores the disko layout and the VM tuning in `hosts/tempest/vm.nix`.)
 
 Disk / install helpers are **destructive** — they wipe and reformat the target device. Only run when actually installing:
 
-- `./tempest-format.sh` — runs disko `destroy,format,mount` against `./disks/tempest.nix`.
-- `./tempest-install.sh` — disko-install `.#tempest` to `/dev/nvme0n1`.
-- `./vm-install.sh` — disko-install `.#vm` to `/dev/vda` (note: no `vm` entry currently exists in `flake.nix`; check before running).
+- `./tempest-format /dev/disk/by-id/<target>` — runs disko `destroy,format,mount` against `./disks/tempest.nix`. The target device is a **required argument** (no default) — `disks/tempest.nix` only has a non-existent placeholder, so a bare/accidental run fails fast instead of wiping a disk.
+- `./tempest-install /dev/disk/by-id/<target>` — disko-install `.#tempest` to the given device (passed through as `--disk main`). Same required-argument safety.
 
 No test framework — validation is "does `nixos-rebuild` evaluate and switch successfully on the relevant host".
 
@@ -60,5 +63,5 @@ Home configs themselves are composition roots that import a rice, desktop module
 - The working directory is `/persist/source-of-truth` and several scripts hard-code that path. Don't move the tree without updating `scripts/config-apply.nix` and `homes/orchid.nix`'s `user-apply`/`system-apply` wrappers.
 - Secrets go through `sops-nix` (imported in `homes/orchid.nix`). Don't commit raw secrets.
 - Host `specialArgs` / `extraSpecialArgs` inject `inputs` and `hostname` — modules expect these available.
-- Nix formatting: 2-space indent (alejandra / nixpkgs-fmt if available). Shell scripts use explicit `set -euo pipefail` where relevant (`vm-install.sh`) or plain `#!/bin/sh` for simple wrappers.
+- Nix formatting: 2-space indent (alejandra / nixpkgs-fmt if available). Shell scripts use explicit `set -euo pipefail` where relevant, or plain `#!/bin/sh` for simple wrappers (e.g. `build-vm`, `tempest-install`).
 - Commit style (per `AGENTS.md` and recent log): short, lowercase summaries, one logical change per commit, mention the host or module touched.

@@ -14,7 +14,7 @@
     # Applications and tools
     ../desktop/zed-editor
     ../desktop/vscode.nix
-    # ../desktop/helix.nix
+    ../desktop/helix.nix
     # ../desktop/emacs
     ../desktop/mail
     ../desktop/tmux.nix

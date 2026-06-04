@@ -213,6 +213,38 @@
         // args);
 
     lib = nixpkgs.lib;
+
+    # tempest is defined once and instantiated twice: the real Framework laptop
+    # (virtual = false) and an ephemeral QEMU clone (virtual = true). The
+    # `virtual` specialArg is consumed by ./hosts/tempest/default.nix, which
+    # conditionally imports the physical-machine layer (disko/zfs/impermanence/
+    # lanzaboote/framework hardware) only when false, and ./hosts/tempest/vm.nix
+    # only when true. Both share the exact same portable config — no duplicate
+    # host to maintain. Build the VM with the ./build-vm script (or directly:
+    # `nix build .#nixosConfigurations.tempest-vm.config.system.build.vmWithDisko`),
+    # then run ./result/bin/disko-vm. NOT `nixos-rebuild build-vm`: that builds
+    # the generic `system.build.vm`, which ignores the disko disk layout AND all
+    # of vm.nix's `disko.tests.extraConfig` tuning (RAM/cores/GPU/neededForBoot).
+    mkTempest = virtual:
+      lib.nixosSystem {
+        specialArgs = {
+          inherit inputs virtual;
+          hostname = "tempest";
+        };
+
+        modules = [
+          {
+            nixpkgs = {
+              hostPlatform = defaultSystem;
+              config = nixpkgsConfig;
+              overlays = overlays;
+            };
+          }
+          niri.nixosModules.niri
+
+          ./hosts/tempest/default.nix
+        ];
+      };
   in {
     # Expose the locked home-manager CLI so it can be bootstrapped without
     # relying on whatever's in PATH — useful right after a config-apply that
@@ -244,32 +276,15 @@
         ];
       };
 
-      tempest = lib.nixosSystem {
-        specialArgs = {
-          inherit inputs;
-          hostname = "tempest";
-        };
+      # Real Framework laptop. Physical-machine modules (disko/impermanence/
+      # lanzaboote/framework/ucodenix + ./disks/tempest.nix) are imported inside
+      # ./hosts/tempest/default.nix, gated on the `virtual` specialArg.
+      tempest = mkTempest false;
 
-        modules = [
-          {
-            nixpkgs = {
-              hostPlatform = defaultSystem;
-              config = nixpkgsConfig;
-              overlays = overlays;
-            };
-          }
-          disko.nixosModules.disko
-          impermanence.nixosModules.impermanence
-          nixos-hardware.nixosModules.framework-amd-ai-300-series
-          lanzaboote.nixosModules.lanzaboote
-          ucodenix.nixosModules.default
-          niri.nixosModules.niri
-          inputs.framework-control.nixosModules.default
-
-          ./disks/tempest.nix
-          ./hosts/tempest/default.nix
-        ];
-      };
+      # Ephemeral QEMU clone of tempest — same config, none of the physical
+      # layer. Build with ./build-vm (→ system.build.vmWithDisko), run
+      # ./result/bin/disko-vm. See mkTempest above for why not `nixos-rebuild build-vm`.
+      tempest-vm = mkTempest true;
 
       hydra = lib.nixosSystem {
         specialArgs = {
