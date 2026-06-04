@@ -16,8 +16,9 @@ let
   '';
 in
 {
-  home.packages = [ pkgs.swaylock-effects ];
-
+  # Lock is handled by Noctalia's lockscreen (NNN stack) rather than swaylock.
+  # swayidle still owns the idle timers + the logind lock/sleep events below;
+  # its `lock` event just calls into the already-running noctalia-shell.
   services.swayidle = {
     enable = true;
     systemdTargets = [ "graphical-session.target" ];
@@ -39,7 +40,7 @@ in
     ];
     events = {
       before-sleep = "${pkgs.systemd}/bin/loginctl lock-session";
-      lock = "${pkgs.swaylock-effects}/bin/swaylock -f";
+      lock = "noctalia-shell ipc call lockScreen lock";
     };
   };
 }

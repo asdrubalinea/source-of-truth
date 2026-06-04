@@ -197,7 +197,7 @@
 
     # --- Security testing ---
     burpsuite
-    caido-desktop
+    # caido-desktop
 
     # --- Games ---
     prismlauncher

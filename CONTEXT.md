@@ -16,7 +16,7 @@ tempest keeps a 3-2-1 backup. Three legs, each with its own meaning of "ran":
 ### Backup states
 
 - **failed** — a backup leg *ran and errored*. This is the only condition that
-  raises an alarm (the red waybar badge). It is a latched state: it persists
+  raises an alarm (the **health indicator** in the bar goes red). It is a latched state: it persists
   until the next successful run of that leg clears it. The syncoid (USB) leg
   also counts as failed if, after replicating, the backup pool reports
   unhealthy (see *integrity scrub* — the run can only inspect the SSD while the
@@ -31,7 +31,7 @@ tempest keeps a 3-2-1 backup. Three legs, each with its own meaning of "ran":
 
 - **integrity scrub** — a full ZFS scrub of a pool to detect/repair silent
   corruption. `rpool` (internal) is scrubbed weekly and its health is shown
-  always (waybar). The external **backup** pool can only be scrubbed while the
+  always (the health indicator in the bar). The external **backup** pool can only be scrubbed while the
   drive is attached, so its scrub rides along with a backup run on a *stale*
   cadence (skipped if scrubbed recently), and an unhealthy result fails that
   run rather than showing as its own always-on indicator.

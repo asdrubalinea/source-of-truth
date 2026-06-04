@@ -1,5 +1,18 @@
 [
   {
+    # Rounded window corners (all windows — no `matches` ⇒ catch-all) to match
+    # the floating Noctalia bar's rounded corners (bar frameRadius = 12).
+    # clip-to-geometry rounds the window surface itself, not just niri's border,
+    # so app content doesn't square off the corners.
+    geometry-corner-radius = {
+      top-left = 12.0;
+      top-right = 12.0;
+      bottom-right = 12.0;
+      bottom-left = 12.0;
+    };
+    clip-to-geometry = true;
+  }
+  {
     matches = [
       { is-floating = true; }
     ];
