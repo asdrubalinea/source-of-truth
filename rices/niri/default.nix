@@ -8,9 +8,9 @@
     ./flights.nix
     ./swayidle.nix
     ./kanshi.nix
-    ./waybar
+    ./noctalia.nix
+    ./noctalia-widgets.nix
     ./wallpaper
-    ./tofi.nix
     ./stylix.nix
   ];
 }

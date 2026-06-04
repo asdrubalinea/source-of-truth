@@ -82,7 +82,10 @@ in
           inactive.color = c.base03;
         };
 
-        gaps = 0;
+        # Gap windows away from the screen edges so they sit inside the floating
+        # Noctalia bar's margin (noctalia-widgets.nix sets the bar's margins to
+        # the same value, so window columns line up with the bar's edges).
+        gaps = 8;
       };
 
       # Prefer no client-side decorations
@@ -106,6 +109,8 @@ in
             "XAUTHORITY"
           ];
         }
+        # NNN stack: launch the Noctalia shell (bar + notifications + launcher).
+        { command = [ "noctalia-shell" ]; }
       ];
 
       # Keybindings
@@ -127,9 +132,13 @@ in
           "-c"
           ''exec emacsclient -c -d "$WAYLAND_DISPLAY"''
         ];
+        # Same key as before; now drives Noctalia's launcher instead of tofi.
         "Mod+Space".action.spawn = [
-          "${pkgs.tofi}/bin/tofi-drun"
-          "--drun-launch=true"
+          "noctalia-shell"
+          "ipc"
+          "call"
+          "launcher"
+          "toggle"
         ];
 
         "Mod+B".action.spawn = [ "${pkgs.blueman}/bin/blueman-manager" ];
