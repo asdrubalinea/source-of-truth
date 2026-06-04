@@ -1,3 +1,18 @@
+# The target device is NOT hard-coded. It must be passed explicitly at
+# format/install time, so accidentally running a destructive disko command (or
+# running it on the wrong machine) targets the bogus placeholder below and fails
+# fast instead of wiping a real disk:
+#   ./tempest-format  /dev/disk/by-id/<target>   # disko --argstr device <target>
+#   ./tempest-install /dev/disk/by-id/<target>   # disko-install --disk main <target>
+# tempest's own NVMe is /dev/disk/by-id/nvme-Corsair_MP700_PRO_SE_A8WFB416001JKK.
+#
+# For the booted system this value is inert: disko derives `fileSystems` from GPT
+# partlabels (disk-main-ESP, disk-main-luks), never from this device path, so the
+# placeholder default is fine for the NixOS module eval (flake.nix → tempest).
+{
+  device ? "/dev/disk/by-id/REPLACE-WITH-TARGET-DEVICE-AT-INSTALL-TIME",
+  ...
+}:
 {
   # tempest disk layout: ZFS-on-LUKS.
   #
@@ -15,7 +30,7 @@
   # (never a zvol) for safe hibernation under a single LUKS container.
   # See docs/adr/0001-zfs-on-luks-tempest.md.
   #
-  # 4K alignment (do this on the NEW drive BEFORE running tempest-format.sh):
+  # 4K alignment (do this on the NEW drive BEFORE running tempest-format):
   #   nvme id-ns /dev/nvme0n1 | grep lbaf      # find a 4096-byte LBA format
   #   nvme format /dev/nvme0n1 --lbaf=<index>  # DESTRUCTIVE — fresh drive only
   # then ashift=12 and --sector-size 4096 below align natively.
@@ -23,9 +38,10 @@
     disk = {
       main = {
         type = "disk";
-        # Stable by-id path (model+serial) — NOT /dev/sdX, which re-enumerates
-        # across reboots/USB hotplug and could point at the wrong disk at install.
-        device = "/dev/disk/by-id/nvme-Corsair_MP700_PRO_SE_A8WFB416001JKK";
+        # Supplied by the caller (see the file header). Always use a stable by-id
+        # path (model+serial) — NOT /dev/sdX, which re-enumerates across
+        # reboots/USB hotplug and could point at the wrong disk at install.
+        device = device;
         content = {
           type = "gpt";
           partitions = {
@@ -111,6 +127,13 @@
           # claims the space it is gone). After a RAM upgrade, either lvextend
           # swap into the gap, or `lvextend` root + `zpool online -e rpool ...`
           # to expand the pool.
+          #
+          # COUPLING: root (95%FREE) is created before swap (alphabetical LV
+          # order), so swap must fit in the remaining ~5%. The tempest-vm image
+          # (hosts/tempest/vm.nix) sets disko.devices.disk.main.imageSize large
+          # enough (1024G) that 5% still exceeds swap's 40G — DON'T shrink that
+          # imageSize below ~804G or disko's format step fails ("insufficient
+          # free space") when it can't fit swap.
           root = {
             size = "95%";
             content = {

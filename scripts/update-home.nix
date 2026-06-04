@@ -11,7 +11,7 @@ let
     # tempest's system layer (niri rice activates programs.niri at the
     # NixOS level; pkgs.helix is set via evilHelixOverlay and referenced as
     # EDITOR in hosts/tempest/system/environment.nix), so bumping them would
-    # change the system closure. Use ./update-flakes.sh for a full bump.
+    # change the system closure. Run `nix flake update` for a full bump.
     nix flake update \
       nixpkgs-home \
       claude-code \

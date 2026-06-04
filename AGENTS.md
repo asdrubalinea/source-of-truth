@@ -11,10 +11,10 @@
 
 ## Build, Test, and Development Commands
 - `nixos-rebuild switch --flake '.#<host>' --sudo`: apply a host configuration (used by `scripts/system-apply.nix`).
-- `./update-flakes.sh`: update flake inputs (`nix flake update`).
-- `./tempest-format.sh`: format/mount disks for the `tempest` layout (destructive).
-- `./tempest-install.sh`: install NixOS using the `tempest` Disko layout.
-- `./vm-install.sh`: install the `vm` target to `/dev/vda`.
+- `nix flake update`: update flake inputs (the old `./update-flakes.sh` wrapper was removed).
+- `./build-vm`: build the non-destructive `tempest-vm` QEMU clone (`system.build.vmWithDisko`); run `./result/bin/disko-vm`.
+- `./tempest-format`: format/mount disks for the `tempest` layout (destructive).
+- `./tempest-install`: install NixOS using the `tempest` Disko layout.
 
 ## Coding Style & Naming Conventions
 - Nix files use two-space indentation; keep attribute sets aligned and readable.
@@ -34,6 +34,6 @@
 - Include screenshots for UI changes under `rices/` or `desktop/` when applicable.
 
 ## Security & Configuration Tips
-- Disk operations (`tempest-format.sh`, `tempest-install.sh`, `vm-install.sh`) are destructive; double-check target disks.
+- Disk operations (`tempest-format`, `tempest-install`) are destructive; double-check target disks.
 - Host secrets may be managed via `sops-nix`; avoid committing raw secrets.
 - Review `hosts/<name>/system/security.nix` before changing security-sensitive settings.

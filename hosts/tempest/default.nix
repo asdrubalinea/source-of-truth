@@ -1,16 +1,11 @@
-{ ... }:
+{ inputs, lib, virtual ? false, ... }:
 {
   imports = [
-    # Hardware
-    ./hardware.nix
+    # --- Portable config: shared by the real laptop AND the VM ---
 
     # System configuration
-    ./system/boot.nix
-    ./system/zfs.nix
-    ./system/backup-external.nix
     ./system/localization.nix
     ./system/networking.nix
-    ./system/persistence.nix
     ./system/environment.nix
     ./system/security.nix
     ./system/services.nix
@@ -21,35 +16,64 @@
     # User accounts
     ./users/irene.nix
 
-    # Shared services
-    # ../../services/thermal-logger.nix
-
     # Shared hardware modules
     ../../hardware/bluetooth.nix
     ../../hardware/audio.nix
-    ../../hardware/framework.nix
 
     # System modules
+    ../../modules/nix.nix
+
+    # framework-control's service is configured in the shared system/services.nix,
+    # so the module must exist in both variants (the service itself is disabled in
+    # vm.nix). The package builds fine off-hardware; only the runtime needs an EC.
+    inputs.framework-control.nixosModules.default
+
+    # Services
+    ../../services/borg-backup.nix
+    ../../services/nix-cleanup.nix
+    ../../services/redshift.nix
+    ../../services/grafana/default.nix
+
+    # Desktop environment
+    ../../rices/niri/system.nix
+
+    # --- Filesystem + boot layer: shared so the VM reproduces tempest's EXACT
+    #     on-disk layout (GPT + LUKS + LVM + swap + ZFS datasets + tmpfs root +
+    #     impermanence). The `tempest-vm` build uses disko's `vmWithDisko`, which
+    #     formats a virtual disk straight from the disko.devices spec below, so
+    #     the VM mounts the same datasets and exercises the same impermanence
+    #     bind-mounts. boot.nix's CachyOS LTS kernel is kept in both because the
+    #     out-of-tree ZFS build needs it (see system/zfs.nix). ---
+    inputs.disko.nixosModules.disko
+    inputs.impermanence.nixosModules.impermanence
+    ../../disks/tempest.nix
+    ./system/boot.nix
+    ./system/zfs.nix
+    ./system/persistence.nix
+  ]
+  ++ lib.optionals (!virtual) [
+    # --- Physical Framework laptop only ---
+    # Hardware drivers, microcode, secure-boot plumbing and the external-disk
+    # backup are meaningless (or actively error) inside a VM, so they are simply
+    # not evaluated when virtual = true.
+    inputs.nixos-hardware.nixosModules.framework-amd-ai-300-series
+    inputs.lanzaboote.nixosModules.lanzaboote
+    inputs.ucodenix.nixosModules.default
+
+    ./hardware.nix
+    ../../hardware/framework.nix
+    ./system/backup-external.nix
+
     # secure-boot.nix (lanzaboote) is intentionally left disabled for the FIRST
     # install: it mkForce-disables systemd-boot and signs UKIs against keys in
     # /var/lib/sbctl, which don't exist yet on a fresh disk. Boot once with
     # systemd-boot (system/boot.nix), run `sbctl create-keys`, then enable this
     # and enroll keys.
     # ../../modules/secure-boot.nix
-    ../../modules/nix.nix
-
-    # Services
-    # ../../services/btrfs-snapshots.nix
-    ../../services/borg-backup.nix
-    ../../services/nix-cleanup.nix
-    ../../services/redshift.nix
-    ../../services/grafana/default.nix
-    # ../../services/syncthing.nix
-
-    # Desktop environment
-    # ../../rices/estradiol/system.nix
-    # ../../desktop/gnome.nix
-    ../../rices/niri/system.nix
+  ]
+  ++ lib.optionals virtual [
+    # --- VM-only layer: home-manager, guest sizing, declarative repo seed ---
+    ./vm.nix
   ];
 
   programs.nh = {

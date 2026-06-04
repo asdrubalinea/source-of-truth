@@ -1,3 +1,10 @@
 .cache/
 desktop/emacs/var/
 desktop/emacs/etc/
+
+# tempest-vm (nix build .#…build.vmWithDisko / run-*-vm) runtime artifacts:
+# OVMF EFI NVRAM varstore + nix build result symlink + any stray disk images.
+result
+result-*
+*-efi-vars.fd
+*.qcow2
