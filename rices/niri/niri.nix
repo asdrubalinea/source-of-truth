@@ -2,13 +2,14 @@
   config,
   pkgs,
   inputs,
+  lib,
   ...
 }:
 let
   windowRules = import ./window-rules.nix;
   c = config.lib.stylix.colors.withHashtag;
 in
-{
+lib.mkIf config.rices.niri.enable {
   programs.niri = {
     package = pkgs.niri-unstable;
     settings = {

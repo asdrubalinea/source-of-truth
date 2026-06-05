@@ -1,5 +1,7 @@
-{ lib, pkgs, inputs, ... }:
+{ lib, pkgs, inputs, config, ... }:
 let
+  cfg = config.rices.niri;
+
   # The flights radar package (TUI + waybar client), backed by the always-on
   # flights-server enabled in ./flights.nix.
   flights = inputs.flights.packages.${pkgs.system}.flights;
@@ -142,8 +144,8 @@ let
     set -eu
     export PATH=${lib.makeBinPath [ pkgs.coreutils pkgs.gnugrep pkgs.gawk pkgs.systemd pkgs.zfs pkgs.jq ]}
 
-    borg_unit="borgbackup-job-home-irene.service"
-    usb_unit="tempest-backup-external.service"
+    borg_unit="${cfg.backupWidget.borgUnit}"
+    usb_unit="${cfg.backupWidget.usbUnit}"
 
     unit_failed() { [ "$(systemctl is-failed "$1" 2>/dev/null || true)" = failed ]; }
 
@@ -169,6 +171,16 @@ let
       fi
     }
 
+    # Machine-policy guard: this readout describes a specific host's backup legs
+    # (and its root pool). On a host where NEITHER configured backup unit exists
+    # (LoadState not-found), there is nothing here to describe — collapse to
+    # empty rather than false-alarming on the absent units or a foreign rpool.
+    loaded() { [ "$(systemctl show -p LoadState --value "$1" 2>/dev/null || true)" = loaded ]; }
+    if ! loaded "$borg_unit" && ! loaded "$usb_unit"; then
+      printf '{"text":""}\n'
+      exit 0
+    fi
+
     # rpool: status -x catches checksum/read/write/scrub errors even while ONLINE.
     rpool_state=$(zpool list -H -o health rpool 2>/dev/null || echo "?")
     if zpool status -x rpool 2>/dev/null | grep -q "is healthy"; then rpool_ok=yes; else rpool_ok=no; fi
@@ -186,7 +198,7 @@ let
     # the SOURCE (always readable, created only on a real replication).
     if unit_failed "$usb_unit"; then usb_stat=FAILED; else usb_stat=ok; fi
     usb_epoch=$(zfs list -H -p -t snapshot -o creation,name 2>/dev/null \
-      | grep -F syncoid_tempest | sort -n | tail -1 | cut -f1)
+      | grep -F "${cfg.backupWidget.syncoidSnapshotPrefix}" | sort -n | tail -1 | cut -f1)
     usb_last=$(ago "''${usb_epoch:-0}")
 
     problems=""
@@ -245,7 +257,7 @@ let
     showMemoryAsPercent = false;
   } // shown;
 in
-{
+lib.mkIf cfg.enable {
   programs.noctalia-shell.settings.bar = {
     position = "top";
 
@@ -297,7 +309,7 @@ in
           hideMode = "alwaysExpanded";
           showIcon = true; # render shield-check / shield-x via the icon slot
           # Click → a one-shot snapshot of everything, then an interactive shell.
-          leftClickExec = "${pkgs.kitty}/bin/kitty --single-instance -e ${pkgs.fish}/bin/fish -C '${pkgs.zfs}/bin/zpool status -v; ${pkgs.systemd}/bin/systemctl --no-pager --full status borgbackup-job-home-irene.service tempest-backup-external.service'";
+          leftClickExec = "${pkgs.kitty}/bin/kitty --single-instance -e ${pkgs.fish}/bin/fish -C '${pkgs.zfs}/bin/zpool status -v; ${pkgs.systemd}/bin/systemctl --no-pager --full status ${cfg.backupWidget.borgUnit} ${cfg.backupWidget.usbUnit}'";
         })
       ];
 

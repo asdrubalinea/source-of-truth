@@ -1,4 +1,4 @@
-{ config, ... }:
+{ config, lib, ... }:
 let
   # base16 palette from stylix (with leading '#'). Inlined here instead of
   # using stylix's kitty target so kitty.conf has no `include` of a base16
@@ -7,7 +7,7 @@ let
   # note in stylix.nix.)
   c = config.lib.stylix.colors.withHashtag;
 in
-{
+lib.mkIf config.rices.niri.enable {
   programs.kitty = {
     enable = true;
     settings = {

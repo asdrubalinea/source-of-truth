@@ -39,7 +39,7 @@ The flake is wired together with three main axes:
 - `hydra` — QEMU guest server (imports `profiles/qemu-guest.nix`), uses disko, runs `services/caddy`.
 - `router.nix` at `hosts/router.nix` is a single-file variant (not currently wired into `nixosConfigurations`).
 
-Each host's `default.nix` is the composition root: imports its own `system/*.nix` and `users/*.nix`, then pulls shared modules from `../../modules`, `../../services`, `../../hardware`, `../../desktop`, and `../../rices`. There is no central "enable options" layer — host composition is explicit `imports = [ ... ]` lists. Toggling a feature for a host means editing that host's `default.nix` (or a file it imports), not flipping a top-level option.
+Each host's `default.nix` is the composition root: imports its own `system/*.nix` and `users/*.nix`, then pulls shared modules from `../../modules`, `../../services`, `../../hardware`, `../../desktop`, and `../../rices`. Host composition is explicit `imports = [ ... ]` lists by default — toggling a feature for a host usually means editing that host's `default.nix` (or a file it imports), not flipping a top-level option. Enable-options are the deliberate exception, used only where a unit is large enough to be worth a clean on/off boundary: `vfio.enable` (`options/passthrough.nix`) and `rices.niri.enable` (the niri rice; see `docs/adr/0004-niri-rice-as-enable-module.md`).
 
 **Shared modules** (imported by hosts):
 - `modules/` — cross-cutting system modules (`nix.nix`, `gaming.nix`, `secure-boot.nix`).

@@ -35,3 +35,18 @@ tempest keeps a 3-2-1 backup. Three legs, each with its own meaning of "ran":
   drive is attached, so its scrub rides along with a backup run on a *stale*
   cadence (skipped if scrubbed recently), and an unhealthy result fails that
   run rather than showing as its own always-on indicator.
+
+## Desktop (rices)
+
+- **rice** — a self-contained desktop environment: the Wayland compositor
+  (niri / hyprland) plus its shell furniture — bar, launcher, notifications,
+  lockscreen, terminals, theming, idle handling, wallpaper, window rules. A
+  rice defines *what the desktop is and how it behaves*; it is meant to be
+  independent of the machine it runs on. tempest's rice is niri; orchid's is
+  estradiol.
+- **machine policy** — per-host facts a rice must not bake in: monitor
+  identities and layout (the kanshi profiles), and the systemd units a bar
+  readout watches (e.g. the backup-health indicator). These belong with the
+  host, not the rice. A rice consumes them as inputs, and degrades cleanly
+  (a readout collapses to nothing) when the thing it would describe is absent
+  on a given machine.

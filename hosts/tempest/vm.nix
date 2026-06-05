@@ -68,7 +68,7 @@
 
   # Real tempest runs home-manager standalone; here we attach it as a NixOS
   # module so a single build produces a fully-configured image. The home config
-  # itself is still single-sourced from homes/tempest.nix. niri's HM module
+  # itself is still single-sourced from homes/tempest. niri's HM module
   # (programs.niri.*) is auto-wired into every HM user by niri.nixosModules.niri
   # when home-manager runs as a NixOS module, so it must NOT be added to
   # sharedModules again here (that double-declares the options).
@@ -80,7 +80,7 @@
       hostname = "tempest";
     };
     users.irene = {
-      imports = [ ../../homes/tempest.nix ];
+      imports = [ ../../homes/tempest ];
 
       # stylix enables `stylix.overlays.enable` by default, which sets
       # nixpkgs.overlays inside the HM config. Combined with useGlobalPkgs that

@@ -1,4 +1,4 @@
-{ pkgs, inputs, ... }:
+{ pkgs, inputs, lib, config, ... }:
 let
   drift = pkgs.callPackage ../../packages/drift.nix { src = inputs.drift; };
 
@@ -15,7 +15,7 @@ let
     fi
   '';
 in
-{
+lib.mkIf config.rices.niri.enable {
   # Lock is handled by Noctalia's lockscreen (NNN stack) rather than swaylock.
   # swayidle still owns the idle timers + the logind lock/sleep events below;
   # its `lock` event just calls into the already-running noctalia-shell.

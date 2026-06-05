@@ -8,31 +8,38 @@
     inputs.hyprland.homeManagerModules.default
     inputs.stylix.homeModules.stylix
 
-    # ../rices/estradiol
-    ../rices/niri
+    # ../../rices/estradiol
+    ../../rices/niri # the niri rice (declares rices.niri.*; enabled below)
+    ./monitors.nix # machine policy: monitor identities + layout (kanshi)
 
     # Applications and tools
-    ../desktop/zed-editor
-    ../desktop/vscode.nix
-    ../desktop/helix.nix
-    # ../desktop/emacs
-    ../desktop/mail
-    ../desktop/tmux.nix
-    ../desktop/home-packages.nix
-    ../desktop/mimeapps.nix
-    ../desktop/telegram-sandbox.nix
+    ../../desktop/zed-editor
+    ../../desktop/vscode.nix
+    ../../desktop/helix.nix
+    # ../../desktop/emacs
+    ../../desktop/mail
+    ../../desktop/tmux.nix
+    ../../desktop/home-packages.nix
+    ../../desktop/mimeapps.nix
+    ../../desktop/telegram-sandbox.nix
 
     # System utilities
-    ../scripts/system-clean.nix
-    ../scripts/config-apply.nix
-    ../scripts/user-apply.nix
-    ../scripts/update-home.nix
-    ../scripts/port-forward.nix
-    ../scripts/claude-sandboxed.nix
+    ../../scripts/system-clean.nix
+    ../../scripts/config-apply.nix
+    ../../scripts/user-apply.nix
+    ../../scripts/update-home.nix
+    ../../scripts/port-forward.nix
+    ../../scripts/claude-sandboxed.nix
 
     # Shell and configuration
-    ../misc/fish.nix
+    ../../misc/fish.nix
   ];
+
+  # Activate the niri rice. Its machine policy stays out here: monitor layout is
+  # ./monitors.nix, and the backup-health readout's watched units default
+  # to tempest's in the rice options (rices.niri.backupWidget.*), so no override
+  # is needed. See docs/adr/0004-niri-rice-as-enable-module.md.
+  rices.niri.enable = true;
 
   home = {
     username = "irene";
@@ -40,7 +47,7 @@
     stateVersion = "23.05";
 
     packages = [
-      # (pkgs.callPackage ../packages/cider-2.nix { })
+      # (pkgs.callPackage ../../packages/cider-2.nix { })
       # inputs.codex.packages.${pkgs.stdenv.hostPlatform.system}.default
     ];
 

@@ -1,5 +1,5 @@
-{ ... }:
-{
+{ lib, config, ... }:
+lib.mkIf config.rices.niri.enable {
   programs.alacritty = {
     enable = true;
     settings = {

@@ -342,14 +342,14 @@
         };
 
         modules = [
-          # hyprland + stylix HM modules are imported inside homes/tempest.nix.
+          # hyprland + stylix HM modules are imported inside homes/tempest.
           # niri.homeModules.config has to be added here because in the previous
           # nixos-module form it was auto-wired by niri.nixosModules.niri; in
           # standalone HM it has to be imported explicitly so programs.niri.*
           # options exist.
           niri.homeModules.config
 
-          ./homes/tempest.nix
+          ./homes/tempest
         ];
       };
     };

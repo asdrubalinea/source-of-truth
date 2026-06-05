@@ -1,4 +1,9 @@
 { ... }:
+# Machine policy for tempest: monitor identities and layout. These are per-host
+# facts (specific BOE/Samsung/LG panel serials and their modes/positions), not
+# part of the niri rice — a rice describes "what the desktop is", independent of
+# the machine it runs on. Factored out of rices/niri so the rice stays portable.
+# See the "machine policy" entry in CONTEXT.md and docs/adr/0004.
 {
   services.kanshi = {
     enable = true;

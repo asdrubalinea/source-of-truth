@@ -1,4 +1,4 @@
-{ pkgs, config, ... }:
+{ pkgs, config, lib, ... }:
 let
   setWallpaper = pkgs.writeShellScript "awww-set-wallpaper" ''
     until ${pkgs.awww}/bin/awww query >/dev/null 2>&1; do
@@ -7,7 +7,7 @@ let
     exec ${pkgs.awww}/bin/awww img ${config.home.homeDirectory}/.wallpaper
   '';
 in
-{
+lib.mkIf config.rices.niri.enable {
   home.file.".wallpaper".source = ./boeing-747.jpg;
   home.packages = [ pkgs.awww ];
 
