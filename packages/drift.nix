@@ -1,7 +1,7 @@
-{
-  lib,
-  buildGoModule,
-  src,
+{ lib
+, buildGoModule
+, src
+,
 }:
 buildGoModule {
   pname = "drift";

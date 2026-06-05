@@ -67,7 +67,7 @@
     enable = true;
     notifications.wall.enable = true;
     defaults.monitored = "-a -o on -S on -T permissive";
-    devices = [ { device = "/dev/nvme0n1"; } ];
+    devices = [{ device = "/dev/nvme0n1"; }];
   };
 
   # Light local-snapshot policy on the mutable state. borg remains the offsite

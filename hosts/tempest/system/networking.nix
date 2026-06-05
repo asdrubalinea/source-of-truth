@@ -1,11 +1,11 @@
-{...}: {
+{ ... }: {
   # Basic network configuration
   networking = {
     hostName = "tempest";
     hostId = "856ff057";
     networkmanager.enable = true;
-    firewall.allowedTCPPorts = [];
-    firewall.allowedUDPPorts = [];
+    firewall.allowedTCPPorts = [ ];
+    firewall.allowedUDPPorts = [ ];
 
     # Development environment hosts
     extraHosts = ''

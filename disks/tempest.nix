@@ -9,9 +9,8 @@
 # For the booted system this value is inert: disko derives `fileSystems` from GPT
 # partlabels (disk-main-ESP, disk-main-luks), never from this device path, so the
 # placeholder default is fine for the NixOS module eval (flake.nix → tempest).
-{
-  device ? "/dev/disk/by-id/REPLACE-WITH-TARGET-DEVICE-AT-INSTALL-TIME",
-  ...
+{ device ? "/dev/disk/by-id/REPLACE-WITH-TARGET-DEVICE-AT-INSTALL-TIME"
+, ...
 }:
 {
   # tempest disk layout: ZFS-on-LUKS.
@@ -72,10 +71,10 @@
               content = {
                 type = "luks";
                 name = "crypt";
-                extraOpenArgs = [];
+                extraOpenArgs = [ ];
                 # 4K sector size: align crypto to NAND pages / a 4K-LBA drive.
                 # Format-time only — cannot change without reformatting.
-                extraFormatArgs = ["--sector-size 4096"];
+                extraFormatArgs = [ "--sector-size 4096" ];
                 settings = {
                   allowDiscards = true;
                 };

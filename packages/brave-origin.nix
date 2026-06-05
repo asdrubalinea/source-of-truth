@@ -1,64 +1,64 @@
-{
-  lib,
-  stdenv,
-  fetchurl,
-  buildPackages,
-  alsa-lib,
-  at-spi2-atk,
-  at-spi2-core,
-  atk,
-  cairo,
-  cups,
-  dbus,
-  dpkg,
-  expat,
-  fontconfig,
-  freetype,
-  gdk-pixbuf,
-  glib,
-  adwaita-icon-theme,
-  gsettings-desktop-schemas,
-  gtk3,
-  gtk4,
-  qt6,
-  libx11,
-  libxscrnsaver,
-  libxcomposite,
-  libxcursor,
-  libxdamage,
-  libxext,
-  libxfixes,
-  libxi,
-  libxrandr,
-  libxrender,
-  libxtst,
-  libdrm,
-  libkrb5,
-  libuuid,
-  libxkbcommon,
-  libxshmfence,
-  libgbm,
-  nspr,
-  nss,
-  pango,
-  pipewire,
-  snappy,
-  udev,
-  wayland,
-  xdg-utils,
-  coreutils,
-  libxcb,
-  zlib,
-  commandLineArgs ? "",
-  pulseSupport ? true,
-  libpulseaudio,
-  libGL,
-  libvaSupport ? true,
-  libva,
-  enableVideoAcceleration ? libvaSupport,
-  vulkanSupport ? false,
-  addDriverRunpath,
-  enableVulkan ? vulkanSupport,
+{ lib
+, stdenv
+, fetchurl
+, buildPackages
+, alsa-lib
+, at-spi2-atk
+, at-spi2-core
+, atk
+, cairo
+, cups
+, dbus
+, dpkg
+, expat
+, fontconfig
+, freetype
+, gdk-pixbuf
+, glib
+, adwaita-icon-theme
+, gsettings-desktop-schemas
+, gtk3
+, gtk4
+, qt6
+, libx11
+, libxscrnsaver
+, libxcomposite
+, libxcursor
+, libxdamage
+, libxext
+, libxfixes
+, libxi
+, libxrandr
+, libxrender
+, libxtst
+, libdrm
+, libkrb5
+, libuuid
+, libxkbcommon
+, libxshmfence
+, libgbm
+, nspr
+, nss
+, pango
+, pipewire
+, snappy
+, udev
+, wayland
+, xdg-utils
+, coreutils
+, libxcb
+, zlib
+, commandLineArgs ? ""
+, pulseSupport ? true
+, libpulseaudio
+, libGL
+, libvaSupport ? true
+, libva
+, enableVideoAcceleration ? libvaSupport
+, vulkanSupport ? false
+, addDriverRunpath
+, enableVulkan ? vulkanSupport
+,
 }:
 
 let

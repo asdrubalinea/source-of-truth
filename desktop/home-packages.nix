@@ -1,7 +1,6 @@
-{
-  pkgs,
-  inputs,
-  ...
+{ pkgs
+, inputs
+, ...
 }: {
   home.packages = with pkgs; [
     # --- Core system utilities ---
@@ -67,7 +66,7 @@
     httm # Time-Machine-style TUI to browse/restore ZFS snapshots
     rclone
     restic
-    vorta # Borg GUI
+    # vorta # Borg GUI
 
     # --- Nix & developer tooling ---
     alejandra
@@ -132,7 +131,7 @@
     direnv
     fzf
     ghostty
-    (callPackage ../packages/drift.nix {src = inputs.drift;})
+    (callPackage ../packages/drift.nix { src = inputs.drift; })
     grc
     kitty
     screen
@@ -153,7 +152,7 @@
 
     # --- Browsers ---
     brave
-    (callPackage ../packages/brave-origin.nix {})
+    (callPackage ../packages/brave-origin.nix { })
     firefox
     tor-browser
     google-chrome
@@ -188,7 +187,7 @@
     onlyoffice-desktopeditors
     xournalpp
     typst
-    (texlive.combine {inherit (texlive) scheme-full;})
+    (texlive.combine { inherit (texlive) scheme-full; })
     zathura # PDF viewer with SyncTeX inverse search
 
     # --- Data & databases ---

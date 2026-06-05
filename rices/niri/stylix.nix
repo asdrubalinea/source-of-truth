@@ -1,9 +1,8 @@
-{
-  pkgs,
-  hostname,
-  lib,
-  config,
-  ...
+{ pkgs
+, hostname
+, lib
+, config
+, ...
 }:
 lib.mkIf config.rices.niri.enable {
   gtk.gtk4.theme = null;

@@ -1,8 +1,10 @@
 { lib, config, ... }:
 let
-  persistedFiles = map (
-    f: if builtins.isString f then f else f.file
-  ) config.environment.persistence."/persist".files;
+  persistedFiles = map
+    (
+      f: if builtins.isString f then f else f.file
+    )
+    config.environment.persistence."/persist".files;
 in
 {
   # Filesystem configuration for impermanence setup.

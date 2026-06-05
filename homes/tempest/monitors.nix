@@ -20,7 +20,7 @@
               scale = 1.0;
             }
 
-           {
+            {
               criteria = "Samsung Electric Company S34J55x H4LT300008";
               mode = "3440x1440";
               position = "0,0";

@@ -1,13 +1,13 @@
-{
-  lib,
-  rustPlatform,
-  nodejs,
-  npmHooks,
-  fetchFromGitHub,
-  fetchNpmDeps,
-  makeDesktopItem,
-  copyDesktopItems,
-  controlPort ? 30912,
+{ lib
+, rustPlatform
+, nodejs
+, npmHooks
+, fetchFromGitHub
+, fetchNpmDeps
+, makeDesktopItem
+, copyDesktopItems
+, controlPort ? 30912
+,
 }:
 
 rustPlatform.buildRustPackage (finalAttrs: {

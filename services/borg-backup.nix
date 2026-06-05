@@ -1,8 +1,7 @@
-{
-  lib,
-  pkgs,
-  config,
-  ...
+{ lib
+, pkgs
+, config
+, ...
 }:
 
 with lib;
@@ -70,27 +69,29 @@ in
       }
     ];
 
-    services.borgbackup.jobs = mapAttrs (_jobName: jobCfg: {
-      inherit (jobCfg) paths;
-      inherit (jobCfg) repo;
-      inherit (jobCfg) user;
+    services.borgbackup.jobs = mapAttrs
+      (_jobName: jobCfg: {
+        inherit (jobCfg) paths;
+        inherit (jobCfg) repo;
+        inherit (jobCfg) user;
 
-      compression = "auto,zstd";
-      environment.BORG_RSH = "ssh -i ${jobCfg.ssh_key_file}";
-      exclude = defaultExclude;
-      extraArgs = "--verbose";
-      extraCreateArgs = "--stats";
+        compression = "auto,zstd";
+        environment.BORG_RSH = "ssh -i ${jobCfg.ssh_key_file}";
+        exclude = defaultExclude;
+        extraArgs = "--verbose";
+        extraCreateArgs = "--stats";
 
-      # Don't fail the whole job on per-file warnings (e.g. an unreadable file
-      # on a degrading disk); the archive still completes.
-      failOnWarnings = false;
+        # Don't fail the whole job on per-file warnings (e.g. an unreadable file
+        # on a degrading disk); the archive still completes.
+        failOnWarnings = false;
 
-      encryption = {
-        mode = "repokey-blake2";
-        passCommand = "cat ${jobCfg.password_file}";
-      };
+        encryption = {
+          mode = "repokey-blake2";
+          passCommand = "cat ${jobCfg.password_file}";
+        };
 
-      startAt = "daily";
-    }) cfg.jobs;
+        startAt = "daily";
+      })
+      cfg.jobs;
   };
 }

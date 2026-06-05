@@ -4,8 +4,7 @@
 
     shellAliases = import ./aliases.nix { inherit pkgs inputs; };
 
-    shellAbbrs = {
-    };
+    shellAbbrs = { };
 
     interactiveShellInit = ''
       set fish_greeting # Disable greeting

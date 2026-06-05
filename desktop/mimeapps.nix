@@ -69,10 +69,11 @@ in
         "application/pdf" = "okularApplication_pdf.desktop";
       }
       # Images -> Gwenview
-      // builtins.listToAttrs (map (t: {
-        name = t;
-        value = gwenview;
-      })
-      imageTypes);
+      // builtins.listToAttrs (map
+        (t: {
+          name = t;
+          value = gwenview;
+        })
+        imageTypes);
   };
 }

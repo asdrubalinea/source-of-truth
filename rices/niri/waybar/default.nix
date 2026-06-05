@@ -205,50 +205,52 @@ let
   monoFont = config.stylix.fonts.monospace.name;
 
   baseSettings = lib.importJSON ./config.jsonc;
-  withHogModules = map (bar: bar // {
-    "modules-left" = bar."modules-left" ++ [ "custom/fans" "custom/cpu-hog" "custom/mem-hog" "custom/health" ];
-    "modules-center" = [ "custom/flights" ] ++ bar."modules-center";
-    "cpu" = bar."cpu" // {
-      states = { warning = 70; critical = 90; };
-    };
-    "memory" = bar."memory" // {
-      states = { warning = 70; critical = 90; };
-    };
-    "custom/fans" = {
-      exec = "${fanWatch}";
-      return-type = "json";
-      interval = 2;
-      tooltip = true;
-    };
-    "custom/health" = {
-      exec = "${healthWatch}";
-      return-type = "json";
-      interval = 60;
-      tooltip = true;
-      # Click → a one-shot snapshot of everything, then an interactive shell.
-      on-click = "${pkgs.kitty}/bin/kitty --single-instance -e ${pkgs.fish}/bin/fish -C '${pkgs.zfs}/bin/zpool status -v; ${pkgs.systemd}/bin/systemctl --no-pager --full status borgbackup-job-home-irene.service tempest-backup-external.service'";
-    };
-    "custom/cpu-hog" = {
-      exec = "${cpuHogWatch}";
-      return-type = "json";
-      interval = 10;
-      on-click = "${pkgs.kitty}/bin/kitty --single-instance -e ${pkgs.btop}/bin/btop";
-    };
-    "custom/mem-hog" = {
-      exec = "${memHogWatch}";
-      return-type = "json";
-      interval = 10;
-      on-click = "${pkgs.kitty}/bin/kitty --single-instance -e ${pkgs.btop}/bin/btop";
-    };
-    # Nearest flight overhead — reads the always-on flights-server (../flights.nix).
-    # Empty when the sky is clear; click to open the full radar TUI.
-    "custom/flights" = {
-      exec = "${flights}/bin/flights-waybar";
-      return-type = "json";
-      interval = 5;
-      on-click = "${pkgs.kitty}/bin/kitty --single-instance -e ${flights}/bin/flights";
-    };
-  }) baseSettings;
+  withHogModules = map
+    (bar: bar // {
+      "modules-left" = bar."modules-left" ++ [ "custom/fans" "custom/cpu-hog" "custom/mem-hog" "custom/health" ];
+      "modules-center" = [ "custom/flights" ] ++ bar."modules-center";
+      "cpu" = bar."cpu" // {
+        states = { warning = 70; critical = 90; };
+      };
+      "memory" = bar."memory" // {
+        states = { warning = 70; critical = 90; };
+      };
+      "custom/fans" = {
+        exec = "${fanWatch}";
+        return-type = "json";
+        interval = 2;
+        tooltip = true;
+      };
+      "custom/health" = {
+        exec = "${healthWatch}";
+        return-type = "json";
+        interval = 60;
+        tooltip = true;
+        # Click → a one-shot snapshot of everything, then an interactive shell.
+        on-click = "${pkgs.kitty}/bin/kitty --single-instance -e ${pkgs.fish}/bin/fish -C '${pkgs.zfs}/bin/zpool status -v; ${pkgs.systemd}/bin/systemctl --no-pager --full status borgbackup-job-home-irene.service tempest-backup-external.service'";
+      };
+      "custom/cpu-hog" = {
+        exec = "${cpuHogWatch}";
+        return-type = "json";
+        interval = 10;
+        on-click = "${pkgs.kitty}/bin/kitty --single-instance -e ${pkgs.btop}/bin/btop";
+      };
+      "custom/mem-hog" = {
+        exec = "${memHogWatch}";
+        return-type = "json";
+        interval = 10;
+        on-click = "${pkgs.kitty}/bin/kitty --single-instance -e ${pkgs.btop}/bin/btop";
+      };
+      # Nearest flight overhead — reads the always-on flights-server (../flights.nix).
+      # Empty when the sky is clear; click to open the full radar TUI.
+      "custom/flights" = {
+        exec = "${flights}/bin/flights-waybar";
+        return-type = "json";
+        interval = 5;
+        on-click = "${pkgs.kitty}/bin/kitty --single-instance -e ${flights}/bin/flights";
+      };
+    })
+    baseSettings;
 in
 {
   programs.waybar = {
