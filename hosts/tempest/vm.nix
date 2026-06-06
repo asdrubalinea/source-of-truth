@@ -43,7 +43,9 @@
   # Setting them at top level errors ("virtualisation.cores does not exist"), so
   # route guest tuning through disko.tests.extraConfig.
   disko.tests.extraConfig = {
-    virtualisation.cores = 4;
+    # Host has 16 threads; a niri desktop + xwayland + noctalia + emacs daemon +
+    # the virgl render thread is cramped on 4. 8 keeps the host responsive too.
+    virtualisation.cores = 8;
 
     # impermanence requires every filesystem backing /persist to be
     # neededForBoot. On the real host system/persistence.nix asserts this on
@@ -59,10 +61,23 @@
     # niri needs a GL-capable GPU; x86 qemu-vm adds none by default. virtio-vga-gl
     # + a gtk/GL display gives accelerated rendering. Adjust if your host QEMU
     # lacks GTK/virgl (e.g. "-display sdl,gl=on", or software GL).
+    #
+    # blob resources (QEMU 10+) let virgl map guest GPU buffers out of shared host
+    # memory instead of copying them every frame — a real cut in the render path's
+    # CPU cost. It needs a shareable RAM backend: a memfd with share=on, referenced
+    # as the machine's memory-backend. qemu-vm already emits `-machine accel=kvm:tcg`
+    # and `-m 8192`; QEMU merges repeated `-machine` flags into one opts group, so
+    # appending `-machine memory-backend=mem0` here augments (not replaces) the kvm
+    # line. memfd size MUST equal `-m` (8192M = 8G) or QEMU refuses to start.
+    # venus (Vulkan) is intentionally omitted: niri composites through smithay's
+    # GLES path, so it wouldn't help. If the VM fails to launch, this GPU block is
+    # the thing to revert (drop back to a bare `-device virtio-vga-gl`).
     virtualisation.qemu.options = [
       "-vga none"
-      "-device virtio-vga-gl"
-      "-display gtk,gl=on"
+      "-object" "memory-backend-memfd,id=mem0,size=8G,share=on"
+      "-machine" "memory-backend=mem0"
+      "-device" "virtio-vga-gl,blob=true,hostmem=4G"
+      "-display" "gtk,gl=on"
     ];
   };
 
@@ -91,6 +106,12 @@
       # is purely cosmetic in the VM and clears the warning. The real laptop runs
       # HM standalone (no useGlobalPkgs), so this override never touches it.
       stylix.overlays.enable = false;
+
+      # The rice runs animations at slowdown 0.7 (slower → longer), and every
+      # animated frame goes through the emulated virgl path, which is the most
+      # visible source of jank in the VM. Turn animations off here only — the
+      # real laptop (HM standalone, this module not imported) keeps them.
+      programs.niri.settings.animations.enable = lib.mkForce false;
     };
 
     # Don't abort activation if /etc/skel seeded a file HM also manages — back it
