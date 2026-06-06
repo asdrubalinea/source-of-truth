@@ -49,8 +49,8 @@
     };
 
     monitoring = {
-      enable = false;
-      powerEfficient = true;
+      enable = true;
+      powerEfficient = false;
     };
 
     flatpak.enable = true;

@@ -1,9 +1,51 @@
-{ config, lib, ... }:
+{ config, lib, pkgs, ... }:
 
 with lib;
 
 let
   cfg = config.services.monitoring;
+
+  # node-exporter has no inotify collector, so we publish the counts ourselves
+  # via the textfile collector: this directory is what the exporter reads, and
+  # the collector below writes an inotify.prom into it.
+  textfileDir = "/var/lib/node-exporter-textfile";
+
+  inotifyExporter = pkgs.writeShellScriptBin "node-inotify-textfile" ''
+    set -euo pipefail
+    export PATH=${makeBinPath [ pkgs.coreutils pkgs.gnugrep pkgs.findutils ]}
+
+    dir=${textfileDir}
+    tmp=$(mktemp "$dir/inotify.prom.XXXXXX")
+    chmod 0644 "$tmp" # mktemp makes 0600; node-exporter runs as another user
+
+    # Total watches = every "inotify " line across all processes' fdinfo. /proc
+    # entries vanish mid-scan, so stream through cat | grep (which skips a
+    # vanished file) rather than handing the glob to awk, which dies fatally on
+    # the first unreadable file.
+    watches=$(cat /proc/[0-9]*/fdinfo/* 2>/dev/null | grep -c '^inotify ' || true)
+    instances=$(find /proc/[0-9]*/fd -lname 'anon_inode:inotify' 2>/dev/null | wc -l || true)
+    max_watches=$(cat /proc/sys/fs/inotify/max_user_watches)
+    max_instances=$(cat /proc/sys/fs/inotify/max_user_instances)
+
+    {
+      echo "# HELP node_inotify_watches Inotify watches in use across all processes."
+      echo "# TYPE node_inotify_watches gauge"
+      echo "node_inotify_watches $watches"
+      echo "# HELP node_inotify_instances Inotify instances (fds) in use across all processes."
+      echo "# TYPE node_inotify_instances gauge"
+      echo "node_inotify_instances $instances"
+      echo "# HELP node_inotify_max_user_watches fs.inotify.max_user_watches sysctl (per-uid limit)."
+      echo "# TYPE node_inotify_max_user_watches gauge"
+      echo "node_inotify_max_user_watches $max_watches"
+      echo "# HELP node_inotify_max_user_instances fs.inotify.max_user_instances sysctl (per-uid limit)."
+      echo "# TYPE node_inotify_max_user_instances gauge"
+      echo "node_inotify_max_user_instances $max_instances"
+    } > "$tmp"
+
+    # Atomic publish; the temp name lacks a trailing .prom so the collector
+    # never reads a half-written file.
+    mv "$tmp" "$dir/inotify.prom"
+  '';
 in
 {
   options.services.monitoring = {
@@ -38,6 +80,12 @@ in
           http_port = 3333;
         };
 
+        # NixOS 26.05 dropped Grafana's built-in default secret_key. This key
+        # only encrypts secrets stored in Grafana's own DB (datasource creds,
+        # alerting contact points) — this instance configures none, so the
+        # historical default is hard-coded rather than file-provisioned.
+        security.secret_key = "SW2YcwTIb9zpOOhoPsMm";
+
         # Power-efficient settings
         analytics = mkIf cfg.powerEfficient {
           reporting_enabled = false;
@@ -62,8 +110,22 @@ in
         };
       };
 
-      # Default dashboards optimized for power efficiency
-      provision = mkIf cfg.powerEfficient {
+      # Provision the Prometheus datasource. Without this Grafana has no
+      # datasource at all and every panel renders "No data". Always
+      # provisioned, independent of powerEfficient. The fixed uid lets the
+      # bundled dashboards reference it deterministically.
+      provision = {
+        enable = true;
+        datasources.settings.datasources = [{
+          name = "Prometheus";
+          type = "prometheus";
+          access = "proxy";
+          url = "http://localhost:${toString config.services.prometheus.port}";
+          uid = "prometheus";
+          isDefault = true;
+        }];
+
+        # Bundled dashboards
         dashboards.settings.providers = [{
           name = "default";
           options.path = ./dashboards;
@@ -98,7 +160,9 @@ in
         enable = true;
         port = 9902;
         enabledCollectors =
-          if cfg.powerEfficient then [
+          # wifi (signal strength) is off by default; enable it in both modes.
+          [ "wifi" ]
+          ++ (if cfg.powerEfficient then [
             # Essential collectors only
             "cpu"
             "cpufreq"
@@ -138,10 +202,11 @@ in
             "time"
             "uname"
             "vmstat"
-          ];
+          ]);
 
         extraFlags = [
           "--collector.cpu.info.bugs-include=^(meltdown|spectre|tsx_async_abort)$"
+          "--collector.textfile.directory=${textfileDir}"
         ] ++ optional cfg.powerEfficient "--collector.cpu.info";
       };
     };
@@ -169,6 +234,32 @@ in
         CPUQuota = mkIf cfg.powerEfficient "10%";
         MemoryMax = mkIf cfg.powerEfficient "256M";
       };
+
+      # Publish inotify watch counts for the textfile collector. Runs as root
+      # (the default) because counting watches means reading every process's
+      # /proc/<pid>/fdinfo, which is root-only for other users' processes.
+      node-inotify-textfile = {
+        description = "Collect inotify watch counts for the node-exporter textfile collector";
+        serviceConfig = {
+          Type = "oneshot";
+          ExecStart = "${inotifyExporter}/bin/node-inotify-textfile";
+        };
+      };
     };
+
+    systemd.timers.node-inotify-textfile = {
+      description = "Periodically collect inotify watch counts";
+      wantedBy = [ "timers.target" ];
+      timerConfig = {
+        OnBootSec = "2min";
+        OnUnitActiveSec = "1min";
+      };
+    };
+
+    # Directory the node-exporter textfile collector reads. World-readable so
+    # the exporter (a different user, read-only rootfs) can read the .prom.
+    systemd.tmpfiles.rules = [
+      "d ${textfileDir} 0755 root root -"
+    ];
   };
 }

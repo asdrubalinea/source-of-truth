@@ -1,10 +1,6 @@
-{ lib, pkgs, inputs, config, ... }:
+{ lib, pkgs, config, ... }:
 let
   cfg = config.rices.niri;
-
-  # The flights radar package (TUI + waybar client), backed by the always-on
-  # flights-server enabled in ./flights.nix.
-  flights = inputs.flights.packages.${pkgs.system}.flights;
 
   # ── Five bespoke readouts ported from waybar ──────────────────────────────
   # Each was a shell script emitting waybar JSON ({text, tooltip, class, alt}),
@@ -220,8 +216,10 @@ let
     # Render the state as an ICON (Tabler name → NIcon), not a text glyph: a
     # text-only CustomButton pads the pill with pillOverlap dead space (it's
     # meant to tuck under an icon disc), which on a one-glyph readout shows as
-    # blank space beside the mark. Healthy ⇒ icon only, so the pill collapses to
-    # a clean circular disc; problem ⇒ icon + expanding red text.
+    # blank space beside the mark. Healthy ⇒ icon only (no text); paired with
+    # hideMode "expandWithOutput" on the widget, the empty text slot collapses
+    # and the pill becomes a clean circular icon disc. Problem ⇒ icon +
+    # expanding red text.
     if [ -z "$problems" ]; then
       jq -nc --arg tooltip "$tooltip" '{icon: "shield-check", tooltip: $tooltip}'
     else
@@ -306,7 +304,14 @@ lib.mkIf cfg.enable {
           textCommand = "${healthWatch}";
           parseJson = true;
           textIntervalMs = 60000;
-          hideMode = "alwaysExpanded";
+          # expandWithOutput, NOT alwaysExpanded: alwaysExpanded keeps the pill
+          # padded out to its full maxTextLength text slot even when the current
+          # text is empty, leaving dead space beside the icon. expandWithOutput
+          # collapses the text slot whenever there's no text — so the healthy
+          # state (icon, no text) shrinks to a bare circular icon disc. The
+          # readout never fully hides like the hog pills do because it always
+          # emits an icon, and showIcon keeps that disc pinned visible.
+          hideMode = "expandWithOutput";
           showIcon = true; # render shield-check / shield-x via the icon slot
           # Click → a one-shot snapshot of everything, then an interactive shell.
           leftClickExec = "${pkgs.kitty}/bin/kitty --single-instance -e ${pkgs.fish}/bin/fish -C '${pkgs.zfs}/bin/zpool status -v; ${pkgs.systemd}/bin/systemctl --no-pager --full status ${cfg.backupWidget.borgUnit} ${cfg.backupWidget.usbUnit}'";
