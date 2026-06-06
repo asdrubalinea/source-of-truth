@@ -91,6 +91,9 @@ in
         };
 
         startAt = "daily";
+        # Laptop: catch up a run that was missed because the machine was
+        # asleep/off at the scheduled time, instead of silently skipping it.
+        persistentTimer = true;
       })
       cfg.jobs;
   };

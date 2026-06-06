@@ -58,7 +58,14 @@ in
   #   openFirewall = true;
   # };
 
-  services.openssh.enable = true;
+  services.openssh = {
+    enable = true;
+    settings = {
+      PasswordAuthentication = false;
+      PermitRootLogin = "prohibit-password";
+      KbdInteractiveAuthentication = false;
+    };
+  };
 
   services.vaultwarden = {
     enable = true;
@@ -66,7 +73,7 @@ in
     backupDir = "/persist/vaultwarden";
     config = {
       DOMAIN = "https://bitwarden.irene.foo";
-      SIGNUPS_ALLOWED = true;
+      SIGNUPS_ALLOWED = false; # account already enrolled; re-enable briefly to add users
       ROCKET_ADDRESS = "127.0.0.1";
       ROCKET_PORT = 8222;
       ENABLE_WEBSOCKET = true;

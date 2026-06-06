@@ -28,7 +28,6 @@ let
 in
 {
   imports = [
-    inputs.sops-nix.homeManagerModules.sops
     inputs.hyprland.homeManagerModules.default
     # inputs.stylix.homeManagerModules.stylix
 
@@ -131,8 +130,9 @@ in
     enableFishIntegration = true;
   };
 
-  sops = {
-    age.sshKeyPaths = [ "/home/irene/.ssh/id_ed25519" ];
-    defaultSopsFile = ./secrets.yaml;
-  };
+  # Manage starship via HM (enableFishIntegration handles the fish hook) rather
+  # than a manual `starship init` in misc/fish.nix, which double-initialised it
+  # on hosts that also enabled programs.starship.
+  programs.starship.enable = true;
+
 }

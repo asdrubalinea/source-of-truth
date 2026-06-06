@@ -40,15 +40,13 @@
         "thunderbolt" # Framework Thunderbolt ports
         "usbhid" # USB input devices
 
-        # USB mass-storage drivers — REQUIRED because the root pool lives on a
-        # USB SanDisk Portable SSD (see disks/tempest.nix). Without these the
-        # initrd loads the xhci host controller but never binds the storage
-        # device, so no /dev/sd* (and thus no /dev/disk/by-partlabel/
-        # disk-main-luks) ever appears: systemd-cryptsetup@crypt times out
-        # waiting for the LUKS partition, the password is never prompted, and the
-        # boot drops to emergency mode. `sd_mod` (the SCSI disk layer) is already
-        # pulled in by the defaults; these bridge USB → SCSI.
-        "uas" # USB Attached SCSI — used by modern USB SSDs like this SanDisk
+        # USB mass-storage drivers, vestigial from when the root pool lived on a
+        # USB SanDisk Portable SSD. Root now lives on the internal NVMe (see
+        # disks/tempest.nix — nvme-Corsair_MP700_PRO_SE…), which the `nvme`
+        # module above binds, so these are no longer load-bearing for boot. Kept
+        # only so an external USB SSD (recovery/install media) still enumerates;
+        # safe to drop if USB-boot support is no longer wanted.
+        "uas" # USB Attached SCSI
         "usb_storage" # USB Bulk-Only Transport — fallback for non-UAS enclosures
       ];
 

@@ -34,7 +34,14 @@
       };
     };
 
-    openssh.enable = true;
+    openssh = {
+      enable = true;
+      settings = {
+        PasswordAuthentication = false;
+        PermitRootLogin = "prohibit-password";
+        KbdInteractiveAuthentication = false;
+      };
+    };
 
     tailscale = {
       enable = true;
@@ -63,7 +70,7 @@
       backupDir = "/persist/vaultwarden";
       config = {
         DOMAIN = "https://bitwarden.irene.foo";
-        SIGNUPS_ALLOWED = true;
+        SIGNUPS_ALLOWED = false;
         ROCKET_ADDRESS = "127.0.0.1";
         ROCKET_PORT = 8222;
         WEBSOCKET_ADDRESS = "127.0.0.1";

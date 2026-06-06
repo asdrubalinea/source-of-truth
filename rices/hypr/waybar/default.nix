@@ -132,7 +132,7 @@ in
             in
             pkgs.writeShellScript "waybar-swallow" ''
               #!/bin/sh
-              if ${hyprctl} getoption misc:enable_swallow | ${rg}/bin/rg -q "int: 1"; then
+              if ${hyprctl} getoption misc:enable_swallow | ${rg} -q "int: 1"; then
               	${hyprctl} keyword misc:enable_swallow false >/dev/null &&
               		${notify-send} "Hyprland" "Turned off swallowing"
               else

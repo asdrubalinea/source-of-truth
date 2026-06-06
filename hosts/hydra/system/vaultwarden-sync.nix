@@ -28,16 +28,24 @@ let
       ${primaryUser}@${primaryHost}:${remoteSnapshot} \
       ${localIncoming}/; then
 
-      mkdir -p ${localData}
+      # A successful rsync of an *empty* snapshot (e.g. orchid mid-rotation, or
+      # an uninitialised primary) would otherwise --delete the live store. The
+      # export always writes db.sqlite3 via `sqlite3 .backup`, so treat its
+      # absence as an empty/partial pull and keep the existing data instead.
+      if [ ! -e ${localIncoming}/db.sqlite3 ]; then
+        printf >&2 'Refusing to apply snapshot from %s: no db.sqlite3 (empty/partial pull); keeping existing data\n' '${primaryHost}'
+      else
+        mkdir -p ${localData}
 
-      ${pkgs.rsync}/bin/rsync -a --delete \
-        --chown=vaultwarden:vaultwarden \
-        --chmod=D0700,F0600 \
-        ${localIncoming}/ \
-        ${localData}/
+        ${pkgs.rsync}/bin/rsync -a --delete \
+          --chown=vaultwarden:vaultwarden \
+          --chmod=D0700,F0600 \
+          ${localIncoming}/ \
+          ${localData}/
 
-      ${pkgs.coreutils}/bin/chown -R vaultwarden:vaultwarden ${localData}
-      ${pkgs.coreutils}/bin/chmod -R u=rwX,go= ${localData}
+        ${pkgs.coreutils}/bin/chown -R vaultwarden:vaultwarden ${localData}
+        ${pkgs.coreutils}/bin/chmod -R u=rwX,go= ${localData}
+      fi
     else
       printf >&2 'Warning: could not reach %s, using existing local data\n' '${primaryHost}'
     fi
