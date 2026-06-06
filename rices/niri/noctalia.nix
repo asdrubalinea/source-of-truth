@@ -48,16 +48,19 @@
           autoLocate = false;
         };
 
-        # The niri rice owns the wallpaper: awww (systemd user service in
-        # ./wallpaper) draws ~/.wallpaper into niri's backdrop layer. Turn
-        # Noctalia's wallpaper off entirely — it renders a per-screen Background
-        # PanelWindow (layer surface) that otherwise paints an empty/solid sheet
-        # OVER awww's backdrop, so the real wallpaper vanishes. NOTE:
-        # noctaliaPerformance.disableWallpaper is the WRONG knob: Background.qml
-        # only honours it while the power-saver "performance mode" is active
-        # (gated behind noctaliaPerformanceMode). wallpaper.enabled=false is the
-        # unconditional switch.
-        wallpaper.enabled = false;
+        # Noctalia owns the wallpaper (replacing the old awww service). Its
+        # Background.qml draws a per-screen layer-shell surface on the *background*
+        # layer that ignores exclusive zones (namespace "noctalia-wallpaper-<out>")
+        # — exactly the two conditions niri's place-within-backdrop requires, so a
+        # layer-rule in niri.nix matching "^noctalia-wallpaper-" reparents it into
+        # niri's backdrop (same trick awww relied on). The image is picked from the
+        # directory below via Noctalia's own picker; the choice persists in
+        # WallpaperService's writable cache (not this read-only settings.json).
+        # ./wallpaper seeds a starter image into that directory.
+        wallpaper = {
+          enabled = true;
+          directory = "~/Pictures/Wallpapers"; # Noctalia's own default; ~ is expanded by preprocessPath
+        };
       };
 
       # ── Plugins (pins ~/.config/noctalia/plugins.json) ───────────────────────

@@ -266,8 +266,13 @@ lib.mkIf config.rices.niri.enable {
       };
       window-rules = windowRules;
       layer-rules = [
+        # Noctalia's wallpaper surface (Background.qml: background layer, ignores
+        # exclusive zones, namespace "noctalia-wallpaper-<output>") — reparent it
+        # into niri's backdrop so it shows behind gapped/transparent windows and
+        # in the overview. Prefix match, not anchored: the namespace carries a
+        # per-output suffix.
         {
-          matches = [{ namespace = "^awww$"; }];
+          matches = [{ namespace = "^noctalia-wallpaper-"; }];
           place-within-backdrop = true;
         }
       ];

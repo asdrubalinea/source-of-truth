@@ -1,6 +1,7 @@
-{ pkgs
-, inputs
-, ...
+{
+  pkgs,
+  inputs,
+  ...
 }: {
   home.packages = with pkgs; [
     # --- Core system utilities ---
@@ -98,7 +99,7 @@
     php
     # pygobject3 (the `gi` module) rides on the interpreter for niri's noctalia
     # Screen Toolkit webcam-mirror tool; a bare python3 can't import it.
-    (python3.withPackages (ps: with ps; [ pygobject3 ]))
+    (python3.withPackages (ps: with ps; [pygobject3]))
     uv # Python package manager
 
     # Language servers (consumed by emacs eglot, helix, etc.)
@@ -131,7 +132,7 @@
     direnv
     fzf
     ghostty
-    (callPackage ../packages/drift.nix { src = inputs.drift; })
+    (callPackage ../packages/drift.nix {src = inputs.drift;})
     grc
     kitty
     screen
@@ -152,7 +153,7 @@
 
     # --- Browsers ---
     brave
-    (callPackage ../packages/brave-origin.nix { })
+    (callPackage ../packages/brave-origin.nix {})
     firefox
     tor-browser
     google-chrome
@@ -187,7 +188,7 @@
     onlyoffice-desktopeditors
     xournalpp
     typst
-    (texlive.combine { inherit (texlive) scheme-full; })
+    (texlive.combine {inherit (texlive) scheme-full;})
     zathura # PDF viewer with SyncTeX inverse search
 
     # --- Data & databases ---

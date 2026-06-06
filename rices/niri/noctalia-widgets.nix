@@ -329,11 +329,10 @@ lib.mkIf cfg.enable {
         { id = "Clock"; }
       ];
 
-      # Noctalia's stock right section, kept as shipped (Tray lives here, not in
-      # center). The ported readouts all sit on the left/center; the right is
-      # left to Noctalia's own widgets.
+      # Noctalia's stock right section. The ported readouts all sit on the
+      # left/center; the right is left to Noctalia's own widgets. The system
+      # Tray is intentionally omitted.
       right = [
-        { id = "Tray"; }
         { id = "NotificationHistory"; }
         { id = "Battery"; }
         { id = "Volume"; }

@@ -1,29 +1,9 @@
-{ pkgs, config, lib, ... }:
-let
-  setWallpaper = pkgs.writeShellScript "awww-set-wallpaper" ''
-    until ${pkgs.awww}/bin/awww query >/dev/null 2>&1; do
-      sleep 0.1
-    done
-    exec ${pkgs.awww}/bin/awww img ${config.home.homeDirectory}/.wallpaper
-  '';
-in
+{ config, lib, ... }:
+# Wallpaper is now drawn by Noctalia (see ../noctalia.nix), not awww. This module
+# just seeds a starter image into Noctalia's picker directory so a fresh machine
+# comes up with a wallpaper instead of Noctalia's bundled default. The directory
+# itself stays writable — drop more images in or switch via Noctalia's picker;
+# only this one file is an HM-managed symlink.
 lib.mkIf config.rices.niri.enable {
-  home.file.".wallpaper".source = ./boeing-747.jpg;
-  home.packages = [ pkgs.awww ];
-
-  systemd.user.services.awww-daemon = {
-    Unit = {
-      Description = "awww wallpaper daemon";
-      PartOf = [ "graphical-session.target" ];
-      After = [ "graphical-session.target" ];
-      ConditionEnvironment = "WAYLAND_DISPLAY";
-    };
-    Service = {
-      ExecStart = "${pkgs.awww}/bin/awww-daemon";
-      ExecStartPost = "${setWallpaper}";
-      Restart = "on-failure";
-      RestartSec = 1;
-    };
-    Install.WantedBy = [ "graphical-session.target" ];
-  };
+  home.file."Pictures/Wallpapers/boeing-747.jpg".source = ./boeing-747.jpg;
 }
