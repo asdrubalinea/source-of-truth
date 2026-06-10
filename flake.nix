@@ -308,6 +308,32 @@
             ./hosts/hydra/default.nix
           ];
         };
+
+        # Raspberry Pi 3B+ (aarch64), headless. Built on tempest under binfmt
+        # emulation and flashed as an SD image — no installer, no disko. The
+        # boot/kernel stack (mainline generic sd-image, no nixos-hardware) is
+        # imported inside ./hosts/zephyr/default.nix. See docs/adr/0005.
+        zephyr = lib.nixosSystem {
+          specialArgs = {
+            inherit inputs;
+            hostname = "zephyr";
+          };
+
+          modules = [
+            {
+              # Trimmed overlay set: the desktop overlays
+              # (niri/emacs/claude-code/cachyos) are irrelevant to a headless
+              # ARM base and several don't build cleanly cross-arch.
+              nixpkgs = {
+                hostPlatform = "aarch64-linux";
+                config = nixpkgsConfig;
+                overlays = [ multiChannelOverlay ];
+              };
+            }
+
+            ./hosts/zephyr/default.nix
+          ];
+        };
       };
 
       homeConfigurations = {
