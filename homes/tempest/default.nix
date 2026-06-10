@@ -10,6 +10,7 @@
     # ../../rices/estradiol
     ../../rices/niri # the niri rice (declares rices.niri.*; enabled below)
     ./monitors.nix # machine policy: monitor identities + layout (kanshi)
+    ./soft-reboot.nix # machine policy: soft-reboot autologin + cold-boot lock gate
 
     # Applications and tools
     ../../desktop/zed-editor

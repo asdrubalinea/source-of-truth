@@ -41,6 +41,38 @@
     block-out-from = "screencast";
   }
   {
+    # Telegram scratchpad geometry: float it, centered, at ~55%×85% of the
+    # working area (proportional so it adapts to any output). niri centers new
+    # floating windows by default, so default-floating-position is deliberately
+    # omitted (a known niri bug also ignores it under open-floating —
+    # niri-wm/niri#3420). The block-out-from rule above still applies; both
+    # match the same app-id. See docs/adr/0006-niri-scratchpad-via-nirius.md.
+    matches = [{ app-id = "org.telegram.desktop"; }];
+    open-floating = true;
+    default-column-width = {
+      proportion = 0.55;
+    };
+    default-window-height = {
+      proportion = 0.85;
+    };
+  }
+  {
+    # Floating terminal scratchpad (Mod+Shift+Return): a near-fullscreen floating
+    # kitty, sized as a proportion of the working area so it adapts to any
+    # output. niri centers new floating windows by default, so
+    # default-floating-position is omitted (see the Telegram rule above). The
+    # app-id comes from kitty's `--class scratchpad-terminal`. See
+    # rices/niri/niri.nix (terminalScratchpad).
+    matches = [{ app-id = "scratchpad-terminal"; }];
+    open-floating = true;
+    default-column-width = {
+      proportion = 0.9;
+    };
+    default-window-height = {
+      proportion = 0.9;
+    };
+  }
+  {
     matches = [{ app-id = "app.drey.PaperPlane"; }];
     block-out-from = "screencast";
   }

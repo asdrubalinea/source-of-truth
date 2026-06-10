@@ -9,6 +9,7 @@
     ./system/environment.nix
     ./system/security.nix
     ./system/services.nix
+    ./system/session.nix
     ./system/vaultwarden-sync.nix
     ./system/virtualization.nix
     ./system/firejail.nix

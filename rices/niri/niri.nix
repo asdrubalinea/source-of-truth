@@ -7,6 +7,99 @@
 let
   windowRules = import ./window-rules.nix;
   c = config.lib.stylix.colors.withHashtag;
+
+  # --- Scratchpads (nirius-backed) -----------------------------------------
+  # A scratchpad pops a window onto the focused workspace and dismisses it with
+  # the same key. niri has no truly hidden workspace, so the "scratchpad" is the
+  # bottom-most workspace; niriusd tracks which windows belong to it and nirius
+  # flips them in/out. See docs/adr/0006-niri-scratchpad-via-nirius.md. Geometry
+  # (float + size) lives in window-rules.nix, matched per app-id.
+  niri = "${pkgs.niri-unstable}/bin/niri";
+  jq = "${pkgs.jq}/bin/jq";
+  nirius = "${pkgs.nirius}/bin/nirius";
+  sleep = "${pkgs.coreutils}/bin/sleep";
+
+  # mkScratchpad builds the two scripts that drive one app's scratchpad. `spawn`
+  # is the shell command launched (backgrounded) when the window doesn't exist.
+  #   init   — launch-if-dead, wait for the window, then make it a scratchpad
+  #            *member* (which also parks/hides it). `scratchpad-show` only acts
+  #            on members, so this must succeed for toggling to work. Wire into
+  #            spawn-at-startup for an always-open app; otherwise it runs lazily
+  #            as the toggle's launch path.
+  #   toggle — summon onto / dismiss from the focused workspace. `scratchpad-show`
+  #            self-toggles for a member, so the common path is one call. But
+  #            nirius can't *query* membership, so we verify via niri afterwards:
+  #            if the window didn't move it wasn't a member yet, so we establish
+  #            membership (park it, or pull it here) — making the toggle
+  #            self-heal an un-parked or freshly-respawned window.
+  mkScratchpad = { name, appId, spawn }:
+    let
+      exists = ''${niri} msg --json windows | ${jq} -e 'any(.[]; .app_id == "${appId}")' >/dev/null'';
+      workspaceOf = ''${niri} msg --json windows | ${jq} -r 'first(.[] | select(.app_id == "${appId}")) | .workspace_id // empty' '';
+      init = pkgs.writeShellScript "${name}-scratchpad-init" ''
+        set -u
+        if ! ${exists}; then
+          ${spawn} &
+        fi
+        # Wait up to ~60s for the window to map — a slow (e.g. firejail) cold
+        # start was otherwise leaving it un-parked, so the toggle silently no-op'd.
+        i=0
+        while [ "$i" -lt 600 ]; do
+          ${exists} && break
+          ${sleep} 0.1
+          i=$((i + 1))
+        done
+        # Make it a scratchpad member (also parks/hides it). Retry until niriusd
+        # accepts the request — spawn-at-startup entries launch concurrently —
+        # but break on first success: a second toggle would un-member it.
+        i=0
+        while [ "$i" -lt 100 ]; do
+          ${nirius} scratchpad-toggle --app-id "${appId}" && break
+          ${sleep} 0.1
+          i=$((i + 1))
+        done
+      '';
+      toggle = pkgs.writeShellScript "${name}-scratchpad-toggle" ''
+        set -u
+        ws=$(${workspaceOf})
+        if [ -z "$ws" ]; then
+          # Not running → launch, park, then show it here.
+          ${init}
+          ${nirius} scratchpad-show --app-id "${appId}"
+          exit 0
+        fi
+        fws=$(${niri} msg --json workspaces | ${jq} -r 'first(.[] | select(.is_focused)) | .id')
+        ${nirius} scratchpad-show --app-id "${appId}"
+        ${sleep} 0.15
+        now=$(${workspaceOf})
+        if [ "$ws" = "$fws" ] && [ "$now" = "$fws" ]; then
+          # Meant to hide but stayed put → not a member → park it.
+          ${nirius} scratchpad-toggle --app-id "${appId}"
+        elif [ "$ws" != "$fws" ] && [ "$now" != "$fws" ]; then
+          # Meant to summon but stayed away → not a member → pull it here.
+          ${nirius} move-to-current-workspace --app-id "${appId}"
+        fi
+      '';
+    in
+    { inherit init toggle; };
+
+  # Telegram: always-open (parked at login), summoned with Mod+T.
+  # `telegram-sandboxed` is the firejail wrapper from desktop/telegram-sandbox.nix,
+  # on PATH via home.packages.
+  telegramScratchpad = mkScratchpad {
+    name = "telegram";
+    appId = "org.telegram.desktop";
+    spawn = "telegram-sandboxed";
+  };
+
+  # Floating terminal: spawned on first use, summoned with Mod+Shift+Return. The
+  # distinct --class gives kitty its own app-id so the window-rule and nirius
+  # target only this instance, not every kitty window.
+  terminalScratchpad = mkScratchpad {
+    name = "terminal";
+    appId = "scratchpad-terminal";
+    spawn = "${pkgs.kitty}/bin/kitty --class scratchpad-terminal";
+  };
 in
 lib.mkIf config.rices.niri.enable {
   programs.niri = {
@@ -111,6 +204,12 @@ lib.mkIf config.rices.niri.enable {
         }
         # NNN stack: launch the Noctalia shell (bar + notifications + launcher).
         { command = [ "noctalia-shell" ]; }
+        # Scratchpads: the nirius daemon, then launch Telegram and park it hidden
+        # in the scratchpad. Mod+T summons it. The terminal scratchpad
+        # (Mod+Shift+Return) is spawned lazily on first use, so it isn't here.
+        # See the let block above.
+        { command = [ "${pkgs.nirius}/bin/niriusd" ]; }
+        { command = [ "${telegramScratchpad.init}" ]; }
       ];
 
       # Keybindings
@@ -119,19 +218,23 @@ lib.mkIf config.rices.niri.enable {
         "Mod+Return".action.spawn = [
           "${pkgs.kitty}/bin/kitty"
         ];
-        # New Emacs frame on the running daemon. Bare "emacsclient" so niri
-        # picks up the home-manager-installed myEmacs from PATH rather than
-        # pulling a second emacs build into the niri closure.
+        # Floating terminal scratchpad: summon/dismiss a near-fullscreen floating
+        # kitty (own app-id "scratchpad-terminal"); see the let block above.
+        "Mod+Shift+Return".action.spawn = [ "${terminalScratchpad.toggle}" ];
+        # Disabled for now (Emacs server is off — see desktop/emacs/default.nix).
+        # This key used to open a new Emacs frame on the running daemon. Bare
+        # "emacsclient" so niri picks up the home-manager-installed myEmacs from
+        # PATH rather than pulling a second emacs build into the niri closure.
         # Pass `-d $WAYLAND_DISPLAY` (e.g. "wayland-1") so the pgtk daemon
         # asks GDK for a Wayland display rather than inheriting niri's
         # xwayland DISPLAY=:0 and opening an X11 frame ("pure-GTK under X"
         # warning). Wayland frame shows up in `niri msg windows` with the
         # lowercase app id "emacs"; the X11 fallback is "Emacs".
-        "Mod+Shift+Return".action.spawn = [
-          "sh"
-          "-c"
-          ''exec emacsclient -c -d "$WAYLAND_DISPLAY"''
-        ];
+        # "Mod+Shift+Return".action.spawn = [
+        #   "sh"
+        #   "-c"
+        #   ''exec emacsclient -c -d "$WAYLAND_DISPLAY"''
+        # ];
         # Same key as before; now drives Noctalia's launcher instead of tofi.
         "Mod+Space".action.spawn = [
           "noctalia-shell"
@@ -145,6 +248,11 @@ lib.mkIf config.rices.niri.enable {
         "Mod+P".action.spawn = [ "${pkgs.pavucontrol}/bin/pavucontrol" ];
         "Mod+N".action.spawn = [ "${pkgs.kdePackages.dolphin}/bin/dolphin" ];
         "Mod+L".action.spawn = [ "${pkgs.systemd}/bin/loginctl" "lock-session" ];
+
+        # Telegram scratchpad: summon/dismiss on the focused workspace.
+        "Mod+T".action.spawn = [ "${telegramScratchpad.toggle}" ];
+        # Send the focused window into / pull it out of the scratchpad.
+        "Mod+Shift+T".action.spawn = [ "${nirius}" "scratchpad-toggle" ];
 
         # Window management
         "Mod+Q".action.close-window = { };

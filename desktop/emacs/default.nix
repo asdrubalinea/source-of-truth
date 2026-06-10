@@ -93,8 +93,12 @@ in
     onChange = "rm -f $HOME/.emacs.d/lisp/*.elc";
   };
 
+  # Emacs server (daemon) disabled for now — the niri Mod+Shift+Return frame
+  # bind that drove it has been repurposed for the floating terminal scratchpad
+  # (rices/niri/niri.nix). Flip `enable` back to true to restore the daemon +
+  # socket activation; the emacsclient bind would also need re-adding.
   services.emacs = {
-    enable = true;
+    enable = false;
     package = myEmacs;
     client.enable = true;
     socketActivation.enable = true;

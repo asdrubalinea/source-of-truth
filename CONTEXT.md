@@ -50,3 +50,12 @@ tempest keeps a 3-2-1 backup. Three legs, each with its own meaning of "ran":
   host, not the rice. A rice consumes them as inputs, and degrades cleanly
   (a readout collapses to nothing) when the thing it would describe is absent
   on a given machine.
+- **scratchpad** — a window kept running but parked out of view, summoned by a
+  keybind as a floating overlay onto whatever workspace is focused and
+  dismissed with the same key. On tempest (niri) the canonical tenant is
+  Telegram (Mod+T). _Avoid_: special workspace, drop-down, quake terminal.
+  _Flagged ambiguity_: niri has no native scratchpad and no hidden workspace,
+  so unlike Hyprland's `togglespecialworkspace` this is **emulated** — the
+  parked window still lives on a real (bottom-most) workspace and remains
+  visible in the overview. "Scratchpad" here names that emulated behaviour, not
+  a first-class compositor feature.
