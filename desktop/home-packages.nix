@@ -168,6 +168,7 @@
     # vesktop
     zoom-us
     claude-code
+    rtk
 
     # --- Media, graphics & documents ---
     feh
