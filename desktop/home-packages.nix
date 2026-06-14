@@ -189,7 +189,7 @@
     onlyoffice-desktopeditors
     xournalpp
     typst
-    (texlive.combine {inherit (texlive) scheme-full;})
+    # (texlive.combine {inherit (texlive) scheme-full;})
     zathura # PDF viewer with SyncTeX inverse search
 
     # --- Data & databases ---

@@ -55,15 +55,6 @@
 
     flatpak.enable = true;
 
-    framework-control = {
-      enable = true;
-      # The ozturkkl/framework-control flake's nixpkgs fork pins a stale src
-      # hash for the v0.5.2 GitHub tag (overrideAttrs of src didn't propagate
-      # into the cargo-vendor FOD), so build the package locally with the
-      # currently-served tag hash instead.
-      package = pkgs.callPackage ../../../packages/framework-control.nix { };
-    };
-
     vaultwarden = {
       enable = true;
       dbBackend = "sqlite";

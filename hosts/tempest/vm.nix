@@ -175,7 +175,6 @@
   # flatpak, sanoid, …) is left running on purpose — it works against the VM's
   # real ZFS pool and is exactly the system behaviour the clone exists to test.
   services.smartd.enable = lib.mkForce false; # monitors /dev/nvme0n1, absent here
-  services.framework-control.enable = lib.mkForce false; # laptop embedded controller
   # borg has no SSH key / remote repo in the VM, so the daily job + timer would
   # just fail on schedule.
   systemd.services.borgbackup-job-home-irene.enable = lib.mkForce false;

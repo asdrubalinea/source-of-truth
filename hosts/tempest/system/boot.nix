@@ -19,7 +19,12 @@
     # Kernel parameters for AMD CPU/GPU optimization
     kernelParams = [
       "microcode.amd_sha_check=off"
-      "amd_pstate=guided" # Prefer guided AMD P-state for better efficiency on Ryzen AI
+      # amd_pstate active mode (amd_pstate_epp driver): genuine demand-based
+      # scaling + EPP support. `guided` only writes a min/max band and lets the
+      # firmware opportunistically boost to max at any load — cores pin near
+      # 5 GHz even at idle — and has no EPP, so TLP's CPU_ENERGY_PERF_POLICY is
+      # inert. See docs/framework-control-cpu-frequency.md.
+      "amd_pstate=active"
       "mem_sleep_default=deep" # Default to deepest available suspend state
       # "usbcore.autosuspend=-1" # Disable USB autosuspend for reliability. Consider removing this
     ];

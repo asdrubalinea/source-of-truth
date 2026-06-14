@@ -58,7 +58,11 @@
     };
     noctalia = {
       url = "github:noctalia-dev/noctalia-shell";
-      inputs.nixpkgs.follows = "nixpkgs";
+      # Do NOT add `inputs.nixpkgs.follows = "nixpkgs"`. Noctalia's Cachix
+      # (noctalia.cachix.org, wired into modules/nix.nix on tempest) only has
+      # paths built against the flake's own pinned nixpkgs; following ours would
+      # invalidate every hit and force a full local Quickshell rebuild. See
+      # https://docs.noctalia.dev/v5/getting-started/nixos/#binary-cache
     };
     stylix = {
       url = "github:danth/stylix";
@@ -114,7 +118,6 @@
     };
     codex.url = "github:sadjow/codex-cli-nix";
     claude-code.url = "github:sadjow/claude-code-nix";
-    framework-control.url = "github:ozturkkl/framework-control";
     drift = {
       url = "github:phlx0/drift";
       inputs.nixpkgs.follows = "nixpkgs";

@@ -9,6 +9,7 @@
     ./system/environment.nix
     ./system/security.nix
     ./system/services.nix
+    ./system/backup-notify.nix
     ./system/session.nix
     ./system/vaultwarden-sync.nix
     ./system/virtualization.nix
@@ -23,11 +24,6 @@
 
     # System modules
     ../../modules/nix.nix
-
-    # framework-control's service is configured in the shared system/services.nix,
-    # so the module must exist in both variants (the service itself is disabled in
-    # vm.nix). The package builds fine off-hardware; only the runtime needs an EC.
-    inputs.framework-control.nixosModules.default
 
     # Services
     ../../services/borg-backup.nix

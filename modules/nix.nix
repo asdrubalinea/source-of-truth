@@ -16,6 +16,7 @@
         if config.networking.hostName == "tempest" then [
           # "http://orchid.boreal-city.ts.net:8501/"
           "https://attic.xuyh0120.win/lantian"
+          "https://noctalia.cachix.org" # prebuilt Noctalia v5 / Quickshell (needs noctalia input NOT following nixpkgs; see flake.nix)
           # "https://cache.garnix.io" # disabled: R2 backend unreachable from this network
         ]
         else [
@@ -31,6 +32,7 @@
         if config.networking.hostName == "tempest" then [
           "orchid:OonqQD3i5uEEi8h3zSxxp/uvVGR+Mum0/mbJohLJ09I="
           "lantian:EeAUQ+W+6r7EtwnmYjeVwx5kOGEBpjlBfPlzGlTNvHc="
+          "noctalia.cachix.org-1:pCOR47nnMEo5thcxNDtzWpOxNFQsBRglJzxWPp3dkU4="
           # "cache.garnix.io:CTFPyKSLcx5RMJKfLo5EEPUObbA78b0YQ2DTCJXqr9g="
         ]
         else [

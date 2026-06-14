@@ -3,107 +3,97 @@
   imports = [ inputs.noctalia.homeModules.default ];
 
   config = lib.mkIf config.rices.niri.enable {
-    # Noctalia is the "shell" leg of the NNN stack — an all-in-one Quickshell
-    # desktop shell (bar + launcher + notifications + lockscreen). On this trial
-    # it replaces waybar (bar) and tofi (launcher), both dropped from the rice's
-    # default.nix, and supersedes mako (notifications) — force mako off so two
-    # notification daemons don't fight over the same dbus name.
+    # Noctalia is the "shell" leg of the NNN stack — an all-in-one desktop shell
+    # (bar + launcher + notifications + lockscreen). It replaces waybar (bar) and
+    # tofi (launcher), both dropped from the rice's default.nix, and supersedes
+    # mako (notifications) — force mako off so two notification daemons don't
+    # fight over the same dbus name.
     services.mako.enable = lib.mkForce false;
 
-    programs.noctalia-shell = {
+    programs.noctalia = {
       enable = true;
 
-      # ── Theming ──────────────────────────────────────────────────────────────
-      # Colors are NOT set here: stylix ships a built-in `noctalia-shell` target
-      # (stylix/modules/noctalia-shell/hm.nix) that maps all 16 Material-3 tokens
-      # from the active base16 palette and also wires bar/panel opacity + fonts.
-      # It auto-activates because programs.noctalia-shell.enable is true. Defining
-      # `colors` here would just collide with it — let stylix be the source of
-      # truth (matches how the rest of the rice is themed).
+      # ── Theming ────────────────────────────────────────────────────────────
+      # Use one of Noctalia v5's hand-authored built-in themes (set in `theme`
+      # below). stylix can't theme v5 yet — its bundled target only drives the
+      # dead v4 `programs.noctalia-shell` option, and v5 support is the unmerged
+      # PR danth/stylix#2364. A built-in palette is fully tuned for v5's
+      # Material-3 token system, so it looks right out of the box — unlike a
+      # partial hand-mapped base16 palette, which has to derive the missing tokens
+      # and comes out off-hue/low-contrast (that's why an earlier custom-palette
+      # attempt looked strange).
+      #
+      # Built-in names (theme.builtin): Ayu, Catppuccin, Dracula, Eldritch,
+      # Gruvbox, Kanagawa, Noctalia, Nord, "Rosé Pine", Tokyo-Night — change the
+      # one word to switch. Other sources if you'd rather not use a built-in:
+      #   source = "wallpaper"  → derive M3 colors from the wallpaper
+      #                           (theme.wallpaper_scheme = "m3-tonal-spot", …)
+      #   source = "custom"     → read programs.noctalia.customPalettes.<name>
+      #                           (palettes/<name>.json) — where a future stylix
+      #                           bump would plug back in.
 
-      # ── Declarative settings (pins ~/.config/noctalia/settings.json) ─────────
-      # These keys don't overlap with the ones stylix's target sets (opacity +
-      # fonts), so they merge cleanly. NOTE: pinning settings.json makes the
-      # in-app settings GUI non-persistent (read-only store symlink) — but
-      # predefinedScheme="" is required regardless: it's what stops Noctalia's
-      # ColorSchemeService from regenerating colors.json over stylix's on startup.
-      # The bar layout (position + widgets, incl. the five ported readouts) lives
-      # in ./noctalia-widgets.nix; this module keeps shell enable + theming.
+      # ── Declarative settings (pins ~/.config/noctalia/config.toml) ───────────
+      # v5 config is TOML, validated at build time by `noctalia config validate`
+      # (programs.noctalia.validateConfig, on by default): a bad VALUE fails the
+      # build, an unknown key is a silent warning. The bar layout (position +
+      # widgets) lives in ./noctalia-widgets.nix and merges into this same
+      # config.toml; this module keeps shell enable, theming, and global shell
+      # settings. Pinning config.toml makes the in-app settings GUI
+      # non-persistent (read-only store symlink).
       settings = {
-        colorSchemes = {
-          useWallpaperColors = false; # use stylix's colors.json, don't matugen the wallpaper
-          predefinedScheme = ""; # empty ⇒ ColorSchemeService won't overwrite colors.json
-          darkMode = true; # catppuccin-mocha is a dark scheme
+        theme = {
+          mode = "dark"; # use Catppuccin's dark (Mocha) variant
+          source = "builtin";
+          builtin = "Catppuccin"; # coheres with the rest of the rice (stylix base16 = catppuccin-mocha)
         };
 
-        # swayidle owns lock-on-sleep (see swayidle.nix); avoid a double lock.
-        general.lockOnSuspend = false;
+        # Keep the shell font in step with the rest of the rice (stylix owns the
+        # family; see rices/niri/stylix.nix). v5 has a single shell font_family —
+        # sysmon's old per-widget monospace toggle is gone.
+        shell.font_family = config.stylix.fonts.sansSerif.name;
 
-        # Weather location. Noctalia geocodes location.name via api.noctalia.dev
-        # then fetches from open-meteo. autoLocate MUST be off: its timer does IP
-        # geolocation and overwrites location.name with the detected city
-        # (LocationService.qml), which would clobber this pin.
+        # Weather / Night-Light / auto-theme location. `address` is geocoded via
+        # api.noctalia.dev; auto_locate MUST stay off or its IP-geolocation timer
+        # overwrites it.
         location = {
-          name = "Las Palmas";
-          autoLocate = false;
+          address = "Las Palmas, Spain";
+          auto_locate = false;
         };
 
-        # Noctalia owns the wallpaper (replacing the old awww service). Its
-        # Background.qml draws a per-screen layer-shell surface on the *background*
-        # layer that ignores exclusive zones (namespace "noctalia-wallpaper-<out>")
-        # — exactly the two conditions niri's place-within-backdrop requires, so a
-        # layer-rule in niri.nix matching "^noctalia-wallpaper-" reparents it into
-        # niri's backdrop (same trick awww relied on). The image is picked from the
-        # directory below via Noctalia's own picker; the choice persists in
-        # WallpaperService's writable cache (not this read-only settings.json).
-        # ./wallpaper seeds a starter image into that directory.
+        # Noctalia owns the wallpaper (replacing the old awww service). It draws a
+        # background-layer surface (namespace "noctalia-wallpaper") that ignores
+        # exclusive zones — niri's layer-rule in niri.nix reparents it into niri's
+        # backdrop.
+        #
+        # v5 only renders a surface when it has a PERSISTED image path:
+        # createInstance → getWallpaperPath(connector) returns the per-monitor
+        # override else `default.path`, and if that's empty it never loads an
+        # image — there is NO "pick the first/random file from `directory`"
+        # fallback at startup (the directory only feeds the random/automation
+        # feature). The picker writes the live choice into the writable
+        # ~/.local/state/noctalia/settings.toml (as wallpaper.default/monitors/
+        # last .path), which deep-merges OVER this read-only config.toml. So when
+        # that runtime state is reset — which is exactly what the v5 update did,
+        # by relocating the state store — nothing is left to show and the desktop
+        # comes up blank.
+        #
+        # Pin `default.path` to the seeded starter image (./wallpaper) so there's
+        # always a deterministic fallback; the picker still overrides it at
+        # runtime via settings.toml.
         wallpaper = {
           enabled = true;
-          directory = "~/Pictures/Wallpapers"; # Noctalia's own default; ~ is expanded by preprocessPath
-        };
-      };
-
-      # ── Plugins (pins ~/.config/noctalia/plugins.json) ───────────────────────
-      # Screen Toolkit (https://noctalia.dev/plugins/screen-toolkit): a bundle of
-      # screenshot / annotate / record / color-pick / OCR / QR / palette / Lens /
-      # webcam tools. Like settings.json, this file becomes a read-only store
-      # symlink — it's the install *registry*, not the plugin code. On startup the
-      # shell sparse-checkouts the enabled plugin's QML from `sourceUrl` into the
-      # WRITABLE ~/.config/noctalia/plugins/screen-toolkit/ (not HM-managed), so
-      # the code itself is fetched at runtime, not pinned in /nix/store.
-      #
-      # The plugin's OWN settings (screenshot dir, API keys, search engine) live in
-      # plugins/screen-toolkit/settings.json. We deliberately DON'T pin those via
-      # `pluginSettings` — leaving that path writable keeps the in-app settings
-      # panel functional for the trial. Enshrine into `pluginSettings` later if a
-      # config worth keeping emerges (same workflow as the bar; see ADR 0003).
-      #
-      # Runtime CLI deps are added to home.packages below — the shell scripts the
-      # plugin runs need them on PATH.
-      plugins = {
-        version = 2;
-        sources = [
-          {
-            enabled = true;
-            name = "Noctalia Plugins";
-            url = "https://github.com/noctalia-dev/noctalia-plugins";
-          }
-        ];
-        states = {
-          screen-toolkit = {
-            enabled = true;
-            sourceUrl = "https://github.com/noctalia-dev/noctalia-plugins";
-          };
+          directory = "~/Pictures/Wallpapers";
+          default.path = "~/Pictures/Wallpapers/boeing-747.jpg";
         };
       };
     };
 
-    # Screen Toolkit runtime dependencies. Only the ones not already in
-    # desktop/home-packages.nix (which provides wl-clipboard, imagemagick, curl,
-    # ffmpeg, jq, python3) or the system layer (xdg-desktop-portal). pygobject3 —
-    # needed by the webcam-mirror tool's python — rides on the global python3
-    # interpreter instead (see desktop/home-packages.nix); a second python3 here
-    # would collide on bin/python3.
+    # Screenshot / annotate / record / OCR tooling. These were the runtime deps
+    # of the v4 "Screen Toolkit" Noctalia plugin. v5 manages plugins differently
+    # — a `[plugins]` table in config.toml plus `noctalia msg plugins …` at
+    # runtime, cloned from the official/community plugin repos — so it's no longer
+    # a home-manager option. The plugin isn't re-declared here yet; the CLI tools
+    # stay because they're generally useful for screenshots/recording.
     home.packages = with pkgs; [
       grim # screenshot grabber (wlroots)
       slurp # region/window selection

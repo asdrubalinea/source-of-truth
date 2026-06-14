@@ -18,7 +18,7 @@ in
 lib.mkIf config.rices.niri.enable {
   # Lock is handled by Noctalia's lockscreen (NNN stack) rather than swaylock.
   # swayidle still owns the idle timers + the logind lock/sleep events below;
-  # its `lock` event just calls into the already-running noctalia-shell.
+  # its `lock` event just calls into the already-running noctalia shell.
   services.swayidle = {
     enable = true;
     systemdTargets = [ "graphical-session.target" ];
@@ -40,7 +40,7 @@ lib.mkIf config.rices.niri.enable {
     ];
     events = {
       before-sleep = "${pkgs.systemd}/bin/loginctl lock-session";
-      lock = "noctalia-shell ipc call lockScreen lock";
+      lock = "noctalia msg session lock";
     };
   };
 }

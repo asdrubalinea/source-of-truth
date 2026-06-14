@@ -122,6 +122,14 @@ lib.mkIf config.rices.niri.enable {
         ELECTRON_OZONE_PLATFORM_HINT = "wayland";
         XDG_SESSION_TYPE = "wayland";
         XDG_CURRENT_DESKTOP = "niri";
+        # Noctalia's lockscreen authenticates against this PAM service (read by
+        # its LockContext). Default is "login", which assumes a privileged caller
+        # — an unprivileged locker hits "pam_unix(login:account): setuid failed"
+        # and can never unlock. Point it at a dedicated /etc/pam.d/noctalia
+        # instead (defined in rices/niri/system.nix). niri exports this to the
+        # processes it spawns, including the noctalia spawn-at-startup, so the
+        # already-running shell that handles every lock path picks it up.
+        NOCTALIA_PAM_SERVICE = "noctalia";
       };
 
       hotkey-overlay = {
@@ -203,7 +211,8 @@ lib.mkIf config.rices.niri.enable {
           ];
         }
         # NNN stack: launch the Noctalia shell (bar + notifications + launcher).
-        { command = [ "noctalia-shell" ]; }
+        # v5 renamed the binary noctalia-shell → noctalia.
+        { command = [ "noctalia" ]; }
         # Scratchpads: the nirius daemon, then launch Telegram and park it hidden
         # in the scratchpad. Mod+T summons it. The terminal scratchpad
         # (Mod+Shift+Return) is spawned lazily on first use, so it isn't here.
@@ -236,12 +245,13 @@ lib.mkIf config.rices.niri.enable {
         #   ''exec emacsclient -c -d "$WAYLAND_DISPLAY"''
         # ];
         # Same key as before; now drives Noctalia's launcher instead of tofi.
+        # v5 IPC: `noctalia msg <command>` replaced `noctalia-shell ipc call …`;
+        # the launcher panel is toggled via the generic panel-toggle handler.
         "Mod+Space".action.spawn = [
-          "noctalia-shell"
-          "ipc"
-          "call"
+          "noctalia"
+          "msg"
+          "panel-toggle"
           "launcher"
-          "toggle"
         ];
 
         "Mod+B".action.spawn = [ "${pkgs.blueman}/bin/blueman-manager" ];
@@ -374,13 +384,13 @@ lib.mkIf config.rices.niri.enable {
       };
       window-rules = windowRules;
       layer-rules = [
-        # Noctalia's wallpaper surface (Background.qml: background layer, ignores
-        # exclusive zones, namespace "noctalia-wallpaper-<output>") — reparent it
-        # into niri's backdrop so it shows behind gapped/transparent windows and
-        # in the overview. Prefix match, not anchored: the namespace carries a
-        # per-output suffix.
+        # Noctalia's wallpaper surface (background layer, ignores exclusive
+        # zones) — reparent it into niri's backdrop so it shows behind
+        # gapped/transparent windows and in the overview. v5 uses a single fixed
+        # layer-shell namespace "noctalia-wallpaper" (v4 carried a per-output
+        # suffix); prefix match keeps it forward-compatible.
         {
-          matches = [{ namespace = "^noctalia-wallpaper-"; }];
+          matches = [{ namespace = "^noctalia-wallpaper"; }];
           place-within-backdrop = true;
         }
       ];

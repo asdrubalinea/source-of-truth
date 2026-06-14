@@ -51,6 +51,13 @@ let
   parent = "${pool}/tempest";
   altroot = "/mnt/backup";
 
+  # Desktop result notifications (see packages/backup-notify.nix). Failures are
+  # wired via systemd OnFailure= below so a crash anywhere in the run is caught;
+  # success is emitted inline at the end of the orchestrator so the no-op skip
+  # paths (drive absent / already imported) stay silent.
+  backup-notify = pkgs.callPackage ../../../packages/backup-notify.nix { };
+  usbUnit = "tempest-backup-external.service";
+
   # Integrity-scrub cadence for the backup pool. The pool is only importable
   # during a run, so a periodic scrub has to ride along with the backup
   # (scrub-if-stale, see the orchestrator script below).
@@ -100,6 +107,7 @@ let
       pkgs.sanoid
       pkgs.coreutils
       pkgs.gnugrep
+      backup-notify
     ];
     text = ''
       log() { echo "[tempest-backup-external] $*"; }
@@ -176,6 +184,9 @@ let
         exit 1
       fi
 
+      # Reached only on a genuine run (the skip paths above exit 0 earlier), so a
+      # success notification here never fires for a plug-less daily timer tick.
+      backup-notify ok "USB external backup" ${usbUnit} || true
       log "done."
     '';
   };
@@ -232,6 +243,23 @@ in
     serviceConfig = {
       Type = "oneshot";
       ExecStart = "${backupBin}/bin/tempest-backup-external";
+    };
+    # Any failure (mid-run crash or the explicit unhealthy-pool exit 1) raises a
+    # desktop notification. Success is notified inline by the orchestrator so a
+    # plug-less timer tick (which no-ops, exiting 0) stays silent.
+    onFailure = [ "backup-notify-usb-fail.service" ];
+  };
+
+  systemd.services.backup-notify-usb-fail = {
+    description = "Desktop fail notification: USB external backup";
+    serviceConfig = {
+      Type = "oneshot";
+      ExecStart = lib.escapeShellArgs [
+        "${backup-notify}/bin/backup-notify"
+        "fail"
+        "USB external backup"
+        usbUnit
+      ];
     };
   };
 

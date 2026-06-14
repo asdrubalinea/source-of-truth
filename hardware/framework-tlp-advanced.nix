@@ -21,13 +21,22 @@
     # ---------- General Settings ----------
     TLP_ENABLE = 1;
 
-    # ---------- CPU Governor ----------
-    CPU_SCALING_GOVERNOR_ON_BAT = "schedutil";
-    CPU_SCALING_GOVERNOR_ON_AC = "schedutil";
-    CPU_DRIVER_OPMODE_ON_BAT = "guided";
-    CPU_DRIVER_OPMODE_ON_AC = "guided";
+    # ---------- CPU Driver Mode + Governor ----------
+    # amd_pstate `active` (amd_pstate_epp driver). In active mode the only
+    # pseudo-governors are performance/powersave, and `powersave` is NOT
+    # min-pinning — it is EPP-driven dynamic scaling (idle cores drop low, full
+    # boost under load). `guided` + schedutil instead pins cores near max at
+    # idle by design (schedutil only sets the floor; firmware boosts freely to
+    # max-capacity). See docs/framework-control-cpu-frequency.md.
+    CPU_DRIVER_OPMODE_ON_BAT = "active";
+    CPU_DRIVER_OPMODE_ON_AC = "active";
+    CPU_SCALING_GOVERNOR_ON_BAT = "powersave";
+    CPU_SCALING_GOVERNOR_ON_AC = "powersave";
 
     # ---------- CPU Energy Policy (EPP) ----------
+    # Primary tuning knob in active mode (EPP only exists there — under `guided`
+    # these were silently inert). If `power` over-throttles interactive feel on
+    # battery, soften to "balance_power".
     CPU_ENERGY_PERF_POLICY_ON_BAT = "power";
     CPU_ENERGY_PERF_POLICY_ON_AC = "balance_performance";
 

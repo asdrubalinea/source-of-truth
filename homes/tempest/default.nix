@@ -36,9 +36,7 @@
   ];
 
   # Activate the niri rice. Its machine policy stays out here: monitor layout is
-  # ./monitors.nix, and the backup-health readout's watched units default
-  # to tempest's in the rice options (rices.niri.backupWidget.*), so no override
-  # is needed. See docs/adr/0004-niri-rice-as-enable-module.md.
+  # ./monitors.nix. See docs/adr/0004-niri-rice-as-enable-module.md.
   rices.niri.enable = true;
 
   home = {
