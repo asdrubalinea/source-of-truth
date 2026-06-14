@@ -83,7 +83,7 @@
         wallpaper = {
           enabled = true;
           directory = "~/Pictures/Wallpapers";
-          default.path = "~/Pictures/Wallpapers/boeing-747.jpg";
+          default.path = "~/Pictures/Wallpapers/wallhaven_yqmelx.jpg";
         };
       };
     };

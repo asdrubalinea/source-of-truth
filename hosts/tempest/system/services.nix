@@ -23,6 +23,14 @@
       freeSwapThreshold = 100;
     };
 
+    ollama = {
+      enable = false;
+      host = "127.0.0.1";
+      # acceleration = "rocm";
+      package = pkgs.ollama-rocm;
+      # rocmOverrideGfx = "10.3.1";
+    };
+
     borg-backup = {
       enable = true;
       jobs.home-irene = {

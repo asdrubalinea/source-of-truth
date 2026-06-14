@@ -17,7 +17,7 @@
     usbutils
     upower
     bubblewrap
-    # trunk.opencode
+    opencode
     ddcutil
 
     # --- System info & monitoring ---
@@ -169,6 +169,7 @@
     zoom-us
     claude-code
     rtk
+    antigravity
 
     # --- Media, graphics & documents ---
     feh
