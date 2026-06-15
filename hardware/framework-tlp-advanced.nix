@@ -37,16 +37,24 @@
     # Primary tuning knob in active mode (EPP only exists there — under `guided`
     # these were silently inert). If `power` over-throttles interactive feel on
     # battery, soften to "balance_power".
+    # On AC we run `performance`: EPP is only a bias hint, not a freq floor, so
+    # the `powersave` governor still drops idle cores into deep C-states — this
+    # just makes wakeups ramp harder and hold high clocks longer under load. (To
+    # pin cores at max even at idle you'd switch the GOVERNOR to performance, not
+    # this; we deliberately don't.)
     CPU_ENERGY_PERF_POLICY_ON_BAT = "power";
-    CPU_ENERGY_PERF_POLICY_ON_AC = "balance_performance";
+    CPU_ENERGY_PERF_POLICY_ON_AC = "performance";
 
     # ---------- Turbo Boost Control ----------
     CPU_BOOST_ON_BAT = 0;
     CPU_BOOST_ON_AC = 1;
 
     # ---------- Platform Profile ----------
+    # Sets the firmware's sustained power ceiling (PPT/STAPM). `performance` on
+    # AC unlocks sustained all-core throughput; it has no idle effect (the limit
+    # only binds under prolonged load) at the cost of more heat/fan under load.
     PLATFORM_PROFILE_ON_BAT = "low-power";
-    PLATFORM_PROFILE_ON_AC = "balanced";
+    PLATFORM_PROFILE_ON_AC = "performance";
 
     # ---------- PCIe ASPM ----------
     PCIE_ASPM_ON_BAT = "powersave";
