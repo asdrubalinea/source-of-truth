@@ -114,11 +114,11 @@ lib.mkIf config.rices.niri.enable {
         QT_WAYLAND_DISABLE_WINDOWDECORATION = "1";
         # Apps launched from niri (binds / tofi-drun) inherit this env, not the
         # systemd user env (spawn-at-startup only imports 4 vars). Set the Qt
-        # platform theme + style here so Dolphin et al. pick up the stylix
-        # qtct/Kvantum theming. "qt5ct" also loads the qt6ct plugin (its plugin
-        # Keys are ["qt6ct","qt5ct"]); matches what stylix's qt target exports.
+        # platform theme here so Dolphin et al. pick up qt.nix's qtct config +
+        # Noctalia's dynamic color file. "qt5ct" also loads the qt6ct plugin
+        # (its plugin Keys are ["qt6ct","qt5ct"]). No QT_STYLE_OVERRIDE — style
+        # is selected by qtct.conf (style=Fusion).
         QT_QPA_PLATFORMTHEME = "qt5ct";
-        QT_STYLE_OVERRIDE = "kvantum";
         ELECTRON_OZONE_PLATFORM_HINT = "wayland";
         XDG_SESSION_TYPE = "wayland";
         XDG_CURRENT_DESKTOP = "niri";

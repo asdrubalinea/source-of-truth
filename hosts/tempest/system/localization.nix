@@ -1,7 +1,6 @@
 { pkgs, ... }:
 {
-  # time.timeZone = "Europe/Rome";
-  services.automatic-timezoned.enable = true;
+  time.timeZone = "Atlantic/Canary";
 
   i18n.defaultLocale = "en_US.UTF-8";
   console = {

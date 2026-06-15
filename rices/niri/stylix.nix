@@ -27,7 +27,9 @@ lib.mkIf config.rices.niri.enable {
 
     targets = {
       neovim.enable = false;
-      alacritty.enable = true;
+      # Colors handed to Noctalia's runtime template (see alacritty.nix +
+      # noctalia.nix theme.templates). Stylix still owns fonts/icons/Qt/wezterm.
+      alacritty.enable = false;
       # Disabled on purpose: stylix's kitty target emits
       #   include /nix/store/<hash>-base16-<scheme>.conf
       # into kitty.conf. We inline the palette into programs.kitty.settings
@@ -48,11 +50,12 @@ lib.mkIf config.rices.niri.enable {
       wezterm.enable = true;
       vscode.enable = false;
       waybar.enable = false;
-      # Standalone Home Manager (irene@tempest) has nixosConfig = null, so the
-      # qt target does NOT auto-enable. Turn it on explicitly, otherwise Qt
-      # apps get no platform theme and Dolphin renders as bare Fusion. Enabling
-      # it sets the qtct platform theme + a Kvantum style themed from base16.
-      qt.enable = true;
+      # Qt theming is now owned by qt.nix + Noctalia's "qt" built-in template
+      # (wallpaper-derived M3 palette → ~/.config/qt{5,6}ct/colors/noctalia.conf,
+      # style=Fusion). Stylix's qt target would write a static base16 qtct config
+      # selecting Kvantum, which conflicts with our managed conf and pins the
+      # wrong style — keep it off.
+      qt.enable = false;
     };
 
     fonts = {

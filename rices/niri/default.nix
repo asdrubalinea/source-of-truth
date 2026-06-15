@@ -11,6 +11,7 @@
     ./noctalia-widgets.nix
     ./wallpaper
     ./stylix.nix
+    ./qt.nix
   ];
 
   # The niri rice as a single enable-options Home-Manager module. Importing this

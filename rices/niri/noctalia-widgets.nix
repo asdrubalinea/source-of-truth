@@ -23,13 +23,11 @@ lib.mkIf cfg.enable {
     bar.default = {
       position = "top";
 
-      # Floating look: gap the bar off the screen edges by niri's gap (8px; see
-      # niri.nix layout.gaps) with rounded corners, so window columns line up with
-      # the bar edges. v5 has no "floating" barType — margin_edge (distance from
-      # the anchored edge), margin_ends (inset at the lane ends), and radius do it.
       margin_edge = 8;
       margin_ends = 8;
       radius = 12;
+      shadow = false;
+      thickness = 32;
 
       # Lane entries are widget INSTANCE names; a bare name with no matching
       # [widget.<name>] table uses the name as its type, so "workspaces", "clock",

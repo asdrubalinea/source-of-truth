@@ -5,6 +5,11 @@ lib.mkIf config.rices.niri.enable {
     settings = {
       env.TERM = "xterm-256color";
 
+      # Noctalia's runtime template writes a palette file here; alacritty
+      # expands ~ and live-reloads on change. Silently ignored on first boot
+      # before Noctalia has run its kitty/alacritty apply for the first time.
+      general.import = [ "~/.config/alacritty/themes/noctalia.toml" ];
+
       window = {
         padding = {
           x = 4;

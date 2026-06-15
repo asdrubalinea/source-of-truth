@@ -42,15 +42,24 @@
       # non-persistent (read-only store symlink).
       settings = {
         theme = {
-          mode = "dark"; # use Catppuccin's dark (Mocha) variant
-          source = "builtin";
-          builtin = "Catppuccin"; # coheres with the rest of the rice (stylix base16 = catppuccin-mocha)
-        };
+          mode = "dark";
+          source = "wallpaper";
+          wallpaper_scheme = "faithful"; # derive M3 colors from the current wallpaper
 
-        # Keep the shell font in step with the rest of the rice (stylix owns the
-        # family; see rices/niri/stylix.nix). v5 has a single shell font_family —
-        # sysmon's old per-widget monospace toggle is gone.
-        shell.font_family = config.stylix.fonts.sansSerif.name;
+          # Live color templates: Noctalia writes per-app palette files at runtime
+          # and reloads each app. GTK is mutable/unmanaged (free); kitty/alacritty
+          # consume Noctalia's output via a declarative include/import so their
+          # structural config stays in Nix. Qt is now also driven here — the "qt"
+          # template writes ~/.config/qt{5,6}ct/colors/noctalia.conf (a QPalette
+          # ColorScheme file); qt.nix pins qtct.conf to pick up that file with
+          # style=Fusion. wezterm stays on stylix.
+          templates = {
+            enable_builtin_templates = true;
+            builtin_ids = [ "gtk3" "gtk4" "kitty" "alacritty" "qt" ];
+            enable_community_templates = false;
+            community_ids = [ ];
+          };
+        };
 
         # Weather / Night-Light / auto-theme location. `address` is geocoded via
         # api.noctalia.dev; auto_locate MUST stay off or its IP-geolocation timer
@@ -84,6 +93,15 @@
           enabled = true;
           directory = "~/Pictures/Wallpapers";
           default.path = "~/Pictures/Wallpapers/wallhaven_yqmelx.jpg";
+        };
+
+        brightness.enable_ddcutil = true;
+
+        backdrop.blur_intensity = 0.1;
+
+        shell = {
+          font_family = config.stylix.fonts.sansSerif.name;
+          screen_corners.enabled = true;
         };
       };
     };
