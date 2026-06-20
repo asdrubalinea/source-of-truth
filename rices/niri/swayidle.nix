@@ -14,11 +14,35 @@ let
       rm -f "$pidfile"
     fi
   '';
+
+  # Absolute path to the noctalia binary. swayidle's user-service PATH is ONLY
+  # bash-interactive/bin (no profile, no home.packages), so a bare `noctalia` in
+  # an event/timeout command is "command not found" and the lock silently
+  # no-ops — which is exactly why suspend and the 600s idle timer stopped
+  # locking. config.programs.noctalia.package is set in ./noctalia.nix (same HM
+  # config).
+  noctaliaBin = "${config.programs.noctalia.package}/bin/noctalia";
+
+  # before-sleep locker. Locks the session DIRECTLY here rather than via
+  # `loginctl lock-session`: swayidle holds the logind sleep inhibitor only until
+  # this command returns, so the lock must complete on this path. Routing through
+  # lock-session would emit a Lock signal handled on swayidle's *separate* `lock`
+  # event, off the inhibitor-blocked path — the box could suspend before the lock
+  # surface is up and resume unlocked (the bug we hit). `noctalia msg session
+  # lock` also flips logind's LockedHint, so the hint stays correct without the
+  # detour.
+  lockBeforeSleep = pkgs.writeShellScript "niri-lock-before-sleep" ''
+    ${noctaliaBin} msg session lock
+    # Let the ext-session-lock surface draw before the screen is frozen for s2idle.
+    ${pkgs.coreutils}/bin/sleep 0.5
+  '';
 in
 lib.mkIf config.rices.niri.enable {
   # Lock is handled by Noctalia's lockscreen (NNN stack) rather than swaylock.
-  # swayidle still owns the idle timers + the logind lock/sleep events below;
-  # its `lock` event just calls into the already-running noctalia shell.
+  # swayidle still owns the idle timers + the logind lock/sleep events below.
+  # before-sleep locks Noctalia directly (see lockBeforeSleep); the `lock` event
+  # locks on idle (600s lock-session) and manual `loginctl lock-session`. Both
+  # call noctalia by ABSOLUTE path — bare `noctalia` isn't on swayidle's PATH.
   services.swayidle = {
     enable = true;
     systemdTargets = [ "graphical-session.target" ];
@@ -48,8 +72,8 @@ lib.mkIf config.rices.niri.enable {
       }
     ];
     events = {
-      before-sleep = "${pkgs.systemd}/bin/loginctl lock-session";
-      lock = "noctalia msg session lock";
+      before-sleep = "${lockBeforeSleep}";
+      lock = "${noctaliaBin} msg session lock";
     };
   };
 }

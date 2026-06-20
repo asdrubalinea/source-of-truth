@@ -169,7 +169,7 @@
     zoom-us
     claude-code
     rtk
-    antigravity
+    # antigravity
 
     # --- Media, graphics & documents ---
     feh
