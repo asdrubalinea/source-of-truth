@@ -210,9 +210,12 @@ lib.mkIf config.rices.niri.enable {
             "XAUTHORITY"
           ];
         }
-        # NNN stack: launch the Noctalia shell (bar + notifications + launcher).
-        # v5 renamed the binary noctalia-shell → noctalia.
-        { command = [ "noctalia" ]; }
+        # NNN stack: the Noctalia shell (bar + notifications + launcher) is NOT
+        # spawned here anymore. It runs as a supervised systemd user service
+        # (programs.noctalia.systemd.enable, in rices/niri/noctalia.nix) with
+        # Restart=on-failure bound to graphical-session.target, so a segfault in
+        # the v5 dev build self-heals instead of leaving a dead desktop. Spawning
+        # it here too would double-launch a singleton shell.
         # Scratchpads: the nirius daemon, then launch Telegram and park it hidden
         # in the scratchpad. Mod+T summons it. The terminal scratchpad
         # (Mod+Shift+Return) is spawned lazily on first use, so it isn't here.

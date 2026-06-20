@@ -11,6 +11,20 @@ lib.mkIf config.rices.niri.enable {
   # `nullOr submodule` type can't merge null with a value.
   gtk.gtk4.theme = lib.mkForce null;
 
+  # Noctalia's gtk3/gtk4 runtime templates rewrite gtk.css IN PLACE: they take
+  # stylix's generated palette and append `@import url("noctalia.css");`, so HM's
+  # read-only symlink at ~/.config/gtk-{3,4}.0/gtk.css becomes a real file. On the
+  # next `home-manager switch -b backup` HM finds that real file in the way of its
+  # symlink and tries to move it to `gtk.css.backup` — but the previous run's
+  # `gtk.css.backup` is still there, so it aborts with "would be clobbered by
+  # backing up", and deleting the backup only buys one clean run. `force = true`
+  # makes HM overwrite the file in place with no backup, restoring the symlink
+  # cleanly; Noctalia re-appends its import on its next theme apply. stylix writes
+  # both files via `xdg.configFile."gtk-{3,4}.0/gtk.css".source`, so setting force
+  # on those same keys just merges into stylix's definition.
+  xdg.configFile."gtk-3.0/gtk.css".force = true;
+  xdg.configFile."gtk-4.0/gtk.css".force = true;
+
   stylix = {
     enable = true;
     base16Scheme = "${pkgs.base16-schemes}/share/themes/catppuccin-mocha.yaml";
@@ -47,6 +61,11 @@ lib.mkIf config.rices.niri.enable {
       # The actual fix is `auto_reload_config = -1` in kitty.nix, which stops
       # the watcher from spawning. This target stays off for theme reasons.
       kitty.enable = false;
+      # Terminal colors are owned by Noctalia's runtime templates (kitty,
+      # alacritty). The shell target injects base16-<scheme>.fish into fish's
+      # config and emits OSC escape sequences at shell startup, which overrides
+      # the noctalia.conf palette every time a shell opens inside the terminal.
+      fish.enable = false;
       wezterm.enable = true;
       vscode.enable = false;
       waybar.enable = false;

@@ -198,6 +198,7 @@
     # litecli # disabled: cli-helpers tests fail in unstable (Pygments ANSI mismatch)
     sqlite
     sqlitebrowser
+    tableplus
 
     # --- Security testing ---
     burpsuite

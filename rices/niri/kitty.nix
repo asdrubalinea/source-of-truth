@@ -8,15 +8,20 @@ lib.mkIf config.rices.niri.enable {
       font_family = config.stylix.fonts.monospace.name;
       font_size = config.stylix.fonts.sizes.terminal;
 
-      # Disable kitty's config auto-reload watcher. Home Manager materializes
-      # kitty.conf as a symlink whose realpath is a store-root file
-      # (/nix/store/<hash>-hm_kittykitty.conf), and kitty's `__watch_conf__`
-      # kitten watches each config file's parent dir *recursively* — so the
-      # watcher recurses over all of /nix/store (~470k inotify watches),
-      # exhausting fs.inotify.max_user_watches and breaking Vite/yarn dev with
-      # ENOSPC. A negative value turns the watcher off (boss.py gates it on
-      # `auto_reload_config >= 0`).
-      auto_reload_config = -1;
+      # Keep auto_reload_config at the default (0 = system default, positive =
+      # poll interval in seconds). This enables SIGUSR1 reload, which Noctalia
+      # uses to push palette updates into running kitty instances after writing
+      # ~/.config/kitty/themes/noctalia.conf. Without it (negative value blocks
+      # both the watcher AND SIGUSR1) Noctalia's reload signal is silently
+      # ignored, so the theme disappears whenever noctalia.conf is rewritten.
+      #
+      # The prior -1 was a workaround for inotify exhaustion: HM materializes
+      # kitty.conf as a /nix/store symlink, and the __watch_conf__ kitten
+      # watches that realpath's parent dir recursively. fs.inotify.max_user_watches
+      # is set to 524288, which is enough headroom for the store paths plus dev
+      # tools. If Vite/yarn inotify starvation resurfaces, increase the sysctl
+      # rather than disabling SIGUSR1.
+      auto_reload_config = 0;
 
       dynamic_title = true;
       term = "xterm-256color";
@@ -32,11 +37,9 @@ lib.mkIf config.rices.niri.enable {
       wheel_scroll_multiplier = 10;
     };
 
-    # Include Noctalia's runtime-generated palette. Kitty expands $HOME in
-    # include paths and only warns (does not fail) if the file is missing on
-    # first boot — Noctalia writes it on first wallpaper apply. The watcher
-    # is off (auto_reload_config = -1) so Noctalia's apply.sh reload-signal
-    # path drives live recolors rather than inotify.
-    extraConfig = "include $\{HOME}/.config/kitty/themes/noctalia.conf";
+    # Include Noctalia's runtime-generated palette. Kitty only warns (does not
+    # fail) if the file is missing on first boot. Noctalia writes it on first
+    # wallpaper apply, then sends SIGUSR1 to reload running kitty instances.
+    extraConfig = "include ~/.config/kitty/themes/noctalia.conf";
   };
 }

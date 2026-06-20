@@ -61,7 +61,13 @@
     PCIE_ASPM_ON_AC = "default";
 
     # ---------- USB Autosuspend ----------
-    USB_AUTOSUSPEND = 1;
+    # OFF: this firmware's only suspend state is s2idle (S0ix). With autosuspend
+    # on, USB devices and the XHCI/USB4 controller power-gate and then fail to
+    # re-enumerate on s2idle resume — taking out USB peripherals *and* the
+    # external display (DP-over-USB-C rides the same controller). Soft-reboot was
+    # the only recovery. This replaces the old `usbcore.autosuspend=-1` kernel
+    # workaround (boot.nix); keeping it in TLP avoids duelling tuners.
+    USB_AUTOSUSPEND = 0;
 
     # ---------- Runtime Power Management ----------
     RUNTIME_PM_ON_BAT = "auto";

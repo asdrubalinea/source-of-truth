@@ -13,6 +13,17 @@
     programs.noctalia = {
       enable = true;
 
+      # Run noctalia as a supervised systemd user service (the module wires up
+      # Restart=on-failure, PartOf/After/WantedBy graphical-session.target) rather
+      # than a bare, unsupervised niri spawn-at-startup. v5.0.0 is an unreleased
+      # dev build of the C++ rewrite (the stable release line is still v4.x) and
+      # segfaults deterministically — same fault offset every time, typically
+      # around output hotplug / session teardown, which this docked+suspend setup
+      # hits constantly. As a service a crash self-heals in ~1s; as a niri child it
+      # just left a dead bar until a manual relaunch (which re-crashed). The
+      # spawn-at-startup entry in niri.nix is removed so it isn't double-launched.
+      systemd.enable = true;
+
       # ── Theming ────────────────────────────────────────────────────────────
       # Use one of Noctalia v5's hand-authored built-in themes (set in `theme`
       # below). stylix can't theme v5 yet — its bundled target only drives the
@@ -47,9 +58,15 @@
           wallpaper_scheme = "faithful"; # derive M3 colors from the current wallpaper
 
           # Live color templates: Noctalia writes per-app palette files at runtime
-          # and reloads each app. GTK is mutable/unmanaged (free); kitty/alacritty
-          # consume Noctalia's output via a declarative include/import so their
-          # structural config stays in Nix. Qt is now also driven here — the "qt"
+          # and reloads each app. The gtk3/gtk4 templates DON'T write a standalone
+          # file — they rewrite ~/.config/gtk-{3,4}.0/gtk.css in place, appending
+          # `@import url("noctalia.css");` to stylix's generated palette. That turns
+          # HM's symlink into a real file, which fights `home-manager switch -b
+          # backup`; stylix.nix sets `force = true` on those two gtk.css options so
+          # HM overwrites in place without a colliding `.backup` (see the long note
+          # there). kitty/alacritty instead consume Noctalia's output via a
+          # declarative include/import so their structural config stays in Nix and
+          # HM never sees a modified file. Qt is now also driven here — the "qt"
           # template writes ~/.config/qt{5,6}ct/colors/noctalia.conf (a QPalette
           # ColorScheme file); qt.nix pins qtct.conf to pick up that file with
           # style=Fusion. wezterm stays on stylix.
@@ -105,6 +122,18 @@
         };
       };
     };
+
+    # A systemd user service only inherits the handful of vars niri pushes via
+    # `systemctl --user import-environment` (WAYLAND_DISPLAY, XDG_CURRENT_DESKTOP,
+    # DBUS_SESSION_BUS_ADDRESS, XAUTHORITY) — NOT niri's per-process `environment`
+    # block. So re-export the two vars noctalia actually needs that live there:
+    #   - NOCTALIA_PAM_SERVICE: without it the lockscreen falls back to PAM "login"
+    #     → "setuid failed" → can never unlock (see the comment in niri.nix).
+    #   - QT_QPA_PLATFORM=wayland: keep the Qt platform explicit, as under niri.
+    systemd.user.services.noctalia.Service.Environment = [
+      "NOCTALIA_PAM_SERVICE=noctalia"
+      "QT_QPA_PLATFORM=wayland"
+    ];
 
     # Screenshot / annotate / record / OCR tooling. These were the runtime deps
     # of the v4 "Screen Toolkit" Noctalia plugin. v5 manages plugins differently

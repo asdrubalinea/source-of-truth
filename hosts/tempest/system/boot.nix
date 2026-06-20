@@ -13,7 +13,9 @@
     # zfs_unstable supports. See docs/adr/0001-zfs-on-luks-tempest.md.
     kernelPackages = pkgs.cachyosKernels.linuxPackages-cachyos-lts-lto-zen4;
 
-    # Hibernation support
+    # Swap lives here; it is NOT a hibernation resume target — ZFS root forces
+    # `nohibernate`, so resume-from-disk never runs. Kept only so the param is
+    # in place should hibernation ever become viable (see hardware/framework.nix).
     resumeDevice = "/dev/mapper/pool-swap";
 
     # Kernel parameters for AMD CPU/GPU optimization
@@ -25,7 +27,8 @@
       # 5 GHz even at idle — and has no EPP, so TLP's CPU_ENERGY_PERF_POLICY is
       # inert. See docs/framework-control-cpu-frequency.md.
       "amd_pstate=active"
-      "mem_sleep_default=deep" # Default to deepest available suspend state
+      # No `mem_sleep_default=deep`: this firmware reports only S0/S4/S5 (no S3),
+      # so "deep" is silently ignored and s2idle (S0ix) is the sole suspend state.
       # "usbcore.autosuspend=-1" # Disable USB autosuspend for reliability. Consider removing this
     ];
 

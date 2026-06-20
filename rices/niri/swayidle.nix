@@ -37,6 +37,15 @@ lib.mkIf config.rices.niri.enable {
         command = "${pkgs.niri-unstable}/bin/niri msg action power-off-monitors";
         resumeCommand = "${pkgs.niri-unstable}/bin/niri msg action power-on-monitors";
       }
+      {
+        # 20 min: actually suspend. Nothing else here suspends on inactivity —
+        # logind only acts on the lid — so without this the laptop just sits
+        # with its screen off, fully awake and draining. s2idle (S0ix) is the
+        # only suspend state this Framework exposes (firmware has no S3) and
+        # ZFS root rules out hibernation, so plain suspend is the deep state.
+        timeout = 1200;
+        command = "${pkgs.systemd}/bin/systemctl suspend";
+      }
     ];
     events = {
       before-sleep = "${pkgs.systemd}/bin/loginctl lock-session";

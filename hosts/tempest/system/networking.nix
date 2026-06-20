@@ -34,6 +34,8 @@
       127.0.0.1 bofrost.dscovr.test
       127.0.0.1 complexcasenrt.dscovr.test
       127.0.0.1 workspace7communicationnrt.dscovr.test
+      127.0.0.1 sole24ore.dscovr.test
+      127.0.0.1 api.dscovr.test
     '';
   };
 }

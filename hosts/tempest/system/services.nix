@@ -100,4 +100,14 @@
       }
     '';
   };
+
+  # Speech Dispatcher (text-to-speech): the `speechd` package — dragged in by
+  # GTK/Chromium apps via the AT-SPI accessibility bus — ships a socket-activated
+  # user service. The enabled `speech-dispatcher.socket` auto-spawns the
+  # `speech-dispatcher` daemon and its `sd_*` synthesizer modules (espeak-ng,
+  # festival, pico, …) in every session. Nothing here uses screen-reader TTS, so
+  # mask both user units: `enable = false` symlinks them to /dev/null, which
+  # overrides the package units and stops the socket from ever activating.
+  systemd.user.services.speech-dispatcher.enable = false;
+  systemd.user.sockets.speech-dispatcher.enable = false;
 }
