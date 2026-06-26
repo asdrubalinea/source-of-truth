@@ -1,6 +1,8 @@
-# Soft-reboot back into niri: greetd autologin gated by a cold-boot lockscreen
+# Soft-reboot back into niri: greetd autologin gated to the tuigreet greeter on cold boot
 
-Status: accepted (2026-06-10)
+Status: accepted (2026-06-10); amended (2026-06-25) — cold-boot auth moved from
+the noctalia lockscreen to the tuigreet greeter, and the runtime lock moved from
+noctalia to swaylock (see the two "Amendment" sections below).
 
 ## Context
 
@@ -61,3 +63,50 @@ and monitors.nix).
   `SoftRebootsCount == 0`, so the guard locks again: you authenticate twice
   (greeter, then lockscreen). Mildly annoying, accepted as rare.
 - `niri-soft-reboot` relies on passwordless `doas` for wheel (`security.doas`).
+
+## Amendment (2026-06-25): cold boot drops to the tuigreet greeter
+
+The noctalia-lockscreen cold-boot gate worked badly in practice: the v5 locker
+was flaky (a half-initialised shell locked too early painted an unlockable red
+screen; later builds segfaulted), so the careful "wait for `[bar] creating`
+before locking" dance in `soft-reboot.nix` was always fighting the locker rather
+than relying on it. The original ADR rejected the greeter-gated alternative "for
+complexity" — but the lockscreen path turned out to be the more complex and less
+reliable of the two.
+
+So the cold-boot auth surface is now the **tuigreet greeter** — the
+greeter-gated alternative this ADR originally rejected:
+
+- The `initial_session` command is now a wrapper
+  (`hosts/tempest/system/session.nix`) that reads `SoftRebootsCount`. On a
+  soft-reboot (`>= 1`) it `exec`s `niri-session` (hands-free, unchanged). On a
+  cold boot (`0`) it exits immediately, so greetd falls through to
+  `default_session` (tuigreet) and you log in at the TTY yourself.
+- The `coldBootLock` spawn-at-startup guard in `homes/tempest/soft-reboot.nix`
+  is gone; that file now only carries the `Mod+Shift+R` soft-reboot trigger.
+
+This *strengthens* the cold-boot boundary relative to the original decision:
+`niri-session` never starts pre-auth, so the "spawn-at-startup apps run behind
+the lock" trade-off above no longer applies. It also removes the double-auth
+annoyance (logout → tuigreet → login no longer triggers a second lock).
+
+## Amendment (2026-06-25): runtime lock moves off Noctalia to swaylock
+
+The cold-boot move above left the *runtime* lock (idle / `Mod+L` / before-sleep,
+all in `rices/niri/swayidle.nix`) still driven by `noctalia msg session lock`.
+That kept the red screen alive **when docked**: Noctalia v5's ext-session-lock
+client segfaults deterministically on output hotplug (same fault offset every
+time), and docking *is* output hotplug (eDP-1 off, externals on). So any lock
+taken while docked crashed the locker, leaving niri to hold the outputs locked
+with no surface — painting its solid red fallback — which the auto-restarted
+locker re-crashed into. Single-output (internal/undocked) never hotplugs, so it
+never reproduced.
+
+So the runtime lock now uses **swaylock** — a tiny wlroots locker that survives
+output hotplug and draws its prompt on every connected output. swayidle's `lock`
+and `before-sleep` call swaylock by absolute path (guarded against double-launch,
+since only one ext-session-lock client may exist); a `swaylock` PAM service is
+added in `rices/niri/system.nix`. Noctalia stays the shell (bar / launcher /
+notifications / wallpaper); it just no longer owns the lock surface. This is the
+same reasoning as the cold-boot move — get auth off the flaky v5 locker — applied
+to the one path the first amendment didn't cover.

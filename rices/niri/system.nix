@@ -19,6 +19,12 @@
   # exclusive), so Noctalia's power-profile control is inert here by design.
   services.upower.enable = true;
 
+  # swaylock is the runtime locker (rices/niri/swayidle.nix `lock` + before-sleep).
+  # Like every unprivileged Wayland locker it needs its own PAM service to unlock:
+  # the default config gives it standard unix auth via the setuid unix_chkpwd
+  # helper (plus fingerprint when fprintd is enabled). Without it, unlocking fails.
+  security.pam.services.swaylock = { };
+
   # Noctalia's lockscreen authenticates via PAM. It defaults to the `login`
   # service (LockContext.qml: NOCTALIA_PAM_SERVICE || "login"), but `login`
   # expects a privileged caller — an unprivileged locker fails its account stage
@@ -27,6 +33,7 @@
   # (standard unix auth via the setuid unix_chkpwd helper, plus fingerprint when
   # fprintd is enabled) and point NOCTALIA_PAM_SERVICE at it (set in the niri
   # environment block, rices/niri/niri.nix). This mirrors what swaylock/hyprlock
-  # do.
+  # do. Kept even though swaylock now owns the lock path, so Noctalia's own lock
+  # IPC (if ever invoked) still authenticates rather than dead-locking on `login`.
   security.pam.services.noctalia = { };
 }

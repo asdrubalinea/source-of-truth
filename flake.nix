@@ -122,6 +122,7 @@
       url = "github:phlx0/drift";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    nix-flatpak.url = "github:gmodena/nix-flatpak";
   };
 
   outputs =

@@ -64,9 +64,14 @@
           # HM's symlink into a real file, which fights `home-manager switch -b
           # backup`; stylix.nix sets `force = true` on those two gtk.css options so
           # HM overwrites in place without a colliding `.backup` (see the long note
-          # there). kitty/alacritty instead consume Noctalia's output via a
-          # declarative include/import so their structural config stays in Nix and
-          # HM never sees a modified file. Qt is now also driven here — the "qt"
+          # there). kitty consumes Noctalia's output via a declarative include, so
+          # its structural config stays in Nix and HM never sees a modified file.
+          # alacritty uses the same idea (general.import of themes/noctalia.toml),
+          # BUT Noctalia's alacritty template also rewrites alacritty.toml in place
+          # to wire that import — so HM DOES see a modified file there, and
+          # alacritty.nix sets `force = true` on it for the same reason as gtk.css
+          # above (see the long note in alacritty.nix). Qt is now also driven
+          # here — the "qt"
           # template writes ~/.config/qt{5,6}ct/colors/noctalia.conf (a QPalette
           # ColorScheme file); qt.nix pins qtct.conf to pick up that file with
           # style=Fusion. wezterm stays on stylix.

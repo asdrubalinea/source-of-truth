@@ -11,7 +11,8 @@
     # ../../rices/estradiol
     ../../rices/niri # the niri rice (declares rices.niri.*; enabled below)
     ./monitors.nix # machine policy: monitor identities + layout (kanshi)
-    ./soft-reboot.nix # machine policy: soft-reboot autologin + cold-boot lock gate
+    ./soft-reboot.nix # machine policy: Mod+Shift+R soft-reboot trigger (autologin gate lives in hosts/tempest/system/session.nix)
+    # ./speakers.nix # machine policy: built-in speaker DSP correction (EasyEffects) — disabled: leaks onto AirPods
 
     # Applications and tools
     ../../desktop/zed-editor

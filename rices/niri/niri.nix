@@ -19,6 +19,93 @@ let
   nirius = "${pkgs.nirius}/bin/nirius";
   sleep = "${pkgs.coreutils}/bin/sleep";
 
+  # --- Audio output switcher (Mod+O) ---------------------------------------
+  # A name-based picker for the default output device, so switching speakers ↔
+  # AirPods ↔ dock survives reboots (PipeWire node *ids* are reassigned, but wpctl
+  # persists the choice by stable node name). We enumerate live Audio/Sink nodes and
+  # hide EasyEffects' virtual "easyeffects_sink" (picking it as default is meaningless
+  # — apps already feed it). Setting the default to a real device is the trigger
+  # EasyEffects watches: it routes its pipeline there and its per-route autoload swaps
+  # the speaker preset in/out for free (see homes/tempest/speakers.nix). The currently
+  # configured default (PipeWire's default.configured.audio.sink — what the last pick
+  # wrote) is marked with a ● so the menu reflects present state. Sinks with no
+  # node.description are skipped (no usable label); duplicate descriptions get a "(n)"
+  # suffix so each visible row maps back to exactly one id. Portable: shows whatever
+  # sinks the host has, no-ops when there are none.
+  pwDump = "${pkgs.pipewire}/bin/pw-dump";
+  wpctl = "${pkgs.wireplumber}/bin/wpctl";
+  tofiBin = "${pkgs.tofi}/bin/tofi";
+  gawk = "${pkgs.gawk}/bin/gawk";
+  audioOutputSwitcher = pkgs.writeShellScript "audio-output-switcher" ''
+    set -euo pipefail
+
+    dump=$(${pwDump})
+
+    # node.name of the configured default sink (what `wpctl set-default` wrote);
+    # empty if unset. Used only to mark the current row.
+    current=$(printf '%s' "$dump" | ${jq} -r '
+      first(
+        .[]
+        | select(.type == "PipeWire:Interface:Metadata")
+        | select(.props["metadata.name"] == "default")
+        | (.metadata // [])[]
+        | select(.key == "default.configured.audio.sink")
+        | .value.name?
+      ) // empty
+    ')
+
+    # One line per real sink: "id<TAB>node.name<TAB>description". Hide EasyEffects'
+    # virtual sink and any sink without a description (it would have no usable label).
+    sinks=$(printf '%s' "$dump" | ${jq} -r '
+      .[]
+      | select(.type == "PipeWire:Interface:Node")
+      | select(.info.props["media.class"] == "Audio/Sink")
+      | select(.info.props["node.name"] != "easyeffects_sink")
+      | select(.info.props["node.description"] != null)
+      | "\(.id)\t\(.info.props["node.name"])\t\(.info.props["node.description"])"
+    ')
+    [ -n "$sinks" ] || exit 0
+
+    # Shared label routine, run twice over the same $sinks so both passes build
+    # identical rows: mode=show prints the menu, mode=resolve prints the id of the
+    # selected row. The configured default gets a ● prefix; duplicate descriptions
+    # get a "(n)" suffix so each row maps to exactly one id. Non-current rows carry
+    # no leading whitespace, so a picker that trims the returned line can't break
+    # the round-trip.
+    mklabel='
+      { seen[$3]++
+        label = $3
+        if (seen[$3] > 1) label = label " (" seen[$3] ")"
+        if ($2 == cur) label = "● " label
+        if (mode == "show") print label
+        else if (label == want) { print $1; exit }
+      }'
+
+    # Override tofi's fullscreen launcher geometry into a centered card sized to the
+    # sink count, with a legible font (stylix's size is tuned for the fullscreen drun
+    # launcher and reads tiny in a small card). Colors come from tofi.nix.
+    n=$(printf '%s\n' "$sinks" | ${gawk} 'END { print NR }')
+    height=$((160 + n * 56))
+
+    label=$(printf '%s\n' "$sinks" \
+      | ${gawk} -F '\t' -v cur="$current" -v mode=show "$mklabel" \
+      | ${tofiBin} \
+          --prompt-text "Output: " \
+          --anchor center \
+          --width 760 --height "$height" \
+          --font-size 26 \
+          --padding-top 36 --padding-bottom 36 \
+          --padding-left 44 --padding-right 44 \
+          --result-spacing 18 --num-results "$n" \
+          --border-width 2 --corner-radius 16) || exit 0
+    [ -n "$label" ] || exit 0
+
+    id=$(printf '%s\n' "$sinks" \
+      | ${gawk} -F '\t' -v cur="$current" -v mode=resolve -v want="$label" "$mklabel")
+    [ -n "$id" ] || exit 1
+    ${wpctl} set-default "$id"
+  '';
+
   # mkScratchpad builds the two scripts that drive one app's scratchpad. `spawn`
   # is the shell command launched (backgrounded) when the window doesn't exist.
   #   init   — launch-if-dead, wait for the window, then make it a scratchpad
@@ -259,6 +346,8 @@ lib.mkIf config.rices.niri.enable {
 
         "Mod+B".action.spawn = [ "${pkgs.blueman}/bin/blueman-manager" ];
         "Mod+P".action.spawn = [ "${pkgs.pavucontrol}/bin/pavucontrol" ];
+        # Pick the default output device by name (EasyEffects follows it).
+        "Mod+O".action.spawn = [ "${audioOutputSwitcher}" ];
         "Mod+N".action.spawn = [ "${pkgs.kdePackages.dolphin}/bin/dolphin" ];
         "Mod+L".action.spawn = [ "${pkgs.systemd}/bin/loginctl" "lock-session" ];
 

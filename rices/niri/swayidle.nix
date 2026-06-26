@@ -1,5 +1,7 @@
 { pkgs, inputs, lib, config, ... }:
 let
+  colors = config.lib.stylix.colors;
+
   drift = pkgs.callPackage ../../packages/drift.nix { src = inputs.drift; };
 
   driftStart = pkgs.writeShellScript "drift-screensaver-start" ''
@@ -15,34 +17,64 @@ let
     fi
   '';
 
-  # Absolute path to the noctalia binary. swayidle's user-service PATH is ONLY
-  # bash-interactive/bin (no profile, no home.packages), so a bare `noctalia` in
-  # an event/timeout command is "command not found" and the lock silently
-  # no-ops — which is exactly why suspend and the 600s idle timer stopped
-  # locking. config.programs.noctalia.package is set in ./noctalia.nix (same HM
-  # config).
-  noctaliaBin = "${config.programs.noctalia.package}/bin/noctalia";
+  # The lock surface is swaylock, NOT Noctalia's lockscreen. Noctalia v5 is the
+  # NNN "shell" leg (bar/launcher/notifications/wallpaper), but its
+  # ext-session-lock client segfaults deterministically on output hotplug — and
+  # docking IS output hotplug (eDP-1 off, externals on). So every lock taken while
+  # docked crashed the locker; niri then had to keep the outputs locked with no
+  # surface and painted its solid red fallback (the "red grape screen"), which the
+  # auto-restarted locker just re-crashed into. swaylock is a tiny wlroots locker
+  # that survives output hotplug and draws its prompt on every connected output.
+  # This mirrors ADR 0007's cold-boot move OFF the Noctalia locker (to tuigreet);
+  # here the runtime lock path follows the same reasoning. PAM service `swaylock`
+  # is defined in ./system.nix.
+  swaylockArgs = lib.concatStringsSep " " [
+    "-f" # daemonize, but only AFTER the lock surface is up (see lockBeforeSleep)
+    "--ignore-empty-password"
+    "--show-failed-attempts"
+    "--indicator"
+    "--color ${colors.base00}"
+    "--inside-color ${colors.base01}"
+    "--inside-wrong-color ${colors.base08}"
+    "--ring-color ${colors.base03}"
+    "--ring-ver-color ${colors.base0D}"
+    "--ring-wrong-color ${colors.base08}"
+    "--key-hl-color ${colors.base0D}"
+    "--bs-hl-color ${colors.base08}"
+    "--text-color ${colors.base05}"
+  ];
+  swaylock = "${pkgs.swaylock}/bin/swaylock ${swaylockArgs}";
 
-  # before-sleep locker. Locks the session DIRECTLY here rather than via
-  # `loginctl lock-session`: swayidle holds the logind sleep inhibitor only until
-  # this command returns, so the lock must complete on this path. Routing through
-  # lock-session would emit a Lock signal handled on swayidle's *separate* `lock`
-  # event, off the inhibitor-blocked path — the box could suspend before the lock
-  # surface is up and resume unlocked (the bug we hit). `noctalia msg session
-  # lock` also flips logind's LockedHint, so the hint stays correct without the
-  # detour.
+  # Single "lock now" entry point for the `lock` event. swayidle fires `lock` on
+  # every logind Lock signal — emitted by `loginctl lock-session` from both the
+  # 600s idle timer and the Mod+L bind. Guard against a second instance: only one
+  # client may hold the ext-session-lock, so a duplicate swaylock just fails to
+  # acquire it (and would exit non-zero, noise). swayidle's user-service PATH has
+  # no profile, so pidof/swaylock are called by absolute store path.
+  lockNow = pkgs.writeShellScript "niri-lock" ''
+    ${pkgs.procps}/bin/pidof swaylock > /dev/null 2>&1 && exit 0
+    exec ${swaylock}
+  '';
+
+  # before-sleep locker. swayidle holds the logind sleep inhibitor only until this
+  # command RETURNS, so the lock must be fully up before we let go. `swaylock -f`
+  # forks only after it has taken the lock and shown its surface, so a synchronous
+  # call here is exactly that guarantee — no detour through `loginctl lock-session`
+  # (whose Lock signal is handled on the *separate* `lock` event, off the
+  # inhibitor-blocked path, and could let the box suspend before the surface is up
+  # and resume unlocked — the bug we hit). Guarded so we don't double-launch over
+  # an already-running swaylock from the idle path.
   lockBeforeSleep = pkgs.writeShellScript "niri-lock-before-sleep" ''
-    ${noctaliaBin} msg session lock
-    # Let the ext-session-lock surface draw before the screen is frozen for s2idle.
-    ${pkgs.coreutils}/bin/sleep 0.5
+    ${pkgs.procps}/bin/pidof swaylock > /dev/null 2>&1 || ${swaylock}
+    # Small settle before the screen is frozen for s2idle.
+    ${pkgs.coreutils}/bin/sleep 0.3
   '';
 in
 lib.mkIf config.rices.niri.enable {
-  # Lock is handled by Noctalia's lockscreen (NNN stack) rather than swaylock.
-  # swayidle still owns the idle timers + the logind lock/sleep events below.
-  # before-sleep locks Noctalia directly (see lockBeforeSleep); the `lock` event
-  # locks on idle (600s lock-session) and manual `loginctl lock-session`. Both
-  # call noctalia by ABSOLUTE path — bare `noctalia` isn't on swayidle's PATH.
+  # Lock is handled by swaylock (NOT Noctalia's lockscreen — see the let block for
+  # why). swayidle owns the idle timers + the logind lock/sleep events below.
+  # before-sleep locks swaylock synchronously (see lockBeforeSleep); the `lock`
+  # event locks on idle (600s lock-session) and manual `loginctl lock-session`.
   services.swayidle = {
     enable = true;
     systemdTargets = [ "graphical-session.target" ];
@@ -73,7 +105,7 @@ lib.mkIf config.rices.niri.enable {
     ];
     events = {
       before-sleep = "${lockBeforeSleep}";
-      lock = "${noctaliaBin} msg session lock";
+      lock = "${lockNow}";
     };
   };
 }

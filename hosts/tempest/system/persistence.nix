@@ -39,6 +39,11 @@ in
       "/etc/NetworkManager/system-connections"
 
       # Services
+      # System-wide flatpak installs (services.flatpak / nix-flatpak). Without
+      # this the repo + apps live on tmpfs root and are wiped every reboot, so
+      # nix-flatpak re-adds the remote and re-downloads declared packages from
+      # scratch on each boot (and any manual installs are simply lost).
+      "/var/lib/flatpak"
       "/var/lib/tailscale"
       "/var/lib/sddm"
       "/var/lib/grafana"

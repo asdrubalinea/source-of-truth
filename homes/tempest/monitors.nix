@@ -113,6 +113,28 @@
       }
 
       {
+        # Internal panel + exactly one external (any unrecognized monitor):
+        # drive the external and switch the laptop screen off. `*` matches a
+        # single output, so this profile only applies when eDP-1 plus one other
+        # display are connected. Must stay below the named two-output profiles
+        # (lg-office, portable-and-integrated) so those win for their specific
+        # monitors — kanshi applies the first matching profile in file order.
+        profile = {
+          name = "external-only";
+          outputs = [
+            {
+              criteria = "eDP-1";
+              status = "disable";
+            }
+            {
+              criteria = "*";
+              status = "enable";
+            }
+          ];
+        };
+      }
+
+      {
         profile = {
           name = "fallback";
           outputs = [

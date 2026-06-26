@@ -28,6 +28,14 @@
 
     # Peripheral support
     logitech.wireless.enable = true;
+
+    # Non-root access to QMK/VIA keyboard firmware. Installs qmk-udev-rules,
+    # whose `KERNEL=="hidraw*" ... TAG+="uaccess"` rule grants the logged-in
+    # session ACL access to /dev/hidraw*, which is what the Keychron Launcher
+    # (a WebHID app) needs to talk to the keyboard. Without it the Launcher
+    # shows "connected" but never responds. Use a Chromium-based browser (Brave
+    # works; Firefox has no WebHID) on a wired connection.
+    keyboard.qmk.enable = true;
   };
 
   # Hardware-specific services

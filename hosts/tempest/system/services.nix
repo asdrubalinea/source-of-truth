@@ -1,5 +1,7 @@
-{ pkgs, ... }:
+{ pkgs, inputs, ... }:
 {
+  imports = [ inputs.nix-flatpak.nixosModules.nix-flatpak ];
+
   programs.nix-ld.enable = true;
 
   programs.ssh.knownHosts = {
@@ -61,7 +63,18 @@
       powerEfficient = false;
     };
 
-    flatpak.enable = true;
+    flatpak = {
+      enable = true;
+      remotes = [
+        {
+          name = "flathub";
+          location = "https://dl.flathub.org/repo/flathub.flatpakrepo";
+        }
+      ];
+      packages = [
+        "io.github.streetpea.Chiaki4deck"
+      ];
+    };
 
     vaultwarden = {
       enable = true;
