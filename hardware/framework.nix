@@ -1,60 +1,4 @@
-{ pkgs, lib, ... }:
-let
-  # tb-redock: rebuild Thunderbolt dock tunnels after s2idle resume (see service below).
-  tbRedock = pkgs.writeShellScript "tb-redock" ''
-    export PATH=${lib.makeBinPath [ pkgs.coreutils pkgs.findutils ]}:$PATH
-    tag="[tb-redock]"; log() { echo "$tag $*"; }
-    TBDEV=/sys/bus/thunderbolt/devices
-
-    # Poll up to ~8s for a non-host TB device (X-Y, Y>=1; host routers are X-0) to reappear.
-    dock=""
-    for _ in $(seq 1 16); do
-      for d in "$TBDEV"/[0-9]-[1-9]*; do [ -e "$d" ] && { dock="$d"; break; }; done
-      [ -n "$dock" ] && break
-      sleep 0.5
-    done
-    if [ -z "$dock" ]; then log "no thunderbolt dock present; nothing to do"; exit 0; fi
-
-    usb_count() { find /sys/bus/usb/devices -maxdepth 1 -type l | wc -l; }
-    name=$(basename "$dock"); domain="''${name%%-*}"
-    deauth=$(cat "$TBDEV/domain''${domain}/deauthorization" 2>/dev/null || echo 0)
-    auth=$(cat "$dock/authorized" 2>/dev/null || echo "?")
-    before=$(usb_count)
-    log "dock=$name domain=$domain deauthorization=$deauth authorized=$auth usb_before=$before"
-
-    # Tier 1 (surgical): deauth->reauth to tear down stale tunnels and rebuild them.
-    if [ -w "$dock/authorized" ]; then
-      if [ "$deauth" = "1" ] && [ "$auth" = "1" ]; then
-        log "tier1: deauthorizing $name"
-        echo 0 > "$dock/authorized" 2>/dev/null \
-          && { sleep 1; log "tier1: authorized now=$(cat "$dock/authorized" 2>/dev/null)"; } \
-          || log "tier1: deauthorize write failed"
-      fi
-      log "tier1: authorizing $name"
-      echo 1 > "$dock/authorized" 2>/dev/null || log "tier1: authorize write failed"
-      sleep 3   # re-tunnel + USB re-enumeration is async
-    fi
-    after=$(usb_count); log "usb_after_tier1=$after"
-
-    # Tier 2 (escalation): only if Tier 1 did not bring USB devices back.
-    if [ "$after" -le "$before" ]; then
-      log "tier1 did not restore devices; escalating to PCI rebind"
-      nhi_path=$(dirname "$(readlink -f "$TBDEV/domain''${domain}")")
-      nhi=$(basename "$nhi_path")
-      if [ "$(basename "$(readlink -f "$nhi_path/driver" 2>/dev/null)")" = "thunderbolt" ]; then
-        log "tier2: rebinding NHI $nhi"
-        echo "$nhi" > /sys/bus/pci/drivers/thunderbolt/unbind 2>/dev/null || log "tier2: unbind failed"
-        sleep 1
-        echo "$nhi" > /sys/bus/pci/drivers/thunderbolt/bind   2>/dev/null || log "tier2: bind failed"
-        sleep 3
-        log "usb_after_tier2=$(usb_count)"
-      else
-        log "tier2: could not resolve NHI PCI function for domain''${domain}"
-      fi
-    fi
-    log "done"
-  '';
-in
+{ pkgs, ... }:
 {
   imports = [
     ./framework-tlp-advanced.nix
@@ -119,38 +63,126 @@ in
     fstrim.enable = true;
   };
 
-  # ---------- Thunderbolt dock: software "replug" on s2idle resume ----------
-  # On s2idle resume boltd re-authorizes the enrolled dock (CalDigit TS3 Plus,
-  # security level iommu+user) — `authorized` flips back to 1 — but the kernel
-  # does NOT rebuild the Thunderbolt PCIe/USB tunnels behind it. Net effect: the
-  # dock has power and reads as authorized, yet nothing behind it re-enumerates
-  # (USB, ethernet, and DP-over-TB all ride those tunnels), until a physical
-  # unplug/replug forces a full re-tunnel. The usual "switch to S3/deep" advice
-  # does NOT apply — this firmware exposes no S3 and ZFS rules out hibernation,
-  # so s2idle is the only sleep state (see boot.nix).
+  # ---------- Thunderbolt dock: tear down around s2idle, don't repair on resume ----------
+  # The only sleep state this Framework exposes is s2idle (no S3; ZFS rules out
+  # hibernation — see boot.nix). Suspending with the dock's USB4 tunnels live
+  # caused two problems: an intermittent dead-on-resume *hang* (the box entered
+  # s2idle and never came back — forced power-off the only recovery, and only
+  # ever while docked), and, on the resumes that did survive, a dock that read
+  # as authorized but re-enumerated nothing behind it (USB, ethernet, and the
+  # external displays all ride those tunnels) until a physical replug.
   #
-  # The previous fix reloaded the `thunderbolt` module via
-  # `powerManagement.resumeCommands`, but that was a silent no-op: `typec` pins
-  # `thunderbolt` (lsmod: `thunderbolt ... 1 typec`), so `modprobe -r thunderbolt`
-  # fails "in use" and the old `|| true` swallowed it. It also ran in `preStop` of
-  # `sleep-actions` with no ordering against `systemd-suspend.service`.
+  # So rather than repair a half-restored resume, we take the USB4 controllers
+  # out of the suspend path entirely: unbind every Thunderbolt host controller
+  # (NHI) *before* suspend and rebind it *after* resume, via the symmetric
+  # system-sleep hook (powerDownCommands on the way in, powerUpCommands on the
+  # way out). This replaces the old `tb-redock` service, whose "surgical"
+  # deauth/reauth almost never worked (0/9 and 0/5 in recent boots) and which
+  # ended up doing this exact NHI rebind on nearly every resume anyway.
+  # See docs/adr/0008-thunderbolt-teardown-around-sleep.md.
   #
-  # Instead, `tb-redock` (ordered After=systemd-suspend.service, i.e. on resume)
-  # rebuilds tunnels surgically: it deauthorizes->reauthorizes the dock device
-  # (`echo 0 then 1 > .../authorized`, supported since the domain reports
-  # `deauthorization=1`), and only if USB devices don't come back does it escalate
-  # to unbinding/rebinding the dock's NHI PCI function — re-probing just that one
-  # USB4 domain (the replug equivalent) without touching the typec-pinned module.
-  # All steps log under `journalctl -u tb-redock.service` with a `[tb-redock]` tag.
-  systemd.services.tb-redock = {
-    description = "Rebuild Thunderbolt dock tunnels after s2idle resume";
-    after = [ "systemd-suspend.service" ];
-    wantedBy = [ "sleep.target" ];
-    serviceConfig = {
-      Type = "oneshot";
-      ExecStart = "${tbRedock}";
-    };
-  };
+  # No retry/verify logic on the NHI rebind itself: a clean tear-down/bring-up is
+  # reliable (the rebind was 9-for-9 historically) and a rare failed rebind costs a
+  # replug, not a hang. The unbound NHIs are recorded in /run so resume rebinds
+  # exactly them; the file lives on tmpfs, so a cold boot (kernel binds the NHIs
+  # itself) finds nothing to do. Steps log with a `[tb-sleep]` tag under
+  # systemd-suspend.service.
+  #
+  # The rebind alone still left the external DP dark after long (overnight) sleeps.
+  # amdgpu probes its DP connectors during kernel resume — which runs *before* this
+  # hook rebinds the fabric — so the DP-over-TB tunnel isn't up yet and it gives up
+  # with `retrieve_link_cap: Read receiver caps dpcd data failed` and no retry. A
+  # short nap won the race (dock/monitor never dropped their link); an overnight
+  # sleep lost it, leaving the monitor black until a reboot. So resume now also
+  # forces an amdgpu DP-connector re-detect once the tunnel is back — a bounded,
+  # docked-only poll. See the "Update (2026-07-01)" section of ADR 0008.
+  powerManagement.powerDownCommands = ''
+    tag="[tb-sleep]"; drv=/sys/bus/pci/drivers/thunderbolt
+    : > /run/tb-nhi-unbound
+    for d in "$drv"/0000:*; do
+      [ -e "$d" ] || continue
+      n=''${d##*/}
+      echo "$n" >> /run/tb-nhi-unbound
+      if echo "$n" > "$drv/unbind" 2>/dev/null; then
+        echo "$tag unbound $n"
+      else
+        echo "$tag unbind $n failed"
+      fi
+    done
+
+    # Record whether an external DP monitor was lit at suspend, so resume knows to
+    # force a connector re-detect (see powerUpCommands). amdgpu's external
+    # connectors are card1-DP-* — the internal panel card1-eDP-1 is excluded by the
+    # glob (it has no "-DP-" substring), so this only trips when a dock display is
+    # actually driving something.
+    ${pkgs.coreutils}/bin/rm -f /run/tb-dp-was-connected
+    if ${pkgs.gnugrep}/bin/grep -qx connected /sys/class/drm/card*-DP-*/status 2>/dev/null; then
+      : > /run/tb-dp-was-connected
+      echo "$tag external DP was connected; will re-detect on resume"
+    fi
+  '';
+  powerManagement.powerUpCommands = ''
+    tag="[tb-sleep]"; drv=/sys/bus/pci/drivers/thunderbolt
+    if [ -f /run/tb-nhi-unbound ]; then
+      while read -r n; do
+        if echo "$n" > "$drv/bind" 2>/dev/null; then
+          echo "$tag rebound $n"
+        else
+          echo "$tag rebind $n failed (already bound?)"
+        fi
+      done < /run/tb-nhi-unbound
+      ${pkgs.coreutils}/bin/rm -f /run/tb-nhi-unbound
+    fi
+
+    # Relight the external display. The rebind above brings the Thunderbolt fabric
+    # back, but bolt authorization and DP-tunnel allocation through the dock are
+    # asynchronous and take a beat — longer after an overnight sleep, once the dock
+    # and monitor have dropped their own link. amdgpu already probed its DP
+    # connectors during the kernel resume that ran *before* this hook, found no
+    # tunnel, and gave up ("retrieve_link_cap: Read receiver caps dpcd data failed")
+    # with no retry — which is why a short nap resumes the monitor but an overnight
+    # sleep leaves it black until a reboot. So once the tunnel is back, force amdgpu
+    # to re-detect every DP connector; the state change emits a hotplug that
+    # relights the panel and hands niri its output. Bounded ~8s poll, breaks as soon
+    # as a connector reads connected, and only runs when a DP monitor was lit at
+    # suspend — an undocked resume skips it entirely and adds no delay.
+    if [ -f /run/tb-dp-was-connected ]; then
+      ${pkgs.coreutils}/bin/rm -f /run/tb-dp-was-connected
+      ok=0
+      for i in 1 2 3 4 5 6 7 8; do
+        ${pkgs.coreutils}/bin/sleep 1
+        for s in /sys/class/drm/card*-DP-*/status; do
+          [ -e "$s" ] && echo detect > "$s" 2>/dev/null
+        done
+        if ${pkgs.gnugrep}/bin/grep -qx connected /sys/class/drm/card*-DP-*/status 2>/dev/null; then
+          echo "$tag external DP re-detected after $i s"
+          ok=1
+          break
+        fi
+      done
+      [ "$ok" = 1 ] || echo "$tag external DP still down after 8s (dock/tunnel not ready?)"
+      ${pkgs.systemd}/bin/udevadm trigger --subsystem-match=drm --action=change 2>/dev/null || true
+    fi
+  '';
+
+  # Diagnostic breadcrumb: log each device as it suspends, so if a dead-on-resume
+  # hang ever survives the teardown above, the (persistent) journal names the
+  # last device that made it down — the next suspect (likely the MT7925 Wi-Fi).
+  # Only emits during suspend/resume. See ADR 0008.
+  systemd.tmpfiles.rules = [ "w /sys/power/pm_debug_messages - - - - 1" ];
+
+  # Force the MT7925 (RZ717) Wi-Fi to power/control=on. This box's only sleep state
+  # is s2idle and its PCIe power-gating doesn't re-enumerate: once this chip is
+  # runtime-suspended it wedges in "driver own failed" (-EIO) and only a cold power
+  # cycle recovers it. Neither TLP denylist gets us to `on` — they merely make TLP
+  # *skip* the device; the mt7925e driver itself enables runtime PM (sets
+  # power/control=auto) when it binds. So this rule must fire on `bind` (after probe),
+  # not just `add`, to win over the driver — an `add`-only rule is silently reverted
+  # to `auto` the moment the driver attaches. Matching by ID (14c3:0717) survives bus
+  # renumbering. Child pinned `on` keeps its parent root port (00:02.3) active too.
+  services.udev.extraRules = ''
+    ACTION=="add|bind", SUBSYSTEM=="pci", ATTR{vendor}=="0x14c3", ATTR{device}=="0x0717", ATTR{power/control}="on"
+  '';
 
   # TLP is configured in ./framework-tlp-advanced.nix; keep PPD off to avoid overlap
   services.power-profiles-daemon.enable = false;

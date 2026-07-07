@@ -1,6 +1,9 @@
 { pkgs, inputs, ... }:
 {
-  imports = [ inputs.nix-flatpak.nixosModules.nix-flatpak ];
+  imports = [
+    inputs.nix-flatpak.nixosModules.nix-flatpak
+    inputs.auxologico-check.nixosModules.default
+  ];
 
   programs.nix-ld.enable = true;
 
@@ -99,6 +102,19 @@
       ids = [ "046d:c547" ];
       settings.main.C-up = "macro(super+e)";
     };
+  };
+
+  # Appointment monitor: polls the auxologico portal in continuous --watch mode
+  # (default) and notifies on new slots from startDate onward. The module creates
+  # the auxologico-check user/group and a tmpfiles rule for dataDir. dataDir lives
+  # under /persist (tempest's root FS is tmpfs; only /persist survives reboots).
+  # environmentFile holds PHP_SESSION_ID + BEARER_TOKEN — created out-of-band, not
+  # in the repo (see .env.example upstream); the unit fails to start until it exists.
+  services.auxologico-check = {
+    enable = true;
+    startDate = "01/07/2026";
+    environmentFile = "/persist/auxologico-check/env";
+    dataDir = "/persist/auxologico-check";
   };
 
   services.caddy = {

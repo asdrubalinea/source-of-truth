@@ -2,7 +2,21 @@
   inputs,
   pkgs,
   ...
-}: {
+}:
+let
+  # SDRangel segfaults under Qt's Wayland platform plugin (its OpenGL spectrum/
+  # scope widgets crash on startup); the global QT_QPA_PLATFORM=wayland from the
+  # niri rice (rices/niri/niri.nix) is what selects that plugin. Pin just this
+  # app to XWayland — niri runs xwayland-satellite, so `xcb` connects fine and
+  # the GL widgets are stable there. (Verified: SIGSEGV on wayland, clean on
+  # xcb.) Must be --set, not --set-default, to override the inherited wayland.
+  sdrangel-xwayland = pkgs.symlinkJoin {
+    name = "sdrangel-xwayland";
+    paths = [ pkgs.sdrangel ];
+    nativeBuildInputs = [ pkgs.makeWrapper ];
+    postBuild = "wrapProgram $out/bin/sdrangel --set QT_QPA_PLATFORM xcb";
+  };
+in {
   imports = [
     # Desktop environment and theming
     inputs.hyprland.homeManagerModules.default
@@ -32,6 +46,7 @@
     ../../scripts/update-home.nix
     ../../scripts/port-forward.nix
     ../../scripts/claude-sandboxed.nix
+    ../../scripts/keep-awake.nix
 
     # Shell and configuration
     ../../misc/fish.nix
@@ -47,6 +62,8 @@
     stateVersion = "23.05";
 
     packages = [
+      sdrangel-xwayland # RTL-SDR Blog V4 frontend, XWayland-wrapped (see let-binding above + hardware/rtl-sdr.nix)
+      pkgs.sdrpp # SDR++ — runs native Wayland fine (GLFW, no wrapper); links rtl-sdr-osmocom (V4-capable)
       # (pkgs.callPackage ../../packages/cider-2.nix { })
       # inputs.codex.packages.${pkgs.stdenv.hostPlatform.system}.default
     ];

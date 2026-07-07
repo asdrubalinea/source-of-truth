@@ -8,6 +8,9 @@
       "docker"
       "kvm"
       "i2c"
+      # Access the RTL-SDR dongle without root (udev marks it GROUP=plugdev,
+      # MODE=0660; see hardware/rtl-sdr.nix).
+      "plugdev"
       # Read system-unit journals unprivileged (waybar backup badge click →
       # `journalctl -xeu borgbackup-job-…`; see rices/niri/waybar).
       "systemd-journal"

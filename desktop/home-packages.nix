@@ -98,8 +98,20 @@
     nodejs
     php
     # pygobject3 (the `gi` module) rides on the interpreter for niri's noctalia
-    # Screen Toolkit webcam-mirror tool; a bare python3 can't import it.
-    (python3.withPackages (ps: with ps; [pygobject3]))
+    # Screen Toolkit webcam-mirror tool; a bare python3 can't import it. The PDF
+    # libs share this one interpreter on purpose — a second python3.withPackages
+    # would collide on bin/python3 in the home profile. pymupdf/pymupdf4llm and
+    # markitdown emit LLM-friendly Markdown; pdfplumber pulls tables; pypdf does
+    # structural split/merge. (camelot dropped — opencv/pandas closure.)
+    (python3.withPackages (ps:
+      with ps; [
+        pygobject3
+        pymupdf # fitz — fast render + text/image extraction
+        pymupdf4llm # PDF pages -> Markdown tuned for LLM/RAG
+        pdfplumber # detailed char/word/table extraction (bundles pdfminer.six)
+        pypdf # pure-python split/merge/crop/transform
+        markitdown # convert docs (incl. PDF) -> Markdown for LLMs
+      ]))
     uv # Python package manager
 
     # Language servers (consumed by emacs eglot, helix, etc.)
@@ -192,6 +204,22 @@
     typst
     # (texlive.combine {inherit (texlive) scheme-full;})
     zathura # PDF viewer with SyncTeX inverse search
+
+    # --- PDF tooling (read / extract / OCR / convert / manipulate) ---
+    # ghostscript + imagemagick (above) already cover rasterize/convert; these
+    # add the text/table/OCR extraction an LLM pipeline needs. The Python libs
+    # (pymupdf, pymupdf4llm, pdfplumber, markitdown) live on the python3 env
+    # further up, not here. (docling dropped — torch/ML closure.)
+    poppler-utils # pdftotext / pdftoppm / pdfimages / pdfinfo / pdffonts / pdftohtml / pdf{detach,separate,unite}
+    mupdf # mutool: render, extract text/images, clean, show structure
+    qpdf # inspect / repair / decrypt / linearize PDF structure
+    pdftk # merge / split / rotate, dump+update metadata, fill forms
+    pdfcpu # Go CLI: optimize, encrypt, validate, extract images/text/pages
+    pdfgrep # grep across PDF text
+    ocrmypdf # add a searchable OCR text layer to scanned PDFs
+    tesseract # OCR engine backing ocrmypdf (English only; see tesseract.withLanguages)
+    img2pdf # lossless images -> PDF
+    pandoc # convert between document formats
 
     # --- Data & databases ---
     dbeaver-bin

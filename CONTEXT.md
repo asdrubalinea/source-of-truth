@@ -36,6 +36,31 @@ tempest keeps a 3-2-1 backup. Three legs, each with its own meaning of "ran":
   cadence (skipped if scrubbed recently), and an unhealthy result fails that
   run rather than showing as its own always-on indicator.
 
+## Sleep & resume (tempest)
+
+tempest's "resume from sleep" has historically meant two *independent* failure
+modes fused into one complaint. The glossary keeps them apart.
+
+- **s2idle** — tempest's only sleep state. The firmware exposes no S3 and ZFS
+  root rules out hibernation, so "suspend" always means s2idle (S0ix); there is
+  no deeper state to fall back to. _Avoid_: "deep sleep", S3, "suspend-to-RAM"
+  (each implies a hardware state this machine doesn't have).
+- **the hang** — the failure where tempest enters s2idle and never comes back:
+  the CPU never resumes, nothing is logged past suspend entry, and the only
+  recovery is holding the power button. Intermittent (roughly one cycle in five)
+  and only ever observed while docked. This is "resume doesn't work" in the
+  literal sense — a dead machine.
+- **redock** — the *separate* failure where resume succeeds but the Thunderbolt
+  dock, though powered and authorized, brings nothing back behind it (USB,
+  ethernet, and the external displays all ride its tunnels) until those tunnels
+  are rebuilt. The machine is alive; only the dock is dead.
+  _Flagged ambiguity_: "the resume is broken" has meant **the hang** and
+  **redock** interchangeably. They are different — one is a dead box, the other
+  a live box with a dead dock — with different causes and different fixes.
+- **keep-awake** — a deliberate utility to hold off idle/lid/sleep while a
+  long-running task finishes. A convenience tool, _not_ a workaround for **the
+  hang**.
+
 ## Desktop (rices)
 
 - **rice** — a self-contained desktop environment: the Wayland compositor

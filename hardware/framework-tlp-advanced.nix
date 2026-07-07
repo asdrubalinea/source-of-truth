@@ -81,7 +81,34 @@
     SOUND_POWER_SAVE_ON_BAT = 1;
     SOUND_POWER_SAVE_ON_AC = 1;
 
-    # Enable runtime power management for GPU
-    RUNTIME_PM_DRIVER_BLACKLIST = "";
+    # The MT7925 (RZ717) Wi-Fi must NEVER be PCIe-runtime-suspended on this
+    # s2idle box. Once its link/MCU is power-gated it wedges in "driver own
+    # failed" (-EIO) and only a full cold power cycle (M.2 rail drop) clears it:
+    # FLR, warm reboot, and re-probe with the device forced `on`/D0 all fail.
+    #
+    # A driver-only denylist is NOT enough, and the reason is subtle: TLP's
+    # RUNTIME_PM_DRIVER_DENYLIST only exempts a device whose driver is *currently
+    # bound* (05-tlp-func-pm maps each denylisted driver -> the addresses it owns,
+    # then skips those). If the mt7925e probe ever fails once, the device sits
+    # driverless, TLP no longer recognises it, and runtime-suspends the orphan
+    # endpoint — which power-gates it mid-probe on the next attempt and re-wedges
+    # it. Circular. That is exactly why the earlier `mt7925e`-only exemption left
+    # the device stuck at power/control=auto + suspended with no driver bound.
+    #
+    # So exempt it BOTH ways:
+    #   - RUNTIME_PM_DENYLIST (by PCI address): TLP skips the device even while
+    #     unbound (the `deny_address` branch never touches power/control).
+    #     c0:00.0 is stable on this fixed topology — native PCIe behind root port
+    #     00:02.3 (pcieport), NOT behind the Thunderbolt NHIs (c3:00.5/.6).
+    #   - RUNTIME_PM_DRIVER_DENYLIST: keeps it exempt once bound, independent of
+    #     bus renumbering. We re-list TLP's intrinsic defaults so overriding this
+    #     key doesn't silently drop them — xhci_hcd especially must stay (the
+    #     USB4/DP controller, same s2idle re-enum hazard as USB_AUTOSUSPEND above).
+    # A udev rule in hardware/framework.nix additionally forces power/control=on
+    # by PCI ID (14c3:0717) at enumeration, so the device is pinned on, not merely
+    # skipped by TLP. Its parent root port then stays active transitively (runtime
+    # PM can't suspend a port with a non-suspended child).
+    RUNTIME_PM_DENYLIST = "c0:00.0";
+    RUNTIME_PM_DRIVER_DENYLIST = "mei_me nouveau radeon xhci_hcd mt7925e";
   };
 }

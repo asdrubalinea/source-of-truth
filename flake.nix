@@ -195,6 +195,11 @@
       nixpkgsConfig = {
         allowUnfree = true;
         # rocmSupport = true;
+        # pnpm is pulled in transitively (build-time dep of a Node-based tool in
+        # the HM closure). nixpkgs marks old pnpm point releases insecure the
+        # moment a newer one lands; bump this string when the next flake update
+        # trips the same gate (error names the exact `pnpm-X.Y.Z`).
+        permittedInsecurePackages = [ "pnpm-10.34.0" ];
       };
 
       mkPkgs = args:

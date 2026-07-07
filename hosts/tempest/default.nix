@@ -21,6 +21,7 @@
     # Shared hardware modules
     ../../hardware/bluetooth.nix
     ../../hardware/audio.nix
+    ../../hardware/rtl-sdr.nix
 
     # System modules
     ../../modules/nix.nix
