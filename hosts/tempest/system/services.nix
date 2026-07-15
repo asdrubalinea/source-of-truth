@@ -1,5 +1,8 @@
-{ pkgs, inputs, ... }:
 {
+  pkgs,
+  inputs,
+  ...
+}: {
   imports = [
     inputs.nix-flatpak.nixosModules.nix-flatpak
     inputs.auxologico-check.nixosModules.default
@@ -9,7 +12,7 @@
 
   programs.ssh.knownHosts = {
     "[u518612.your-storagebox.de]:23" = {
-      hostNames = [ "[u518612.your-storagebox.de]:23" ];
+      hostNames = ["[u518612.your-storagebox.de]:23"];
       publicKey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIICf9svRenC/PLKIL9nk6K/pxQgoiFC41wTNvoIncOxs";
     };
   };
@@ -43,7 +46,7 @@
         repo = "ssh://u518612@u518612.your-storagebox.de:23/./backups/tempest-home-irene";
         ssh_key_file = "/home/irene/.ssh/id_ed25519";
         password_file = "/persist/borg-home-backup/passphrase";
-        paths = [ "/home/irene" ];
+        paths = ["/home/irene"];
       };
     };
 
@@ -99,7 +102,7 @@
   services.keyd = {
     enable = true;
     keyboards.g502 = {
-      ids = [ "046d:c547" ];
+      ids = ["046d:c547"];
       settings.main.C-up = "macro(super+e)";
     };
   };
@@ -111,7 +114,7 @@
   # environmentFile holds PHP_SESSION_ID + BEARER_TOKEN — created out-of-band, not
   # in the repo (see .env.example upstream); the unit fails to start until it exists.
   services.auxologico-check = {
-    enable = true;
+    enable = false;
     startDate = "01/07/2026";
     environmentFile = "/persist/auxologico-check/env";
     dataDir = "/persist/auxologico-check";
