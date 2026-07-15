@@ -11,20 +11,6 @@ lib.mkIf config.rices.niri.enable {
   # `nullOr submodule` type can't merge null with a value.
   gtk.gtk4.theme = lib.mkForce null;
 
-  # Noctalia's gtk3/gtk4 runtime templates rewrite gtk.css IN PLACE: they take
-  # stylix's generated palette and append `@import url("noctalia.css");`, so HM's
-  # read-only symlink at ~/.config/gtk-{3,4}.0/gtk.css becomes a real file. On the
-  # next `home-manager switch -b backup` HM finds that real file in the way of its
-  # symlink and tries to move it to `gtk.css.backup` — but the previous run's
-  # `gtk.css.backup` is still there, so it aborts with "would be clobbered by
-  # backing up", and deleting the backup only buys one clean run. `force = true`
-  # makes HM overwrite the file in place with no backup, restoring the symlink
-  # cleanly; Noctalia re-appends its import on its next theme apply. stylix writes
-  # both files via `xdg.configFile."gtk-{3,4}.0/gtk.css".source`, so setting force
-  # on those same keys just merges into stylix's definition.
-  xdg.configFile."gtk-3.0/gtk.css".force = true;
-  xdg.configFile."gtk-4.0/gtk.css".force = true;
-
   stylix = {
     enable = true;
     base16Scheme = "${pkgs.base16-schemes}/share/themes/catppuccin-mocha.yaml";
@@ -41,39 +27,29 @@ lib.mkIf config.rices.niri.enable {
 
     targets = {
       neovim.enable = false;
-      # Colors handed to Noctalia's runtime template (see alacritty.nix +
-      # noctalia.nix theme.templates). Stylix still owns fonts/icons/Qt/wezterm.
-      alacritty.enable = false;
-      # Disabled on purpose: stylix's kitty target emits
-      #   include /nix/store/<hash>-base16-<scheme>.conf
-      # into kitty.conf. We inline the palette into programs.kitty.settings
-      # from config.lib.stylix.colors instead (see kitty.nix) — same theme,
-      # no store-root include.
-      #
-      # NOTE: removing this include does NOT bound kitty's inotify watches —
-      # that was a misdiagnosis. kitty's config-reload watcher
-      # (`kitten __watch_conf__`) watches each config file's parent directory
-      # *recursively*, and Home Manager materializes kitty.conf itself as a
-      # symlink whose realpath is a store-root file
-      # (/nix/store/<hash>-hm_kittykitty.conf). So kitty recurses over all of
-      # /nix/store (~470k watches) regardless of any include, exhausting
-      # fs.inotify.max_user_watches and breaking Vite/yarn dev with ENOSPC.
-      # The actual fix is `auto_reload_config = -1` in kitty.nix, which stops
-      # the watcher from spawning. This target stays off for theme reasons.
-      kitty.enable = false;
-      # Terminal colors are owned by Noctalia's runtime templates (kitty,
-      # alacritty). The shell target injects base16-<scheme>.fish into fish's
-      # config and emits OSC escape sequences at shell startup, which overrides
-      # the noctalia.conf palette every time a shell opens inside the terminal.
-      fish.enable = false;
-      wezterm.enable = true;
       vscode.enable = false;
       waybar.enable = false;
-      # Qt theming is now owned by qt.nix + Noctalia's "qt" built-in template
-      # (wallpaper-derived M3 palette → ~/.config/qt{5,6}ct/colors/noctalia.conf,
-      # style=Fusion). Stylix's qt target would write a static base16 qtct config
-      # selecting Kvantum, which conflicts with our managed conf and pins the
-      # wrong style — keep it off.
+
+      # Terminals are themed by stylix directly (base16 catppuccin-mocha). kitty's
+      # target appends `include /nix/store/<hash>-base16.conf` to kitty.conf; that
+      # store-root include is fine, but kitty.nix sets `auto_reload_config = -1` so
+      # the config-reload watcher never spawns (it watches kitty.conf's realpath
+      # parent — /nix/store — recursively, ~470k inotify watches, which exhausted
+      # fs.inotify.max_user_watches and broke Vite/yarn with ENOSPC). Colors are
+      # build-time static now, so there's nothing to hot-reload.
+      alacritty.enable = true;
+      kitty.enable = true;
+      wezterm.enable = true;
+      # fish syntax-highlight colors + OSC palette from the same base16 scheme.
+      # (Was off only because Noctalia's runtime terminal palette fought fish's
+      # OSC — that relay is gone.)
+      fish.enable = true;
+
+      # Qt is handled in qt.nix, not by stylix's qt target: that target is
+      # Kvantum-only (warns if you change the style) and its `autoEnable` is gated
+      # on `nixosConfig != null`, so it doesn't even apply under standalone HM —
+      # plus Kvantum under standalone HM hits home-manager#6565. qt.nix keeps
+      # style=Fusion and generates a qtct ColorScheme from config.lib.stylix.colors.
       qt.enable = false;
     };
 

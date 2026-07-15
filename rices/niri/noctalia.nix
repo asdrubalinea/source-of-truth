@@ -25,23 +25,19 @@
       systemd.enable = true;
 
       # ── Theming ────────────────────────────────────────────────────────────
-      # Use one of Noctalia v5's hand-authored built-in themes (set in `theme`
-      # below). stylix can't theme v5 yet — its bundled target only drives the
-      # dead v4 `programs.noctalia-shell` option, and v5 support is the unmerged
-      # PR danth/stylix#2364. A built-in palette is fully tuned for v5's
-      # Material-3 token system, so it looks right out of the box — unlike a
-      # partial hand-mapped base16 palette, which has to derive the missing tokens
-      # and comes out off-hue/low-contrast (that's why an earlier custom-palette
-      # attempt looked strange).
+      # Colors come from stylix. The stylix bump landed the noctalia v5 target
+      # (danth/stylix#2364 — see modules/noctalia/hm.nix in the stylix store
+      # path): it maps the base16 scheme (catppuccin-mocha, set in stylix.nix)
+      # into noctalia's Material-3 tokens as a `custom_palette`, and sets
+      # theme.source = "custom" / theme.mode from stylix polarity. We just consume
+      # that here — no source/mode override — which is the whole reason this rice
+      # used to hand-drive colors (wallpaper-derived) instead.
       #
-      # Built-in names (theme.builtin): Ayu, Catppuccin, Dracula, Eldritch,
-      # Gruvbox, Kanagawa, Noctalia, Nord, "Rosé Pine", Tokyo-Night — change the
-      # one word to switch. Other sources if you'd rather not use a built-in:
-      #   source = "wallpaper"  → derive M3 colors from the wallpaper
-      #                           (theme.wallpaper_scheme = "m3-tonal-spot", …)
-      #   source = "custom"     → read programs.noctalia.customPalettes.<name>
-      #                           (palettes/<name>.json) — where a future stylix
-      #                           bump would plug back in.
+      # stylix also themes the apps themselves directly (its gtk / kitty /
+      # alacritty / wezterm / fish targets, plus the qtct ColorScheme generated in
+      # qt.nix), so noctalia no longer relays colors to other apps — there is no
+      # theme.templates block here anymore, and the per-app `force = true`
+      # workarounds that the runtime templates required are gone.
 
       # ── Declarative settings (pins ~/.config/noctalia/config.toml) ───────────
       # v5 config is TOML, validated at build time by `noctalia config validate`
@@ -52,36 +48,9 @@
       # settings. Pinning config.toml makes the in-app settings GUI
       # non-persistent (read-only store symlink).
       settings = {
-        theme = {
-          mode = "dark";
-          source = "wallpaper";
-          wallpaper_scheme = "faithful"; # derive M3 colors from the current wallpaper
-
-          # Live color templates: Noctalia writes per-app palette files at runtime
-          # and reloads each app. The gtk3/gtk4 templates DON'T write a standalone
-          # file — they rewrite ~/.config/gtk-{3,4}.0/gtk.css in place, appending
-          # `@import url("noctalia.css");` to stylix's generated palette. That turns
-          # HM's symlink into a real file, which fights `home-manager switch -b
-          # backup`; stylix.nix sets `force = true` on those two gtk.css options so
-          # HM overwrites in place without a colliding `.backup` (see the long note
-          # there). kitty consumes Noctalia's output via a declarative include, so
-          # its structural config stays in Nix and HM never sees a modified file.
-          # alacritty uses the same idea (general.import of themes/noctalia.toml),
-          # BUT Noctalia's alacritty template also rewrites alacritty.toml in place
-          # to wire that import — so HM DOES see a modified file there, and
-          # alacritty.nix sets `force = true` on it for the same reason as gtk.css
-          # above (see the long note in alacritty.nix). Qt is now also driven
-          # here — the "qt"
-          # template writes ~/.config/qt{5,6}ct/colors/noctalia.conf (a QPalette
-          # ColorScheme file); qt.nix pins qtct.conf to pick up that file with
-          # style=Fusion. wezterm stays on stylix.
-          templates = {
-            enable_builtin_templates = true;
-            builtin_ids = [ "gtk3" "gtk4" "kitty" "alacritty" "qt" ];
-            enable_community_templates = false;
-            community_ids = [ ];
-          };
-        };
+        # theme.* (source / mode / custom_palette / customPalettes / shell
+        # .font_family / wallpaper.default.path) is entirely owned by the stylix
+        # noctalia target — see the Theming note above.
 
         # Weather / Night-Light / auto-theme location. `address` is geocoded via
         # api.noctalia.dev; auto_locate MUST stay off or its IP-geolocation timer
@@ -114,7 +83,9 @@
         wallpaper = {
           enabled = true;
           directory = "~/Pictures/Wallpapers";
-          default.path = "~/Pictures/Wallpapers/wallhaven_yqmelx.jpg";
+          # The stylix target also pins wallpaper.default.path (to its own `image`)
+          # at normal priority, so mkForce the rice's seeded starter image to win.
+          default.path = lib.mkForce "~/Pictures/Wallpapers/wallhaven_yqmelx.jpg";
         };
 
         brightness.enable_ddcutil = true;
@@ -122,7 +93,7 @@
         backdrop.blur_intensity = 0.1;
 
         shell = {
-          font_family = config.stylix.fonts.sansSerif.name;
+          # font_family is set by the stylix noctalia target (fonts.sansSerif.name).
           screen_corners.enabled = true;
         };
       };
