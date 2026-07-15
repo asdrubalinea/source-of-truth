@@ -2,8 +2,7 @@
   inputs,
   pkgs,
   ...
-}:
-let
+}: let
   # SDRangel segfaults under Qt's Wayland platform plugin (its OpenGL spectrum/
   # scope widgets crash on startup); the global QT_QPA_PLATFORM=wayland from the
   # niri rice (rices/niri/niri.nix) is what selects that plugin. Pin just this
@@ -12,8 +11,8 @@ let
   # xcb.) Must be --set, not --set-default, to override the inherited wayland.
   sdrangel-xwayland = pkgs.symlinkJoin {
     name = "sdrangel-xwayland";
-    paths = [ pkgs.sdrangel ];
-    nativeBuildInputs = [ pkgs.makeWrapper ];
+    paths = [pkgs.sdrangel];
+    nativeBuildInputs = [pkgs.makeWrapper];
     postBuild = "wrapProgram $out/bin/sdrangel --set QT_QPA_PLATFORM xcb";
   };
 in {

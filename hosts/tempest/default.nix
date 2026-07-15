@@ -22,6 +22,7 @@
     ../../hardware/bluetooth.nix
     ../../hardware/audio.nix
     ../../hardware/rtl-sdr.nix
+    ../../hardware/sdrplay.nix
 
     # System modules
     ../../modules/nix.nix
