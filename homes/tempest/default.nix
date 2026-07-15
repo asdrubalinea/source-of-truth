@@ -109,6 +109,31 @@ in {
       };
     };
 
+    # Reach GitLab.com over its alternate git+ssh port (443 via
+    # altssh.gitlab.com) so pushes still work on networks that firewall
+    # port 22. See:
+    # https://about.gitlab.com/blog/gitlab-dot-com-now-supports-an-alternate-git-plus-ssh-port/
+    ssh = {
+      enable = true;
+      # Opt out of HM's soon-to-be-removed default `Host *` block; its values
+      # just mirror ssh's own built-in defaults, so there's nothing to keep.
+      enableDefaultConfig = false;
+      settings = {
+        "gitlab.com" = {
+          HostName = "altssh.gitlab.com";
+          User = "git";
+          Port = 443;
+          IPQoS = "none";
+        };
+        "github.com" = {
+          HostName = "ssh.github.com";
+          User = "git";
+          Port = 443;
+          IPQoS = "none";
+        };
+      };
+    };
+
     # Development tools
     nix-index = {
       enable = true;
