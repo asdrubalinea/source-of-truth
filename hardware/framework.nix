@@ -1,68 +1,5 @@
 { pkgs, ... }:
-{
-  imports = [
-    ./framework-tlp-advanced.nix
-  ];
-
-  # Install Framework-specific tools for hardware monitoring
-  environment.systemPackages = with pkgs; [
-    fw-ectool
-    framework-tool
-  ];
-
-  systemd.services = {
-    disable-fingerprint-led = {
-      description = "Disable Framework Laptop Fingerprint LED at boot";
-      wantedBy = [ "multi-user.target" ];
-      after = [ "multi-user.target" ];
-
-      serviceConfig = {
-        Type = "oneshot";
-        RemainAfterExit = true;
-
-        ExecStart = "${pkgs.fw-ectool}/bin/ectool led power off";
-      };
-    };
-
-    set-default-brightness = {
-      description = "Set default brightness level";
-      wantedBy = [ "multi-user.target" ];
-      after = [ "multi-user.target" ];
-
-      serviceConfig = {
-        Type = "oneshot";
-        RemainAfterExit = true;
-
-        ExecStart = "${pkgs.brightnessctl}/bin/brightnessctl set 42%";
-      };
-    };
-  };
-
-  # Services
-  services = {
-    fwupd = {
-      enable = true;
-      extraRemotes = [ "lvfs-testing" ];
-    };
-
-    # Hibernation is unavailable here: ZFS root forces `nohibernate` (pool
-    # corruption hazard) and the firmware exposes no S3. So `suspend-then-
-    # hibernate`/`hibernate` would degrade to a permanent s2idle that never
-    # powers off — use plain `suspend` (s2idle/S0ix), the only real sleep state.
-    logind.settings.Login = {
-      HandleLidSwitch = "suspend";
-      HandleLidSwitchDocked = "ignore";
-      HandleLidSwitchExternalPower = "ignore";
-      HandlePowerKey = "suspend";
-    };
-
-    # Enable thermal management to prevent overheating
-    thermald.enable = true;
-
-    # Enable TRIM for SSD health
-    fstrim.enable = true;
-  };
-
+let
   # ---------- Thunderbolt dock: tear down around s2idle, don't repair on resume ----------
   # The only sleep state this Framework exposes is s2idle (no S3; ZFS rules out
   # hibernation — see boot.nix). Suspending with the dock's USB4 tunnels live
@@ -74,9 +11,9 @@
   #
   # So rather than repair a half-restored resume, we take the USB4 controllers
   # out of the suspend path entirely: unbind every Thunderbolt host controller
-  # (NHI) *before* suspend and rebind it *after* resume, via the symmetric
-  # system-sleep hook (powerDownCommands on the way in, powerUpCommands on the
-  # way out). This replaces the old `tb-redock` service, whose "surgical"
+  # (NHI) *before* suspend and rebind it *after* resume. This runs from the
+  # `tb-sleep` systemd service below (tbSleepDown on the way in, tbSleepUp on the
+  # way out) — it replaces the old `tb-redock` service, whose "surgical"
   # deauth/reauth almost never worked (0/9 and 0/5 in recent boots) and which
   # ended up doing this exact NHI rebind on nearly every resume anyway.
   # See docs/adr/0008-thunderbolt-teardown-around-sleep.md.
@@ -85,8 +22,8 @@
   # reliable (the rebind was 9-for-9 historically) and a rare failed rebind costs a
   # replug, not a hang. The unbound NHIs are recorded in /run so resume rebinds
   # exactly them; the file lives on tmpfs, so a cold boot (kernel binds the NHIs
-  # itself) finds nothing to do. Steps log with a `[tb-sleep]` tag under
-  # systemd-suspend.service.
+  # itself) finds nothing to do. Steps log with a `[tb-sleep]` tag under the
+  # tb-sleep.service unit.
   #
   # The rebind alone still left the external DP dark after long (overnight) sleeps.
   # amdgpu probes its DP connectors during kernel resume — which runs *before* this
@@ -96,7 +33,7 @@
   # sleep lost it, leaving the monitor black until a reboot. So resume now also
   # forces an amdgpu DP-connector re-detect once the tunnel is back — a bounded,
   # docked-only poll. See the "Update (2026-07-01)" section of ADR 0008.
-  powerManagement.powerDownCommands = ''
+  tbSleepDown = pkgs.writeShellScript "tb-sleep-down" ''
     tag="[tb-sleep]"; drv=/sys/bus/pci/drivers/thunderbolt
     : > /run/tb-nhi-unbound
     for d in "$drv"/0000:*; do
@@ -111,17 +48,17 @@
     done
 
     # Record whether an external DP monitor was lit at suspend, so resume knows to
-    # force a connector re-detect (see powerUpCommands). amdgpu's external
-    # connectors are card1-DP-* — the internal panel card1-eDP-1 is excluded by the
-    # glob (it has no "-DP-" substring), so this only trips when a dock display is
-    # actually driving something.
+    # force a connector re-detect (see tbSleepUp). amdgpu's external connectors are
+    # card1-DP-* — the internal panel card1-eDP-1 is excluded by the glob (it has no
+    # "-DP-" substring), so this only trips when a dock display is actually driving
+    # something.
     ${pkgs.coreutils}/bin/rm -f /run/tb-dp-was-connected
     if ${pkgs.gnugrep}/bin/grep -qx connected /sys/class/drm/card*-DP-*/status 2>/dev/null; then
       : > /run/tb-dp-was-connected
       echo "$tag external DP was connected; will re-detect on resume"
     fi
   '';
-  powerManagement.powerUpCommands = ''
+  tbSleepUp = pkgs.writeShellScript "tb-sleep-up" ''
     tag="[tb-sleep]"; drv=/sys/bus/pci/drivers/thunderbolt
     if [ -f /run/tb-nhi-unbound ]; then
       while read -r n; do
@@ -164,6 +101,91 @@
       ${pkgs.systemd}/bin/udevadm trigger --subsystem-match=drm --action=change 2>/dev/null || true
     fi
   '';
+in
+{
+  imports = [
+    ./framework-tlp-advanced.nix
+  ];
+
+  # Install Framework-specific tools for hardware monitoring
+  environment.systemPackages = with pkgs; [
+    fw-ectool
+    framework-tool
+  ];
+
+  systemd.services = {
+    disable-fingerprint-led = {
+      description = "Disable Framework Laptop Fingerprint LED at boot";
+      wantedBy = [ "multi-user.target" ];
+      after = [ "multi-user.target" ];
+
+      serviceConfig = {
+        Type = "oneshot";
+        RemainAfterExit = true;
+
+        ExecStart = "${pkgs.fw-ectool}/bin/ectool led power off";
+      };
+    };
+
+    set-default-brightness = {
+      description = "Set default brightness level";
+      wantedBy = [ "multi-user.target" ];
+      after = [ "multi-user.target" ];
+
+      serviceConfig = {
+        Type = "oneshot";
+        RemainAfterExit = true;
+
+        ExecStart = "${pkgs.brightnessctl}/bin/brightnessctl set 42%";
+      };
+    };
+
+    # Suspend/resume hook for the Thunderbolt teardown (see the tbSleepDown/tbSleepUp
+    # comment in the let block). Replaces the deprecated
+    # powerManagement.powerDownCommands/powerUpCommands (removed in NixOS 26.11) with
+    # the exact semantics the nixos `sleep-actions` service used: pulled in `before`
+    # sleep.target so ExecStart runs before the box suspends, and StopWhenUnneeded so
+    # the unit is stopped once sleep.target is no longer needed on resume — firing
+    # ExecStop. oneshot + RemainAfterExit keeps it "active" across the sleep so the
+    # stop (and thus ExecStop) only happens on the way out.
+    tb-sleep = {
+      description = "Thunderbolt teardown around s2idle + external-DP relight on resume";
+      wantedBy = [ "sleep.target" ];
+      before = [ "sleep.target" ];
+      unitConfig.StopWhenUnneeded = true;
+      serviceConfig = {
+        Type = "oneshot";
+        RemainAfterExit = true;
+        ExecStart = tbSleepDown;
+        ExecStop = tbSleepUp;
+      };
+    };
+  };
+
+  # Services
+  services = {
+    fwupd = {
+      enable = true;
+      extraRemotes = [ "lvfs-testing" ];
+    };
+
+    # Hibernation is unavailable here: ZFS root forces `nohibernate` (pool
+    # corruption hazard) and the firmware exposes no S3. So `suspend-then-
+    # hibernate`/`hibernate` would degrade to a permanent s2idle that never
+    # powers off — use plain `suspend` (s2idle/S0ix), the only real sleep state.
+    logind.settings.Login = {
+      HandleLidSwitch = "suspend";
+      HandleLidSwitchDocked = "ignore";
+      HandleLidSwitchExternalPower = "ignore";
+      HandlePowerKey = "suspend";
+    };
+
+    # Enable thermal management to prevent overheating
+    thermald.enable = true;
+
+    # Enable TRIM for SSD health
+    fstrim.enable = true;
+  };
 
   # Diagnostic breadcrumb: log each device as it suspends, so if a dead-on-resume
   # hang ever survives the teardown above, the (persistent) journal names the
@@ -182,6 +204,21 @@
   # renumbering. Child pinned `on` keeps its parent root port (00:02.3) active too.
   services.udev.extraRules = ''
     ACTION=="add|bind", SUBSYSTEM=="pci", ATTR{vendor}=="0x14c3", ATTR{device}=="0x0717", ATTR{power/control}="on"
+
+    # Stop peripherals from waking the box out of s2idle while the lid is shut.
+    # This Framework's only sleep state is s2idle and it already "didn't reach
+    # deepest state" (no true S0i3), so any wake source that fires on a timer
+    # turns a closed-lid suspend into a wake/re-suspend loop: logind sees the lid
+    # still closed on each spurious resume and immediately re-suspends. One
+    # overnight run logged 742 suspend cycles (~1 every 41s) and flattened the
+    # battery — every wake spins the CPU/radios/GPU back up. Both devices below
+    # were `power/wakeup=enabled` and neither can be used from a closed lid, so
+    # denying their wakeup is pure upside. Matched by stable ID so bus
+    # renumbering doesn't lose them.
+    #   046d:c547 = Logitech USB Receiver (wireless mouse/kbd dongle)
+    #   PIXA3854  = internal I2C-HID touchpad
+    ACTION=="add", SUBSYSTEM=="usb", ATTR{idVendor}=="046d", ATTR{idProduct}=="c547", ATTR{power/wakeup}="disabled"
+    ACTION=="add", SUBSYSTEM=="i2c", KERNEL=="i2c-PIXA3854:00", ATTR{power/wakeup}="disabled"
   '';
 
   # TLP is configured in ./framework-tlp-advanced.nix; keep PPD off to avoid overlap
