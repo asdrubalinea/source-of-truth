@@ -62,18 +62,20 @@
           name = "portable-and-integrated";
           outputs = [
             {
-              criteria = "BOE Display Unknown";
-              mode = "2560x1440";
-              position = "0,0";
-              scale = 1.0;
-            }
-
-            {
               criteria = "eDP-1";
               status = "enable";
               mode = "2880x1920@120.000";
-              position = "2560,0";
+              position = "0,0";
               # scale = 2.0; # Niri only accepts integer scaling on this panel
+            }
+
+            {
+              # 1440 = eDP-1's logical width (2880 at the effective 2.0 scale),
+              # so the portable panel sits flush to the right of the laptop.
+              criteria = "BOE Display Unknown";
+              mode = "2560x1440";
+              position = "1440,0";
+              scale = 1.0;
             }
           ];
         };
