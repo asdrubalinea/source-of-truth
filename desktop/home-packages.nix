@@ -50,6 +50,7 @@
     xxd
     yazi
     zip
+    tree
 
     # --- Networking & HTTP ---
     curl
