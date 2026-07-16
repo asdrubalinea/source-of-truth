@@ -63,11 +63,11 @@
 
 let
   pname = "brave-origin";
-  version = "1.92.9";
+  version = "1.94.70";
 
   src = fetchurl {
     url = "https://github.com/brave/brave-browser/releases/download/v${version}/brave-origin-nightly_${version}_amd64.deb";
-    hash = "sha256-DQSVxT03+QPAxgPestfdMljmIcF9Bxlarq39hlQhZBU=";
+    hash = "sha256-3Iy0Lza1DliQFaHoGMxIaE6lVcbytDp+T+NzWj3nyNE=";
   };
 
   inherit (lib)
@@ -204,7 +204,7 @@ stdenv.mkDerivation {
     for icon in ''${icon_sizes[*]}
     do
         mkdir -p $out/share/icons/hicolor/$icon\x$icon/apps
-        ln -s $out/opt/brave.com/brave-origin-nightly/product_logo_$icon.png $out/share/icons/hicolor/$icon\x$icon/apps/brave-origin-nightly.png
+        ln -s $out/opt/brave.com/brave-origin-nightly/product_logo_''${icon}_nightly.png $out/share/icons/hicolor/$icon\x$icon/apps/brave-origin-nightly.png
     done
 
     # Replace xdg-settings and xdg-mime
