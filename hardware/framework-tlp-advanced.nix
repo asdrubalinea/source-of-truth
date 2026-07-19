@@ -53,11 +53,16 @@
     CPU_BOOST_ON_AC = 1;
 
     # ---------- Platform Profile ----------
-    # Sets the firmware's sustained power ceiling (PPT/STAPM). `performance` on
-    # AC unlocks sustained all-core throughput; it has no idle effect (the limit
-    # only binds under prolonged load) at the cost of more heat/fan under load.
+    # Sets the firmware's sustained power ceiling (PPT/STAPM). `performance` on AC
+    # raises that ceiling for sustained all-core throughput, at the cost of more
+    # heat/fan. For this machine's actual duty cycle (docked desktop: browser,
+    # editor, terminal — bursty light load, GPU idle) that headroom went almost
+    # entirely into heat, so we run `balanced`: it lifts the ceiling well above
+    # low-power for the occasional compile burst while keeping the firmware from
+    # holding max PPT on trivial load. Pair with EPP=balance_performance above.
+    # Switch back to `performance` for a genuinely sustained all-core job.
     PLATFORM_PROFILE_ON_BAT = "low-power";
-    PLATFORM_PROFILE_ON_AC = "performance";
+    PLATFORM_PROFILE_ON_AC = "balanced";
 
     # ---------- PCIe ASPM ----------
     PCIE_ASPM_ON_BAT = "powersave";
