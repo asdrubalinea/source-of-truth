@@ -37,13 +37,16 @@
     # Primary tuning knob in active mode (EPP only exists there — under `guided`
     # these were silently inert). If `power` over-throttles interactive feel on
     # battery, soften to "balance_power".
-    # On AC we run `performance`: EPP is only a bias hint, not a freq floor, so
-    # the `powersave` governor still drops idle cores into deep C-states — this
-    # just makes wakeups ramp harder and hold high clocks longer under load. (To
-    # pin cores at max even at idle you'd switch the GOVERNOR to performance, not
-    # this; we deliberately don't.)
+    # On AC we run `balance_performance`, NOT `performance`. EPP is a bias hint,
+    # not a freq floor — but on Strix Point `performance` made even bursty light
+    # load (browser JS, compositor, editor) slam cores to ~4.9 GHz and *hold*
+    # those clocks/voltage far longer than the work needed, baking Tctl to ~85 °C
+    # at idle-ish load while the GPU sat at 0%. `balance_performance` keeps the
+    # snappy interactive ramp but lets clocks fall back promptly, so light load
+    # runs much cooler/quieter with no perceptible desktop slowdown. Bump back to
+    # `performance` only if a sustained CPU workload actually needs it.
     CPU_ENERGY_PERF_POLICY_ON_BAT = "power";
-    CPU_ENERGY_PERF_POLICY_ON_AC = "performance";
+    CPU_ENERGY_PERF_POLICY_ON_AC = "balance_performance";
 
     # ---------- Turbo Boost Control ----------
     CPU_BOOST_ON_BAT = 0;
