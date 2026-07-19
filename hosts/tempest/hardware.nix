@@ -36,6 +36,12 @@
     # shows "connected" but never responds. Use a Chromium-based browser (Brave
     # works; Firefox has no WebHID) on a wired connection.
     keyboard.qmk.enable = true;
+
+    # DDC/CI over the GPU's I²C buses, so `ddcutil` can set brightness on
+    # external monitors (an OLED is emissive — no backlight for brightnessctl).
+    # Loads i2c-dev and grants seated users + the `i2c` group access. Physical-
+    # only (meaningless in the VM). See docs/adr/0009.
+    i2c.enable = true;
   };
 
   # Hardware-specific services

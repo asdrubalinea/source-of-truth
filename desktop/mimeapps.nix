@@ -76,4 +76,32 @@ in
         })
         imageTypes);
   };
+
+  # KService application catalog for Dolphin (and any other KDE file manager)
+  # under niri. Without this, double-clicking a file in Dolphin pops the
+  # "Open With" picker every time and ignores the defaults above — even though
+  # `xdg-mime query default image/jpeg` correctly returns Gwenview.
+  #
+  # Why: KIO resolves a mimetype's handler through KService, whose application
+  # catalog is built by kbuildsycoca6 from an XDG menu file named
+  # `${XDG_MENU_PREFIX}applications.menu`. A Plasma session exports
+  # XDG_MENU_PREFIX=plasma- and ships plasma-applications.menu; the niri session
+  # sets neither the variable nor any menu file, so kbuildsycoca6 enumerates
+  # ZERO apps and KService can offer no handler for any type → the picker.
+  # (Verified with `kbuildsycoca6 --menutest`: 62 apps listed with this file,
+  # 0 without.) mimeapps.list itself is read fine; the catalog it points into is
+  # simply empty. Providing the standard "include everything" menu — matching
+  # the unset/empty prefix — repopulates it. Inert on a real Plasma session,
+  # which reads plasma-applications.menu instead.
+  xdg.configFile."menus/applications.menu".text = ''
+    <!DOCTYPE Menu PUBLIC "-//freedesktop//DTD Menu 1.0//EN" "http://www.freedesktop.org/standards/menu-spec/1.0/menu.dtd">
+    <Menu>
+      <Name>Applications</Name>
+      <DefaultAppDirs/>
+      <DefaultDirectoryDirs/>
+      <Include>
+        <All/>
+      </Include>
+    </Menu>
+  '';
 }

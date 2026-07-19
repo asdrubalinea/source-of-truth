@@ -115,6 +115,42 @@
       }
 
       {
+        # tempest's 4K QD-OLED (MSI MAG 272UP E16, 3840x2160@165) as the solo
+        # clamshell display: lid closed, eDP-1 off, OLED the only output.
+        # Connected DIRECT USB-C (DP-alt), NOT via the CalDigit dock — full
+        # DSC-backed bandwidth and outside the ADR-0008 redock path. scale 1.5 →
+        # logical 2560x1440. HDR/VRR deliberately off. See docs/adr/0009.
+        #
+        # SCAFFOLD — the panel isn't here yet. On first connect, fill the two
+        # TODOs from `niri msg outputs`, then verify the logical size reads
+        # 2560x1440 (fractional scale honored via kanshi). If it still reads
+        # 3840x2160, kanshi's fractional scale was rejected → move this output to
+        # a niri-native `output` block instead. Placed ABOVE external-only /
+        # fallback so it wins (kanshi applies the first matching profile in file
+        # order). Until the criteria below is completed this profile stays inert
+        # and the OLED falls through to external-only at scale 1.0 (tiny).
+        profile = {
+          name = "oled-desk";
+          outputs = [
+            {
+              # TODO(on arrival): exact make/model/serial from `niri msg outputs`,
+              # e.g. "MSI MAG 272UP QD-OLED <serial>".
+              criteria = "MSI MAG 272UP QD-OLED";
+              # TODO(on arrival): exact mode incl. refresh to 3 decimals, e.g.
+              # "3840x2160@165.000". Without @refresh niri may pick 60Hz — pin it.
+              mode = "3840x2160";
+              position = "0,0";
+              scale = 1.5;
+            }
+            {
+              criteria = "eDP-1";
+              status = "disable";
+            }
+          ];
+        };
+      }
+
+      {
         # Internal panel + exactly one external (any unrecognized monitor):
         # drive the external and switch the laptop screen off. `*` matches a
         # single output, so this profile only applies when eDP-1 plus one other

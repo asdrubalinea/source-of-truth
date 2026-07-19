@@ -30,7 +30,12 @@
     fontconfig = {
       enable = true;
       hinting.style = "slight";
-      subpixel.rgba = "rgb";
+      # Grayscale antialiasing, not RGB subpixel. tempest's external is a QD-OLED
+      # (MSI MAG 272UP E16) whose triangular subpixel layout fringes text under
+      # "rgb" subpixel AA; grayscale is the safe OLED/HiDPI choice. fontconfig
+      # can't do this per-monitor, so it also very slightly softens the low-DPI
+      # LCD externals — an accepted trade at their densities. See docs/adr/0009.
+      subpixel.rgba = "none";
       antialias = true;
     };
   };

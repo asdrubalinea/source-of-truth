@@ -19,6 +19,32 @@ let
   nirius = "${pkgs.nirius}/bin/nirius";
   sleep = "${pkgs.coreutils}/bin/sleep";
 
+  # --- Brightness (Mod brightness keys) ------------------------------------
+  # One control, two backends. When the internal panel is an active niri output,
+  # adjust its backlight with brightnessctl (laptop use). When clamshell-docked
+  # (eDP-1 disabled) there is no backlight — brightness on an external (esp. the
+  # emissive QD-OLED) goes over DDC/CI with ddcutil (VCP 0x10). The else-branch
+  # fires for ANY clamshell profile; ddcutil only succeeds on externals that
+  # expose DDC/CI (needs hardware.i2c.enable in hosts/tempest/hardware.nix). Tune
+  # --sleep-multiplier / add --display on arrival via `ddcutil detect`. See
+  # docs/adr/0009.
+  brightnessAdjust = pkgs.writeShellScript "brightness-adjust" ''
+    set -u
+    dir="''${1:-up}"
+    step=5
+    if ${niri} msg --json outputs | ${jq} -e '(."eDP-1".logical // null) != null' >/dev/null 2>&1; then
+      case "$dir" in
+        up)   exec ${pkgs.brightnessctl}/bin/brightnessctl set "$step%+" ;;
+        down) exec ${pkgs.brightnessctl}/bin/brightnessctl set "$step%-" ;;
+      esac
+    else
+      case "$dir" in
+        up)   exec ${pkgs.ddcutil}/bin/ddcutil --sleep-multiplier 2 setvcp 10 + "$step" ;;
+        down) exec ${pkgs.ddcutil}/bin/ddcutil --sleep-multiplier 2 setvcp 10 - "$step" ;;
+      esac
+    fi
+  '';
+
   # --- Audio output switcher (Mod+O) ---------------------------------------
   # A name-based picker for the default output device, so switching speakers ↔
   # AirPods ↔ dock survives reboots (PipeWire node *ids* are reassigned, but wpctl
@@ -441,16 +467,10 @@ lib.mkIf config.rices.niri.enable {
           "${pamixer}/bin/pamixer"
           "--toggle-mute"
         ];
-        "XF86MonBrightnessUp".action.spawn = [
-          "${brightnessctl}/bin/brightnessctl"
-          "set"
-          "5%+"
-        ];
-        "XF86MonBrightnessDown".action.spawn = [
-          "${brightnessctl}/bin/brightnessctl"
-          "set"
-          "5%-"
-        ];
+        # Brightness keys route through brightnessAdjust: backlight when the
+        # laptop panel is active, ddcutil/DDC-CI when clamshell (see let block).
+        "XF86MonBrightnessUp".action.spawn = [ "${brightnessAdjust}" "up" ];
+        "XF86MonBrightnessDown".action.spawn = [ "${brightnessAdjust}" "down" ];
 
         # Media control
         "XF86AudioPlay".action.spawn = [

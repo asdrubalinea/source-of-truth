@@ -23,6 +23,19 @@ lib.mkIf cfg.enable {
     bar.default = {
       position = "top";
 
+      # Auto-hide the bar: it retracts to a 3px edge-trigger and slides back when
+      # the pointer reaches the screen edge. Primary burn-in mitigation for the
+      # tempest QD-OLED — a persistent bar is the worst static-content offender.
+      # `reserve_space = false` is REQUIRED with auto_hide: it defaults to true,
+      # which keeps the bar's compositor exclusive zone even while hidden, so
+      # tiled/maximized windows stop below it and leave a dead wallpaper strip at
+      # the top. With it false the bar is a true overlay and windows fill the full
+      # height. Hot-reloads. Companions if wanted: `smart_auto_hide` (stay visible
+      # only while the workspace is empty) and `show_on_workspace_switch`
+      # (default: flash on switch). See docs/adr/0009.
+      auto_hide = true;
+      reserve_space = false;
+
       margin_edge = 8;
       margin_ends = 8;
       radius = 12;
