@@ -1,4 +1,10 @@
 {...}: {
+  # LocalSend — AirDrop-style LAN file sharing. openFirewall handles TCP+UDP 53317.
+  programs.localsend = {
+    enable = true;
+    openFirewall = true;
+  };
+
   # Basic network configuration
   networking = {
     hostName = "tempest";
