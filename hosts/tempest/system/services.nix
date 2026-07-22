@@ -66,7 +66,14 @@
 
     monitoring = {
       enable = true;
+      # Keep the full collector set (rapl/pressure/schedstat/thermal) that the
+      # thermal & battery-drain investigation relies on — so powerEfficient stays
+      # OFF, since flipping it would drop exactly those collectors. Instead cut
+      # the scrape cadence 15s -> 60s: ~4x fewer wakeups (the real idle-power cost
+      # on a laptop) with no loss of telemetry fidelity. Resource quotas are
+      # pinned below, decoupled from powerEfficient. See services/grafana.
       powerEfficient = false;
+      scrapeInterval = "60s";
     };
 
     flatpak = {
@@ -97,6 +104,20 @@
         ROCKET_LOG = "critical";
       };
     };
+  };
+
+  # Cap the monitoring stack's resource use on this laptop. The shared module
+  # (services/grafana/default.nix) only applies these quotas under powerEfficient,
+  # which we deliberately keep off to retain the full diagnostic collector set —
+  # so pin them here at the host level instead. serviceConfig merges with the
+  # module's own Restart/RestartSec settings.
+  systemd.services.grafana.serviceConfig = {
+    CPUQuota = "20%";
+    MemoryMax = "512M";
+  };
+  systemd.services.prometheus.serviceConfig = {
+    CPUQuota = "10%";
+    MemoryMax = "256M";
   };
 
   services.keyd = {
