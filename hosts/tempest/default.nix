@@ -14,6 +14,7 @@
     ./system/vaultwarden-sync.nix
     ./system/virtualization.nix
     ./system/firejail.nix
+    ./system/memory.nix
 
     # User accounts
     ./users/irene.nix
