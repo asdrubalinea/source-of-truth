@@ -7,6 +7,7 @@
     ./niri.nix
     ./flights.nix
     ./swayidle.nix
+    ./pip-follow.nix
     ./noctalia.nix
     ./noctalia-widgets.nix
     ./wallpaper
