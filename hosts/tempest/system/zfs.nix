@@ -19,6 +19,15 @@
   # with another live machine.
   boot.zfs.forceImportRoot = true;
 
+  # Cap the ARC at 8 GiB. Left unset, OpenZFS lets the ARC grow to nearly all of
+  # RAM (~29.6 GiB observed on this 32 GiB machine), so under a heavy Nix build +
+  # browser it competes with app memory and triggers ZFS's laggy ARC reclaim
+  # (perceived stalls). 8 GiB still caches plenty of the hot /nix store (which
+  # lives on ZFS) for eval/build while leaving ~24 GiB for everything else.
+  # 8 * 1024^3 = 8589934592. Set via kernel cmdline so it applies at module load
+  # in the initrd, before the root pool import. Pairs with system/memory.nix.
+  boot.kernelParams = [ "zfs.zfs_arc_max=8589934592" ];
+
   # Explicitly activate the LVM volume group that backs the pool, in the initrd,
   # before the pool import. The rpool vdev is the logical volume /dev/pool/root
   # (disko ZFS-on-LVM-on-LUKS layout). Because the real root is tmpfs + ZFS, the
