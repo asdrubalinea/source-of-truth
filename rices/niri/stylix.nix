@@ -13,7 +13,7 @@ lib.mkIf config.rices.niri.enable {
 
   stylix = {
     enable = true;
-    base16Scheme = "${pkgs.base16-schemes}/share/themes/catppuccin-mocha.yaml";
+    base16Scheme = "${pkgs.base16-schemes}/share/themes/oxocarbon-dark.yaml";
 
     # Icon theme for Qt/KDE apps (Dolphin, Okular, …). Off by default; without
     # it only `hicolor` is present and Dolphin's toolbar/file icons fall back
@@ -30,7 +30,7 @@ lib.mkIf config.rices.niri.enable {
       vscode.enable = false;
       waybar.enable = false;
 
-      # Terminals are themed by stylix directly (base16 catppuccin-mocha). kitty's
+      # Terminals are themed by stylix directly (base16 oxocarbon-dark). kitty's
       # target appends `include /nix/store/<hash>-base16.conf` to kitty.conf; that
       # store-root include is fine, but kitty.nix sets `auto_reload_config = -1` so
       # the config-reload watcher never spawns (it watches kitty.conf's realpath
