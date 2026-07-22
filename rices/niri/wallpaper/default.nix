@@ -7,4 +7,5 @@
 lib.mkIf config.rices.niri.enable {
   home.file."Pictures/Wallpapers/boeing-747.jpg".source = ./boeing-747.jpg;
   home.file."Pictures/Wallpapers/wallhaven_yqmelx.jpg".source = ./wallhaven_yqmelx.jpg;
+  home.file."Pictures/Wallpapers/shinobu-kocho-dark.png".source = ./shinobu-kocho-dark.png;
 }
