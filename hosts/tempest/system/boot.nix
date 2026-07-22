@@ -1,9 +1,16 @@
 { pkgs, ... }:
 {
   services.scx = {
-    # Enable the sched_ext framework and the scx_bpfland scheduler
+    # Enable the sched_ext framework. scx_lavd (Latency-criticality Aware Virtual
+    # Deadline) is interactive-focused like the previous scx_bpfland, but adds
+    # power awareness: --autopower eases scheduling aggressiveness on battery and
+    # biases work toward the Zen5c compact cores, ramping back up on AC. This sits
+    # a layer below TLP's EPP/platform-profile split and complements it. If the
+    # scheduler ever faults, the kernel transparently falls back to its built-in
+    # scheduler, so this is a safe, one-line-reversible change.
     enable = true;
-    scheduler = "scx_bpfland"; # Prioritizes foreground interactive tasks
+    scheduler = "scx_lavd";
+    extraArgs = [ "--autopower" ];
   };
 
   boot = {
