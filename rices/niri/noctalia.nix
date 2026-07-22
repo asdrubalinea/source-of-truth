@@ -27,7 +27,7 @@
       # ── Theming ────────────────────────────────────────────────────────────
       # Colors come from stylix. The stylix bump landed the noctalia v5 target
       # (danth/stylix#2364 — see modules/noctalia/hm.nix in the stylix store
-      # path): it maps the base16 scheme (catppuccin-mocha, set in stylix.nix)
+      # path): it maps the base16 scheme (oxocarbon-dark, set in stylix.nix)
       # into noctalia's Material-3 tokens as a `custom_palette`, and sets
       # theme.source = "custom" / theme.mode from stylix polarity. We just consume
       # that here — no source/mode override — which is the whole reason this rice

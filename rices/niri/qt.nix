@@ -6,7 +6,7 @@ lib.mkIf config.rices.niri.enable (
 
     # A qtct ColorScheme is 22 QPalette roles, in the fixed order qt5ct/qt6ct
     # expect (documented inline below). We derive them from the stylix base16
-    # palette (catppuccin-mocha, set in stylix.nix) so Qt apps rendered with the
+    # palette (oxocarbon-dark, set in stylix.nix) so Qt apps rendered with the
     # Fusion style match gtk/terminals/noctalia. This replaces the file Noctalia's
     # "qt" runtime template used to write at ~/.config/qt{5,6}ct/colors/noctalia.conf.
     paletteRow = lib.concatStringsSep ", " [
