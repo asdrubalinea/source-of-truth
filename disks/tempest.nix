@@ -192,6 +192,18 @@
             mountpoint = "/var/lib/sbctl";
           };
 
+          # Docker's data root (virtualisation.docker with storageDriver =
+          # "zfs"; see hosts/tempest/system/virtualization.nix). Own dataset so
+          # the zfs graph driver can clone one child dataset per layer, and so
+          # image churn stays outside /persist — which is snapshotted hourly and
+          # replicated to the external USB pool. Inherits
+          # com.sun:auto-snapshot=false from rootFsOptions: images are
+          # re-pullable, snapshotting them would just pin deleted layers.
+          docker = {
+            type = "zfs_fs";
+            mountpoint = "/var/lib/docker";
+          };
+
           # Never mounted. A refreservation we can shrink to recover from a
           # 100%-full, write-wedged pool (ZFS is copy-on-write).
           reserved = {
