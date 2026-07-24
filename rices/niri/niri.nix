@@ -292,7 +292,7 @@ lib.mkIf config.rices.niri.enable {
         border = {
           enable = true;
           width = 2;
-          active.color = c.base07;
+          active.color = c.base09;
           inactive.color = c.base03;
         };
 
