@@ -292,8 +292,8 @@ lib.mkIf config.rices.niri.enable {
         border = {
           enable = true;
           width = 2;
-          active.color = c.base09;
-          inactive.color = c.base03;
+          active.color = c.base03;
+          inactive.color = c.base01;
         };
 
         # Gap windows away from the screen edges so they sit inside the floating
