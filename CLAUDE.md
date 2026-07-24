@@ -12,7 +12,7 @@ Rebuilds are done from the flake root against `.#<host>`:
 
 - `nixos-rebuild switch --flake '.#tempest' --sudo` — apply a host config. Wrapped as `config-apply` / `system-apply` (installed via home-manager from `scripts/config-apply.nix` and `scripts/system-apply.nix`) — both `pushd` into `/persist/source-of-truth` and run `nixos-rebuild switch --flake '.#' --sudo`, so `.#` resolves to the current host's `nixosConfigurations` entry by hostname.
 - `home-manager switch --flake '.#irene@<host>'` — apply a standalone Home Manager config. Both `orchid` and `tempest` have entries under `homeConfigurations` (`irene@orchid`, `irene@tempest`). On tempest there's a `user-apply` wrapper (`scripts/user-apply.nix`) that runs this with `-b backup`. On tempest a system change therefore needs **both** `system-apply` and `user-apply`.
-- `update-home` (tempest only, `scripts/update-home.nix`) — `nix flake update` for the subset of inputs that only affect tempest's HM closure (`nixpkgs-home`, `claude-code`, `codex`, `zen-browser`, `hn-tui-flake`, `emacs-overlay`, `stylix`, `hyprland`). `niri` and `helix` are intentionally excluded because both also live in tempest's system layer.
+- `update-home` (tempest only, `scripts/update-home.nix`) — `nix flake update` for the subset of inputs that only affect tempest's HM closure (`nixpkgs-home`, `claude-code`, `zen-browser`, `hn-tui-flake`, `emacs-overlay`, `stylix`, `hyprland`). `niri` and `helix` are intentionally excluded because both also live in tempest's system layer.
 - `nix flake update` — update all flake inputs (the old `./update-flakes.sh` wrapper was removed).
 - `system-clean` (from `scripts/system-clean.nix`) — delete old generations, GC, optimize the store.
 

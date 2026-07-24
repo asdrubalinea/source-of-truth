@@ -64,7 +64,6 @@ in {
       sdrangel-xwayland # RTL-SDR Blog V4 frontend, XWayland-wrapped (see let-binding above + hardware/rtl-sdr.nix)
       pkgs.sdrpp # SDR++ — runs native Wayland fine (GLFW, no wrapper); links rtl-sdr-osmocom (V4-capable)
       # (pkgs.callPackage ../../packages/cider-2.nix { })
-      # inputs.codex.packages.${pkgs.stdenv.hostPlatform.system}.default
     ];
 
     # persistence."/persist/home/irene" = {

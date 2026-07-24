@@ -87,7 +87,6 @@
     nixd # Nix LSP
     nixpkgs-fmt
     gh # GitHub CLI (used by magit/forge)
-    # trunk.codex
 
     inputs.hn-tui-flake.packages.${stdenv.hostPlatform.system}.hackernews-tui # hn TUI
 
@@ -181,6 +180,7 @@
     # vesktop
     zoom-us
     claude-code
+    codex # OpenAI Codex CLI (nixpkgs; prebuilt in cache.nixos.org)
     rtk
     # antigravity
 

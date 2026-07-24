@@ -116,7 +116,6 @@
       url = "github:asdrubalinea/hn-tui-flake";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    codex.url = "github:sadjow/codex-cli-nix";
     claude-code.url = "github:sadjow/claude-code-nix";
     drift = {
       url = "github:phlx0/drift";
@@ -143,7 +142,6 @@
     , emacs-overlay
     , lanzaboote
     , ucodenix
-    , codex
     , claude-code
     , nix-cachyos-kernel
     , ...

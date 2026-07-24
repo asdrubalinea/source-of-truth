@@ -92,8 +92,6 @@ in
     system-apply
     arc-size
     nix-size
-
-    inputs.codex.packages.${pkgs.stdenv.hostPlatform.system}.default
   ];
 
   # programs.neovim = {
