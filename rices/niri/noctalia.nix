@@ -85,7 +85,7 @@
           directory = "~/Pictures/Wallpapers";
           # The stylix target also pins wallpaper.default.path (to its own `image`)
           # at normal priority, so mkForce the rice's seeded starter image to win.
-          default.path = lib.mkForce "~/Pictures/Wallpapers/mitsuri-kanroji-3840x2160-22627.png";
+          default.path = lib.mkForce "~/Pictures/Wallpapers/kawaii-cat-girl-5120x2880-26545.png";
         };
 
         brightness.enable_ddcutil = true;
