@@ -46,6 +46,7 @@ in {
     ../../scripts/port-forward.nix
     ../../scripts/claude-sandboxed.nix
     ../../scripts/keep-awake.nix
+    ../../scripts/ps5-audio.nix
 
     # Shell and configuration
     ../../misc/fish.nix
