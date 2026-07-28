@@ -181,7 +181,10 @@
     zoom-us
     claude-code
     codex # OpenAI Codex CLI (nixpkgs; prebuilt in cache.nixos.org)
-    rtk
+    # unstable's rtk 0.43.0 fails its cargo test build (rust 1.97 dead_code lint,
+    # -D warnings); nixpkgs master carries the --cap-lints fix. Drop back to
+    # plain `rtk` once unstable reaches 0.44.0.
+    trunk.rtk
     # antigravity
 
     # --- Media, graphics & documents ---
