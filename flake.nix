@@ -181,9 +181,34 @@
             });
       };
 
+      # nixpkgs' python3Packages.pandas-stubs fails to build against pytest 9.1:
+      # pytest now warns (PytestRemovedIn10Warning) on the generators upstream
+      # passes to @parametrize, and pandas-stubs' `-W error` config makes that
+      # fatal during collection. It reaches this closure as a *check* input of
+      # pdfplumber, which markitdown propagates — see the python3 env in
+      # desktop/home-packages.nix — so the whole HM generation dies on a type-stub
+      # test suite. Same fix as the pending upstream PR: run those tests under
+      # pytest 9.0. Note doCheck = false is NOT an option here — pandas-stubs sets
+      # `pythonImportsCheck = [ "pandas" ]` and pandas comes in via
+      # nativeCheckInputs, so skipping checks starves the import check instead.
+      # Drop this overlay once https://github.com/NixOS/nixpkgs/pull/545267
+      # reaches nixos-unstable.
+      pandasStubsOverlay = final: prev: {
+        pythonPackagesExtensions = prev.pythonPackagesExtensions ++ [
+          (pyfinal: pyprev: {
+            pandas-stubs = pyprev.pandas-stubs.overridePythonAttrs (old: {
+              nativeCheckInputs =
+                (prev.lib.remove pyfinal.pytestCheckHook old.nativeCheckInputs)
+                ++ [ pyfinal.pytest9_0CheckHook ];
+            });
+          })
+        ];
+      };
+
       overlays = [
         multiChannelOverlay
         helixSteelOverlay
+        pandasStubsOverlay
         emacs-overlay.overlay
         niri.overlays.niri
         claude-code.overlays.default
