@@ -116,6 +116,15 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
     claude-code.url = "github:sadjow/claude-code-nix";
+    llm-agents = {
+      url = "github:numtide/llm-agents.nix";
+      # Numtide's AI-agent package set (ex nix-ai-tools); source for codex and
+      # rtk, both of which nixpkgs ships well behind upstream. HM-only, so
+      # update-home bumps it. Same reasoning as noctalia above:
+      # do NOT add `inputs.nixpkgs.follows = "nixpkgs"`. cache.numtide.com (wired
+      # into modules/nix.nix) only has paths built against the flake's own pinned
+      # nixpkgs-unstable, and codex is a full Rust + rusty_v8 build locally.
+    };
     drift = {
       url = "github:phlx0/drift";
       inputs.nixpkgs.follows = "nixpkgs";

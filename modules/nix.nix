@@ -12,6 +12,7 @@
 
       substituters = [
         "https://cache.nixos.org/"
+        "https://cache.numtide.com" # numtide/llm-agents.nix (codex); needs that input NOT following nixpkgs, see flake.nix
       ] ++ (
         if config.networking.hostName == "tempest" then [
           # "http://orchid.boreal-city.ts.net:8501/"
@@ -28,6 +29,7 @@
       # Corresponding public keys
       trusted-public-keys = [
         "cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY="
+        "niks3.numtide.com-1:DTx8wZduET09hRmMtKdQDxNNthLQETkc/yaX7M4qK0g="
       ] ++ (
         if config.networking.hostName == "tempest" then [
           "orchid:OonqQD3i5uEEi8h3zSxxp/uvVGR+Mum0/mbJohLJ09I="

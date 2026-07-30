@@ -15,6 +15,7 @@ let
     nix flake update \
       nixpkgs-home \
       claude-code \
+      llm-agents \
       zen-browser \
       hn-tui-flake \
       emacs-overlay \

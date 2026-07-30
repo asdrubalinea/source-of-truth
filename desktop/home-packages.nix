@@ -2,7 +2,12 @@
   pkgs,
   inputs,
   ...
-}: {
+}: let
+  # numtide/llm-agents.nix — AI-agent CLIs. Taken from the flake's own outputs
+  # (not overlays.shared-nixpkgs) so they stay built against its pinned nixpkgs
+  # and cache.numtide.com actually hits; see flake.nix.
+  llm-agents = inputs.llm-agents.packages.${pkgs.stdenv.hostPlatform.system};
+in {
   home.packages = with pkgs; [
     # --- Core system utilities ---
     coreutils
@@ -17,7 +22,7 @@
     usbutils
     upower
     bubblewrap
-    opencode
+    # opencode # no longer used
     ddcutil
 
     # --- System info & monitoring ---
@@ -180,11 +185,11 @@
     # vesktop
     zoom-us
     claude-code
-    codex # OpenAI Codex CLI (nixpkgs; prebuilt in cache.nixos.org)
-    # unstable's rtk 0.43.0 fails its cargo test build (rust 1.97 dead_code lint,
-    # -D warnings); nixpkgs master carries the --cap-lints fix. Drop back to
-    # plain `rtk` once unstable reaches 0.44.0.
-    trunk.rtk
+    llm-agents.codex # OpenAI Codex CLI; 0.146.0 vs nixpkgs unstable's 0.118.0
+    # rtk 0.44.1, and llm-agents.nix sets doCheck = false, so this sidesteps the
+    # cargo-test failure that forced the trunk.rtk pin. It also installs the
+    # hooks tree under $out/libexec/rtk/hooks (jq wrapped), which nixpkgs omits.
+    llm-agents.rtk
     # antigravity
 
     # --- Media, graphics & documents ---
