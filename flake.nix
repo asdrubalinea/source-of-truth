@@ -132,294 +132,294 @@
     nix-flatpak.url = "github:gmodena/nix-flatpak";
   };
 
-  outputs =
-    inputs @ { nixpkgs
-    , nixpkgs-home
-    , nixpkgs-stable
-    , nixpkgs-trunk
-    , nixpkgs-custom
-    , home-manager
-    , hyprland
-    , niri
-    , vscode-server
-    , disko
-    , impermanence
-    , stylix
-    , sops-nix
-    , nixos-hardware
-    , emacs-overlay
-    , lanzaboote
-    , ucodenix
-    , claude-code
-    , nix-cachyos-kernel
-    , ...
-    }:
-    let
-      defaultSystem = "x86_64-linux";
+  outputs = inputs @ {
+    nixpkgs,
+    nixpkgs-home,
+    nixpkgs-stable,
+    nixpkgs-trunk,
+    nixpkgs-custom,
+    home-manager,
+    hyprland,
+    niri,
+    vscode-server,
+    disko,
+    impermanence,
+    stylix,
+    sops-nix,
+    nixos-hardware,
+    emacs-overlay,
+    lanzaboote,
+    ucodenix,
+    claude-code,
+    nix-cachyos-kernel,
+    ...
+  }: let
+    defaultSystem = "x86_64-linux";
 
-      multiChannelOverlay = final: prev: {
-        stable = import nixpkgs-stable {
-          system = final.stdenv.hostPlatform.system;
-          config = final.config;
-        };
-
-        trunk = import nixpkgs-trunk {
-          system = final.stdenv.hostPlatform.system;
-          config = final.config;
-        };
-
-        custom = import nixpkgs-custom {
-          system = final.stdenv.hostPlatform.system;
-          config = final.config;
-        };
+    multiChannelOverlay = final: prev: {
+      stable = import nixpkgs-stable {
+        system = final.stdenv.hostPlatform.system;
+        config = final.config;
       };
 
-      # Steel plugin language is not a default cargo feature
-      # (helix-term: `default = ["git"]`), so enable it here. The fork's
-      # default.nix vendors deps via cargoLock + allowBuiltinFetchGit, so adding
-      # a build feature needs no hash change. Note: buildRustPackage reads the
-      # `cargoBuildFeatures` env var (mapped from its `buildFeatures` arg *inside*
-      # the function), so overriding `buildFeatures` here would be ignored — we
-      # must set `cargoBuildFeatures` directly via overrideAttrs.
-      helixSteelOverlay = final: prev: {
-        helix =
-          (inputs.helix.packages.${final.stdenv.hostPlatform.system}.default).overrideAttrs
-            (old: {
-              cargoBuildFeatures = (old.cargoBuildFeatures or [ ]) ++ [ "steel" ];
-            });
+      trunk = import nixpkgs-trunk {
+        system = final.stdenv.hostPlatform.system;
+        config = final.config;
       };
 
-      # nixpkgs' python3Packages.pandas-stubs fails to build against pytest 9.1:
-      # pytest now warns (PytestRemovedIn10Warning) on the generators upstream
-      # passes to @parametrize, and pandas-stubs' `-W error` config makes that
-      # fatal during collection. It reaches this closure as a *check* input of
-      # pdfplumber, which markitdown propagates — see the python3 env in
-      # desktop/home-packages.nix — so the whole HM generation dies on a type-stub
-      # test suite. Same fix as the pending upstream PR: run those tests under
-      # pytest 9.0. Note doCheck = false is NOT an option here — pandas-stubs sets
-      # `pythonImportsCheck = [ "pandas" ]` and pandas comes in via
-      # nativeCheckInputs, so skipping checks starves the import check instead.
-      # Drop this overlay once https://github.com/NixOS/nixpkgs/pull/545267
-      # reaches nixos-unstable.
-      pandasStubsOverlay = final: prev: {
-        pythonPackagesExtensions = prev.pythonPackagesExtensions ++ [
+      custom = import nixpkgs-custom {
+        system = final.stdenv.hostPlatform.system;
+        config = final.config;
+      };
+    };
+
+    # Steel plugin language is not a default cargo feature
+    # (helix-term: `default = ["git"]`), so enable it here. The fork's
+    # default.nix vendors deps via cargoLock + allowBuiltinFetchGit, so adding
+    # a build feature needs no hash change. Note: buildRustPackage reads the
+    # `cargoBuildFeatures` env var (mapped from its `buildFeatures` arg *inside*
+    # the function), so overriding `buildFeatures` here would be ignored — we
+    # must set `cargoBuildFeatures` directly via overrideAttrs.
+    helixSteelOverlay = final: prev: {
+      helix =
+        (inputs.helix.packages.${final.stdenv.hostPlatform.system}.default).overrideAttrs
+        (old: {
+          cargoBuildFeatures = (old.cargoBuildFeatures or []) ++ ["steel"];
+        });
+    };
+
+    # nixpkgs' python3Packages.pandas-stubs fails to build against pytest 9.1:
+    # pytest now warns (PytestRemovedIn10Warning) on the generators upstream
+    # passes to @parametrize, and pandas-stubs' `-W error` config makes that
+    # fatal during collection. It reaches this closure as a *check* input of
+    # pdfplumber, which markitdown propagates — see the python3 env in
+    # desktop/home-packages.nix — so the whole HM generation dies on a type-stub
+    # test suite. Same fix as the pending upstream PR: run those tests under
+    # pytest 9.0. Note doCheck = false is NOT an option here — pandas-stubs sets
+    # `pythonImportsCheck = [ "pandas" ]` and pandas comes in via
+    # nativeCheckInputs, so skipping checks starves the import check instead.
+    # Drop this overlay once https://github.com/NixOS/nixpkgs/pull/545267
+    # reaches nixos-unstable.
+    pandasStubsOverlay = final: prev: {
+      pythonPackagesExtensions =
+        prev.pythonPackagesExtensions
+        ++ [
           (pyfinal: pyprev: {
             pandas-stubs = pyprev.pandas-stubs.overridePythonAttrs (old: {
               nativeCheckInputs =
                 (prev.lib.remove pyfinal.pytestCheckHook old.nativeCheckInputs)
-                ++ [ pyfinal.pytest9_0CheckHook ];
+                ++ [pyfinal.pytest9_0CheckHook];
             });
           })
         ];
-      };
+    };
 
-      overlays = [
-        multiChannelOverlay
-        helixSteelOverlay
-        pandasStubsOverlay
-        emacs-overlay.overlay
-        niri.overlays.niri
-        claude-code.overlays.default
-        nix-cachyos-kernel.overlays.default
-      ];
+    overlays = [
+      multiChannelOverlay
+      helixSteelOverlay
+      pandasStubsOverlay
+      emacs-overlay.overlay
+      niri.overlays.niri
+      claude-code.overlays.default
+      nix-cachyos-kernel.overlays.default
+    ];
 
-      nixpkgsConfig = {
-        allowUnfree = true;
-        # rocmSupport = true;
-        # pnpm is pulled in transitively (build-time dep of a Node-based tool in
-        # the HM closure). nixpkgs marks old pnpm point releases insecure the
-        # moment a newer one lands; bump this string when the next flake update
-        # trips the same gate (error names the exact `pnpm-X.Y.Z`).
-        permittedInsecurePackages = [ "pnpm-10.34.0" ];
-      };
+    nixpkgsConfig = {
+      allowUnfree = true;
+      # rocmSupport = true;
+      # pnpm is pulled in transitively (build-time dep of a Node-based tool in
+      # the HM closure). nixpkgs marks old pnpm point releases insecure the
+      # moment a newer one lands; bump this string when the next flake update
+      # trips the same gate (error names the exact `pnpm-X.Y.Z`).
+      permittedInsecurePackages = ["pnpm-10.34.0"];
+    };
 
-      mkPkgs = args:
-        import nixpkgs ({
+    mkPkgs = args:
+      import nixpkgs ({
           system = defaultSystem;
           config = nixpkgsConfig;
           overlays = overlays;
         }
         // args);
 
-      # Same shape as mkPkgs but built from the independent nixpkgs-home input,
-      # so tempest's standalone home generation can be bumped without touching
-      # the system channel. The stable/trunk/custom overlays continue to pull
-      # from their own inputs, so `pkgs.stable.foo` still works.
-      mkHomePkgs = args:
-        import nixpkgs-home ({
+    # Same shape as mkPkgs but built from the independent nixpkgs-home input,
+    # so tempest's standalone home generation can be bumped without touching
+    # the system channel. The stable/trunk/custom overlays continue to pull
+    # from their own inputs, so `pkgs.stable.foo` still works.
+    mkHomePkgs = args:
+      import nixpkgs-home ({
           system = defaultSystem;
           config = nixpkgsConfig;
           overlays = overlays;
         }
         // args);
 
-      lib = nixpkgs.lib;
+    lib = nixpkgs.lib;
 
-      # tempest is defined once and instantiated twice: the real Framework laptop
-      # (virtual = false) and an ephemeral QEMU clone (virtual = true). The
-      # `virtual` specialArg is consumed by ./hosts/tempest/default.nix, which
-      # conditionally imports the physical-machine layer (disko/zfs/impermanence/
-      # lanzaboote/framework hardware) only when false, and ./hosts/tempest/vm.nix
-      # only when true. Both share the exact same portable config — no duplicate
-      # host to maintain. Build the VM with the ./build-vm script (or directly:
-      # `nix build .#nixosConfigurations.tempest-vm.config.system.build.vmWithDisko`),
-      # then run ./result/bin/disko-vm. NOT `nixos-rebuild build-vm`: that builds
-      # the generic `system.build.vm`, which ignores the disko disk layout AND all
-      # of vm.nix's `disko.tests.extraConfig` tuning (RAM/cores/GPU/neededForBoot).
-      mkTempest = virtual:
-        lib.nixosSystem {
-          specialArgs = {
-            inherit inputs virtual;
-            hostname = "tempest";
-          };
-
-          modules = [
-            {
-              nixpkgs = {
-                hostPlatform = defaultSystem;
-                config = nixpkgsConfig;
-                overlays = overlays;
-              };
-            }
-            niri.nixosModules.niri
-
-            ./hosts/tempest/default.nix
-          ];
-        };
-    in
-    {
-      # Expose the locked home-manager CLI so it can be bootstrapped without
-      # relying on whatever's in PATH — useful right after a config-apply that
-      # tears down /etc/profiles/per-user/irene before the first standalone HM
-      # activation:
-      #   nix run /persist/source-of-truth#home-manager -- switch \
-      #     --flake '.#irene@tempest' -b backup
-      packages.${defaultSystem}.home-manager =
-        home-manager.packages.${defaultSystem}.default;
-
-      nixosConfigurations = {
-        "orchid" = lib.nixosSystem {
-          specialArgs = {
-            inherit inputs;
-            hostname = "orchid";
-          };
-
-          modules = [
-            {
-              nixpkgs = {
-                hostPlatform = defaultSystem;
-                config = nixpkgsConfig;
-                overlays = overlays;
-              };
-            }
-            niri.nixosModules.niri
-
-            ./hosts/orchid/default.nix
-          ];
+    # tempest is defined once and instantiated twice: the real Framework laptop
+    # (virtual = false) and an ephemeral QEMU clone (virtual = true). The
+    # `virtual` specialArg is consumed by ./hosts/tempest/default.nix, which
+    # conditionally imports the physical-machine layer (disko/zfs/impermanence/
+    # lanzaboote/framework hardware) only when false, and ./hosts/tempest/vm.nix
+    # only when true. Both share the exact same portable config — no duplicate
+    # host to maintain. Build the VM with the ./build-vm script (or directly:
+    # `nix build .#nixosConfigurations.tempest-vm.config.system.build.vmWithDisko`),
+    # then run ./result/bin/disko-vm. NOT `nixos-rebuild build-vm`: that builds
+    # the generic `system.build.vm`, which ignores the disko disk layout AND all
+    # of vm.nix's `disko.tests.extraConfig` tuning (RAM/cores/GPU/neededForBoot).
+    mkTempest = virtual:
+      lib.nixosSystem {
+        specialArgs = {
+          inherit inputs virtual;
+          hostname = "tempest";
         };
 
-        # Real Framework laptop. Physical-machine modules (disko/impermanence/
-        # lanzaboote/framework/ucodenix + ./disks/tempest.nix) are imported inside
-        # ./hosts/tempest/default.nix, gated on the `virtual` specialArg.
-        tempest = mkTempest false;
+        modules = [
+          {
+            nixpkgs = {
+              hostPlatform = defaultSystem;
+              config = nixpkgsConfig;
+              overlays = overlays;
+            };
+          }
+          niri.nixosModules.niri
 
-        # Ephemeral QEMU clone of tempest — same config, none of the physical
-        # layer. Build with ./build-vm (→ system.build.vmWithDisko), run
-        # ./result/bin/disko-vm. See mkTempest above for why not `nixos-rebuild build-vm`.
-        tempest-vm = mkTempest true;
+          ./hosts/tempest/default.nix
+        ];
+      };
+  in {
+    # Expose the locked home-manager CLI so it can be bootstrapped without
+    # relying on whatever's in PATH — useful right after a config-apply that
+    # tears down /etc/profiles/per-user/irene before the first standalone HM
+    # activation:
+    #   nix run /persist/source-of-truth#home-manager -- switch \
+    #     --flake '.#irene@tempest' -b backup
+    packages.${defaultSystem}.home-manager =
+      home-manager.packages.${defaultSystem}.default;
 
-        hydra = lib.nixosSystem {
-          specialArgs = {
-            inherit inputs;
-            hostname = "hydra";
-          };
-
-          modules = [
-            {
-              nixpkgs = {
-                hostPlatform = defaultSystem;
-                config = nixpkgsConfig;
-                overlays = overlays;
-              };
-            }
-            disko.nixosModules.disko
-
-            ./disks/hydra.nix
-            ./hosts/hydra/default.nix
-          ];
+    nixosConfigurations = {
+      "orchid" = lib.nixosSystem {
+        specialArgs = {
+          inherit inputs;
+          hostname = "orchid";
         };
 
-        # Raspberry Pi 3B+ (aarch64), headless. Built on tempest under binfmt
-        # emulation and flashed as an SD image — no installer, no disko. The
-        # boot/kernel stack (mainline generic sd-image, no nixos-hardware) is
-        # imported inside ./hosts/zephyr/default.nix. See docs/adr/0005.
-        zephyr = lib.nixosSystem {
-          specialArgs = {
-            inherit inputs;
-            hostname = "zephyr";
-          };
+        modules = [
+          {
+            nixpkgs = {
+              hostPlatform = defaultSystem;
+              config = nixpkgsConfig;
+              overlays = overlays;
+            };
+          }
+          niri.nixosModules.niri
 
-          modules = [
-            {
-              # Trimmed overlay set: the desktop overlays
-              # (niri/emacs/claude-code/cachyos) are irrelevant to a headless
-              # ARM base and several don't build cleanly cross-arch.
-              nixpkgs = {
-                hostPlatform = "aarch64-linux";
-                config = nixpkgsConfig;
-                overlays = [ multiChannelOverlay ];
-              };
-            }
-
-            ./hosts/zephyr/default.nix
-          ];
-        };
+          ./hosts/orchid/default.nix
+        ];
       };
 
-      homeConfigurations = {
-        "irene@orchid" = home-manager.lib.homeManagerConfiguration {
-          pkgs = mkPkgs { };
-          extraSpecialArgs = {
-            inherit inputs;
-            hostname = "orchid";
-          };
+      # Real Framework laptop. Physical-machine modules (disko/impermanence/
+      # lanzaboote/framework/ucodenix + ./disks/tempest.nix) are imported inside
+      # ./hosts/tempest/default.nix, gated on the `virtual` specialArg.
+      tempest = mkTempest false;
 
-          modules = [
-            hyprland.homeManagerModules.default
-            vscode-server.homeModules.default
-            niri.homeModules.config
-            stylix.homeModules.stylix
+      # Ephemeral QEMU clone of tempest — same config, none of the physical
+      # layer. Build with ./build-vm (→ system.build.vmWithDisko), run
+      # ./result/bin/disko-vm. See mkTempest above for why not `nixos-rebuild build-vm`.
+      tempest-vm = mkTempest true;
 
-            ./homes/orchid.nix
-
-            {
-              home = {
-                username = "irene";
-                homeDirectory = "/home/irene";
-                stateVersion = "23.05";
-              };
-            }
-          ];
+      hydra = lib.nixosSystem {
+        specialArgs = {
+          inherit inputs;
+          hostname = "hydra";
         };
 
-        "irene@tempest" = home-manager.lib.homeManagerConfiguration {
-          pkgs = mkHomePkgs { };
-          extraSpecialArgs = {
-            inherit inputs;
-            hostname = "tempest";
-          };
+        modules = [
+          {
+            nixpkgs = {
+              hostPlatform = defaultSystem;
+              config = nixpkgsConfig;
+              overlays = overlays;
+            };
+          }
+          disko.nixosModules.disko
 
-          modules = [
-            # hyprland + stylix HM modules are imported inside homes/tempest.
-            # niri.homeModules.config has to be added here because in the previous
-            # nixos-module form it was auto-wired by niri.nixosModules.niri; in
-            # standalone HM it has to be imported explicitly so programs.niri.*
-            # options exist.
-            niri.homeModules.config
+          ./disks/hydra.nix
+          ./hosts/hydra/default.nix
+        ];
+      };
 
-            ./homes/tempest
-          ];
+      # Raspberry Pi 3B+ (aarch64), headless. Built on tempest under binfmt
+      # emulation and flashed as an SD image — no installer, no disko. The
+      # boot/kernel stack (mainline generic sd-image, no nixos-hardware) is
+      # imported inside ./hosts/zephyr/default.nix. See docs/adr/0005.
+      zephyr = lib.nixosSystem {
+        specialArgs = {
+          inherit inputs;
+          hostname = "zephyr";
         };
+
+        modules = [
+          {
+            # Trimmed overlay set: the desktop overlays
+            # (niri/emacs/claude-code/cachyos) are irrelevant to a headless
+            # ARM base and several don't build cleanly cross-arch.
+            nixpkgs = {
+              hostPlatform = "aarch64-linux";
+              config = nixpkgsConfig;
+              overlays = [multiChannelOverlay];
+            };
+          }
+
+          ./hosts/zephyr/default.nix
+        ];
       };
     };
+
+    homeConfigurations = {
+      "irene@orchid" = home-manager.lib.homeManagerConfiguration {
+        pkgs = mkPkgs {};
+        extraSpecialArgs = {
+          inherit inputs;
+          hostname = "orchid";
+        };
+
+        modules = [
+          hyprland.homeManagerModules.default
+          vscode-server.homeModules.default
+          niri.homeModules.config
+          stylix.homeModules.stylix
+
+          ./homes/orchid.nix
+
+          {
+            home = {
+              username = "irene";
+              homeDirectory = "/home/irene";
+              stateVersion = "23.05";
+            };
+          }
+        ];
+      };
+
+      "irene@tempest" = home-manager.lib.homeManagerConfiguration {
+        pkgs = mkHomePkgs {};
+        extraSpecialArgs = {
+          inherit inputs;
+          hostname = "tempest";
+        };
+
+        modules = [
+          # hyprland + stylix HM modules are imported inside homes/tempest.
+          # niri.homeModules.config has to be added here because in the previous
+          # nixos-module form it was auto-wired by niri.nixosModules.niri; in
+          # standalone HM it has to be imported explicitly so programs.niri.*
+          # options exist.
+          niri.homeModules.config
+
+          ./homes/tempest
+        ];
+      };
+    };
+  };
 }
