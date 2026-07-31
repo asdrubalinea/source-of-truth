@@ -86,3 +86,54 @@ modes fused into one complaint. The glossary keeps them apart.
   parked window still lives on a real (bottom-most) workspace and remains
   visible in the overview. "Scratchpad" here names that emulated behaviour, not
   a first-class compositor feature.
+
+## Media automation (tempest)
+
+**Opportunistic media service**:
+A personal service whose availability follows tempest's awake time. Sleep,
+travel, shutdown, and reboot are normal unavailability, not outages.
+_Avoid_: Always-on media server
+
+**Media request**:
+A selection made through the discovery interface asking the automation system
+to acquire a movie. It is fulfilled when a playable file is ready in the
+**media library**.
+_Avoid_: Treating addition to a streaming catalogue as fulfillment
+
+**Media library**:
+A bounded collection of replaceable movies. Losing the library is an
+inconvenience, not a loss of irreplaceable data.
+_Avoid_: Personal media, archive
+
+**Personal media**:
+Irreplaceable user-created material such as home videos. It is user data, not
+part of the **media library**.
+_Avoid_: Treating personal media as replaceable library content
+
+**Playback client**:
+The application that opens a media file for viewing. For this system the
+playback client is mpv.
+_Avoid_: Media server
+
+**Media server**:
+A service that catalogues a library and exposes playback, availability, and
+watch-state information to other applications. This system has no media server.
+_Avoid_: Calling mpv a media server
+
+### Example dialogue
+
+> **Developer:** Should the family videos be added to the media library?
+>
+> **Domain expert:** No. The media library contains only replaceable movies;
+> family videos are personal media and must retain the protections of ordinary
+> user data.
+>
+> **Developer:** Is playback being unavailable while tempest sleeps an outage?
+>
+> **Domain expert:** No. This is an opportunistic media service; availability
+> follows the laptop's awake time.
+>
+> **Developer:** Which media server does mpv provide?
+>
+> **Domain expert:** None. mpv is the playback client and opens library files
+> directly.
