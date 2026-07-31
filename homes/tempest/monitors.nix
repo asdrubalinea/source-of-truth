@@ -18,10 +18,14 @@
 # Because kanshi commits a profile atomically and does NOT fall through to the
 # next matching profile, the ENTIRE profile then aborts: the OLED silently
 # reverts to its 60Hz preferred mode and the lid panel wakes back up. That log
-# line is the tell. Recovery is a physical replug to force a fresh probe (the
-# pruned mode list is fixed at probe time and can't be refreshed from userspace);
-# if a replug doesn't restore it, the link genuinely can't carry @144 in that
-# topology and the pin has to come down for that profile.
+# line is the tell. The pruned mode list is fixed at probe time, so something has
+# to force a *fresh* probe. On resume that is now automatic: the tb-sleep hook in
+# hardware/framework.nix compares each panel's mode count against what it had at
+# suspend and software-replugs a degraded one via amdgpu's debugfs
+# trigger_hotplug (see ADR 0008). Outside a resume — first plug into a starved
+# topology — it is still a physical replug. If a replug doesn't restore it, the
+# link genuinely can't carry @144 there and the pin has to come down for that
+# profile.
 {
   services.kanshi = {
     enable = true;
