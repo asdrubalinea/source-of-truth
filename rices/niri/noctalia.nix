@@ -95,6 +95,20 @@
         shell = {
           # font_family is set by the stylix noctalia target (fonts.sansSerif.name).
           screen_corners.enabled = true;
+
+          # Noctalia's clipboard history is on by default and "adopts orphaned
+          # selections" — it takes Wayland selection ownership so content
+          # survives the source app exiting. That adoption raced every copy:
+          # Gecko/Chromium announce a selection and serve empty data for ~6ms
+          # before filling it in, noctalia read that empty/previous value and
+          # re-offered it as its own, the app re-asserted, and the two ping-ponged
+          # ~6 times per Ctrl+C. Whichever won the last round decided what you
+          # pasted, so the first copy often yielded the PREVIOUS selection.
+          # Verified by removal: with noctalia stopped the ping-pong vanished
+          # entirely; with this false, 49 adoptions/hour dropped to 0 and history
+          # still records. Trade-off kept deliberately: clipboard content now
+          # dies with the source app, which is plain Wayland behaviour.
+          clipboard_keep_from_closed_apps = false;
         };
       };
     };
