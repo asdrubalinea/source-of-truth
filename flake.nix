@@ -129,6 +129,27 @@
       url = "github:phlx0/drift";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    warp = {
+      url = "github:warpdotdev/warp";
+      # Warp's client is AGPL/MIT open source and the repo ships its own flake,
+      # so build `warp-oss` from source rather than using nixpkgs' unfree
+      # prebuilt tarball. app/src/bin/oss.rs constructs the OSS ChannelState
+      # with `autoupdate_config: None`, so the "new version available but Warp
+      # is unable to perform the update" banner the prebuilt build raises on
+      # every launch cannot fire — no wrapper or pinned channel_versions.json
+      # needed. It also passes `telemetry_config: None` and
+      # `crash_reporting_config: None`, dropping the RudderStack and Sentry
+      # wiring the prebuilt build ships with.
+      #
+      # Upstream labels the flake experimental and Linux-only, and it's a large
+      # from-source Rust build with no published substituter — expect long
+      # rebuilds whenever this input moves.
+      #
+      # Same reasoning as noctalia and llm-agents below: do NOT add
+      # `inputs.nixpkgs.follows = "nixpkgs"`. It pins its own nixpkgs alongside
+      # crane and rust-overlay against rust-toolchain.toml, and that pin is the
+      # combination upstream actually builds against.
+    };
     nix-flatpak.url = "github:gmodena/nix-flatpak";
   };
 
