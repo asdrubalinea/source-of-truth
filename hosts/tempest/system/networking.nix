@@ -1,48 +1,61 @@
-{...}: {
+{lib, ...}: let
+  # Local development stack: every name below is served by the reverse proxy
+  # running on this machine, so the `*.dscovr.test` domain works offline.
+  devDomain = "dscovr.test";
+
+  # Product surfaces.
+  devServices = [
+    "admin"
+    "api"
+    "app"
+    "experiment"
+    "tak"
+    "teams"
+  ];
+
+  # Per-tenant workspaces exercised against the local stack.
+  devWorkspaces = [
+    "acea"
+    "alotofpeoplenrt"
+    "alotofpeopletcb"
+    "bofrost"
+    "complexcasenrt"
+    "sole24ore"
+    "workspace-turco-meccanico-dominio"
+    "workspace0tcb"
+    "workspace1basenrt"
+    "workspace1tcb"
+    "workspace2nrt"
+    "workspace2tcb"
+    "workspace3tcb"
+    "workspace4tcb"
+    "workspace5nrt"
+    "workspace5tcb"
+    "workspace6nrt"
+    "workspace7communicationnrt"
+    "workspace8nrt"
+    "workspace9nrt"
+  ];
+
+  devHosts =
+    [devDomain]
+    ++ map (sub: "${sub}.${devDomain}") (devServices ++ devWorkspaces);
+in {
   # LocalSend — AirDrop-style LAN file sharing. openFirewall handles TCP+UDP 53317.
   programs.localsend = {
     enable = true;
     openFirewall = true;
   };
 
-  # Basic network configuration
   networking = {
     hostName = "tempest";
     hostId = "856ff057";
+
     networkmanager.enable = true;
+
     firewall.allowedTCPPorts = [];
     firewall.allowedUDPPorts = [];
 
-    # Development environment hosts
-    extraHosts = ''
-      127.0.0.1 dscovr.test
-      127.0.0.1 tak.dscovr.test
-      127.0.0.1 admin.dscovr.test
-      127.0.0.1 app.dscovr.test
-      127.0.0.1 experiment.dscovr.test
-      127.0.0.1 teams.dscovr.test
-      127.0.0.1 acea.dscovr.test
-      127.0.0.1 workspace5nrt.dscovr.test
-      127.0.0.1 workspace0tcb.dscovr.test
-      127.0.0.1 workspace2nrt.dscovr.test
-      127.0.0.1 workspace6nrt.dscovr.test
-      127.0.0.1 alotofpeoplenrt.dscovr.test
-      127.0.0.1 workspace4tcb.dscovr.test
-      127.0.0.1 workspace2tcb.dscovr.test
-      127.0.0.1 workspace1basenrt.dscovr.test
-      127.0.0.1 workspace1tcb.dscovr.test
-      127.0.0.1 alotofpeopletcb.dscovr.test
-      127.0.0.1 workspace5tcb.dscovr.test
-      127.0.0.1 workspace-turco-meccanico-dominio.dscovr.test
-      127.0.0.1 complexcasenrt.dscovr.test
-      127.0.0.1 workspace3tcb.dscovr.test
-      127.0.0.1 workspace8nrt.dscovr.test
-      127.0.0.1 bofrost.dscovr.test
-      127.0.0.1 complexcasenrt.dscovr.test
-      127.0.0.1 workspace7communicationnrt.dscovr.test
-      127.0.0.1 sole24ore.dscovr.test
-      127.0.0.1 api.dscovr.test
-      127.0.0.1 workspace9nrt.dscovr.test
-    '';
+    extraHosts = lib.concatMapStringsSep "\n" (host: "127.0.0.1 ${host}") devHosts;
   };
 }
