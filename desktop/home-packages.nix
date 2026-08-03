@@ -155,11 +155,7 @@ in {
     screen
     starship
     tmux
-    # Warp built from upstream's own flake (`warp-oss`), not nixpkgs' unfree
-    # prebuilt tarball — see the `warp` input in flake.nix for why. Installs as
-    # `warp-terminal-experimental`; the app id is dev.warp.WarpOss, so its
-    # config and logs live apart from the prebuilt build's.
-    inputs.warp.packages.${stdenv.hostPlatform.system}.warp-terminal-experimental
+    # Warp lives in desktop/warp.nix (package + declarative settings.toml).
     wezterm
     zellij
 
