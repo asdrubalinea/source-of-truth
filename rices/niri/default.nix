@@ -9,6 +9,7 @@
     ./flights.nix
     ./swayidle.nix
     ./pip-follow.nix
+    ./marquee.nix
     ./noctalia.nix
     ./noctalia-widgets.nix
     ./wallpaper
@@ -23,7 +24,9 @@
   # no options layer" convention; see docs/adr/0004-niri-rice-as-enable-module.md.
   #
   # Machine policy lives OUTSIDE the rice: e.g. the monitor layout (kanshi) lives
-  # in homes/tempest/monitors.nix. (The bar's old storage/backup-health readout —
+  # in homes/tempest/monitors.nix, and which panel carries a marquee is set as
+  # `rices.niri.marquee` from the home config (the option is declared next to its
+  # use, in ./marquee.nix). (The bar's old storage/backup-health readout —
   # and the rices.niri.backupWidget options that fed it — were dropped in the
   # Noctalia v5 migration; v5's custom_button can't poll a script. See
   # rices/niri/noctalia-widgets.nix and ADR 0003.) See "machine policy" in

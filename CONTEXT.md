@@ -57,9 +57,16 @@ modes fused into one complaint. The glossary keeps them apart.
   _Flagged ambiguity_: "the resume is broken" has meant **the hang** and
   **redock** interchangeably. They are different — one is a dead box, the other
   a live box with a dead dock — with different causes and different fixes.
-- **keep-awake** — a deliberate utility to hold off idle/lid/sleep while a
-  long-running task finishes. A convenience tool, _not_ a workaround for **the
-  hang**.
+- **keep-awake** — holding off idle/lid/sleep while something that needs the
+  machine awake is unfinished. A convenience, _not_ a workaround for **the
+  hang**. Held two ways: *deliberately*, as a utility invoked for a long-running
+  task, and *implicitly*, for exactly as long as a **marquee** tenant is
+  *playing* — because nothing about watching registers as activity. Playing, not
+  merely present: pausing a tenant releases it, which is deliberate, since a
+  paused tenant is a static frame in a strip no window can cover and the idle
+  chain is what eventually covers and unlights it. A tenant that ends on its own
+  also releases it; a live or looping one does not, and is an open-ended
+  keep-awake until it is paused or the marquee is sent **dark**.
 
 ## Desktop (rices)
 
@@ -77,6 +84,15 @@ modes fused into one complaint. The glossary keeps them apart.
   host, not the rice. A rice consumes them as inputs, and degrades cleanly
   (a readout collapses to nothing) when the thing it would describe is absent
   on a given machine.
+- **bar** — the rice's single status strip: workspaces, live readouts, clock,
+  indicators. There is exactly one per rice, and on tempest it **hides itself**,
+  reappearing only while the pointer is at the screen edge — an OLED lives longer
+  without a permanent lit strip. Being summoned by intent is the whole design, so
+  any *other* thing that makes it appear is a defect, not a feature.
+  _Flagged ambiguity_: on tempest the bar is Noctalia's, and the only surviving
+  **waybar** is a module-less black rectangle that exists purely to reserve the
+  **marquee** — a bar in name and process only, with nothing on it. "The bar"
+  never means that one. Which units a bar readout watches is **machine policy**.
 - **scratchpad** — a window kept running but parked out of view, summoned by a
   keybind as a floating overlay onto whatever workspace is focused and
   dismissed with the same key. On tempest (niri) the canonical tenant is
@@ -86,6 +102,25 @@ modes fused into one complaint. The glossary keeps them apart.
   parked window still lives on a real (bottom-most) workspace and remains
   visible in the overview. "Scratchpad" here names that emulated behaviour, not
   a first-class compositor feature.
+- **marquee** — a strip along one edge of a single output, permanently removed
+  from the tiling area and impossible for any window to cover, whose tenant is
+  moving content. On tempest it is the top of the portrait OLED, the panel's full
+  width and the matching 16:9 height, and its tenant is a video. The strip exists
+  whether or not it is tenanted — it is a fixed property of that panel, not a
+  mode you turn on — so no window ever moves when a tenant arrives or leaves, and
+  windows tile below it with no intervention. Its purpose is as much ergonomic as
+  it is playback: it starts the desktop below the panel's uncomfortable top edge.
+  _Avoid_: overlay, banner, top bar, PiP.
+- **dark** (of a marquee) — untenanted, showing nothing: not the wallpaper, not a
+  paused frame. On an OLED an unlit strip is the only safe resting state for a
+  region no window can ever cover, so "empty" and "dark" mean the same thing
+  here.
+  _Flagged ambiguity_: both the **scratchpad** and the browser **PiP** are
+  windows that get relocated onto the focused workspace behind your back. A
+  marquee is not a window and belongs to no workspace, so it survives a workspace
+  switch with nothing chasing it. Do not describe the marquee as "a PiP that
+  stays put". Which panel carries a marquee, and how deep it is, is **machine
+  policy**.
 
 ## Media automation (tempest)
 
