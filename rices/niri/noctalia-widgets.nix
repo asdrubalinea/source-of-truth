@@ -30,11 +30,20 @@ lib.mkIf cfg.enable {
       # which keeps the bar's compositor exclusive zone even while hidden, so
       # tiled/maximized windows stop below it and leave a dead wallpaper strip at
       # the top. With it false the bar is a true overlay and windows fill the full
-      # height. Hot-reloads. Companions if wanted: `smart_auto_hide` (stay visible
-      # only while the workspace is empty) and `show_on_workspace_switch`
-      # (default: flash on switch). See docs/adr/0009.
+      # height. Hot-reloads. Companion left alone: `smart_auto_hide` (stay visible
+      # while the workspace is empty), which would only add static bar-time. See
+      # docs/adr/0009.
       auto_hide = true;
       reserve_space = false;
+
+      # …and DON'T flash it on every workspace change (`show_on_workspace_switch`
+      # defaults to true — confirmed with `noctalia config export full`). That
+      # reveal exists to tell you where you landed after a *relative* switch, but
+      # every workspace bind in ./niri.nix is absolute (Mod+1…Mod+0 →
+      # focus-workspace = N) and Mod+E opens the overview, so it announced
+      # something already known and then animated away. Off is also strictly less
+      # on-screen time for the panel this bar hides itself to protect.
+      show_on_workspace_switch = false;
 
       margin_edge = 8;
       margin_ends = 8;
