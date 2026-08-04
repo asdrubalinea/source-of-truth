@@ -1,6 +1,9 @@
 { pkgs, lib, config, ... }:
 let
-  niri = "${pkgs.niri-unstable}/bin/niri";
+  # niri-stable, matching the compositor the system session runs — a mismatched
+  # CLI answers `niri msg` with a version-warning line instead of JSON. See the
+  # `niri` binding in niri.nix.
+  niri = "${pkgs.niri-stable}/bin/niri";
   jq = "${pkgs.jq}/bin/jq";
 
   # niri has no "sticky / show on all workspaces" window flag (checked against

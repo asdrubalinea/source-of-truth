@@ -96,8 +96,10 @@ lib.mkIf config.rices.niri.enable {
       }
       {
         timeout = 900;
-        command = "${pkgs.niri-unstable}/bin/niri msg action power-off-monitors";
-        resumeCommand = "${pkgs.niri-unstable}/bin/niri msg action power-on-monitors";
+        # niri-stable: same package as the running compositor, or `niri msg`
+        # bails out on a version mismatch (see the `niri` binding in niri.nix).
+        command = "${pkgs.niri-stable}/bin/niri msg action power-off-monitors";
+        resumeCommand = "${pkgs.niri-stable}/bin/niri msg action power-on-monitors";
       }
       {
         # 20 min: actually suspend. Nothing else here suspends on inactivity —

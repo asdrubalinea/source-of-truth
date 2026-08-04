@@ -14,7 +14,17 @@ let
   # bottom-most workspace; niriusd tracks which windows belong to it and nirius
   # flips them in/out. See docs/adr/0006-niri-scratchpad-via-nirius.md. Geometry
   # (float + size) lives in window-rules.nix, matched per app-id.
-  niri = "${pkgs.niri-unstable}/bin/niri";
+  # The `niri` CLI and the running compositor MUST come from the same package.
+  # `niri msg` refuses to talk to a different version: it prints "Running niri
+  # compositor has a different version from the niri CLI" on stdout *instead of*
+  # the JSON, so `--json` consumers silently get a jq parse error and every
+  # script here misreads the session. The compositor is the SYSTEM one —
+  # greetd launches `niri-session` from /run/current-system/sw (see
+  # rices/niri/system.nix `programs.niri.enable`, and the niri.service unit ships
+  # inside that same package) — and niri-flake's default there is niri-stable.
+  # So: niri-stable, not niri-unstable. Bumping the compositor means changing
+  # both the system's `programs.niri.package` and this line together.
+  niri = "${pkgs.niri-stable}/bin/niri";
   jq = "${pkgs.jq}/bin/jq";
   nirius = "${pkgs.nirius}/bin/nirius";
   sleep = "${pkgs.coreutils}/bin/sleep";
@@ -223,7 +233,10 @@ let
 in
 lib.mkIf config.rices.niri.enable {
   programs.niri = {
-    package = pkgs.niri-unstable;
+    # Not the compositor — the session comes from the system package. This is what
+    # home-manager validates the generated KDL against, so it has to be the same
+    # version that will actually load it (see the `niri` binding above).
+    package = pkgs.niri-stable;
     settings = {
       environment = {
         CLUTTER_BACKEND = "wayland";
