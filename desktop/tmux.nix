@@ -3,7 +3,10 @@
 {
   programs.tmux = {
     enable = true;
-    terminal = "screen-256color";
+    # tmux-256color, not screen-256color: the screen entry is missing the
+    # styled-underline and extended-key capabilities that the passthrough
+    # below advertises to apps running inside tmux.
+    terminal = "tmux-256color";
     keyMode = "vi";
     mouse = true;
     baseIndex = 1;
@@ -13,6 +16,14 @@
     extraConfig = ''
       # Enable 256 colors and true color support
       set -ga terminal-overrides ",*256col*:Tc"
+
+      # tmux only forwards capabilities it believes the outer terminal has, so
+      # spell them out for wezterm (rices/niri/wezterm.nix sets TERM=wezterm):
+      # truecolor, coloured/curly underlines for helix diagnostics, OSC 8
+      # hyperlinks, and CSI-u extended keys.
+      set -as terminal-features ",wezterm*:RGB:usstyle:hyperlinks:extkeys"
+      # Request disambiguated keys from wezterm and hand them to apps that ask.
+      set -s extended-keys on
       
       # Set pane base index to 1
       setw -g pane-base-index 1
