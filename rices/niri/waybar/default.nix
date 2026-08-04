@@ -227,19 +227,22 @@ let
         interval = 60;
         tooltip = true;
         # Click → a one-shot snapshot of everything, then an interactive shell.
-        on-click = "${pkgs.kitty}/bin/kitty --single-instance -e ${pkgs.fish}/bin/fish -C '${pkgs.zfs}/bin/zpool status -v; ${pkgs.systemd}/bin/systemctl --no-pager --full status borgbackup-job-home-irene.service tempest-backup-external.service'";
+        # `wezterm start` (no --always-new-process) is the old
+        # `kitty --single-instance`: a running wezterm GUI instance of the same
+        # class serves the window, so repeat clicks don't stack up processes.
+        on-click = "${pkgs.wezterm}/bin/wezterm start -- ${pkgs.fish}/bin/fish -C '${pkgs.zfs}/bin/zpool status -v; ${pkgs.systemd}/bin/systemctl --no-pager --full status borgbackup-job-home-irene.service tempest-backup-external.service'";
       };
       "custom/cpu-hog" = {
         exec = "${cpuHogWatch}";
         return-type = "json";
         interval = 10;
-        on-click = "${pkgs.kitty}/bin/kitty --single-instance -e ${pkgs.btop}/bin/btop";
+        on-click = "${pkgs.wezterm}/bin/wezterm start -- ${pkgs.btop}/bin/btop";
       };
       "custom/mem-hog" = {
         exec = "${memHogWatch}";
         return-type = "json";
         interval = 10;
-        on-click = "${pkgs.kitty}/bin/kitty --single-instance -e ${pkgs.btop}/bin/btop";
+        on-click = "${pkgs.wezterm}/bin/wezterm start -- ${pkgs.btop}/bin/btop";
       };
       # Nearest flight overhead — reads the always-on flights-server (../flights.nix).
       # Empty when the sky is clear; click to open the full radar TUI.
@@ -247,7 +250,7 @@ let
         exec = "${flights}/bin/flights-waybar";
         return-type = "json";
         interval = 5;
-        on-click = "${pkgs.kitty}/bin/kitty --single-instance -e ${flights}/bin/flights";
+        on-click = "${pkgs.wezterm}/bin/wezterm start -- ${flights}/bin/flights";
       };
     })
     baseSettings;

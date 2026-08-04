@@ -24,9 +24,12 @@ launch/park (`init`) and summon/dismiss (`toggle`) scripts for any app — with
 two tenants:
 
 - **Telegram** — always-open, parked at login by `init`, summoned with `Mod+T`.
-- **Floating terminal** — a `kitty --class scratchpad-terminal`, spawned lazily
-  on first use and summoned with `Mod+Shift+Return` (which previously opened an
-  Emacs frame; that bind and the Emacs server are disabled for now).
+- **Floating terminal** — a `wezterm start --always-new-process --class
+  scratchpad-terminal` (it was `kitty --class scratchpad-terminal` until the
+  rice's terminal moved to wezterm; `--always-new-process` is what keeps the
+  app-id ours rather than a serving instance's), spawned lazily on first use and
+  summoned with `Mod+Shift+Return` (which previously opened an Emacs frame; that
+  bind and the Emacs server are disabled for now).
 
 `Mod+Shift+T` toggles the *focused* window in/out of the scratchpad as general
 infrastructure. Geometry (float + centered, sized as a proportion of the working

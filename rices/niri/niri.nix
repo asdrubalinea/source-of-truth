@@ -206,12 +206,19 @@ let
   };
 
   # Floating terminal: spawned on first use, summoned with Mod+Shift+Return. The
-  # distinct --class gives kitty its own app-id so the window-rule and nirius
-  # target only this instance, not every kitty window.
+  # distinct --class gives wezterm its own app-id so the window-rule and nirius
+  # target only this instance, not every wezterm window.
+  #
+  # --always-new-process is what makes that class stick: a plain `wezterm start`
+  # asks an already-running GUI instance to spawn the window for it (the
+  # single-instance rendezvous socket in $XDG_RUNTIME_DIR/wezterm is named after
+  # the wayland display *and* the class), and a window spawned that way carries
+  # the serving instance's app-id, not ours. Forcing our own process keeps the
+  # app-id ours regardless.
   terminalScratchpad = mkScratchpad {
     name = "terminal";
     appId = "scratchpad-terminal";
-    spawn = "${pkgs.kitty}/bin/kitty --class scratchpad-terminal";
+    spawn = "${pkgs.wezterm}/bin/wezterm start --always-new-process --class scratchpad-terminal";
   };
 in
 lib.mkIf config.rices.niri.enable {
@@ -339,12 +346,16 @@ lib.mkIf config.rices.niri.enable {
 
       # Keybindings
       binds = with pkgs; {
-        # Terminal and launcher
+        # Terminal and launcher. Bare `wezterm` defaults to the `start`
+        # subcommand, which hands the request to a running wezterm GUI instance
+        # of the same class when there is one — so extra windows are cheap
+        # (kitty was a fresh process per press). The scratchpad below
+        # deliberately opts out of that; see the let block.
         "Mod+Return".action.spawn = [
-          "${pkgs.kitty}/bin/kitty"
+          "${pkgs.wezterm}/bin/wezterm"
         ];
         # Floating terminal scratchpad: summon/dismiss a near-fullscreen floating
-        # kitty (own app-id "scratchpad-terminal"); see the let block above.
+        # wezterm (own app-id "scratchpad-terminal"); see the let block above.
         "Mod+Shift+Return".action.spawn = [ "${terminalScratchpad.toggle}" ];
         # Disabled for now (Emacs server is off — see desktop/emacs/default.nix).
         # This key used to open a new Emacs frame on the running daemon. Bare
