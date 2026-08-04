@@ -187,6 +187,7 @@ in {
     zoom-us
     claude-code
     llm-agents.codex # OpenAI Codex CLI; 0.146.0 vs nixpkgs unstable's 0.118.0
+    llm-agents.opencode
     # rtk 0.44.1, and llm-agents.nix sets doCheck = false, so this sidesteps the
     # cargo-test failure that forced the trunk.rtk pin. It also installs the
     # hooks tree under $out/libexec/rtk/hooks (jq wrapped), which nixpkgs omits.
