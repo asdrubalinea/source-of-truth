@@ -10,6 +10,9 @@
       tpm2-tools
       git-crypt
       ntfs3g
+      # Terminfo only (no wezterm build) so ssh from tempest, which runs
+      # TERM=wezterm, gets a known terminal here.
+      wezterm.terminfo
 
       vulkan-tools
       vulkan-loader

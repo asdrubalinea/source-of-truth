@@ -29,6 +29,9 @@ in
     tailscale
     hyfetch
     htop
+    # Terminfo only (no wezterm build) so ssh from tempest, which runs
+    # TERM=wezterm, gets a known terminal here.
+    wezterm.terminfo
   ];
 
   environment.variables = {
