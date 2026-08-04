@@ -148,7 +148,8 @@
         # tempest's 4K QD-OLED (MSI MAG 272U E16) as the solo clamshell display:
         # lid closed, eDP-1 off, OLED the only output. Connected DIRECT USB-C
         # (DP-alt / USB4), NOT via the CalDigit dock — full DSC-backed bandwidth
-        # and outside the ADR-0008 redock path. scale 1.5 → logical 2560x1440.
+        # and outside the ADR-0008 redock path. scale 1.5 → 2560x1440, then
+        # `transform` rotates it to portrait → logical 1440x2560.
         # HDR/VRR deliberately off. See docs/adr/0009. Match is by make/model/
         # serial, so the DRM connector name is incidental — it moves with the
         # physical port (DP-7 on the old port, DP-2 over USB4).
@@ -156,7 +157,7 @@
         # Mode pinned to 3840x2160@165 — the panel's real 4K ceiling once it's on
         # a USB4 port (the earlier @120 cap was the old port's bandwidth; without
         # @refresh niri defaults to the 60Hz preferred mode). If the logical size
-        # reads 3840x2160 instead of 2560x1440, kanshi rejected the fractional
+        # reads 2160x3840 instead of 1440x2560, kanshi rejected the fractional
         # 1.5 scale → move this output to a niri-native `output` block instead.
         # Placed ABOVE external-only / fallback so it wins (kanshi applies the
         # first matching profile in file order).
@@ -168,6 +169,9 @@
               mode = "3840x2160@165.000";
               position = "0,0";
               scale = 1.5;
+              # Portrait. niri counts transforms COUNTER-clockwise, so 270 is a
+              # −90° (clockwise quarter-turn) rotation; "90" is the other way up.
+              transform = "270";
             }
             {
               criteria = "eDP-1";
@@ -181,10 +185,11 @@
         # oled-desk plus the portable 2560x1440 panel stacked BELOW the OLED.
         # kanshi matches the connected set exactly, so oled-desk (MSI + eDP-1)
         # can't cover this three-output case — hence a separate profile.
-        # Geometry: the OLED's logical size is 2560x1440 (3840x2160 at scale
-        # 1.5), so the portable — native 2560x1440 at scale 1.0 — aligns flush
-        # on both side edges, and y=1440 is exactly the OLED's logical height.
-        # Lid stays closed (eDP-1 off), same as oled-desk.
+        # Geometry: the OLED is portrait (see oled-desk), logical 1440x2560, so
+        # y=2560 is exactly its logical height and the portable — native
+        # 2560x1440 at scale 1.0 — sits under it flush on the LEFT edge only;
+        # being 2560 logical wide it now overhangs the 1440-wide OLED to the
+        # right. Lid stays closed (eDP-1 off), same as oled-desk.
         #
         # Both externals at full rate is the intent. If the portable comes up at
         # 640x480 (see the header note — its modes got pruned at probe time), the
@@ -199,11 +204,12 @@
               mode = "3840x2160@165.000";
               position = "0,0";
               scale = 1.5;
+              transform = "270"; # portrait — see oled-desk
             }
             {
               criteria = "BOE Display Unknown";
               mode = "2560x1440@144.000";
-              position = "0,1440";
+              position = "0,2560";
               scale = 1.0;
             }
             {
