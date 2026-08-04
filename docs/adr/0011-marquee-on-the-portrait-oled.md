@@ -94,45 +94,63 @@ imported by nothing — is deleted in the same change. It was going to collide w
 the strut on `programs.waybar.settings`; the strut ended up not using that module
 at all, but a dead bar config that nothing imports is still worth removing.
 
-## Layer assignment (creation-ordered, by necessity)
+## Layer assignment (the video is on `top`, because `bottom` moves)
 
 Three surfaces must stack in a fixed order on this panel: the wallpaper at the
 bottom, waybar's black above it, the video above that.
 
 This ADR originally gave each its own layer-shell level — waybar on
-`background`, mpvpaper on `bottom` — so that the order would not depend on
-same-layer surfaces stacking in creation order (true in wlroots/niri, but not
-promised by the protocol). **That is not implementable**, for two independent
-reasons found while writing the module:
+`background`, mpvpaper on `bottom`. Half of that is unimplementable and the
+other half is wrong; both were found by running it:
 
 - **waybar cannot sit on `background`.** Its `layer` deserializer understands
   only `"bottom"`, `"top"` and `"overlay"` (`src/bar.cpp:63-71`; `enum bar_layer`
   at `include/bar.hpp:32` has exactly those three members). An unrecognised value
   is *silently ignored* — the bar keeps its mode default, `bottom`. So a config
-  saying `background` would have looked right and done nothing.
-- **There is no level between `bottom` and normal windows.** So the video cannot
-  be given its own layer strictly above waybar's black and still stay under the
-  windows; `top` would put it over fullscreen windows too.
+  saying `background` would have looked right and done nothing. waybar is on
+  `bottom`, and that is fine: below windows is exactly where a reserve belongs.
+- **`bottom` is not a fixed position in niri — it moves with the workspaces.**
+  niri renders the `background` and `bottom` layers *once per rendered
+  workspace*, relocated into that workspace's render geometry and cropped to it
+  (the `for (ws_geo, ws_elements) in monitor_elements` loop,
+  `src/niri.rs:4330-4359`). That is the mechanism that shows the bar and the
+  wallpaper inside each workspace card in the overview. It also means the video
+  scrolled off the panel and a second copy scrolled in on **every workspace
+  switch**. A strip that slides away is not a marquee.
 
-So both live on `bottom`:
+`top` and `overlay` are collected once, outside that loop
+(`src/niri.rs:4275-4278`), and never move. So the video is on `top`:
 
 | surface | layer | why |
 | --- | --- | --- |
-| Noctalia wallpaper | `background`, reparented into niri's **backdrop** | already so, via the `place-within-backdrop` layer-rule at `rices/niri/niri.nix:631-634`; the backdrop renders behind everything |
-| waybar (reserve + dark backdrop) | `bottom` | the only layer it can reach that is still below windows |
-| mpvpaper (video) | `bottom`, mapped later | above waybar by creation order (below) |
+| Noctalia wallpaper | `background`, reparented into niri's **backdrop** | already so, via the `place-within-backdrop` layer-rule at `rices/niri/niri.nix:614-624`; the backdrop renders behind everything, and unlike `background` proper it is not relocated per workspace |
+| waybar (reserve + dark backdrop) | `bottom` | the only layer it can reach that is still below windows; it slides on a switch, but it is either hidden behind the video or plain black |
+| mpvpaper (video) | `top` | the lowest layer niri renders at a fixed position |
 
-niri *does* define same-layer order, even though the protocol doesn't: smithay's
-`LayerMap` keeps an insertion-ordered set, and niri renders
-`layers_on(layer).rev()` front-to-back (`src/niri.rs:4392-4393`), so the most
-recently mapped surface is on top. waybar is always-on from
-`graphical-session.target` and the video is cast on demand, so the video always
-maps later and always wins.
+The original objection to `top` — "it would put the video over fullscreen
+windows" — does not hold, and neither does the wider worry that a full-output
+surface on `top` would bury the panel. Three checked facts:
 
-The residual hole: restarting waybar while a tenant plays remaps its black
-*above* the video — audio keeps playing and the band goes black. Going dark and
-re-casting fixes it. `After=waybar.service` on the tenant unit records the
-requirement.
+- **A fullscreen window still wins.** niri renders the active workspace above the
+  top layer whenever the view is stationary and the focused window is fullscreen
+  (`src/layout/monitor.rs:1451-1459`, `render_above_top_layer`).
+- **Everything outside the video is transparent, not black.** mpvpaper asks EGL
+  for an 8-bit alpha channel (`src/main.c:574`) and sets
+  `background-color=#00000000` (`src/main.c:421`); mpv fills the border area
+  around the video with that colour (`--border-background` defaults to `color`).
+  Only the video rectangle is opaque. This was an accepted-either-way detail
+  before; it is now **load-bearing** and the module says so.
+- **The surface takes no input.** mpvpaper commits an empty input region
+  (`src/main.c:693-696`), so clicks land on whatever is underneath.
+
+Two order dependencies remain, both now benign or documented. The video is above
+waybar's black by *layer*, so restarting the strut mid-tenancy no longer buries
+it — that residual hole is closed, and `After=` on the tenant unit now records
+only that the band must be reserved before anything is painted into it. But
+Noctalia's bar and its screen corners are also on `top` on this panel and map
+first: niri renders `layers_on(layer).rev()` front-to-back
+(`src/niri.rs:4393`) — smithay's `LayerMap` is insertion-ordered, so the most
+recently mapped surface wins — and the tenant is cast on demand, i.e. last.
 
 ## Why the marquee is permanent rather than summoned
 
@@ -185,17 +203,22 @@ previously defined as deliberate-only; that definition has been widened.
 
 ## Consequences
 
-- **The wallpaper may be hidden on that panel while a tenant plays.** mpvpaper's
-  surface is the whole output, so whatever mpv paints outside the video covers the
-  rest of the panel — visible in the 8px window gaps and on empty workspaces.
-  Accepted as the price of not patching mpvpaper. (mpvpaper actually sets
-  `background-color=#00000000` and asks EGL for an 8-bit alpha channel
-  — `src/main.c:421` and `568-575` — so the remainder may come out *transparent*
-  and leave the wallpaper visible instead. Either outcome is fine; don't "fix"
-  whichever one shows up.)
-- **The video's position above the black band depends on mapping order.** See
-  *Layer assignment* above — this is a property of niri, not of the layer-shell
-  protocol, and it is the only arrangement waybar can express.
+- **The tenant's surface must stay transparent outside the video.** mpvpaper's
+  surface is the whole output and it sits on `top`, so the alpha is what keeps it
+  from burying the panel: `background-color=#00000000` plus an 8-bit EGL alpha
+  channel (`src/main.c:421` and `574`) leave only the video rectangle opaque.
+  Never hand it an opaque `background-color` or a `border-background` that
+  ignores the alpha. If a tenant ever does black out the panel, `Mod+Y` → "Go
+  dark" ends it.
+- **A playing tenant covers Noctalia's bar and rounded corners on this panel.**
+  Those are `top`-layer surfaces too and they map first, so the tenant — cast on
+  demand, i.e. last — renders above them (see *Layer assignment*). The bar is
+  auto-hidden anyway and still exists on every other output; the price is paid
+  only on the panel that is currently showing a video.
+- **The band holds still through workspace switches and the overview; the
+  windows around it do not.** That asymmetry is the point of the `top` layer, but
+  it does mean the marquee no longer zooms into the workspace cards in the
+  overview the way the bar and the wallpaper do.
 - **A live or looping tenant is an open-ended keep-awake.** tempest will not lock
   and will not suspend while it plays; there is deliberately no cap. Pausing or
   going dark are the two ways out.
@@ -228,17 +251,24 @@ previously defined as deliberate-only; that definition has been widened.
 
 ## First-run checks
 
-Four things could not be verified without running the compositor. The first two
-have since been run against the live session:
+Five things could not be verified without running the compositor. The first
+three have since been run against the live session:
 
 1. ✅ waybar honours `height: 810` with zero modules configured —
    `Bar configured (width: 1440, height: 810) for output: DP-2`.
 2. ✅ Its exclusive zone is honoured on that output alone, and the black lands
    above the backdrop-reparented wallpaper.
-3. A cast video lands above that black rather than under it (the creation-order
-   claim in *Layer assignment*, read out of niri's source but never watched).
-4. A fullscreened window covers the marquee — expected, since fullscreen windows
-   sit above `bottom`-layer surfaces.
+3. ✅ A cast video lands above that black rather than under it — and, since the
+   video moved to `top`, by layer rather than by creation order.
+4. A fullscreened window on this panel covers the marquee — expected from
+   `render_above_top_layer` (*Layer assignment*), read out of niri's source but
+   never watched. Note it holds only while the view is stationary: during a
+   workspace switch or in the overview the band comes back over the fullscreen
+   window.
+5. Nothing on the panel that is *not* the video is opaque — no black rectangle
+   under the band swallowing windows. `niri msg layers` should show `mpvpaper` on
+   `Top` for that output, and windows should stay clickable and visible right up
+   to the band's edge.
 
 The failure mode to recognise for anything output-related: waybar logs "Using
 configuration file …" and then *nothing*. No bar and no error means the `output`

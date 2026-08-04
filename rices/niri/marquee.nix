@@ -22,27 +22,51 @@ let
   # or Nix parses it as a path; the division is exact (12960 / 16 = 810).
   depth = cfg.width * 9 / 16;
 
-  # LAYERING. Three things stack on this panel: the wallpaper (reparented into
-  # niri's backdrop by the layer-rule in ./niri.nix), waybar's black, and the
-  # video on top. ADR-0011 asked for three *distinct* layer-shell levels so the
-  # order would not depend on creation order. That turned out to be
-  # unimplementable, in two steps:
+  # LAYERING. The strut's black is on `bottom`; the video is on `top`. The split
+  # is not about stacking the two — it is about *motion*, and it is the reason
+  # the marquee holds still while you change workspaces.
   #
-  #   - waybar cannot sit on `background`. Its deserializer understands only
-  #     "bottom", "top" and "overlay" (src/bar.cpp:63-71, `enum bar_layer` at
-  #     include/bar.hpp:32); anything else is silently ignored and the bar keeps
-  #     its mode default, `bottom`. So waybar is on `bottom`.
-  #   - "above `bottom`, still below normal windows" is an empty slot in the
-  #     layer-shell protocol. `top` would put the video over fullscreen windows.
+  # niri renders the `background` and `bottom` layers once **per rendered
+  # workspace**, relocated into that workspace's render geometry and cropped to
+  # it (the `for (ws_geo, ws_elements) in monitor_elements` loop,
+  # src/niri.rs:4330-4359). That is what puts the bar and the wallpaper inside
+  # each workspace card in the overview — and it also means a `bottom` surface
+  # slides with the workspace-switch animation: the video scrolled off the panel
+  # and a second copy scrolled in on every switch. `top` and `overlay` are
+  # collected once, outside that loop (src/niri.rs:4275-4278), so they never
+  # move. A strip that slides away is not a marquee, so the video is on `top`.
   #
-  # So both live on `bottom`, and the order is creation order — which niri does
-  # define: smithay's LayerMap is an insertion-ordered set and niri renders
-  # `layers_on(layer).rev()` front-to-back (src/niri.rs:4392-4393), i.e. the most
-  # recently mapped surface wins. The strut is always-on from graphical-session
-  # and mpvpaper is started on demand, so the video always maps later and is
-  # always on top. The one hole: restarting the strut while a tenant plays remaps
-  # its black ABOVE the video (audio keeps playing, the band goes black) — go dark
-  # and re-cast to fix it.
+  # ADR-0011 rejected `top` because it "would put the video over fullscreen
+  # windows". Three facts, all checked, say it doesn't:
+  #
+  #   - A fullscreen window still wins: niri renders the active workspace above
+  #     the top layer whenever the view is stationary and the focused window is
+  #     fullscreen (monitor.rs:1451-1459, `render_above_top_layer`).
+  #   - Everything outside the video is TRANSPARENT, not black, so the
+  #     full-output surface covers nothing. mpvpaper asks EGL for an 8-bit alpha
+  #     channel (src/main.c:574) and sets `background-color=#00000000`
+  #     (src/main.c:421), and mpv fills the border area around the video with
+  #     that colour (`--border-background` defaults to `color`). This is now
+  #     load-bearing — see the warning on mpvOptions below.
+  #   - It takes no input either way: mpvpaper commits an empty input region
+  #     (src/main.c:693-696), so clicks land on whatever is underneath.
+  #
+  # What each layer then holds, and the two order dependencies left:
+  #
+  #   - The strut stays on `bottom` (waybar can't reach `background` anyway: its
+  #     deserializer knows only "bottom", "top" and "overlay" —
+  #     src/bar.cpp:63-71, `enum bar_layer` at include/bar.hpp:32 — and silently
+  #     ignores anything else). The video is above it by *layer* now, so
+  #     restarting the strut mid-tenancy no longer buries the video: ADR-0011's
+  #     residual hole is closed. Its black does still slide on a workspace
+  #     switch, hidden behind the video while a tenant plays and plain black
+  #     otherwise.
+  #   - Noctalia's bar and screen corners are also on `top` on this panel, and
+  #     they map first. niri renders `layers_on(layer).rev()` front-to-back
+  #     (src/niri.rs:4393) — smithay's LayerMap is insertion-ordered, so the most
+  #     recently mapped surface wins — and the tenant is cast on demand, i.e.
+  #     last. So a playing tenant covers the (auto-hidden) bar and the rounded
+  #     corners ON THIS PANEL. Both still exist on every other output.
 
   niri = "${pkgs.niri-stable}/bin/niri"; # must match the compositor; see ./niri.nix
   jq = "${pkgs.jq}/bin/jq";
@@ -169,6 +193,12 @@ let
   # marquee darkens itself — a 40-minute video is a self-cleaning 40-minute
   # keep-awake. And never pass mpvpaper's own -p/-s: their "wallpaper is hidden"
   # heuristic misfires on a full-output surface that windows partially cover.
+  #
+  # NEVER give the surface an opaque background either — no `background-color`
+  # with a non-zero alpha, no `border-background=color` paired with one. The
+  # surface is the whole output and it is on `top` (see LAYERING): only the video
+  # rectangle may be opaque, or the tenant blacks out every window on this panel.
+  # If that ever happens, Mod+Y → "Go dark" ends it.
   mpvOptions = lib.concatStringsSep " " [
     "video-align-y=-1"
     "keepaspect=yes"
@@ -240,9 +270,12 @@ let
 
     # --collect so a tenant that ran to EOF leaves no unit behind; OnFailure
     # notifies, because a dead or DRM-protected URL otherwise just leaves the
-    # marquee dark with the reason buried in the journal. After= records the
-    # layering requirement (see LAYERING above). Wants= pulls in the keep-awake,
-    # which binds itself back to this unit — see niri-marquee-awake.service.
+    # marquee dark with the reason buried in the journal. After= records that the
+    # band must be *reserved* before anything is painted into it — the video no
+    # longer depends on mapping after the strut to be on top of it, but a tenant
+    # cast before the reserve exists would hang over windows laid out as if the
+    # band weren't there. Wants= pulls in the keep-awake, which binds itself back
+    # to this unit — see niri-marquee-awake.service.
     #
     # mpvpaper takes the connector, not the panel identity — and by *substring*
     # (src/main.c:728-730), so never hand it a connector name that contains
@@ -252,7 +285,7 @@ let
       -p After=niri-marquee-strut.service \
       -p Wants=niri-marquee-awake.service \
       -p OnFailure=niri-marquee-failed.service \
-      -- ${mpvpaper} -l bottom -o "${mpvOptions}" "$conn" "$pick"
+      -- ${mpvpaper} -l top -o "${mpvOptions}" "$conn" "$pick"
   '';
 
   # --- Pause (Mod+Shift+Y) --------------------------------------------------
