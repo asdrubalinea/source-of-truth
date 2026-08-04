@@ -26,7 +26,101 @@
 # topology — it is still a physical replug. If a replug doesn't restore it, the
 # link genuinely can't carry @144 there and the pin has to come down for that
 # profile.
-{
+let
+  # --- THE QD-OLED'S MOUNT: ONE SWITCH --------------------------------------
+  # How that panel physically stands, and the only line to edit to change it:
+  #
+  #   "portrait"  — on its short edge, rotated −90°, logical 1440x2560. Its top
+  #                 edge is then uncomfortably high to read, so the top 810 px
+  #                 are a marquee band (docs/adr/0011).
+  #   "landscape" — the normal way round, logical 2560x1440, no band.
+  #
+  # Everything that follows from the mount is derived below: kanshi's
+  # `transform`, the panel's logical size, where the portable panel stacks under
+  # it in oled-desk-portable, and whether the marquee exists at all. NOTHING
+  # else in the tree needs editing — the rice resolves orientation at runtime
+  # (Mod+G's even split reads the focused output's geometry,
+  # rices/niri/niri.nix:159-167; tofi places itself in percentages,
+  # rices/niri/tofi.nix:42-47), and rices/niri/marquee.nix compiles to nothing
+  # when its option is null.
+  #
+  # Applying a flip: `user-apply`, then restart kanshi
+  # (`systemctl --user restart kanshi`) or replug the panel — kanshi commits a
+  # profile on output changes, not on config reload, so an already-committed
+  # rotation otherwise stays up until something re-triggers the profile.
+  oledMount = "portrait"; # "portrait" | "landscape"
+
+  # Fail the build on a typo rather than silently landing in landscape.
+  oledPortrait =
+    if oledMount == "portrait"
+    then true
+    else if oledMount == "landscape"
+    then false
+    else throw "monitors.nix: oledMount must be \"portrait\" or \"landscape\", got \"${oledMount}\"";
+
+  # THE panel identity for this monitor, in kanshi's make/model/serial form. The
+  # marquee's `panel` is fed from this same binding (below), because the two must
+  # be byte-identical — the marquee matches by make/model/serial through niri's
+  # IPC, never by connector (see PANEL IDENTITY in rices/niri/marquee.nix).
+  oledPanel = "Micro-Star Int'l Co., Ltd. MAG 272U E16 0x01010101";
+
+  # 3840x2160 at scale 1.5 is 2560x1440 logical; the quarter-turn swaps the two.
+  oledLogicalWidth =
+    if oledPortrait
+    then 1440
+    else 2560;
+  oledLogicalHeight =
+    if oledPortrait
+    then 2560
+    else 1440;
+
+  # tempest's 4K QD-OLED (MSI MAG 272U E16), as both profiles that drive it want
+  # it. Connected DIRECT USB-C (DP-alt / USB4), NOT via the CalDigit dock — full
+  # DSC-backed bandwidth and outside the ADR-0008 redock path. HDR/VRR
+  # deliberately off. See docs/adr/0009. Match is by make/model/serial, so the
+  # DRM connector name is incidental — it moves with the physical port (DP-7 on
+  # the old port, DP-2 over USB4).
+  #
+  # Mode pinned to 3840x2160@165 — the panel's real 4K ceiling once it's on a
+  # USB4 port (the earlier @120 cap was the old port's bandwidth; without
+  # @refresh niri defaults to the 60Hz preferred mode). If the logical size comes
+  # back as the full 3840x2160 (or 2160x3840 rotated) instead of the 1.5-scaled
+  # size above, kanshi rejected the fractional scale → move this output to a
+  # niri-native `output` block instead.
+  #
+  # `transform` is set on both mounts rather than omitted in landscape: kanshi
+  # leaves an unmentioned property alone, so switching back has to actively
+  # un-rotate a panel a previous profile already turned. niri counts transforms
+  # COUNTER-clockwise, so 270 is a −90° (clockwise quarter-turn) rotation; "90"
+  # is the other way up.
+  oledOutput = {
+    criteria = oledPanel;
+    mode = "3840x2160@165.000";
+    position = "0,0";
+    scale = 1.5;
+    transform =
+      if oledPortrait
+      then "270"
+      else "normal";
+  };
+in {
+  # Machine policy: the QD-OLED carries the marquee (docs/adr/0011), and it does
+  # so *because* of how the panel is mounted — the band's whole purpose is the
+  # portrait mount's high top edge. So it is derived from oledMount rather than
+  # set independently, and standing the panel back up removes it: null means this
+  # machine has no marquee and none of rices/niri/marquee.nix exists.
+  #
+  # 16:9 of a 2560-wide landscape panel would be 1440 deep — the entire screen —
+  # so the arithmetic agrees with the ergonomics. The rice derives the depth from
+  # `width`; nothing else needs it.
+  rices.niri.marquee =
+    if oledPortrait
+    then {
+      panel = oledPanel;
+      width = oledLogicalWidth;
+    }
+    else null;
+
   services.kanshi = {
     enable = true;
     systemdTarget = "graphical-session.target";
@@ -145,34 +239,16 @@
       }
 
       {
-        # tempest's 4K QD-OLED (MSI MAG 272U E16) as the solo clamshell display:
-        # lid closed, eDP-1 off, OLED the only output. Connected DIRECT USB-C
-        # (DP-alt / USB4), NOT via the CalDigit dock — full DSC-backed bandwidth
-        # and outside the ADR-0008 redock path. scale 1.5 → 2560x1440, then
-        # `transform` rotates it to portrait → logical 1440x2560.
-        # HDR/VRR deliberately off. See docs/adr/0009. Match is by make/model/
-        # serial, so the DRM connector name is incidental — it moves with the
-        # physical port (DP-7 on the old port, DP-2 over USB4).
-        #
-        # Mode pinned to 3840x2160@165 — the panel's real 4K ceiling once it's on
-        # a USB4 port (the earlier @120 cap was the old port's bandwidth; without
-        # @refresh niri defaults to the 60Hz preferred mode). If the logical size
-        # reads 2160x3840 instead of 1440x2560, kanshi rejected the fractional
-        # 1.5 scale → move this output to a niri-native `output` block instead.
-        # Placed ABOVE external-only / fallback so it wins (kanshi applies the
-        # first matching profile in file order).
+        # The QD-OLED as the solo clamshell display: lid closed, eDP-1 off, OLED
+        # the only output. The panel's own settings — mode, scale, rotation — are
+        # `oledOutput` in the let block above; so is the mount switch that decides
+        # whether it runs portrait or landscape. Placed ABOVE external-only /
+        # fallback so it wins (kanshi applies the first matching profile in file
+        # order).
         profile = {
           name = "oled-desk";
           outputs = [
-            {
-              criteria = "Micro-Star Int'l Co., Ltd. MAG 272U E16 0x01010101";
-              mode = "3840x2160@165.000";
-              position = "0,0";
-              scale = 1.5;
-              # Portrait. niri counts transforms COUNTER-clockwise, so 270 is a
-              # −90° (clockwise quarter-turn) rotation; "90" is the other way up.
-              transform = "270";
-            }
+            oledOutput
             {
               criteria = "eDP-1";
               status = "disable";
@@ -185,31 +261,27 @@
         # oled-desk plus the portable 2560x1440 panel stacked BELOW the OLED.
         # kanshi matches the connected set exactly, so oled-desk (MSI + eDP-1)
         # can't cover this three-output case — hence a separate profile.
-        # Geometry: the OLED is portrait (see oled-desk), logical 1440x2560, so
-        # y=2560 is exactly its logical height and the portable — native
-        # 2560x1440 at scale 1.0 — sits under it flush on the LEFT edge only;
-        # being 2560 logical wide it now overhangs the 1440-wide OLED to the
-        # right. Lid stays closed (eDP-1 off), same as oled-desk.
+        # Geometry: the portable's y is the OLED's logical height, so it sits
+        # directly under it, flush on the LEFT edge. In the portrait mount the
+        # OLED is 1440 logical wide, so the 2560-wide portable overhangs it to the
+        # right; in landscape the two are the same logical width and line up
+        # exactly. Lid stays closed (eDP-1 off), same as oled-desk.
         #
         # Both externals at full rate is the intent. If the portable comes up at
         # 640x480 (see the header note — its modes got pruned at probe time), the
         # two are likely sharing one starved DP tunnel: dropping the OLED back to
-        # @120 here frees bandwidth, and replugging the portable onto its own
-        # port rather than the CalDigit TS3 Plus forces a fresh probe.
+        # @120 frees bandwidth, and replugging the portable onto its own port
+        # rather than the CalDigit TS3 Plus forces a fresh probe. The OLED's mode
+        # is shared with oled-desk now, so drop it for THIS profile only with
+        # `oledOutput // {mode = "3840x2160@120.000";}` in place of `oledOutput`.
         profile = {
           name = "oled-desk-portable";
           outputs = [
-            {
-              criteria = "Micro-Star Int'l Co., Ltd. MAG 272U E16 0x01010101";
-              mode = "3840x2160@165.000";
-              position = "0,0";
-              scale = 1.5;
-              transform = "270"; # portrait — see oled-desk
-            }
+            oledOutput
             {
               criteria = "BOE Display Unknown";
               mode = "2560x1440@144.000";
-              position = "0,2560";
+              position = "0,${toString oledLogicalHeight}";
               scale = 1.0;
             }
             {

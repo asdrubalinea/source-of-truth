@@ -4,7 +4,7 @@ Status: accepted — implemented in `rices/niri/marquee.nix`. Two sections were
 amended during implementation, both because a claim read out of waybar's and
 mpvpaper's source assumed *wlroots'* conventions and niri does not follow them:
 *Why a waybar that is not a bar* (panel identity) and *Layer assignment*.
-Checks 1 and 2 below have since passed; 3 and 4 are unrun.
+Checks 1-3 below have since passed; 4 and 5 are unrun.
 
 tempest's QD-OLED (ADR-0009) now runs portrait (`transform "270"`, logical
 1440x2560). Its top edge is uncomfortably high to read, so the top **810 logical
@@ -12,6 +12,10 @@ px of that panel alone** are permanently removed from niri's working area and
 given to a 16:9 video: the **marquee** (see CONTEXT.md). Windows tile in the
 1440x1750 below it with no window rules and no manual sorting, and nothing ever
 moves when a video starts or stops.
+
+Everything here is conditional on that mount, and the mount is one line —
+`oledMount` in `homes/tempest/monitors.nix`. Standing the panel back up landscape
+removes the marquee entirely; see *The marquee is a property of the mount*.
 
 The reserve and the pixels are **two separate, independently-lived processes**:
 an always-on, opaque-black, module-less **waybar** owns the exclusive zone
@@ -200,6 +204,39 @@ over mpv's socket to know which way to toggle.
 
 This makes marquee playback an *implicit* **keep-awake**, a term CONTEXT.md
 previously defined as deliberate-only; that definition has been widened.
+
+## The marquee is a property of the mount, and the mount is one switch
+
+The band answers a physical fact — the panel stands on its short edge, so its top
+edge is too high to read — and it is not wanted on any other geometry. 16:9 of a
+2560-wide landscape panel is 1440 deep: the whole screen. So the marquee is
+*derived* from how the panel is mounted rather than configured next to it, and
+that mount is a single binding, `oledMount` in `homes/tempest/monitors.nix`:
+
+| `oledMount` | kanshi `transform` | logical | marquee |
+| --- | --- | --- | --- |
+| `"portrait"` | `270` | 1440x2560 | `{ panel; width = 1440; }` → an 810-deep band |
+| `"landscape"` | `normal` | 2560x1440 | `null` → nothing in this ADR exists |
+
+Also derived from it: the panel's logical size, and where the portable panel
+stacks under it in the `oled-desk-portable` profile. Both mounts share one
+`oledOutput` attrset and one panel-identity binding, which is also what feeds
+`rices.niri.marquee.panel` — that is why the marquee option moved out of
+`homes/tempest/default.nix` and in beside the kanshi profile. The requirement that
+the two strings stay byte-identical (*Why a waybar that is not a bar*) is now
+structural rather than a comment asking you to remember.
+
+Nothing else in the tree is orientation-aware at build time, which is the reason
+one line is enough: `Mod+G`'s even split reads the focused output's geometry at
+runtime (`rices/niri/niri.nix:159-167`), tofi places itself in percentages of
+whatever output it lands on (`rices/niri/tofi.nix:42-47`), and
+`rices/niri/marquee.nix` is wrapped in `lib.mkIf (… && cfg != null)` so a null
+option leaves no units, no binds and no waybar behind. `transform` is written on
+both mounts rather than omitted in landscape, because kanshi leaves a property it
+doesn't mention alone — switching back has to actively un-rotate the panel.
+
+Flipping it needs `user-apply` plus a kanshi restart or a replug: kanshi commits a
+profile when the output set changes, not when its config is rewritten.
 
 ## Consequences
 

@@ -120,7 +120,10 @@ modes fused into one complaint. The glossary keeps them apart.
   marquee is not a window and belongs to no workspace, so it survives a workspace
   switch with nothing chasing it. Do not describe the marquee as "a PiP that
   stays put". Which panel carries a marquee, and how deep it is, is **machine
-  policy**.
+  policy** — on tempest it follows the OLED's mount (`oledMount` in
+  `homes/tempest/monitors.nix`), so running that panel landscape means the machine
+  has no marquee at all. That is a property of how the panel stands, decided at
+  rebuild time; it does not make the marquee a mode.
 
 ## Media automation (tempest)
 

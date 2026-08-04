@@ -55,16 +55,13 @@ in {
 
   # Activate the niri rice. Its machine policy stays out here: monitor layout is
   # ./monitors.nix. See docs/adr/0004-niri-rice-as-enable-module.md.
+  #
+  # `rices.niri.marquee` (docs/adr/0011) is machine policy too, and it lives in
+  # ./monitors.nix rather than here: the band exists only because the QD-OLED is
+  # mounted portrait, so it is derived from that file's `oledMount` switch
+  # alongside the panel's rotation and logical size, off the one panel-identity
+  # binding both need.
   rices.niri.enable = true;
-
-  # Machine policy: the QD-OLED carries the marquee (docs/adr/0011). `panel` must
-  # stay byte-identical to this panel's kanshi `criteria` in ./monitors.nix —
-  # both waybar and mpvpaper match it by make/model/serial, never by connector.
-  # The rice derives the 810px depth as 16:9 of `width`; nothing else needs it.
-  rices.niri.marquee = {
-    panel = "Micro-Star Int'l Co., Ltd. MAG 272U E16 0x01010101";
-    width = 1440; # logical width in portrait: 3840x2160 at scale 1.5, transform 270
-  };
 
   home = {
     username = "irene";
