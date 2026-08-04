@@ -142,6 +142,126 @@ let
     ${wpctl} set-default "$id"
   '';
 
+  # --- Even split (Mod+G) ---------------------------------------------------
+  # "Halve the screen between the focused window and its neighbour" — resolved
+  # against the ORIENTATION of the output we're on. niri stacks windows only
+  # *inside* a column, so the same intent needs two different layouts: on a
+  # landscape output an even split is two half-width columns side by side, while
+  # on a portrait one (the QD-OLED at transform 270 — see
+  # homes/tempest/monitors.nix) it is ONE full-width column holding both windows,
+  # halved top and bottom. Splitting horizontally on a 1440x2560 panel is what we
+  # do NOT want: two 720-wide slivers.
+  #
+  # The vertical halving resets each window's height to *automatic* rather than
+  # pinning 50%: niri divides a column's leftover space equally among auto-height
+  # windows, so "auto everywhere" already IS the even split, and it stays right
+  # for a column that ended up holding three.
+  #
+  # Each branch also undoes the other's shape, so the binding still does what it
+  # says after the output is rotated: in portrait it consumes the neighbouring
+  # column into the focused one, in landscape it expels a stacked window back out
+  # into its own column.
+  #
+  # A floating window has no place in the scrolling layout, so there is nothing to
+  # split against and we no-op.
+  evenSplit = pkgs.writeShellScript "niri-even-split" ''
+    set -u
+
+    # Portrait = the output is taller than it is wide, which is exactly what a 90°
+    # or −90° `transform` does to a landscape panel (1440x2560 on the rotated
+    # QD-OLED). Deliberately NOT read off `.logical.transform`: its JSON spelling
+    # is not one scheme — an unrotated output reports "Normal" while a rotated one
+    # reports "270" — so matching names is a trap, whereas the geometry is the
+    # thing we actually care about (and it does the right thing for a
+    # natively-portrait panel too).
+    portrait=$(${niri} msg --json focused-output \
+      | ${jq} -r 'if (.logical.height // 0) > (.logical.width // 0) then 1 else 0 end')
+
+    # Layout facts for the focused window in one query: how many windows share
+    # its column, and how many sit in columns to its right / to its left. The
+    # right/left counts double as "is there a column that way at all".
+    facts=$(${niri} msg --json windows | ${jq} -r '
+      ([.[] | select(.is_focused)] | first) as $f
+      | if $f == null or $f.layout.pos_in_scrolling_layout == null then empty
+        else
+          ($f.layout.pos_in_scrolling_layout[0]) as $col
+          | [ .[]
+              | select(.workspace_id == $f.workspace_id)
+              | .layout.pos_in_scrolling_layout // empty
+              | .[0]
+            ] as $cols
+          | "\([$cols[] | select(. == $col)] | length)"
+            + " \([$cols[] | select(. > $col)] | length)"
+            + " \([$cols[] | select(. < $col)] | length)"
+        end
+    ')
+    [ -n "$facts" ] || exit 0
+    # shellcheck disable=SC2086
+    set -- $facts
+    mine=$1
+    right=$2
+    left=$3
+
+    if [ "$portrait" = 1 ]; then
+      if [ "$mine" -lt 2 ]; then
+        # Alone in my column: pull the neighbour in. `consume-window-into-column`
+        # only ever eats rightwards, so with no column to the right we step left
+        # and let that column consume US.
+        if [ "$right" -gt 0 ]; then
+          ${niri} msg action consume-window-into-column
+        elif [ "$left" -gt 0 ]; then
+          ${niri} msg action focus-column-left
+          ${niri} msg action consume-window-into-column
+        else
+          exit 0 # sole window on the workspace — nothing to split with
+        fi
+      fi
+
+      # The stack owns the full width of a portrait screen; each window in it
+      # gets an equal share of the height.
+      ${niri} msg action set-column-width "100%"
+      ${niri} msg --json windows | ${jq} -r '
+        ([.[] | select(.is_focused)] | first) as $f
+        | if $f == null or $f.layout.pos_in_scrolling_layout == null then empty
+          else
+            ($f.layout.pos_in_scrolling_layout[0]) as $col
+            | .[]
+            | select(.workspace_id == $f.workspace_id)
+            | select((.layout.pos_in_scrolling_layout // [-1])[0] == $col)
+            | .id
+          end
+      ' | while read -r id; do
+        ${niri} msg action reset-window-height --id "$id"
+      done
+      exit 0
+    fi
+
+    # Landscape. A stacked column has to come apart first: expelling puts the
+    # focused window in a fresh column to the right of the rest, so the pair to
+    # halve is known — no neighbour search needed.
+    if [ "$mine" -gt 1 ]; then
+      ${niri} msg action expel-window-from-column
+      ${niri} msg action set-column-width "50%"
+      ${niri} msg action focus-column-left
+      ${niri} msg action set-column-width "50%"
+      ${niri} msg action focus-column-right
+      exit 0
+    fi
+
+    # Already one window per column: resize the focused column and its neighbour
+    # (preferring the one to the right), then hand focus back.
+    ${niri} msg action set-column-width "50%"
+    if [ "$right" -gt 0 ]; then
+      ${niri} msg action focus-column-right
+      ${niri} msg action set-column-width "50%"
+      ${niri} msg action focus-column-left
+    elif [ "$left" -gt 0 ]; then
+      ${niri} msg action focus-column-left
+      ${niri} msg action set-column-width "50%"
+      ${niri} msg action focus-column-right
+    fi
+  '';
+
   # mkScratchpad builds the two scripts that drive one app's scratchpad. `spawn`
   # is the shell command launched (backgrounded) when the window doesn't exist.
   #   init   — launch-if-dead, wait for the window, then make it a scratchpad
@@ -411,27 +531,10 @@ lib.mkIf config.rices.niri.enable {
         "Mod+F".action.fullscreen-window = { };
         "Mod+M".action.maximize-column = { };
 
-        # Even 50/50 split: resize focused column + its neighbor to 50% each.
-        "Mod+G".action.spawn = [
-          "sh"
-          "-c"
-          ''
-            set -e
-            n=${pkgs.niri-unstable}/bin/niri
-            "$n" msg action set-column-width "50%"
-            before=$("$n" msg --json focused-window | ${pkgs.jq}/bin/jq -r .id)
-            "$n" msg action focus-column-right
-            after=$("$n" msg --json focused-window | ${pkgs.jq}/bin/jq -r .id)
-            if [ "$before" = "$after" ]; then
-              "$n" msg action focus-column-left
-              "$n" msg action set-column-width "50%"
-              "$n" msg action focus-column-right
-            else
-              "$n" msg action set-column-width "50%"
-              "$n" msg action focus-column-left
-            fi
-          ''
-        ];
+        # Even 50/50 split of the focused window and its neighbour, along
+        # whichever axis suits the output's orientation — two half-width columns
+        # in landscape, one full-width column halved top/bottom in portrait.
+        "Mod+G".action.spawn = [ "${evenSplit}" ];
 
         # Focus movement
         "Mod+Left".action.focus-column-left = { };
