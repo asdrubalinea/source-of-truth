@@ -92,6 +92,25 @@
 
         backdrop.blur_intensity = 0.1;
 
+        # wezterm asks for toasts that never go away. Captured from its live
+        # Notify call: app_name="wezterm", urgency=critical, expire_timeout=0 —
+        # and 0 is the spec's "never expire" (-1 is "daemon default"), so
+        # noctalia was right to keep them up. wezterm has no knob for this; the
+        # only notification-related field in its config schema is
+        # notification_handling.
+        #
+        # A matched filter with allow_permanent = false rewrites timeout 0 to
+        # noctalia's kDefaultNotificationTimeout (6s); add override_duration
+        # (milliseconds) here to choose a different one. `match` is a
+        # case-insensitive token compared against app name, desktop entry or
+        # category, so "wezterm" hits the app name. Every other filter field
+        # (show_toast / save_history / play_sound) defaults true, so this only
+        # changes the expiry.
+        notification.filter.wezterm = {
+          match = "wezterm";
+          allow_permanent = false;
+        };
+
         shell = {
           # font_family is set by the stylix noctalia target (fonts.sansSerif.name).
           screen_corners.enabled = true;
