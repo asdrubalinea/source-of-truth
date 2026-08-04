@@ -117,23 +117,12 @@ let
         else if (label == want) { print $1; exit }
       }'
 
-    # Override tofi's fullscreen launcher geometry into a centered card sized to the
-    # sink count, with a legible font (stylix's size is tuned for the fullscreen drun
-    # launcher and reads tiny in a small card). Colors come from tofi.nix.
-    n=$(printf '%s\n' "$sinks" | ${gawk} 'END { print NR }')
-    height=$((160 + n * 56))
-
+    # Geometry, font and colours come from ./tofi.nix — do not add --width,
+    # --height or --anchor here. A sized tofi window is unreadable on tempest's
+    # portrait panel; that file says why, with numbers.
     label=$(printf '%s\n' "$sinks" \
       | ${gawk} -F '\t' -v cur="$current" -v mode=show "$mklabel" \
-      | ${tofiBin} \
-          --prompt-text "Output: " \
-          --anchor center \
-          --width 760 --height "$height" \
-          --font-size 26 \
-          --padding-top 36 --padding-bottom 36 \
-          --padding-left 44 --padding-right 44 \
-          --result-spacing 18 --num-results "$n" \
-          --border-width 2 --corner-radius 16) || exit 0
+      | ${tofiBin} --prompt-text "Output: ") || exit 0
     [ -n "$label" ] || exit 0
 
     id=$(printf '%s\n' "$sinks" \
