@@ -11,8 +11,8 @@
       # Access the RTL-SDR dongle without root (udev marks it GROUP=plugdev,
       # MODE=0660; see hardware/rtl-sdr.nix).
       "plugdev"
-      # Read system-unit journals unprivileged (waybar backup badge click →
-      # `journalctl -xeu borgbackup-job-…`; see rices/niri/waybar).
+      # Read system-unit journals unprivileged, e.g. `journalctl -xeu
+      # borgbackup-job-…` when a backup notification says a leg failed.
       "systemd-journal"
     ];
 

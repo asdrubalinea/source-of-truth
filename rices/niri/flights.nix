@@ -1,8 +1,9 @@
-# Nearest-flight radar server (github:asdrubalinea/flights), backing the
-# custom/flights Waybar widget defined in ./waybar/default.nix. The HM module
-# runs flights-server as a systemd user service tied to graphical-session.target
-# (one always-on poller — the waybar client never starts its own) and puts the
-# `flights` (TUI) and `flights-waybar` clients on PATH.
+# Nearest-flight radar server (github:asdrubalinea/flights). The HM module runs
+# flights-server as a systemd user service tied to graphical-session.target (one
+# always-on poller — a client never starts its own) and puts the `flights` (TUI)
+# and `flights-waybar` clients on PATH. Nothing on the desktop reads it anymore:
+# the bar widget it used to feed went away with waybar in the Noctalia migration
+# (ADR 0003), and Noctalia v5 can't poll a script. The TUI is the interface now.
 #
 # Set [home] lat/lon in ~/.config/flights/config.toml so distances measure from
 # here; everything else has sane defaults.

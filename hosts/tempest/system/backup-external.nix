@@ -177,7 +177,7 @@ let
       # Surface external-SSD health while the pool is still imported (the only
       # chance). A pool can read ONLINE yet carry checksum/read/write or
       # scrub-found errors; `status -x` catches those. A non-zero exit here fails
-      # the unit, which lights the waybar backup badge red.
+      # the unit, which latches the syncoid leg as **failed** (CONTEXT.md).
       if ! zpool status -x ${pool} | grep -q "is healthy"; then
         log "POOL '${pool}' UNHEALTHY:"
         zpool status -v ${pool} || true
