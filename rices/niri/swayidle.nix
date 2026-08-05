@@ -75,6 +75,23 @@ let
     # Small settle before the screen is frozen for s2idle.
     ${pkgs.coreutils}/bin/sleep 0.3
   '';
+
+  # On AC power we keep the machine awake (services like the auxologico bot keep
+  # running, backups complete) but the screens still power off via the 900s
+  # timer; only on battery do we actually suspend. swayidle's suspend timeout
+  # (1200s) runs this wrapper instead of a bare `systemctl suspend`. The check
+  # reads sysfs directly (no extra deps): suspend only when EVERY real battery
+  # reports Discharging. On mains the battery reads Charging / Full / Not
+  # charging, so the wrapper no-ops and the desktop just sits with screens off,
+  # fully awake — the Framework has no S3, so s2idle is the deep state, which is
+  # exactly what we want to avoid while charging.
+  suspendOrOnBattery = pkgs.writeShellScript "niri-suspend-or-not" ''
+    for s in /sys/class/power_supply/*/status; do
+      [ -r "$s" ] || continue
+      [ "$(cat "$s")" != "Discharging" ] && exit 0
+    done
+    exec ${pkgs.systemd}/bin/systemctl suspend
+  '';
 in
 lib.mkIf config.rices.niri.enable {
   # Lock is handled by swaylock (NOT Noctalia's lockscreen — see the let block for
@@ -95,20 +112,27 @@ lib.mkIf config.rices.niri.enable {
         command = "${pkgs.systemd}/bin/loginctl lock-session";
       }
       {
-        timeout = 900;
+        # OLED anti burn-in: power the panels off early (120s). This is the
+        # earliest timer on purpose — a dark, off panel is the best burn-in
+        # protection, so the drift screensaver (300s) and idle lock (600s)
+        # below are effectively unreachable in the on-screen state, but kept
+        # for the manual/rental paths where the screen is left on.
         # niri-stable: same package as the running compositor, or `niri msg`
         # bails out on a version mismatch (see the `niri` binding in niri.nix).
+        timeout = 120;
         command = "${pkgs.niri-stable}/bin/niri msg action power-off-monitors";
         resumeCommand = "${pkgs.niri-stable}/bin/niri msg action power-on-monitors";
       }
       {
-        # 20 min: actually suspend. Nothing else here suspends on inactivity —
-        # logind only acts on the lid — so without this the laptop just sits
-        # with its screen off, fully awake and draining. s2idle (S0ix) is the
-        # only suspend state this Framework exposes (firmware has no S3) and
-        # ZFS root rules out hibernation, so plain suspend is the deep state.
+        # 20 min: suspend on battery only. On AC the wrapper above no-ops (the
+        # machine stays awake with screens off, so services keep running); on
+        # battery it falls through to systemctl suspend and the box drops to
+        # s2idle (S0ix), the only suspend state this Framework exposes. Nothing
+        # else here suspends on inactivity — logind only acts on the lid — so
+        # without this the laptop would just sit with its screen off on battery,
+        # fully awake and draining.
         timeout = 1200;
-        command = "${pkgs.systemd}/bin/systemctl suspend";
+        command = "${suspendOrOnBattery}";
       }
     ];
     events = {
