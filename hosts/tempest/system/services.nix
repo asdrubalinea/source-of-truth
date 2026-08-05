@@ -135,7 +135,7 @@
   # environmentFile holds PHP_SESSION_ID + BEARER_TOKEN — created out-of-band, not
   # in the repo (see .env.example upstream); the unit fails to start until it exists.
   services.auxologico-check = {
-    enable = false;
+    enable = true;
     startDate = "01/07/2026";
     environmentFile = "/persist/auxologico-check/env";
     dataDir = "/persist/auxologico-check";
