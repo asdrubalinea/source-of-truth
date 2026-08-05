@@ -31,13 +31,16 @@ lib.mkIf config.rices.niri.enable {
       -- resize the window to match.
       config.adjust_window_size_when_changing_font_size = false
 
-      -- Bell: play a sound via paplay since SystemBeep doesn't work on Wayland
+      -- Bell: play a sound via paplay since SystemBeep doesn't work on Wayland.
+      -- No visual flash — a 0-duration visual_bell keeps the whole window from
+      -- blinking red on every BEL (backspace-on-empty, arrow-up on a bash
+      -- history edge over ssh).
       config.audible_bell = "Disabled"
       config.visual_bell = {
         fade_in_function = "EaseIn",
-        fade_in_duration_ms = 75,
+        fade_in_duration_ms = 0,
         fade_out_function = "EaseOut",
-        fade_out_duration_ms = 75,
+        fade_out_duration_ms = 0,
       }
 
       wezterm.on("bell", function(window, pane)
