@@ -48,7 +48,7 @@ let
   # (`systemctl --user restart kanshi`) or replug the panel — kanshi commits a
   # profile on output changes, not on config reload, so an already-committed
   # rotation otherwise stays up until something re-triggers the profile.
-  oledMount = "portrait"; # "portrait" | "landscape"
+  oledMount = "landscape"; # "portrait" | "landscape"
 
   # Fail the build on a typo rather than silently landing in landscape.
   oledPortrait =
