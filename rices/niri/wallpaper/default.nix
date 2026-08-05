@@ -10,4 +10,5 @@ lib.mkIf config.rices.niri.enable {
   home.file."Pictures/Wallpapers/shinobu-kocho-dark.png".source = ./shinobu-kocho-dark.png;
   home.file."Pictures/Wallpapers/mitsuri-kanroji-3840x2160-22627.png".source = ./mitsuri-kanroji-3840x2160-22627.png;
   home.file."Pictures/Wallpapers/kawaii-cat-girl-5120x2880-26545.png".source = ./kawaii-cat-girl-5120x2880-26545.png;
+  home.file."Pictures/Wallpapers/vintage-car-gta-6-3840x2160-26771.jpg".source = ./vintage-car-gta-6-3840x2160-26771.jpg;
 }
