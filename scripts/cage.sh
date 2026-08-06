@@ -276,7 +276,9 @@ stop_session() {
     [ "$name" != "$wanted" ] && continue
     found=1
     if is_sandboxed_pid "$pid"; then
-      zellij kill-session "$name" 2>/dev/null || true
+      zellij kill-session "$name" >/dev/null 2>/dev/null || true
+      zellij delete-session "$name" >/dev/null 2>/dev/null || true
+      rm -f "$XDG_RUNTIME_DIR"/zellij/*/"$wanted" 2>/dev/null || true
       echo "cage: stopped $name"
       return 0
     fi
@@ -296,7 +298,9 @@ stop_all() {
     if is_sandboxed_pid "$pid"; then
       name="$(server_session "$pid")"
       [ -n "$name" ] || continue
-      zellij kill-session "$name" 2>/dev/null || true
+      zellij kill-session "$name" >/dev/null 2>/dev/null || true
+      zellij delete-session "$name" >/dev/null 2>/dev/null || true
+      rm -f "$XDG_RUNTIME_DIR"/zellij/*/"$name" 2>/dev/null || true
       echo "cage: stopped $name"
       found=1
     fi
@@ -318,7 +322,11 @@ case "$ACTION" in
       fi
     else
       # No live server: clear any stale session entry, then start fresh.
-      zellij kill-session "$NAME" 2>/dev/null || true
+      # delete-session works even when the server is dead (kill-session only
+      # talks to a live one). Also nuke any stale socket file the dead server
+      # left behind.
+      zellij delete-session "$NAME" >/dev/null 2>/dev/null || true
+      rm -f "$XDG_RUNTIME_DIR"/zellij/*/"$NAME" 2>/dev/null || true
       if [ "$cwd" = "$HOME" ]; then
         echo "cage: the sandbox has an empty tmpfs HOME; cd into a workspace dir first" >&2
         exit 1
@@ -328,8 +336,9 @@ case "$ACTION" in
       # When the creating client detaches it is PID 1 of the namespace;
       # the kernel then reaps every process in it, tearing the session down
       # automatically. The server dies with it before zellij can remove its
-      # socket, so prune any stale per-session entry here (globbing the
-      # socket-version dir, which is agnostic to its name).
+      # socket and the session entry from its internal state, so prune them
+      # here (globbing the socket-version dir, which is agnostic to its name).
+      zellij delete-session "$NAME" >/dev/null 2>/dev/null || true
       rm -f "$XDG_RUNTIME_DIR"/zellij/*/"$NAME" 2>/dev/null || true
     fi
     ;;
