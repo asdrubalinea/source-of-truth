@@ -126,7 +126,11 @@ Options:
 Start or attach to a session.  If the session is already running (and is a
 sandbox), attach to it.  Otherwise create a new isolated sandbox.
 
-The default session name is `sandbox`.
+When no name is given, the session name is derived from the current working
+directory's basename.  This means running `cage` from different directories
+creates separate sandbox sessions — each directory gets its own isolated
+session — instead of all attaching to a single `sandbox` session.  A user
+who wants a custom or shared session can still pass an explicit name.
 
 ### 4.2.  `cage agent [name]`
 

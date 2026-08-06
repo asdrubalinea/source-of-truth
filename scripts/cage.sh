@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Isolated persistent sandbox: bubblewrap + zellij.
 #
-#   cage                      start OR attach to the 'sandbox' session
+#   cage                      start OR attach to a session named from cwd
 #   cage <name>               same, named session
 #   cage start [name]         start a new isolated sandbox
 #   cage agent [name]         alias for start (kept for backwards compat)
@@ -45,6 +45,14 @@ usage() {
   echo "usage: cage [start|attach|agent|list|stop|stop-all] [name] [--net|--nonet]" >&2
 }
 
+# Derive a default session name from the current working directory (basename)
+# when the user does not supply one.  This way `cage` from different directories
+# creates separate sandbox sessions instead of all attaching to a single
+# "sandbox" session.  Users who want a custom name can still run `cage <name>`.
+default_session_name() {
+  basename "$PWD"
+}
+
 # Parse positionals (subcommand, name) and flag options. The network flag
 # only matters at session creation; re-attaching reuses the existing mounts.
 POS=()
@@ -74,7 +82,7 @@ case "$ACTION" in
     ;;
   "")
     ACTION="attach"
-    NAME="${NAME:-sandbox}"
+    NAME="${NAME:-$(default_session_name)}"
     ;;
   *)
     # Short form: `cage <name>` means start-or-attach a named session.
@@ -82,7 +90,7 @@ case "$ACTION" in
     ACTION="attach"
     ;;
 esac
-NAME="${NAME:-sandbox}"
+NAME="${NAME:-$(default_session_name)}"
 
 sandbox_cmd() {
   local cwd="$1"
