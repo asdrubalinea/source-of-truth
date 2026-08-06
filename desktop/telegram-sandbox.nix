@@ -10,15 +10,14 @@ let
 
   telegramBin = "${pkgs.telegram-desktop}/bin/Telegram";
 
-  firejailInvocation = lib.concatStringsSep " " (
+  firejailCmd = lib.concatStringsSep " " (
     [ "/run/wrappers/bin/firejail" ] ++ firejailArgs ++ [ "--" telegramBin ]
   );
 
-  telegramSandboxed = pkgs.writeShellScriptBin "telegram-sandboxed" ''
-    #!${pkgs.stdenv.shell}
-    set -euo pipefail
-    exec ${firejailInvocation} "$@"
-  '';
+  telegramSandboxed = pkgs.writeShellApplication {
+    name = "telegram-sandboxed";
+    text = builtins.replaceStrings [ "@firejailCmd@" ] [ firejailCmd ] (builtins.readFile ./telegram-sandbox.sh);
+  };
 in
 {
   home.packages = [ telegramSandboxed ];
@@ -29,7 +28,7 @@ in
     icon = "org.telegram.desktop";
     type = "Application";
     terminal = false;
-    exec = "${firejailInvocation} -- %U";
+    exec = "${firejailCmd} -- %U";
     categories = [ "Chat" "Network" "InstantMessaging" "Qt" ];
     mimeType = [ "x-scheme-handler/tg" "x-scheme-handler/tonsite" ];
 
@@ -46,7 +45,7 @@ in
     actions.quit = {
       name = "Quit Telegram";
       icon = "application-exit";
-      exec = "${firejailInvocation} -quit";
+      exec = "${firejailCmd} -quit";
     };
   };
 }

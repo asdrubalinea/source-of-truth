@@ -42,6 +42,7 @@ in
 
     ../misc/fish.nix
     ../desktop/tmux.nix
+    ../desktop/zellij.nix
     ../desktop/warp.nix
 
     ../desktop/home-packages.nix

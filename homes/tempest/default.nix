@@ -34,6 +34,7 @@ in {
     # ../../desktop/emacs
     ../../desktop/mail
     ../../desktop/tmux.nix
+    ../../desktop/zellij.nix
     ../../desktop/warp.nix
     ../../desktop/home-packages.nix
     ../../desktop/mimeapps.nix
@@ -46,6 +47,7 @@ in {
     ../../scripts/update-home.nix
     ../../scripts/port-forward.nix
     ../../scripts/claude-sandboxed.nix
+    ../../scripts/cage.nix
     ../../scripts/keep-awake.nix
     ../../scripts/ps5-audio.nix
 

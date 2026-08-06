@@ -107,6 +107,17 @@ lib.mkIf config.rices.niri.enable {
         { key = "Tab", mods = "ALT", action = act.ActivateLastTab },
         -- Jump to any tab by name.
         { key = "e", mods = "CTRL|SHIFT", action = act.ShowLauncherArgs { flags = "FUZZY|TABS" } },
+
+        -- Ctrl+Backspace and Super/Cmd+Backspace → delete the word left of cursor.
+        --
+        -- WezTerm sends the modern kitty-protocol CSI u sequence (ESC [ 127 ; 5 u)
+        -- for these when enable_kitty_keyboard = true, but prompt_toolkit 3.0.52
+        -- (Hermes's TUI input library) doesn't parse CSI u — the raw bytes get
+        -- echoed literally as "[127;5u". Override with ESC+Ctrl+H (0x1b 0x08),
+        -- the traditional sequence that prompt_toolkit's Emacs bindings already
+        -- map to backward_kill_word.
+        { key = "Backspace", mods = "CTRL", action = act.SendString "\x1b\x08" },
+        { key = "Backspace", mods = "SUPER", action = act.SendString "\x1b\x08" },
         -- Name the current tab (pins the title against shell OSC updates).
         {
           key = ",",
