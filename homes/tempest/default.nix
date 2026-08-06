@@ -76,6 +76,19 @@ in {
       # (pkgs.callPackage ../../packages/cider-2.nix { })
     ];
 
+    # Pre-configure hyfetch (aliased to "neofetch" and "fetch") for the
+    # lesbian pride flag. The config file is consumed by hyfetch --gen and
+    # on every run; see https://github.com/hyfetch-project/hyfetch.
+    file.".config/hyfetch.json" = {
+      text = builtins.toJSON {
+        preset = "lesbian";
+        backend = "neofetch";
+        mode = "rgb";
+        light_dark = "dark";
+        distro = null;
+      };
+    };
+
     # persistence."/persist/home/irene" = {
     #   directories = [
     #     "Downloads"
