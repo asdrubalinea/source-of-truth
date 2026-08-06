@@ -7,6 +7,14 @@
   # (not overlays.shared-nixpkgs) so they stay built against its pinned nixpkgs
   # and cache.numtide.com actually hits; see flake.nix.
   llm-agents = inputs.llm-agents.packages.${pkgs.stdenv.hostPlatform.system};
+
+  # Electron cannot infer a password store from the standalone Niri session, so
+  # Mailspring otherwise falls back to unencrypted basic_text and refuses to
+  # save account credentials. greetd's PAM stack already starts and unlocks
+  # GNOME Keyring; tell Electron to use its Secret Service explicitly.
+  mailspring-with-keyring = pkgs.mailspring.override {
+    commandLineArgs = "--password-store=gnome-libsecret";
+  };
 in {
   home.packages = with pkgs; [
     # --- Core system utilities ---
@@ -182,6 +190,7 @@ in {
     telegram-desktop
     signal-desktop
     thunderbird
+    mailspring-with-keyring
     # vesktop
     zoom-us
     claude-code
