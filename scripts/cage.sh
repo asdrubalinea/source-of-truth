@@ -113,6 +113,13 @@ sandbox_cmd() {
     --ro-bind /run/current-system /run/current-system
     --ro-bind /run/wrappers /run/wrappers
     --bind "$XDG_RUNTIME_DIR/zellij" "$XDG_RUNTIME_DIR/zellij"
+    # Wayland socket: bind-mount the compositor's socket so sandboxed tools
+    # (wl-copy/wl-paste for clipboard, grim/slurp for screenshots) can
+    # interact with the host display server. Deliberately opt-in via
+    # --bind-try: when WAYLAND_DISPLAY is unset (e.g. SSH session) or the
+    # socket path doesn't exist, the mount is silently skipped — no leak on
+    # headless usage.
+    --bind-try "$XDG_RUNTIME_DIR/$WAYLAND_DISPLAY" "$XDG_RUNTIME_DIR/$WAYLAND_DISPLAY"
     --tmpfs "$HOME"
     --ro-bind-try "$HOME/.nix-profile" "$HOME/.nix-profile"
     --ro-bind-try "$HOME/.local/share/opencode/auth.json" \
