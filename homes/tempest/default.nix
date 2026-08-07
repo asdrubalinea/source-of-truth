@@ -82,10 +82,19 @@ in {
     file.".config/hyfetch.json" = {
       text = builtins.toJSON {
         preset = "lesbian";
-        backend = "neofetch";
         mode = "rgb";
+        auto_detect_light_dark = false;
         light_dark = "dark";
+        lightness = null;
+        color_align.mode = "horizontal";
+        backend = "neofetch";
+        args = null;
         distro = null;
+        pride_month_disable = false;
+        custom_ascii_path = null;
+        custom_presets = null;
+        palette_glyph = null;
+        palette_type = null;
       };
     };
 
