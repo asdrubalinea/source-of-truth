@@ -244,6 +244,9 @@ The sandbox SHALL set the following environment variables:
 - `HOME` — same value as the host's `HOME`
 - `USER` — same value as the host's `USER`
 - `SANDBOXED` — set to `cage` (a marker the user can check)
+- `TMPDIR` — set to `/tmp`, the sandbox-local tmpfs; host dev-shell temp paths
+  are not inherited because their parent directories do not exist inside the
+  fresh tmpfs
 
 The hostname inside the sandbox SHALL be set to `sandbox-<session>`.
 

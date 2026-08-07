@@ -112,6 +112,9 @@ sandbox_cmd() {
     --proc /proc
     --dev-bind /dev /dev
     --tmpfs /tmp
+    # Host dev shells can point TMPDIR below /tmp. That path disappears when
+    # the sandbox replaces /tmp, so always use the sandbox-local tmpfs root.
+    --setenv TMPDIR /tmp
     --ro-bind /sys /sys
     --ro-bind /bin /bin
     --ro-bind /usr/bin /usr/bin
