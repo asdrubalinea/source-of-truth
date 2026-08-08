@@ -22,8 +22,9 @@ There is exactly one sandbox mode, and it is **isolated**:
 
 - The user's home directory is a fresh tmpfs inside the sandbox.  Only the
   working directory at launch time is writable from the host.
-- Only the zellij socket subdirectory of the runtime directory is reachable;
-  ssh-agent, gnupg, Wayland, D-Bus, PipeWire and keyrings are NOT reachable.
+- Only this session's own zellij socket directory is reachable; ssh-agent,
+  gnupg, D-Bus, PipeWire and keyrings are NOT reachable.  (The Wayland socket
+  IS bound when `WAYLAND_DISPLAY` is set — see §3.4.)
 - The user's home-manager profile, opencode configuration, and opencode auth
   file are mounted read-only.
 - By default the sandbox shares the host network (agents need outbound HTTPS);
@@ -39,8 +40,13 @@ exposes the writable home to the sandbox.
   net) created by bubblewrap.  Processes inside the sandbox see distinct
   process IDs, host names, IPC resources, and mount points.
 - **Session**:  a zellij session that runs inside the sandbox.  Each session
-  has a name, a server process, and a Unix socket under
-  `$XDG_RUNTIME_DIR/zellij/contract_version_1/<session>`.
+  has a name, a server process, and a Unix socket.  Inside the sandbox that
+  socket is at `$XDG_RUNTIME_DIR/zellij/contract_version_1/<session>`; on the
+  host it lives in the session's private directory,
+  `$XDG_RUNTIME_DIR/cage/<session>/contract_version_1/<session>`.
+- **Session name**:  sanitised to `[A-Za-z0-9._-]` before use, because it
+  composes a host path that teardown removes recursively.  Characters outside
+  that set are replaced with `-`.
 - **Owner**:  the `cage` invocation that created the session (the process
   running bubblewrap).  The owner's zellij client is PID 1 of the namespace.
 - **Attach**:  connecting a zellij client from the host to the zellij server
@@ -64,21 +70,36 @@ created and the sandbox is fully offline (only the loopback device exists).
 ### 3.2.  Server-in-namespace trick
 
 The zellij server process runs inside the namespace.  Its Unix socket is
-written to the shared `$XDG_RUNTIME_DIR` path.  Because the socket and the
-path are bind-mounted read-write between host and sandbox, a zellij client
-invoked from the host can connect to the server that runs inside the
-namespace.  Every pane, window, or subprocess that the client spawns is then
-automatically inside the namespace.
+written to `$XDG_RUNTIME_DIR/zellij/` as seen from inside the sandbox, which
+is a bind mount of the session's private host directory
+`$XDG_RUNTIME_DIR/cage/<session>/`.  Because that directory is bind-mounted
+read-write between host and sandbox, a zellij client invoked from the host can
+connect to the server that runs inside the namespace.  Every pane, window, or
+subprocess that the client spawns is then automatically inside the namespace.
+
+The bind MUST be the per-session directory and MUST NOT be the shared
+`$XDG_RUNTIME_DIR/zellij/`.  Binding the shared directory places every *host*
+session's control socket inside every sandbox, which is a complete escape: a
+process in the sandbox runs `zellij attach <host-session>` and reaches a server
+living in the host namespace.  The host-session guards in §4 are host-side CLI
+checks and do not constrain a process that invokes `zellij` directly.
 
 The procedure is:
 
 1.  The host shell starts `cage`.
-2.  `cage` invokes `bwrap` with the namespace flags and mounts.
+2.  `cage` creates `$XDG_RUNTIME_DIR/cage/<session>/` and invokes `bwrap` with
+    the namespace flags and mounts, binding it onto the sandbox's
+    `$XDG_RUNTIME_DIR/zellij`.
 3.  Inside the namespace, `bwrap` execs `zellij -s <session>`.
-4.  The zellij server opens its socket in the shared directory.
-5.  The host shell (or any other terminal) runs `zellij attach <session>`,
-    which connects to the socket and reaches the server inside the namespace.
+4.  The zellij server opens its socket in that directory.
+5.  The host shell (or any other terminal) runs `cage attach <session>`, which
+    points a zellij client at the session's private directory via
+    `XDG_RUNTIME_DIR` and reaches the server inside the namespace.
 6.  Every pane created by the attached client runs inside the namespace.
+
+Because the host client needs the per-session `XDG_RUNTIME_DIR`, a bare
+`zellij attach <session>` from the host no longer finds a sandboxed session;
+use `cage attach <session>`.
 
 ### 3.3.  Lifecycle: sessions end on detach
 
@@ -103,11 +124,16 @@ Consequences:
 
 ### 3.4.  Socket isolation
 
-Only the `$XDG_RUNTIME_DIR/zellij/` subdirectory is bound read-write between
-host and sandbox.  Desktop sockets (Wayland, PipeWire, dbus, ssh-agent, gnupg,
-keyring) are NOT reachable from inside the sandbox.  The `SSH_AUTH_SOCK`
-environment variable, if set, points to a path that does not exist inside the
-sandbox.
+Only the session's own `$XDG_RUNTIME_DIR/cage/<session>/` directory is bound
+read-write between host and sandbox.  PipeWire, D-Bus, ssh-agent, gnupg and
+keyring sockets are NOT reachable: they are filesystem paths outside the bind
+set, so `SSH_AUTH_SOCK` and `DBUS_SESSION_BUS_ADDRESS` point at paths that do
+not exist inside the sandbox.
+
+The Wayland socket IS bound when `WAYLAND_DISPLAY` is set, so that `wl-copy`,
+`wl-paste`, `grim` and `slurp` work inside the sandbox.  This grants clipboard
+read/write and screen capture against the host session, and is a deliberate
+trade-off rather than an oversight.
 
 ## 4.  Command Reference
 
@@ -163,10 +189,15 @@ is only stopped if its server process has a `bwrap` ancestor.
 
 ### 4.7.  Session-name conflicts with host zellij
 
-Because host and sandbox zellij servers share the same socket directory
-naming, a requested name MAY resolve to a host session.  In that case
-`start`/`attach` MUST refuse to attach and `stop` MUST refuse to stop.  The
-tool never silently operates on a host session.
+Host and sandbox zellij servers share one session-name space, so a requested
+name MAY resolve to a host session.  In that case `start`/`attach` MUST refuse
+to attach and `stop` MUST refuse to stop.  The tool never silently operates on
+a host session.
+
+These are host-side conveniences, not a security boundary: they run in the
+cage CLI, and a process inside the sandbox is not obliged to go through it.
+The boundary that does hold is the per-session socket directory of §3.2 —
+a sandbox cannot reach a host session's socket at all.
 
 ## 5.  Mount Model
 
@@ -185,7 +216,8 @@ tool never silently operates on a host session.
 | `/usr/bin` | ro-bind | `/usr/bin/env` (shebangs like `#!/usr/bin/env` need it) |
 | `/run/current-system` | ro-bind | Active NixOS system |
 | `/run/wrappers` | ro-bind | setuid wrappers (rendered nosuid by bubblewrap) |
-| `$XDG_RUNTIME_DIR/zellij` | rw | zellij server socket (host ↔ sandbox) |
+| `$XDG_RUNTIME_DIR/cage/<session>` → `$XDG_RUNTIME_DIR/zellij` | rw | this session's zellij socket only (host ↔ sandbox) |
+| `$XDG_RUNTIME_DIR/$WAYLAND_DISPLAY` | bind-try | Wayland socket when set (clipboard, screenshots) |
 | `$HOME` | tmpfs | Fresh, empty home inside the sandbox |
 | `$HOME/.nix-profile` | ro-bind-try | home-manager programs (immutable store refs) |
 | `$HOME/.config/opencode` | ro-bind | opencode config when present on the host |
@@ -199,9 +231,9 @@ tool never silently operates on a host session.
 `--ro-bind-try` is used for optional sources, so a missing `~/.nix-profile` or
 missing opencode auth file does not prevent the sandbox from starting.
 
-The `$XDG_RUNTIME_DIR/zellij` directory is created on the host before the
-first use, so a fresh machine that has never run zellij can still start a
-sandbox.
+The `$XDG_RUNTIME_DIR/cage/<session>` directory is created on the host before
+the first use, so a fresh machine that has never run zellij can still start a
+sandbox.  It is removed on teardown.
 
 ### 5.2.  Home directory
 
@@ -236,7 +268,6 @@ sandbox.
   tool state.  It is bound read-write, which means a compromised agent could
   write to that host directory; it holds the user's provider credentials, so
   consider `--nonet` if those must never leave the machine.
-
 ### 5.3.  Environment
 
 The sandbox SHALL set the following environment variables:
@@ -413,9 +444,13 @@ includes the `--ro-bind /sys /sys` flag.
 
 ### 8.4.  No sessions listed by `list`
 
-`zellij list-sessions` on this version may only enumerate sessions reachable
-through the shared socket directory.  If nothing is shown, there are no active
-zellij sessions anywhere (sandbox or host).
+`cage list` enumerates live zellij *server processes* rather than calling
+`zellij list-sessions`, because sandboxed sessions keep their sockets in
+per-session directories that a host client does not scan.  If nothing is
+shown, there are no live zellij servers anywhere (sandbox or host).
+
+A bare `zellij list-sessions` on the host will not show sandboxed sessions,
+for the same reason.  This is expected; use `cage list`.
 
 ## 9.  References
 

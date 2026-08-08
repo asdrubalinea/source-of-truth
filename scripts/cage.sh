@@ -16,7 +16,8 @@
 #
 # Every sandbox is isolated: the home directory is a fresh tmpfs, only the
 # launch-time working directory is writable from the host, and the runtime
-# dir is restricted to the zellij socket (no ssh-agent/dbus/Wayland/gnupg).
+# dir is restricted to this session's own zellij socket (no ssh-agent/dbus/
+# gnupg, and no other session's socket).
 # ~/.nix-profile, ~/.config/opencode and the opencode auth file are bound
 # in read-only. ~/.hermes (hermes' whole config/auth/sessions dir) is
 # bound read-write, like ~/.pi, so sandboxed hermes persists state.
@@ -28,10 +29,16 @@
 #
 # Everything run inside the attached zellij session (nix develop, opencode,
 # builds, ...) descends from a bwrap namespace, so it is confined to the
-# sandbox automatically. The zellij server socket lives under
-# $XDG_RUNTIME_DIR, which is bind-mounted rw host <-> sandbox: a zellij
-# client attached from the host reaches the server that runs INSIDE the
-# namespace, so every pane/window it spawns is sandboxed.
+# sandbox automatically. Each session gets its OWN socket directory on the
+# host ($XDG_RUNTIME_DIR/cage/<name>), bind-mounted rw onto the sandbox's
+# $XDG_RUNTIME_DIR/zellij: a zellij client attached from the host reaches the
+# server that runs INSIDE the namespace, so every pane/window it spawns is
+# sandboxed, while the sandbox only ever sees its own control socket.
+# Binding the shared $XDG_RUNTIME_DIR/zellij instead (as this script used to)
+# put every *host* session's socket inside every sandbox, which is a full
+# escape: `zellij attach <host-session>` from inside reaches a server that
+# lives in the host namespace. The host-session guards below are host-side
+# CLI checks and do not help there.
 #
 # Lifecycle: a session belongs to the invocation that created it (the one
 # running bwrap). When that client detaches it is PID 1 of the namespaces,
@@ -51,6 +58,20 @@ usage() {
 # "sandbox" session.  Users who want a custom name can still run `cage <name>`.
 default_session_name() {
   basename "$PWD"
+}
+
+# Session names now compose a filesystem path ($XDG_RUNTIME_DIR/cage/<name>)
+# that teardown removes with `rm -rf`, so restrict them to a safe character
+# set. Sanitising rather than rejecting keeps `cage` working in directories
+# whose basename contains spaces or other awkward characters.
+sanitize_session_name() {
+  local clean
+  clean="$( printf '%s' "$1" | tr -c 'A-Za-z0-9._-' '-' )"
+  case "$clean" in
+    '' | . | ..) clean=sandbox ;;
+    [-.]*) clean="s$clean" ;;
+  esac
+  printf '%s' "$clean"
 }
 
 # Parse positionals (subcommand, name) and flag options. The network flag
@@ -91,6 +112,11 @@ case "$ACTION" in
     ;;
 esac
 NAME="${NAME:-$(default_session_name)}"
+NAME_RAW="$NAME"
+NAME="$(sanitize_session_name "$NAME")"
+if [ "$NAME" != "$NAME_RAW" ]; then
+  echo "cage: session name normalised to '$NAME'" >&2
+fi
 
 sandbox_cmd() {
   local cwd="$1"
@@ -100,9 +126,11 @@ sandbox_cmd() {
     echo "cage: XDG_RUNTIME_DIR is not set" >&2
     exit 1
   }
-  # The zellij socket dir must exist on the host BEFORE the bind (bwrap
-  # requires the source path to exist); create it on first use.
-  mkdir -p "$XDG_RUNTIME_DIR/zellij"
+  # This session's private socket dir must exist on the host BEFORE the bind
+  # (bwrap requires the source path to exist); create it on first use.
+  local sockroot
+  sockroot="$(sock_root "$NAME")"
+  mkdir -p "$sockroot"
 
   local bargs=(
     --die-with-parent
@@ -123,14 +151,17 @@ sandbox_cmd() {
     --ro-bind /etc /etc
     --ro-bind /run/current-system /run/current-system
     --ro-bind /run/wrappers /run/wrappers
-    --bind "$XDG_RUNTIME_DIR/zellij" "$XDG_RUNTIME_DIR/zellij"
+    # Only THIS session's socket dir, never the shared one (see header).
+    --bind "$sockroot" "$XDG_RUNTIME_DIR/zellij"
     # Wayland socket: bind-mount the compositor's socket so sandboxed tools
     # (wl-copy/wl-paste for clipboard, grim/slurp for screenshots) can
     # interact with the host display server. Deliberately opt-in via
-    # --bind-try: when WAYLAND_DISPLAY is unset (e.g. SSH session) or the
-    # socket path doesn't exist, the mount is silently skipped — no leak on
-    # headless usage.
-    --bind-try "$XDG_RUNTIME_DIR/$WAYLAND_DISPLAY" "$XDG_RUNTIME_DIR/$WAYLAND_DISPLAY"
+    # --bind-try: when the socket path doesn't exist the mount is silently
+    # skipped — no leak on headless usage. The :- default matters: this script
+    # runs under `set -u`, so a bare $WAYLAND_DISPLAY made cage abort outright
+    # on an SSH/headless login rather than skipping the mount.
+    --bind-try "$XDG_RUNTIME_DIR/${WAYLAND_DISPLAY:-.cage-no-wayland}" \
+      "$XDG_RUNTIME_DIR/${WAYLAND_DISPLAY:-.cage-no-wayland}"
     --tmpfs "$HOME"
     --ro-bind-try "$HOME/.nix-profile" "$HOME/.nix-profile"
     --ro-bind-try "$HOME/.local/share/opencode/auth.json" \
@@ -279,6 +310,28 @@ is_sandbox_session() {
   is_sandboxed_pid "$pid"
 }
 
+# Host-side location of a session's private socket directory.
+sock_root() {
+  printf '%s/cage/%s' "$XDG_RUNTIME_DIR" "$1"
+}
+
+# XDG_RUNTIME_DIR a host-side zellij *client* must use to reach the server with
+# the given PID. Sandboxed servers keep their socket in the per-session dir;
+# host servers use the real runtime dir. A sandbox started by an older cage
+# (shared socket dir) falls back correctly, because its per-session directory
+# will not exist.
+client_runtime_dir() {
+  local pid="$1" name
+  if is_sandboxed_pid "$pid"; then
+    name="$(server_session "$pid")"
+    if [ -n "$name" ] && [ -d "$(sock_root "$name")" ]; then
+      sock_root "$name"
+      return 0
+    fi
+  fi
+  printf '%s' "$XDG_RUNTIME_DIR"
+}
+
 stop_session() {
   local wanted="$1" pid name found=0
   while read -r pid; do
@@ -287,9 +340,11 @@ stop_session() {
     [ "$name" != "$wanted" ] && continue
     found=1
     if is_sandboxed_pid "$pid"; then
-      zellij kill-session "$name" >/dev/null 2>/dev/null || true
+      local rt
+      rt="$(client_runtime_dir "$pid")"
+      XDG_RUNTIME_DIR="$rt" zellij kill-session "$name" >/dev/null 2>/dev/null || true
       zellij delete-session "$name" >/dev/null 2>/dev/null || true
-      rm -f "$XDG_RUNTIME_DIR"/zellij/*/"$wanted" 2>/dev/null || true
+      rm -rf "$(sock_root "$name")" 2>/dev/null || true
       echo "cage: stopped $name"
       return 0
     fi
@@ -303,20 +358,25 @@ stop_session() {
 }
 
 stop_all() {
-  local pid name found=0
+  local pid name rt found=0
   while read -r pid; do
     [ -z "$pid" ] && continue
     if is_sandboxed_pid "$pid"; then
       name="$(server_session "$pid")"
       [ -n "$name" ] || continue
-      zellij kill-session "$name" >/dev/null 2>/dev/null || true
+      rt="$(client_runtime_dir "$pid")"
+      XDG_RUNTIME_DIR="$rt" zellij kill-session "$name" >/dev/null 2>/dev/null || true
       zellij delete-session "$name" >/dev/null 2>/dev/null || true
-      rm -f "$XDG_RUNTIME_DIR"/zellij/*/"$name" 2>/dev/null || true
+      rm -rf "$(sock_root "$name")" 2>/dev/null || true
       echo "cage: stopped $name"
       found=1
     fi
   done < <(server_pids)
-  [ "$found" = 0 ] && echo "cage: no sandbox sessions running"
+  # Plain `[ ... ] && echo` would make a successful stop-all exit nonzero,
+  # since it is the last command in the function.
+  if [ "$found" = 0 ]; then
+    echo "cage: no sandbox sessions running"
+  fi
 }
 
 case "$ACTION" in
@@ -326,7 +386,12 @@ case "$ACTION" in
       # A live session with this name exists: only attach to it if it is
       # actually a sandbox. Never silently attach to a host zellij session.
       if is_sandbox_session "$NAME"; then
-        exec zellij attach "$NAME"
+        # The server's socket lives in this session's private dir, so point the
+        # client at it. Only the socket lookup uses XDG_RUNTIME_DIR; config and
+        # cache come from XDG_CONFIG_HOME / XDG_CACHE_HOME and are unaffected.
+        pid="$(server_pid_for "$NAME")"
+        exec env XDG_RUNTIME_DIR="$(client_runtime_dir "$pid")" \
+          zellij attach "$NAME"
       else
         echo "cage: refusing to attach to '$NAME': it is a host zellij session, not a sandbox" >&2
         exit 1
@@ -337,7 +402,7 @@ case "$ACTION" in
       # talks to a live one). Also nuke any stale socket file the dead server
       # left behind.
       zellij delete-session "$NAME" >/dev/null 2>/dev/null || true
-      rm -f "$XDG_RUNTIME_DIR"/zellij/*/"$NAME" 2>/dev/null || true
+      rm -rf "$(sock_root "$NAME")" 2>/dev/null || true
       if [ "$cwd" = "$HOME" ]; then
         echo "cage: the sandbox has an empty tmpfs HOME; cd into a workspace dir first" >&2
         exit 1
@@ -347,22 +412,33 @@ case "$ACTION" in
       # When the creating client detaches it is PID 1 of the namespace;
       # the kernel then reaps every process in it, tearing the session down
       # automatically. The server dies with it before zellij can remove its
-      # socket and the session entry from its internal state, so prune them
-      # here (globbing the socket-version dir, which is agnostic to its name).
+      # socket and the session entry from its internal state, so drop the
+      # whole per-session socket dir here.
       zellij delete-session "$NAME" >/dev/null 2>/dev/null || true
-      rm -f "$XDG_RUNTIME_DIR"/zellij/*/"$NAME" 2>/dev/null || true
+      rm -rf "$(sock_root "$NAME")" 2>/dev/null || true
     fi
     ;;
   list)
-    name=
-    while read -r name; do
-      [ -z "$name" ] && continue
-      if is_sandbox_session "$name"; then
+    # Enumerate live servers by process rather than via `zellij list-sessions`:
+    # sandboxed servers now keep their sockets in per-session dirs the host
+    # client does not scan. This is also more accurate than the old listing,
+    # which labelled every dead-but-resurrectable session "(host)" because
+    # is_sandbox_session needs a live server to answer.
+    found=0
+    while read -r pid; do
+      [ -z "$pid" ] && continue
+      name="$(server_session "$pid")"
+      [ -n "$name" ] || continue
+      if is_sandboxed_pid "$pid"; then
         echo "$name  (sandbox)"
       else
         echo "$name  (host)"
       fi
-    done < <(zellij list-sessions -s 2>/dev/null || true)
+      found=1
+    done < <(server_pids)
+    if [ "$found" = 0 ]; then
+      echo "cage: no live zellij sessions"
+    fi
     ;;
   stop)
     stop_session "$NAME"
