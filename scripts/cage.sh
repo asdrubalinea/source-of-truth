@@ -12,12 +12,25 @@
 #
 #   Options (may appear anywhere):
 #     --net                    share the host network (DEFAULT; opencode needs it)
+#     --isolate-net            private network namespace with outbound-only
+#                              connectivity via pasta(1). Blocks the host's
+#                              loopback services AND the abstract-socket
+#                              namespace (which is what exposes the host X
+#                              server to the sandbox). Not yet the default --
+#                              see the CAGE_DEFAULT_NET note below.
 #     --nonet                  isolate the network (fully offline sandbox)
 #
 # Every sandbox is isolated: the home directory is a fresh tmpfs, only the
 # launch-time working directory is writable from the host, and the runtime
 # dir is restricted to this session's own zellij socket (no ssh-agent/dbus/
 # gnupg, and no other session's socket).
+#
+# NOTE on --net (the default): sharing the host network namespace also shares
+# the host's *abstract* AF_UNIX socket namespace, which is not hidden by the
+# /tmp tmpfs. The host X server listens there and accepts unauthenticated
+# clients, so under --net a sandboxed process has full X11 rights against
+# host XWayland apps (input injection, key capture, clipboard). Host loopback
+# services are reachable for the same reason. Use --isolate-net to close both.
 # ~/.nix-profile, ~/.config/opencode and the opencode auth file are bound
 # in read-only. ~/.hermes (hermes' whole config/auth/sessions dir) is
 # bound read-write, like ~/.pi, so sandboxed hermes persists state.
@@ -49,8 +62,18 @@
 set -euo pipefail
 
 usage() {
-  echo "usage: cage [start|attach|agent|list|stop|stop-all] [name] [--net|--nonet]" >&2
+  echo "usage: cage [start|attach|agent|list|stop|stop-all] [name] [--net|--isolate-net|--nonet]" >&2
 }
+
+# Default network mode. `net` shares the host stack (the long-standing
+# behaviour); `isolated` is the hardened mode described in the header. Override
+# per-invocation with the flags, or for a whole shell with CAGE_NET=isolated.
+# Flip this default to `isolated` once pasta has been smoke-tested here.
+CAGE_DEFAULT_NET="${CAGE_NET:-net}"
+
+# Address of the DNS forwarder pasta runs inside the sandbox netns. Link-local,
+# so it cannot collide with the LAN (10.0.0.0/24) or the tailnet (100.64/10).
+CAGE_DNS_FORWARD=169.254.1.1
 
 # Derive a default session name from the current working directory (basename)
 # when the user does not supply one.  This way `cage` from different directories
@@ -77,10 +100,11 @@ sanitize_session_name() {
 # Parse positionals (subcommand, name) and flag options. The network flag
 # only matters at session creation; re-attaching reuses the existing mounts.
 POS=()
-NET=net
+NET="$CAGE_DEFAULT_NET"
 for a in "$@"; do
   case "$a" in
     --net) NET=net ;;
+    --isolate-net) NET=isolated ;;
     --nonet) NET=nonet ;;
     --) ;;
     --*)
@@ -232,12 +256,69 @@ sandbox_cmd() {
   if [ -d "$HOME/.codex" ]; then
     bargs+=(--bind "$HOME/.codex" "$HOME/.codex")
   fi
-  # Network: default shares the host stack (agents need outbound HTTPS).
-  # --nonet gives a fully isolated network namespace (offline).
-  if [ "$NET" = nonet ]; then
-    bargs+=(--unshare-net)
+  # Network. --net (default) shares the host stack, which also shares the
+  # host's abstract AF_UNIX socket namespace and loopback. --nonet is fully
+  # offline. --isolate-net keeps outbound connectivity but puts the sandbox in
+  # its own netns, so the host X server and host loopback services stop being
+  # reachable; pasta(1) then restores outbound traffic from the host side.
+  case "$NET" in
+    nonet)
+      bargs+=(--unshare-net)
+      ;;
+    isolated)
+      command -v pasta >/dev/null 2>&1 || {
+        echo "cage: --isolate-net needs pasta(1) from the passt package" >&2
+        exit 1
+      }
+      # /etc is bound read-only from the host, and the host resolver here is a
+      # tailscale address that does not exist in the new netns, so point the
+      # sandbox at pasta's forwarder instead.
+      printf 'nameserver %s\noptions edns0\n' "$CAGE_DNS_FORWARD" \
+        >"$sockroot/resolv.conf"
+      bargs+=(
+        --unshare-net
+        --ro-bind "$sockroot/resolv.conf" /etc/resolv.conf
+        --info-fd 3
+      )
+      ;;
+  esac
+
+  if [ "$NET" = isolated ]; then
+    rm -f "$sockroot/info.json"
+    attach_network "$sockroot/info.json" &
+    bwrap "${bargs[@]}" "${shift_args[@]}" 3>"$sockroot/info.json"
+  else
+    bwrap "${bargs[@]}" "${shift_args[@]}"
   fi
-  bwrap "${bargs[@]}" "${shift_args[@]}"
+}
+
+# Wait for bwrap to publish the sandbox PID on --info-fd, then hand the fresh
+# network namespace to pasta. pasta backgrounds itself and exits when the
+# namespace goes away, so there is nothing to clean up afterwards.
+attach_network() {
+  local info="$1" pid='' i=0
+  while [ "$i" -lt 100 ]; do
+    if [ -s "$info" ]; then
+      pid="$( tr -d '\n ' <"$info" \
+        | sed -n 's/.*"child-pid":\([0-9]\{1,\}\).*/\1/p' )"
+      [ -n "$pid" ] && break
+    fi
+    i=$(( i + 1 ))
+    sleep 0.1
+  done
+  [ -n "$pid" ] || {
+    echo "cage: could not read the sandbox PID; it has no network" >&2
+    return 1
+  }
+  # --no-map-gw is load-bearing: pasta's default maps the gateway address back
+  # to the host's loopback, which would hand back exactly the host-loopback
+  # access this mode exists to remove. --dns-forward is also required, since
+  # pasta forwards no DNS unless asked.
+  pasta --quiet --config-net --no-map-gw \
+    --dns-forward "$CAGE_DNS_FORWARD" "$pid" || {
+    echo "cage: pasta failed to configure the sandbox network" >&2
+    return 1
+  }
 }
 
 # True if the given PID is a genuine zellij *server* process: its argv is

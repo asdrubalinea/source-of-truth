@@ -28,7 +28,10 @@ There is exactly one sandbox mode, and it is **isolated**:
 - The user's home-manager profile, opencode configuration, and opencode auth
   file are mounted read-only.
 - By default the sandbox shares the host network (agents need outbound HTTPS);
-  network isolation is available with `--nonet`.
+  `--isolate-net` gives outbound-only connectivity in a private network
+  namespace, and `--nonet` is fully offline.  Note that sharing the host
+  network also shares the host's abstract AF_UNIX socket namespace — see
+  §3.5.
 
 There is no "shared" mode that bind-mounts the home directory; the tool never
 exposes the writable home to the sandbox.
@@ -66,6 +69,8 @@ The sandbox SHALL create the following namespaces:
 The sandbox SHOULD NOT create a network namespace by default; the network is
 shared with the host.  When `--nonet` is given, a network namespace SHALL be
 created and the sandbox is fully offline (only the loopback device exists).
+When `--isolate-net` is given, a network namespace SHALL be created and
+`pasta(1)` SHALL be attached to it to restore outbound connectivity (§3.5).
 
 ### 3.2.  Server-in-namespace trick
 
@@ -135,17 +140,48 @@ The Wayland socket IS bound when `WAYLAND_DISPLAY` is set, so that `wl-copy`,
 read/write and screen capture against the host session, and is a deliberate
 trade-off rather than an oversight.
 
+### 3.5.  Network isolation and the abstract socket namespace
+
+Abstract AF_UNIX sockets are keyed by *network* namespace, not by filesystem
+path.  Under the default `--net`, replacing `/tmp` with a tmpfs therefore does
+NOT hide the host's abstract sockets, and the following remain reachable from
+inside the sandbox:
+
+- The host X server (`@/tmp/.X11-unix/X0`), which accepts unauthenticated
+  clients.  This grants XTEST input injection, key capture and clipboard access
+  against host XWayland applications.
+- Every host loopback service, including unauthenticated admin APIs that bind
+  to `127.0.0.1` on the assumption that loopback is trusted.
+- The LAN and the tailnet.
+
+`--isolate-net` SHALL create a network namespace and attach `pasta(1)` to it,
+which removes the sandbox from the host's abstract socket namespace and from
+host loopback while preserving outbound connectivity.  Because `/etc` is bound
+read-only and the host resolver may be unreachable from the new namespace, cage
+SHALL generate a `resolv.conf` pointing at pasta's DNS forwarder and bind it
+over `/etc/resolv.conf`.  pasta MUST be invoked with `--no-map-gw`; without it
+pasta maps the gateway address back to the host's loopback and re-opens the
+access this mode exists to remove.
+
+Outbound connections in this mode are still made from the host's stack, so LAN
+and tailnet destinations remain reachable; host loopback and abstract sockets
+do not.
+
 ## 4.  Command Reference
 
 ```
-cage [start|attach|agent|list|stop|stop-all] [name] [--net|--nonet]
+cage [start|attach|agent|list|stop|stop-all] [name] [--net|--isolate-net|--nonet]
 ```
 
 Options:
 
 - `--net` — share the host network (DEFAULT; required for agents that call
-  model APIs).
+  model APIs).  See §3.5 for what else this shares.
+- `--isolate-net` — private network namespace with outbound-only connectivity
+  via `pasta(1)`.  Requires the `passt` package.
 - `--nonet` — create a network namespace; the sandbox is offline.
+
+The default may be set for a whole shell with `CAGE_NET=isolated`.
 
 ### 4.1.  `cage [start|attach] [name]`
 
