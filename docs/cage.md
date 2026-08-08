@@ -261,6 +261,7 @@ a sandbox cannot reach a host session's socket at all.
 | `$HOME/.cache/opencode` | bind-try | opencode plugin/model cache when present on the host (rw) |
 | `$HOME/.pi` | bind | Pi config dir (auth.json, settings.json, models.json, sessions, tools) when present (rw) |
 | `$HOME/.config/fish` | ro-bind | Fish shell config (aliases, prompt, key bindings, theme) when present (ro) |
+| `$HOME/.config/helix` | ro-bind | Helix config (including Steel cogs and init files) when present (ro) |
 | `$HOME/.local/share/fish` | bind | Fish shell history when present (rw) |
 | cwd (PWD at launch) | rw | Working directory |
 
@@ -304,6 +305,10 @@ sandbox.  It is removed on teardown.
   tool state.  It is bound read-write, which means a compromised agent could
   write to that host directory; it holds the user's provider credentials, so
   consider `--nonet` if those must never leave the machine.
+- The Helix configuration directory (`$HOME/.config/helix`) MUST be bound
+  read-only at its exact path when it exists on the host, so sandboxed `hx`
+  inherits the host's editor settings, init files, and Steel cogs.
+
 ### 5.3.  Environment
 
 The sandbox SHALL set the following environment variables:

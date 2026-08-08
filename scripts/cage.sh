@@ -37,6 +37,8 @@
 # Claude Code (~/.claude, ~/.claude.json) and Codex (~/.codex) are also
 # bound read-write so their auth, config and session history persist.
 # ~/.config/fish (including aliases) is bound read-only and
+# ~/.config/helix is bound read-only so Helix uses the host's Home Manager
+# configuration inside the sandbox, while
 # ~/.local/share/fish (shell history) is bound read-write so fish inside
 # the sandbox has the same aliases and persistent history as the host.
 #
@@ -218,6 +220,11 @@ sandbox_cmd() {
   # symlink into /nix/store which is already mounted ro in the sandbox.
   if [ -d "$HOME/.config/fish" ]; then
     bargs+=(--ro-bind "$HOME/.config/fish" "$HOME/.config/fish")
+  fi
+  # Bring the host's Helix config (including Steel cogs and init files) along
+  # read-only so sandboxed `hx` uses the same editor configuration as the host.
+  if [ -d "$HOME/.config/helix" ]; then
+    bargs+=(--ro-bind "$HOME/.config/helix" "$HOME/.config/helix")
   fi
   # Fish shell history (~/.local/share/fish/fish_history) is bound read-write
   # so history typed in the sandbox persists across sessions and is shared
