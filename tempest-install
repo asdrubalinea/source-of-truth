@@ -11,3 +11,34 @@ if [ "$#" -lt 1 ]; then
 fi
 sudo nix --extra-experimental-features nix-command --extra-experimental-features flakes run 'github:nix-community/disko/latest#disko-install' -- \
   --flake '.#tempest' --write-efi-boot-entries --disk main "$1"
+
+# Export rpool before leaving the installer. disko-install's EXIT trap only
+# `umount -R`s the mount point — it never exports — so without this the fresh
+# pool is left marked active under the INSTALLER's hostid, and tempest's
+# `boot.zfs.forceImportRoot = false` (hosts/tempest/system/zfs.nix) makes the
+# first boot refuse the import and drop to an initrd emergency shell.
+#
+# Not fatal if it fails (the install itself is already done), but do not reboot
+# without resolving it — see the warning below.
+#
+# "no such pool" is the one benign failure: it means the pool is already exported
+# (disko is pinned to `latest` above, so a future version may well do this
+# itself). Treat that as success — otherwise a correct install exits 1 with a
+# warning about a problem that isn't there.
+if export_out=$(sudo zpool export rpool 2>&1); then
+  :
+elif printf '%s\n' "$export_out" | grep -qi 'no such pool'; then
+  echo "note: rpool is already exported — nothing to do." >&2
+else
+  echo "$export_out" >&2
+  echo >&2
+  echo "WARNING: 'zpool export rpool' failed. The install completed, but the pool" >&2
+  echo "is still marked active under this installer's hostid, so the first boot" >&2
+  echo "will refuse to import it and drop to an initrd emergency shell." >&2
+  echo >&2
+  echo "Fix before rebooting: retry 'sudo zpool export rpool' (check for open" >&2
+  echo "files or lingering mounts under the install mount point first)." >&2
+  echo "If you reboot anyway, add 'zfs_force=1' to the kernel command line from" >&2
+  echo "the bootloader for that one boot — it will import and re-stamp the hostid." >&2
+  exit 1
+fi

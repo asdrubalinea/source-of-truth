@@ -10,14 +10,58 @@
   boot.supportedFilesystems = [ "zfs" ];
   boot.initrd.supportedFilesystems = [ "zfs" ];
 
-  # zfs_unstable tracks the newest OpenZFS, matching the CachyOS LTS kernel.
-  boot.zfs.package = pkgs.zfs_unstable;
-  # Force-import the root pool. `disko-install`'s EXIT trap only `umount -R`s the
-  # mount point — it never `zpool export`s — so right after install the pool can
-  # be left marked active under the installer's hostid. Forcing avoids a
-  # first-boot refusal; it is safe here, a single-disk laptop pool never shared
-  # with another live machine.
-  boot.zfs.forceImportRoot = true;
+  # boot.zfs.package is deliberately NOT set here. The module default is already
+  # pkgs.zfs — nixpkgs' current stable OpenZFS line, zfs_2_4 today — and tracking
+  # whatever nixpkgs considers stable is exactly the intent. Nothing to remember,
+  # nothing to re-check after an update.
+  #
+  # This was pkgs.zfs_unstable, on the theory that the CachyOS LTS kernel needed
+  # the newest OpenZFS. It does not: nixpkgs applies the same guard to every ZFS
+  # attribute (kernelMinSupportedMajorMinor = "4.18", kernelMaxSupportedMajorMinor
+  # = "7.0" — see pkgs/os-specific/linux/zfs/generic.nix), so even zfs_2_3 (2.3.8)
+  # builds against this 6.18 kernel. Falling back to the default is also a small
+  # upgrade over zfs_unstable: same version today (both 2.4.3) but not the same
+  # derivation — zfs_2_4 carries a backported dedup data-corruption fix
+  # (openzfs#18366, unreleased as of 2.4.3) and is the attribute nixpkgs runs its
+  # zfs series tests against. dedup is off on rpool (dedupratio 1.00x) so that fix
+  # is probably out of reach, but it costs nothing.
+  #
+  # Not pinned to pkgs.zfs_2_4 either. A pin defers a major bump rather than
+  # reviewing it, and the recovery path does not depend on one: if `nix flake
+  # update` ever lands a bad 2.5.x under the root pool, boot the previous
+  # generation and the old module comes back with it. That works because the
+  # on-disk format stays readable by the older release until `zpool upgrade`
+  # enables new feature flags — and that step is always manual. So the one rule
+  # this relies on: do not run `zpool upgrade` on rpool just because `zpool
+  # status` suggests it, unless you are ready to give up the rollback.
+
+  # boot.zfs.forceImportRoot is off. Steady-state boots do not need it: every
+  # successful import stamps this host's id into the pool labels
+  # (networking.hostId = "856ff057" in system/networking.nix, matching
+  # /etc/hostid), so normal boots and post-crash recovery import fine without -f.
+  #
+  # It was originally on for ONE reason — the first boot after install.
+  # `disko-install`'s EXIT trap only `umount -R`s the mount point, it never
+  # `zpool export`s, so a fresh pool is left marked active under the installer's
+  # hostid and a non-forced import refuses. That is NOT "long gone": it recurs
+  # every time ./tempest-install is run, i.e. exactly during disaster recovery
+  # after replacing a dead NVMe. Closed at the source instead — ./tempest-install
+  # now runs `zpool export rpool` after disko-install and refuses to finish
+  # quietly if that fails. Keep the two in sync: turning this off is only safe
+  # while the installer exports.
+  #
+  # Kept as an explicit `false` rather than deleted: forcing bypasses the one
+  # safeguard against importing a pool that another live system still holds, and
+  # that is worth being visibly off rather than merely absent.
+  #
+  # Last-resort recovery, if a boot ever does refuse (e.g. the pool was imported
+  # from rescue media and not exported): add `zfs_force=1` to the kernel command
+  # line for that one boot — not turning this back on permanently. NOTE that this
+  # hatch disappears once ../../modules/secure-boot.nix is enabled: lanzaboote
+  # boots signed UKIs and systemd-stub ignores cmdline edits under Secure Boot, so
+  # from then on the only fix is external rescue media. Prefer keeping the pool
+  # cleanly exported over relying on the hatch.
+  boot.zfs.forceImportRoot = false;
 
   # Cap the ARC at 8 GiB. Left unset, OpenZFS lets the ARC grow to nearly all of
   # RAM (~29.6 GiB observed on this 32 GiB machine), so under a heavy Nix build +

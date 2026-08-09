@@ -56,8 +56,12 @@ ways, so the layout is deliberate, not incidental.
 
 ## Consequences
 
-- Kernel bumps on tempest are constrained to what `zfs_unstable` supports; stay
-  on the `-lts` CachyOS variant.
+- Kernel bumps on tempest are constrained to what nixpkgs' ZFS supports (every
+  ZFS attribute caps at `kernelMaxSupportedMajorMinor = "7.0"`, so this is not a
+  choice between attributes); stay on the `-lts` CachyOS variant.
+  `boot.zfs.package` is deliberately left at the module default — `pkgs.zfs`,
+  currently `zfs_2_4` — rather than pinned to `zfs_unstable`; see the comment in
+  `hosts/tempest/system/zfs.nix`.
 - Re-enrolling TPM2 (`systemd-cryptenroll --wipe-slot=tpm2` + re-add) is needed
   after any change to Secure Boot keys/state; the LUKS passphrase is the
   permanent fallback.
