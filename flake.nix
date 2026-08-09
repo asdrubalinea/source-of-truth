@@ -249,11 +249,21 @@
         ];
     };
 
+    # niri v25.08 still links against libdisplay-info 0.2.  The unstable
+    # nixpkgs input removed its libdisplay-info_0_2 alias, while the stable
+    # input still carries the matching package.  Supply that package before
+    # niri-flake's overlay auto-discovers the argument.
+    niriLibdisplayInfoOverlay = final: prev: {
+      libdisplay-info_0_2 =
+        nixpkgs-stable.legacyPackages.${final.stdenv.hostPlatform.system}.libdisplay-info_0_2;
+    };
+
     overlays = [
       multiChannelOverlay
       helixSteelOverlay
       pandasStubsOverlay
       emacs-overlay.overlay
+      niriLibdisplayInfoOverlay
       niri.overlays.niri
       claude-code.overlays.default
       # `default` builds against our nixpkgs; `pinned` would use upstream's own
