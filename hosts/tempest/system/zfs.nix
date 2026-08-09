@@ -16,10 +16,11 @@
   # nothing to re-check after an update.
   #
   # This was pkgs.zfs_unstable, on the theory that the CachyOS LTS kernel needed
-  # the newest OpenZFS. It does not: nixpkgs applies the same guard to every ZFS
-  # attribute (kernelMinSupportedMajorMinor = "4.18", kernelMaxSupportedMajorMinor
-  # = "7.0" — see pkgs/os-specific/linux/zfs/generic.nix), so even zfs_2_3 (2.3.8)
-  # builds against this 6.18 kernel. Falling back to the default is also a small
+  # the newest OpenZFS. It does not: every ZFS attribute currently declares the
+  # same guard (kernelMinSupportedMajorMinor = "4.18", kernelMaxSupportedMajorMinor
+  # = "7.0" — set per-version in pkgs/os-specific/linux/zfs/{2_3,2_4,unstable}.nix
+  # and enforced by generic.nix), so even zfs_2_3 (2.3.8) builds against this 6.18
+  # kernel. Falling back to the default is also a small
   # upgrade over zfs_unstable: same version today (both 2.4.3) but not the same
   # derivation — zfs_2_4 carries a backported dedup data-corruption fix
   # (openzfs#18366, unreleased as of 2.4.3) and is the attribute nixpkgs runs its
