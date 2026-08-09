@@ -49,8 +49,10 @@ ways, so the layout is deliberate, not incidental.
   mandatory because turning SB on changes PCR 7.
 - **CachyOS LTS** because ZFS is an out-of-tree module; nixpkgs hard-fails to
   evaluate when the kernel outruns OpenZFS support, which the bleeding-edge
-  `-latest` CachyOS kernel routinely does. LTS keeps the CachyOS/BORE patches +
-  scx scheduler on a base ZFS supports.
+  `-latest` CachyOS kernel routinely does. LTS keeps the CachyOS patches + scx
+  scheduler on a base ZFS supports. (The variant in use is
+  `linuxPackages-cachyos-lts-lto-zen4` — *not* a `-bore` one; it runs EEVDF
+  underneath scx. See `hosts/tempest/system/boot.nix`.)
 
 ## Consequences
 

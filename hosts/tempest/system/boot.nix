@@ -8,16 +8,47 @@
     # a layer below TLP's EPP/platform-profile split and complements it. If the
     # scheduler ever faults, the kernel transparently falls back to its built-in
     # scheduler, so this is a safe, one-line-reversible change.
+    #
+    # While an scx scheduler is loaded it governs *every* task, so the in-kernel
+    # scheduler below only matters as the fallback taken when the BPF program
+    # exits or faults. Picking a different kernel variant is therefore not a way
+    # to change scheduling behaviour — the lever is this `scheduler` value, whose
+    # enum currently also offers scx_flash, scx_p2dq, scx_rusty, scx_bpfland,
+    # scx_cosmos and scx_layered among others.
+    #
+    # Inspect at runtime: `cat /sys/kernel/sched_ext/state` (expect "enabled")
+    # and `cat /sys/kernel/sched_ext/root/ops` (expect the loaded scheduler's
+    # build id, e.g. lavd_1.1.2_x86_64_unknown_linux_gnu).
     enable = true;
     scheduler = "scx_lavd";
     extraArgs = [ "--autopower" ];
   };
 
   boot = {
-    # CachyOS kernel with BORE scheduler
-    # LTS (not -latest): ZFS is out-of-tree and nixpkgs refuses to evaluate when
-    # the kernel outruns OpenZFS support. LTS keeps CachyOS/BORE + scx on a base
-    # zfs_unstable supports. See docs/adr/0001-zfs-on-luks-tempest.md.
+    # CachyOS kernel: patches + CachyOS tunings (HZ=1000, full preemption,
+    # sched_ext compiled in), built with clang/ThinLTO and -march=znver4.
+    # NOT the BORE scheduler — that lives in the separate linux-cachyos-bore*
+    # attrs; this standard variant runs EEVDF underneath scx (verified: no
+    # CONFIG_SCHED_BORE, CONFIG_SCHED_CLASS_EXT=y).
+    #
+    # LTS (not -latest): ZFS is out-of-tree and nixpkgs refuses to *evaluate* when
+    # the kernel outruns OpenZFS support — every ZFS attribute caps out at
+    # kernelMaxSupportedMajorMinor = "7.0", and -latest is already 7.1.x, so the
+    # zfs-kernel derivation goes meta.broken and the rebuild dies before compiling
+    # anything. LTS keeps CachyOS + scx on a base the nixpkgs ZFS supports. See
+    # docs/adr/0001-zfs-on-luks-tempest.md. (If a newer kernel is ever needed, the
+    # way out is upstream's per-variant CachyOS-patched ZFS:
+    # boot.zfs.package = config.boot.kernelPackages.zfs_cachyos, which sets that
+    # cap to "99.99" and passes --enable-linux-experimental — i.e. it removes the
+    # guard rather than satisfying it, so validate it on this kernel first and
+    # bump the kernel in a separate rebuild.)
+    #
+    # -zen4 is `-march=znver4`, which already implies AVX-512 (this CPU reports
+    # avx512f/bw/dq/vl/vnni/bf16/vbmi2/vp2intersect) *plus* AMD-specific tuning,
+    # so it is strictly richer than the -x86_64-v4 variant — switching to that
+    # would be a downgrade, not the upgrade guides present it as. Upstream
+    # exposes no znver5 target, so this is the top rung available for Krackan
+    # Point.
     kernelPackages = pkgs.cachyosKernels.linuxPackages-cachyos-lts-lto-zen4;
 
     # Swap lives here; it is NOT a hibernation resume target — ZFS root forces
