@@ -40,6 +40,20 @@
       # Do NOT override nixpkgs — upstream's lantian attic cache only has
       # store paths built against its pinned nixpkgs. Following ours forces
       # a full local kernel rebuild on every change.
+      #
+      # Note this is necessary but not sufficient: we apply `overlays.default`
+      # below, which builds cachyosKernels against *our* nixpkgs, so the
+      # derivation hash differs from the one upstream's Hydra pushed.
+      # Measured 2026-08-09 for linux-cachyos-lts-lto-zen4-6.18.40: default →
+      # g2b5i1w3848vc4cy4psmc6359z0zjkcp, pinned →
+      # 03zf59q4mb1fgczynkf454x1lkbdy22a, and the attic serves a narinfo for
+      # both (a well-formed but absent hash 404s, so those hits are real).
+      # So there is no problem today — but it is luck, not a guarantee. If a
+      # rebuild ever starts compiling a ThinLTO kernel locally, the fix is
+      # `overlays.pinned`, which upstream recommends precisely for this. The
+      # tradeoff there: cachyosKernels (and with it zfs_cachyos and any
+      # extraModulePackages taken from that set) would come from upstream's
+      # nixpkgs revision rather than ours.
     };
 
     # --- Desktop/UI Components ---
@@ -242,6 +256,9 @@
       emacs-overlay.overlay
       niri.overlays.niri
       claude-code.overlays.default
+      # `default` builds against our nixpkgs; `pinned` would use upstream's own
+      # revision to guarantee attic cache hits. See the input's comment above
+      # before changing this.
       nix-cachyos-kernel.overlays.default
     ];
 
