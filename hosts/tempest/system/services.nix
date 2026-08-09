@@ -23,8 +23,14 @@
     # cut (and thus unclean-shutdown lost writes). Decide on RAM alone: the 40G
     # swap is sized for hibernation (>= RAM, see disks/tempest.nix), not a
     # runtime cushion to thrash into, so don't wait for it to fill. SIGTERM at
-    # <5% available RAM, SIGKILL at half that. Raise freeMemThreshold if it ever
-    # fires too eagerly.
+    # <5% available RAM, SIGKILL at half that. LOWER freeMemThreshold if it ever
+    # fires too eagerly — earlyoom kills once available drops BELOW the
+    # threshold, so raising it makes it fire sooner, not later.
+    #
+    # This reads MemAvailable, so anything that changes how the kernel computes
+    # MemAvailable retunes it silently. vm.watermark_scale_factor is the trap
+    # (si_mem_available() subtracts totalreserve_pages and two wmark_low terms);
+    # see the "Deliberately NOT set" note in system/memory.nix before adding it.
     earlyoom = {
       enable = true;
       freeMemThreshold = 5;
