@@ -3,8 +3,8 @@
 # This VM reproduces tempest's EXACT filesystem: it is built with disko's
 # `vmWithDisko`, which formats a throwaway virtual disk from the same
 # disks/tempest.nix spec (GPT + LUKS + LVM + swap + ZFS rpool/{nix,persist,
-# persist/home,sbctl,reserved} + tmpfs root + impermanence) and then boots an
-# ephemeral overlay on top. The host nix store is shared in (copyNixStore=false,
+# persist/home,sbctl,docker,reserved} + tmpfs root + impermanence) and then boots
+# an ephemeral overlay on top. The host nix store is shared in (copyNixStore=false,
 # mountHostNixStore=true), so the layout is real but the build stays fast.
 #
 # Build & run:
