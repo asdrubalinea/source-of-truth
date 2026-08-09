@@ -164,7 +164,7 @@ in {
     starship
     tmux
     # Warp lives in desktop/warp.nix (package + declarative settings.toml).
-    wezterm
+    # alacritty is installed by programs.alacritty (rices/niri/alacritty.nix).
 
     # --- Desktop integration ---
     appimage-run # run AppImages via Nix

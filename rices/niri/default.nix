@@ -3,7 +3,6 @@
   imports = [
     ./alacritty.nix
     ./kitty.nix
-    ./wezterm.nix
     ./niri.nix
     ./tofi.nix
     ./flights.nix

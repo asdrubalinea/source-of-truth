@@ -4,14 +4,14 @@ let
 
   drift = pkgs.callPackage ../../packages/drift.nix { src = inputs.drift; };
 
-  # --always-new-process is load-bearing twice over: it keeps `--class` ours (a
-  # plain `wezterm start` lets an already-running instance spawn the window,
-  # which would carry that instance's app-id and miss the open-fullscreen window
-  # rule matching ^drift-screensaver$), and it makes $! the PID of the process
-  # that actually owns the window, so driftStop's kill closes the screensaver
-  # instead of a client that already exited.
+  # Every `alacritty` invocation is its own process, which this depends on twice
+  # over: `--class` stays ours (so the window still matches the open-fullscreen
+  # rule on ^drift-screensaver$), and $! is the PID of the process that actually
+  # owns the window, so driftStop's kill closes the screensaver instead of a
+  # client that already exited. wezterm needed --always-new-process to get both;
+  # alacritty gives them by default.
   driftStart = pkgs.writeShellScript "drift-screensaver-start" ''
-    ${pkgs.wezterm}/bin/wezterm start --always-new-process --class drift-screensaver -- ${drift}/bin/drift --scene waveform &
+    ${pkgs.alacritty}/bin/alacritty --class drift-screensaver -e ${drift}/bin/drift --scene waveform &
     echo $! > "$XDG_RUNTIME_DIR/drift-screensaver.pid"
   '';
 

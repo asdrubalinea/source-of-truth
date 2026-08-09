@@ -325,19 +325,17 @@ let
   };
 
   # Floating terminal: spawned on first use, summoned with Mod+Shift+Return. The
-  # distinct --class gives wezterm its own app-id so the window-rule and nirius
-  # target only this instance, not every wezterm window.
+  # distinct --class gives this window its own app-id so the window-rule and
+  # nirius target only this instance, not every terminal window.
   #
-  # --always-new-process is what makes that class stick: a plain `wezterm start`
-  # asks an already-running GUI instance to spawn the window for it (the
-  # single-instance rendezvous socket in $XDG_RUNTIME_DIR/wezterm is named after
-  # the wayland display *and* the class), and a window spawned that way carries
-  # the serving instance's app-id, not ours. Forcing our own process keeps the
-  # app-id ours regardless.
+  # Every `alacritty` invocation is its own process, so the class sticks by
+  # itself — no equivalent of the --always-new-process dance wezterm needed here
+  # (its bare `start` handed the request to an already-running GUI instance,
+  # which then spawned a window carrying *that* instance's app-id, not ours).
   terminalScratchpad = mkScratchpad {
     name = "terminal";
     appId = "scratchpad-terminal";
-    spawn = "${pkgs.wezterm}/bin/wezterm start --always-new-process --class scratchpad-terminal";
+    spawn = "${pkgs.alacritty}/bin/alacritty --class scratchpad-terminal";
   };
 in
 lib.mkIf config.rices.niri.enable {
@@ -468,16 +466,18 @@ lib.mkIf config.rices.niri.enable {
 
       # Keybindings
       binds = with pkgs; {
-        # Terminal and launcher. Bare `wezterm` defaults to the `start`
-        # subcommand, which hands the request to a running wezterm GUI instance
-        # of the same class when there is one — so extra windows are cheap
-        # (kitty was a fresh process per press). The scratchpad below
-        # deliberately opts out of that; see the let block.
+        # Terminal and launcher. Every press is its own alacritty process:
+        # alacritty has no single-instance rendezvous of its own, which is what
+        # made extra windows cheap under wezterm (bare `wezterm` defaulted to
+        # `start`, handing the request to a running GUI instance of the same
+        # class). `alacritty msg create-window` would reuse a process, but it
+        # needs a daemon holding the IPC socket alive, and alacritty's cold
+        # start is light enough that the extra unit isn't worth it.
         "Mod+Return".action.spawn = [
-          "${pkgs.wezterm}/bin/wezterm"
+          "${pkgs.alacritty}/bin/alacritty"
         ];
         # Floating terminal scratchpad: summon/dismiss a near-fullscreen floating
-        # wezterm (own app-id "scratchpad-terminal"); see the let block above.
+        # terminal (own app-id "scratchpad-terminal"); see the let block above.
         "Mod+Shift+Return".action.spawn = [ "${terminalScratchpad.toggle}" ];
         # Disabled for now (Emacs server is off — see desktop/emacs/default.nix).
         # This key used to open a new Emacs frame on the running daemon. Bare

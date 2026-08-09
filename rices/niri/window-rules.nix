@@ -58,10 +58,10 @@
   }
   {
     # Floating terminal scratchpad (Mod+Shift+Return): a near-fullscreen floating
-    # wezterm, sized as a proportion of the working area so it adapts to any
+    # alacritty, sized as a proportion of the working area so it adapts to any
     # output. niri centers new floating windows by default, so
     # default-floating-position is omitted (see the Telegram rule above). The
-    # app-id comes from wezterm's `--class scratchpad-terminal`. See
+    # app-id comes from alacritty's `--class scratchpad-terminal`. See
     # rices/niri/niri.nix (terminalScratchpad).
     matches = [{ app-id = "scratchpad-terminal"; }];
     open-floating = true;
