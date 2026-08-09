@@ -134,8 +134,8 @@
   # Alt+SysRq+R,E,I,S,U,B (sync -> remount-ro -> reboot) flushes dirty buffers
   # and quiesces the filesystems instead of a raw power cut — and a clean
   # power-off is the cheapest defense against the lost-write corruption that
-  # forced the old btrfs root read-only (75 unsafe shutdowns on this drive; see
-  # crash/crash_report.md). At minimum use S -> U -> B. Default was 16 (sync
-  # only); 1 enables all functions.
+  # forced the old btrfs root read-only (75 unsafe shutdowns on the drive that
+  # preceded this NVMe). At minimum use S -> U -> B. Default was 16 (sync only);
+  # 1 enables all functions.
   boot.kernel.sysctl."kernel.sysrq" = 1;
 }
