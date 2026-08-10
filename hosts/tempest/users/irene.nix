@@ -14,6 +14,10 @@
       # Read system-unit journals unprivileged, e.g. `journalctl -xeu
       # borgbackup-job-…` when a backup notification says a leg failed.
       "systemd-journal"
+      # Capture packets without root. The group is created by
+      # programs.wireshark (system/environment.nix), which setcap-wraps dumpcap
+      # for its members.
+      "wireshark"
     ];
 
     hashedPassword = (import ../../../passwords).password;
