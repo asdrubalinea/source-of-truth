@@ -1,4 +1,14 @@
 { pkgs, inputs, ... }: {
+  # Frecency-ranked directory jumping: `z <fragment>` cds to the best match,
+  # `zi` picks interactively through fzf. Enabled as a program rather than
+  # dropped into desktop/home-packages.nix because the binary does nothing
+  # without the shell hook that records every visit — same reasoning as the
+  # nix-index and starship integrations in homes/tempest/default.nix.
+  programs.zoxide = {
+    enable = true;
+    enableFishIntegration = true;
+  };
+
   programs.fish = {
     enable = true;
 
