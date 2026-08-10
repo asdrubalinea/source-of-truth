@@ -279,6 +279,9 @@ in {
     claude-code
     llm-agents.codex # OpenAI Codex CLI; 0.146.0 vs nixpkgs unstable's 0.118.0
     llm-agents.opencode
+    # OpenCode 2 preview, from npm's `next` channel. Installs as `opencode2`,
+    # so it sits alongside the 1.x `opencode` binary rather than replacing it.
+    llm-agents.opencode2
     llm-agents.pi
     llm-agents.hermes-agent # Nous Research self-improving agent
     # rtk 0.44.1, and llm-agents.nix sets doCheck = false, so this sidesteps the
