@@ -126,6 +126,14 @@ in {
 
   home.sessionVariables = {
     EDITOR = "${pkgs.helix}/bin/hx";
+
+    # distrobox autodetects a container manager by probing podman, then docker,
+    # then lilipod. Both podman and docker are enabled on this host
+    # (hosts/tempest/system/virtualization.nix), so leave nothing to the probe:
+    # pin podman, which is the rootless one that shares $HOME under irene's uid.
+    # If podman is broken, distrobox now says so instead of quietly building the
+    # box under the rootful docker daemon.
+    DBX_CONTAINER_MANAGER = "podman";
   };
 
   programs = {

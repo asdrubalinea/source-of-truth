@@ -204,6 +204,20 @@
             mountpoint = "/var/lib/docker";
           };
 
+          # podman's storage — rootful graphroot (storage/) and the rootless
+          # per-user roots (rootless/<user>/), which are pointed here instead of
+          # ~/.local/share/containers by virtualisation.containers.storage in
+          # hosts/tempest/system/virtualization.nix. Same reasoning as the docker
+          # dataset above: keeps distrobox image churn out of the /persist
+          # snapshot + USB replication scope, and inherits
+          # com.sun:auto-snapshot=false. Unlike docker this is plain overlay on
+          # one dataset, not the zfs graph driver — podman has no zfs driver in
+          # rootless mode.
+          containers = {
+            type = "zfs_fs";
+            mountpoint = "/var/lib/containers";
+          };
+
           # Never mounted. A refreservation we can shrink to recover from a
           # 100%-full, write-wedged pool (ZFS is copy-on-write).
           reserved = {
