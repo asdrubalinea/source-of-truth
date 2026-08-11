@@ -275,7 +275,7 @@ in {
     obsidian
     telegram-desktop
     signal-desktop
-    thunderbird
+    # thunderbird
     mailspring-with-keyring
     # vesktop
     zoom-us
