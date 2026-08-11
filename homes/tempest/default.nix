@@ -50,6 +50,7 @@ in {
     ../../scripts/cage.nix
     ../../scripts/keep-awake.nix
     ../../scripts/ps5-audio.nix
+    ../../scripts/sitrep.nix
 
     # Shell and configuration
     ../../misc/fish.nix
