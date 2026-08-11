@@ -263,6 +263,10 @@ a sandbox cannot reach a host session's socket at all.
 | `$HOME/.config/fish` | ro-bind | Fish shell config (aliases, prompt, key bindings, theme) when present (ro) |
 | `$HOME/.config/helix` | ro-bind | Helix config (including Steel cogs and init files) when present (ro) |
 | `$HOME/.local/share/fish` | bind | Fish shell history when present (rw) |
+| `$HOME/.claude` | bind | Claude Code data dir (auth, config, projects history) when present (rw) |
+| `$HOME/.claude.json` | bind-try | Claude Code legacy config blob (rw) |
+| `$HOME/.agents` | bind | Claude Code skill store, which `~/.claude/skills` symlinks into, when present (rw) |
+| resolved `$HOME/.claude/skills/*` targets | ro-bind-try | Skills symlinked in from elsewhere on the host (ro) |
 | cwd (PWD at launch) | rw | Working directory |
 
 `--ro-bind-try` is used for optional sources, so a missing `~/.nix-profile` or
@@ -308,6 +312,25 @@ sandbox.  It is removed on teardown.
 - The Helix configuration directory (`$HOME/.config/helix`) MUST be bound
   read-only at its exact path when it exists on the host, so sandboxed `hx`
   inherits the host's editor settings, init files, and Steel cogs.
+- The Claude Code data directory (`$HOME/.claude`) MUST be bound read-write at
+  its exact path when it exists on the host, so sandboxed `claude` keeps the
+  host's credentials, configuration and session history.  It holds the user's
+  provider credentials; see §6.5.
+- Claude Code skills MUST resolve inside the sandbox.  `~/.claude/skills/<name>`
+  is a symlink per skill and the bodies live outside `~/.claude`, so binding
+  `~/.claude` alone carries the symlinks in and leaves them dangling against
+  the tmpfs HOME — a sandbox then offers none of the user's personal skills.
+  (Plugin skills are unaffected: they live under `~/.claude/plugins/cache`,
+  inside that bind.)  Therefore:
+  - The shared skill store (`$HOME/.agents`) MUST be bound at its exact path
+    when it exists.  It is bound read-write so skill installers work inside
+    the sandbox, which means a compromised agent could rewrite skill bodies a
+    later host session would follow — but `~/.claude/skills` is already
+    writable through the bind above, so this grants nothing new in kind.
+  - Any remaining `~/.claude/skills/*` symlink MUST have its resolved target
+    bound read-only at that target's own path, so skills kept elsewhere on the
+    host (in their own git checkout, say) resolve too.  Only the exact
+    registered directory is bound, never a parent of it and never `$HOME`.
 
 ### 5.3.  Environment
 

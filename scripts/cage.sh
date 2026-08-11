@@ -35,7 +35,9 @@
 # in read-only. ~/.hermes (hermes' whole config/auth/sessions dir) is
 # bound read-write, like ~/.pi, so sandboxed hermes persists state.
 # Claude Code (~/.claude, ~/.claude.json) and Codex (~/.codex) are also
-# bound read-write so their auth, config and session history persist.
+# bound read-write so their auth, config and session history persist, plus
+# ~/.agents (the store the ~/.claude/skills symlinks point into) so skills
+# resolve rather than dangle.
 # ~/.config/fish (including aliases) is bound read-only and
 # ~/.config/helix is bound read-only so Helix uses the host's Home Manager
 # configuration inside the sandbox, while
@@ -257,6 +259,34 @@ sandbox_cmd() {
     bargs+=(--bind "$HOME/.claude" "$HOME/.claude")
   fi
   bargs+=(--bind-try "$HOME/.claude.json" "$HOME/.claude.json")
+  # Claude Code skills. ~/.claude/skills/<name> is a *symlink* per skill and
+  # the bodies live outside ~/.claude -- the shared store is ~/.agents/skills.
+  # Binding ~/.claude alone therefore carried the symlinks in and left every
+  # one of them dangling against the tmpfs HOME, so `claude` inside a sandbox
+  # offered none of the personal skills. (Plugin skills were never affected:
+  # those live under ~/.claude/plugins/cache, i.e. inside the bind.) Bound
+  # read-write, like ~/.claude itself, so skill installers (find-skills,
+  # write-a-skill) still work inside the sandbox. That lets a compromised
+  # agent rewrite host skill bodies -- but ~/.claude/skills is already
+  # writable through the bind above, so this grants nothing new in kind.
+  if [ -d "$HOME/.agents" ]; then
+    bargs+=(--bind "$HOME/.agents" "$HOME/.agents")
+  fi
+  # Skills can also be symlinked in from anywhere else on the host (one kept
+  # in its own git checkout, say), so resolve each remaining link and bind its
+  # target at its own path rather than hardcoding a list. Read-only, and only
+  # the exact directories the user registered under ~/.claude/skills -- never
+  # a parent of one, and never $HOME itself.
+  local skill target
+  for skill in "$HOME"/.claude/skills/*; do
+    [ -L "$skill" ] || continue
+    target="$(realpath -e "$skill" 2>/dev/null)" || continue
+    case "$target" in
+      "$HOME"/.claude/* | "$HOME"/.agents/* | /nix/store/*) continue ;;
+      "$HOME" | /) continue ;;
+    esac
+    bargs+=(--ro-bind-try "$target" "$target")
+  done
   # Codex CLI: its whole data dir (~/.codex, holding config.toml,
   # auth.json and sessions) is bound read-write so sandboxed `codex`
   # can persist auth and session history.
