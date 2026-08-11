@@ -1,6 +1,9 @@
 # tempest: Time-Machine-style local backup via ZFS replication to an external USB SSD
 
-Status: accepted (2026-06-02)
+Status: accepted (2026-06-02); amended (2026-08-11) — the backup scrub became
+automatic, result notifications and an on-demand verify command were added, and
+the "long gap forces a reseed" consequence turned out to be wrong (see the
+Amendment section at the end).
 
 ## Context
 
@@ -57,13 +60,49 @@ snapshots of `rpool/persist` and `rpool/persist/home`; borg already ships
   on the very NVMe the backup protects; if that disk dies and the passphrase
   exists only there, the backup is unrecoverable. It is also stored in
   vaultwarden (self-hosted) / printed. Recovery uses `zfs load-key -L prompt`.
-- Plug the drive in at least every few weeks: incrementals ride the common
-  snapshot, and `rpool/persist` weeklies are kept 4 weeks (system/zfs.nix). A
-  longer gap forces a full reseed.
+- A long gap between plug-ins does **not** force a reseed (this bullet said the
+  opposite until 2026-08-11 — see the Amendment). The common base is syncoid's
+  own `syncoid_<host>_<ts>` snapshot, and sanoid's autoprune only expires
+  `autosnap_*`, so it is never pruned no matter how long the drive is away.
+  Exactly one is kept per dataset; syncoid deletes the previous after each
+  successful run. The real reseed trigger is destroying that snapshot by hand.
+  Note it is a snapshot and **not** a bookmark — `--create-bookmark` is opt-in
+  in syncoid and is not passed, so `zfs list -t bookmark` is empty and there is
+  no second fallback if the sync snapshot is lost.
 - `/nix` (reproducible) and `rpool/sbctl` (regenerable Secure Boot keys) are not
   backed up by design.
-- Scrub of the backup pool is manual (the auto flow exports immediately):
-  `sudo tempest-backup-browse` then `sudo zpool scrub backup` while attached.
+- Scrub of the backup pool rides along with a backup run (scrub-if-stale, 30d,
+  stamped as the `tempest:scrubbed` user property on the pool so the cadence
+  travels with the drive). The run is the only window the pool is imported, so
+  on a scrub run the drive must stay attached — `zpool scrub -w` blocks and the
+  oneshot has no timeout.
+- **A replication that succeeds can still fail the unit.** The orchestrator ends
+  with a `zpool status -x` gate and exits 1 on an unhealthy pool, so the syncoid
+  leg shows as failed even though the data was sent. That is deliberate — the
+  alternative is a green unit sitting on a rotting drive — but it means "unit
+  failed" here does not imply "backup did not happen".
+- **A faulted drive hangs the unit indefinitely.** The oneshot sets no
+  `TimeoutStartSec`, and a suspended pool blocks `zpool`/`zfs` calls forever
+  rather than erroring, so the unit can sit in `activating` with sustained I/O
+  pressure and no CPU use. `tempest-backup-verify` wraps every call in
+  `timeout`; the orchestrator does not.
+- Three operator commands, all root: `tempest-backup-browse` (import + load key
+  + mount under `/mnt/backup` for `httm`), `tempest-backup-eject` (export), and
+  `tempest-backup-verify` (below). Browse is the only one that loads the key.
+- `tempest-backup-verify` answers "is the backup current and intact?" on demand:
+  it imports **read-only** and **without loading the encryption key** (snapshot
+  names, creation times and pool health are unencrypted metadata), so a
+  verification can neither modify the drive nor expose plaintext. It reports
+  what the last scrub found — being read-only, it cannot scrub or repair.
+  Note it cannot report pool fill either: a read-only import never loads the
+  metaslab space maps, so `zpool list` reports `ALLOC 0 / 0%` however full the
+  pool is. It reads per-dataset `used` instead and refuses to print a pool
+  percentage. Measuring true fill needs a read-write import.
+- Results surface as desktop notifications (`packages/backup-notify.nix`):
+  failure via `OnFailure=` on the unit, success emitted inline by the
+  orchestrator so a plug-less timer tick — which no-ops and exits 0 — stays
+  silent. This replaced the Noctalia bar readout that ADR 0003 describes, after
+  v5's `custom_button` lost the ability to poll a script.
 
 ## Rejected alternatives
 
@@ -75,3 +114,44 @@ snapshots of `rpool/persist` and `rpool/persist/home`; borg already ships
   hand-plugged backup target.
 - **Leave it always imported on a plain timer** — simplest, but a USB reset can
   fault a live pool, and runs fail noisily whenever the drive is detached.
+
+## Amendment (2026-08-11)
+
+Three changes since acceptance, plus one correction.
+
+**The backup scrub became automatic.** As accepted, scrubbing the external was a
+manual `tempest-backup-browse` + `zpool scrub backup`, on the reasoning that the
+auto flow exports immediately and so leaves no window. In practice a manual step
+gated on remembering it is a step that does not happen. The orchestrator now
+scrubs *inside* the run when the last one is older than 30 days, stamping
+`tempest:scrubbed` on the pool as a user property — deliberately on the pool
+rather than in host state, so the cadence travels with the drive and is readable
+exactly when it matters. Cost: on a scrub run the drive must stay attached for
+potentially hours, because `zpool scrub -w` blocks.
+
+**Results became push notifications.** ADR 0003's Noctalia bar readout was a
+*pull* — the bar polled a script for storage/backup health. Noctalia v5's
+`custom_button` can no longer poll, so that readout was dropped and each backup
+unit now pushes a notification as it finishes (`packages/backup-notify.nix`).
+
+**An on-demand verify command was added** (`tempest-backup-verify`). The
+orchestrator's `zpool status -x` gate only inspects the pool during a run, which
+answers "was it healthy when the backup happened?", not "is my backup good right
+now?". The verify path imports read-only and never loads the key, so asking the
+question cannot damage or decrypt the thing being asked about.
+
+**Correction: "a longer gap forces a full reseed" was wrong.** The original
+consequence tied the incremental base to `rpool/persist` weeklies expiring after
+4 weeks. That is not the base. syncoid takes its own `syncoid_<host>_<ts>`
+snapshot, and sanoid's autoprune only expires `autosnap_*` — so the common base
+survives an arbitrarily long gap and no reseed is forced. Verified 2026-08-11:
+exactly one `syncoid_` snapshot per source dataset, oldest surviving history on
+the backup reaching to 2026-06-02.
+
+Worth knowing that the same check found `zfs list -t bookmark` empty across
+`rpool`. A code comment had claimed syncoid creates a bookmark alongside the sync
+snapshot "so incrementals survive even if a source snapshot is later pruned";
+`--create-bookmark` is opt-in and is not passed, so that safety net does not
+exist. The comment has been corrected. Passing `--create-bookmark` would make the
+claim true and is the obvious hardening if the sync snapshot ever gets destroyed
+by accident — untaken for now, since nothing prunes it today.

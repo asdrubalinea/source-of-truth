@@ -142,10 +142,20 @@ let
         zfs create -o canmount=off -o mountpoint=none ${parent}
       fi
 
-      # Replicate. Default syncoid creates a sync snapshot + bookmark (so
-      # incrementals survive even if a source snapshot is later pruned) and
-      # sends with -I, carrying every sanoid snapshot in between onto the
-      # backup = the browsable history. recvOptions=u: never mount on receive.
+      # Replicate. syncoid takes its own `syncoid_<host>_<ts>` sync snapshot on
+      # the source and sends with -I, carrying every sanoid snapshot in between
+      # onto the backup = the browsable history. recvOptions=u: never mount on
+      # receive.
+      #
+      # That sync snapshot is what makes the NEXT run incremental, and it
+      # survives arbitrary gaps: sanoid's autoprune only expires its own
+      # `autosnap_*` snapshots, so it never removes the common base. Exactly one
+      # is kept — syncoid deletes the previous one after each successful run.
+      #
+      # Note it is a snapshot and NOT a bookmark: `--create-bookmark` is opt-in
+      # in syncoid and is not passed here, so `zfs list -t bookmark` is empty.
+      # If that sync snapshot is ever destroyed by hand, the next run has no
+      # common base and must reseed the whole pool.
       ${lib.concatMapStringsSep "\n" (p: ''
         log "replicating ${p.src} -> ${p.dst}"
         syncoid --recvOptions=u --quiet ${p.src} ${p.dst}
@@ -223,12 +233,43 @@ let
       zpool export ${pool} && echo "'${pool}' exported — safe to unplug."
     '';
   };
+
+  # On-demand "is my backup actually good?" check. The orchestrator's own
+  # `zpool status -x` gate only looks at the pool during a backup run; this
+  # answers the question at any time, and — unlike the run — imports READ-ONLY
+  # and never loads the encryption key. The body is a plain .sh file rather than
+  # an inline string because it is long and full of ''${...} shell expansions
+  # that would need escaping in a Nix indented string. The config values are
+  # injected as a prelude instead, so PAIRS is derived from the same `pairs`
+  # list the orchestrator replicates: adding a dataset there extends the
+  # verification automatically, with no second place to update.
+  verifyBin = pkgs.writeShellApplication {
+    name = "tempest-backup-verify";
+    runtimeInputs = [
+      pkgs.zfs
+      pkgs.coreutils
+      pkgs.gawk
+      pkgs.gnugrep
+      pkgs.gnused
+      pkgs.systemd
+    ];
+    text =
+      ''
+        POOL=${pool}
+        PARENT=${parent}
+        ALTROOT=${altroot}
+        SCRUB_MAX_AGE=${toString scrubMaxAgeSec}
+        PAIRS=(${lib.concatMapStringsSep " " (p: "${p.src}:${p.dst}") pairs})
+      ''
+      + builtins.readFile ./backup-verify.sh;
+  };
 in
 {
   environment.systemPackages = [
     backupBin
     browseBin
     ejectBin
+    verifyBin
   ];
 
   # Fire a backup the moment the drive is plugged in. ZFS labels the member
