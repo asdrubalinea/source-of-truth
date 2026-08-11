@@ -253,6 +253,9 @@ in {
     appimage-run # run AppImages via Nix
     blueman
     libnotify # notify-send
+    # AirPods noise-control/ear-detection/battery. Deliberately NOT pkgs.librepods
+    # (that is the superseded Qt build); see packages/librepods.nix.
+    (callPackage ../packages/librepods.nix {})
     networkmanagerapplet
     pavucontrol
     seahorse
