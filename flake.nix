@@ -68,7 +68,26 @@
     };
     niri = {
       url = "github:sodiboo/niri-flake";
-      inputs.nixpkgs.follows = "nixpkgs";
+      # Do NOT `follows = "nixpkgs"`, and do NOT leave this unpinned either.
+      #
+      # niri.cachix.org (added to the substituters by niri.nixosModules.niri
+      # itself, which is why it isn't in modules/nix.nix) only holds
+      # `niri.packages.*` as built by upstream CI — i.e. against the exact
+      # nixpkgs in niri-flake's own flake.lock. Following our nixpkgs changes the
+      # derivation hash and turns niri into a ~277 MB local Rust build.
+      #
+      # Merely dropping the `follows` is not enough: nix then reuses whatever
+      # `github:NixOS/nixpkgs/nixos-unstable` node our lock already has, which
+      # runs ahead of CI. That breaks the build outright, because niri-flake's
+      # `make-niri` asserts `libdisplay-info_0_2.version == "0.2.0"` for both
+      # niri-stable and niri-unstable, and nixpkgs removed the
+      # libdisplay-info_0_2 alias on 2026-08-04.
+      #
+      # So pin it to niri-flake's own locked rev. Re-sync this whenever the niri
+      # input is bumped (read `nixpkgs` out of niri-flake's flake.lock); if it
+      # drifts you lose every cache hit, and if it drifts past a nixpkgs that
+      # dropped libdisplay-info_0_2 the build fails loudly rather than silently.
+      inputs.nixpkgs.url = "github:NixOS/nixpkgs/e72e4f299401a3689d4b3d5fc6496b11db7064eb";
     };
     noctalia = {
       url = "github:noctalia-dev/noctalia-shell";
@@ -249,13 +268,26 @@
         ];
     };
 
-    # niri v25.08 still links against libdisplay-info 0.2.  The unstable
-    # nixpkgs input removed its libdisplay-info_0_2 alias, while the stable
-    # input still carries the matching package.  Supply that package before
-    # niri-flake's overlay auto-discovers the argument.
-    niriLibdisplayInfoOverlay = final: prev: {
-      libdisplay-info_0_2 =
-        nixpkgs-stable.legacyPackages.${final.stdenv.hostPlatform.system}.libdisplay-info_0_2;
+    # Take the niri package set from niri-flake's `packages` output rather than
+    # the attrs its overlay defines. The two are not the same build:
+    # `overlays.niri = final: prev: make-package-set final` compiles against
+    # whatever pkgs it lands in (ours), while `packages` uses the flake's own
+    # nixpkgs — and only the latter is in niri.cachix.org. Ordered after
+    # niri.overlays.niri so these aliases win.
+    #
+    # This also retires the libdisplay-info_0_2 backfill this overlay used to
+    # carry: nothing builds niri against our nixpkgs any more, so the alias
+    # unstable dropped is no longer needed. niri >= v25.11 wants 0.3 regardless.
+    niriPrebuiltOverlay = final: _prev: let
+      inherit (final.stdenv.hostPlatform) system;
+    in {
+      inherit
+        (niri.packages.${system})
+        niri-stable
+        niri-unstable
+        xwayland-satellite-stable
+        xwayland-satellite-unstable
+        ;
     };
 
     overlays = [
@@ -263,8 +295,8 @@
       helixSteelOverlay
       pandasStubsOverlay
       emacs-overlay.overlay
-      niriLibdisplayInfoOverlay
       niri.overlays.niri
+      niriPrebuiltOverlay
       claude-code.overlays.default
       # `default` builds against our nixpkgs; `pinned` would use upstream's own
       # revision to guarantee attic cache hits. See the input's comment above
