@@ -20,11 +20,12 @@ let
   # the JSON, so `--json` consumers silently get a jq parse error and every
   # script here misreads the session. The compositor is the SYSTEM one —
   # greetd launches `niri-session` from /run/current-system/sw (see
-  # rices/niri/system.nix `programs.niri.enable`, and the niri.service unit ships
-  # inside that same package) — and niri-flake's default there is niri-stable.
-  # So: niri-stable, not niri-unstable. Bumping the compositor means changing
-  # both the system's `programs.niri.package` and this line together.
-  niri = "${pkgs.niri-stable}/bin/niri";
+  # rices/niri/system.nix `programs.niri.package`, and the niri.service unit
+  # ships inside that same package), which is pinned to pkgs.niri-unstable.
+  # Changing the compositor means changing that option and every
+  # pkgs.niri-unstable in this rice together (niri.nix, marquee.nix,
+  # pip-follow.nix, swayidle.nix).
+  niri = "${pkgs.niri-unstable}/bin/niri";
   jq = "${pkgs.jq}/bin/jq";
   nirius = "${pkgs.nirius}/bin/nirius";
   sleep = "${pkgs.coreutils}/bin/sleep";
@@ -343,7 +344,7 @@ lib.mkIf config.rices.niri.enable {
     # Not the compositor — the session comes from the system package. This is what
     # home-manager validates the generated KDL against, so it has to be the same
     # version that will actually load it (see the `niri` binding above).
-    package = pkgs.niri-stable;
+    package = pkgs.niri-unstable;
     settings = {
       environment = {
         CLUTTER_BACKEND = "wayland";

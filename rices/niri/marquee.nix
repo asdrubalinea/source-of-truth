@@ -68,7 +68,7 @@ let
   #     last. So a playing tenant covers the (auto-hidden) bar and the rounded
   #     corners ON THIS PANEL. Both still exist on every other output.
 
-  niri = "${pkgs.niri-stable}/bin/niri"; # must match the compositor; see ./niri.nix
+  niri = "${pkgs.niri-unstable}/bin/niri"; # must match the compositor; see ./niri.nix
   jq = "${pkgs.jq}/bin/jq";
   head = "${pkgs.coreutils}/bin/head";
   systemctl = "${pkgs.systemd}/bin/systemctl";

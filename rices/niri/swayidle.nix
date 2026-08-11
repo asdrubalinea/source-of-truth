@@ -117,11 +117,11 @@ lib.mkIf config.rices.niri.enable {
         # protection, so the drift screensaver (300s) and idle lock (600s)
         # below are effectively unreachable in the on-screen state, but kept
         # for the manual/rental paths where the screen is left on.
-        # niri-stable: same package as the running compositor, or `niri msg`
+        # niri-unstable: same package as the running compositor, or `niri msg`
         # bails out on a version mismatch (see the `niri` binding in niri.nix).
         timeout = 120;
-        command = "${pkgs.niri-stable}/bin/niri msg action power-off-monitors";
-        resumeCommand = "${pkgs.niri-stable}/bin/niri msg action power-on-monitors";
+        command = "${pkgs.niri-unstable}/bin/niri msg action power-off-monitors";
+        resumeCommand = "${pkgs.niri-unstable}/bin/niri msg action power-on-monitors";
       }
       {
         # 20 min: suspend on battery only. On AC the wrapper above no-ops (the
