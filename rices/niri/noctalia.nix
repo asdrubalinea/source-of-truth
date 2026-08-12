@@ -85,7 +85,13 @@
           directory = "~/Pictures/Wallpapers";
           # The stylix target also pins wallpaper.default.path (to its own `image`)
           # at normal priority, so mkForce the rice's seeded starter image to win.
-          default.path = lib.mkForce "~/Pictures/Wallpapers/vintage-car-gta-6-3840x2160-26771.jpg";
+          # OLED panel: pick the lowest-APL seeded image. shinobu-kocho-dark is
+          # neon-on-true-black — 5% mean luminance, 1% of pixels above 80%, and
+          # the black field is *actually* #000 so those subpixels stay off (no
+          # emission, no wear). The previous pick (vintage-car, 46% mean) and the
+          # runtime one it replaced (wallhaven-k881zd, 75%) both light most of
+          # the panel for hours with a static image — the burn-in case.
+          default.path = lib.mkForce "~/Pictures/Wallpapers/shinobu-kocho-dark.png";
         };
 
         brightness.enable_ddcutil = true;
