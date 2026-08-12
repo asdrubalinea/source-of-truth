@@ -377,16 +377,6 @@ lib.mkIf config.rices.niri.enable {
         skip-at-startup = true;
       };
 
-      # Make niri wait for each frame to finish rendering before queueing it to
-      # DRM. Without it, clients that composite on the GPU and submit dmabufs
-      # with explicit sync (Chrome/Electron, Qt6 apps like Telegram, and
-      # Vulkan-via-Mesa-WSI apps like wezterm and zed) flash stale/black blocks
-      # on every redraw, while plain-EGL clients (alacritty, Firefox/Zen) are
-      # unaffected. Open upstream against exactly this niri build:
-      # https://github.com/niri-wm/niri/issues/2477 (and discussion #3777).
-      # Costs a little latency — drop it once niri fixes the sync path.
-      debug."wait-for-frame-completion-before-queueing" = [];
-
       xwayland-satellite.enable = true;
 
       gestures = {
