@@ -18,18 +18,11 @@
       set -ga terminal-overrides ",*256col*:Tc"
 
       # tmux only forwards capabilities it believes the outer terminal has, so
-      # spell them out for alacritty (rices/niri/alacritty.nix sets
-      # TERM=alacritty): truecolor, coloured/curly underlines for helix
-      # diagnostics, OSC 8 hyperlinks, CSI-u extended keys, and `sync` — DECSET
-      # 2026 synchronized output, which lets a repaint land as one atomic frame
-      # instead of a half-drawn screen reaching the compositor.
-      #
-      # usstyle is asserted rather than read off the terminfo entry: alacritty
-      # implements SGR 58/59 underline colours, but its terminfo advertises only
-      # Smulx and omits Setulc, so tmux would otherwise forward the underline
-      # shape without the colour.
-      set -as terminal-features ",alacritty*:RGB:usstyle:hyperlinks:extkeys:sync"
-      # Request disambiguated keys from alacritty and hand them to apps that ask.
+      # spell them out for wezterm (rices/niri/wezterm.nix sets TERM=wezterm):
+      # truecolor, coloured/curly underlines for helix diagnostics, OSC 8
+      # hyperlinks, and CSI-u extended keys.
+      set -as terminal-features ",wezterm*:RGB:usstyle:hyperlinks:extkeys"
+      # Request disambiguated keys from wezterm and hand them to apps that ask.
       set -s extended-keys on
       
       # Set pane base index to 1

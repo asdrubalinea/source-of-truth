@@ -34,7 +34,7 @@
       # used to hand-drive colors (wallpaper-derived) instead.
       #
       # stylix also themes the apps themselves directly (its gtk / kitty /
-      # alacritty / fish targets, plus the qtct ColorScheme generated in
+      # alacritty / wezterm / fish targets, plus the qtct ColorScheme generated in
       # qt.nix), so noctalia no longer relays colors to other apps — there is no
       # theme.templates block here anymore, and the per-app `force = true`
       # workarounds that the runtime templates required are gone.
@@ -98,10 +98,24 @@
 
         backdrop.blur_intensity = 0.1;
 
-        # (A notification.filter pinned here used to clamp wezterm's toasts,
-        # which it raised with expire_timeout=0 — the spec's "never expire" — and
-        # offered no knob to soften. It went out with the switch to alacritty,
-        # which raises no desktop notifications at all.)
+        # wezterm asks for toasts that never go away. Captured from its live
+        # Notify call: app_name="wezterm", urgency=critical, expire_timeout=0 —
+        # and 0 is the spec's "never expire" (-1 is "daemon default"), so
+        # noctalia was right to keep them up. wezterm has no knob for this; the
+        # only notification-related field in its config schema is
+        # notification_handling.
+        #
+        # A matched filter with allow_permanent = false rewrites timeout 0 to
+        # noctalia's kDefaultNotificationTimeout (6s); add override_duration
+        # (milliseconds) here to choose a different one. `match` is a
+        # case-insensitive token compared against app name, desktop entry or
+        # category, so "wezterm" hits the app name. Every other filter field
+        # (show_toast / save_history / play_sound) defaults true, so this only
+        # changes the expiry.
+        notification.filter.wezterm = {
+          match = "wezterm";
+          allow_permanent = false;
+        };
 
         shell = {
           # font_family is set by the stylix noctalia target (fonts.sansSerif.name).

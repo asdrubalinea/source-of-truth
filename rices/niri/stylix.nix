@@ -39,6 +39,7 @@ lib.mkIf config.rices.niri.enable {
       # build-time static now, so there's nothing to hot-reload.
       alacritty.enable = true;
       kitty.enable = true;
+      wezterm.enable = true;
       # fish syntax-highlight colors + OSC palette from the same base16 scheme.
       # (Was off only because Noctalia's runtime terminal palette fought fish's
       # OSC — that relay is gone.)

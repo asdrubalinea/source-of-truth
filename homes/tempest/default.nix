@@ -158,9 +158,8 @@ in {
       # just mirror ssh's own built-in defaults, so there's nothing to keep.
       enableDefaultConfig = false;
       settings = {
-        # Locally alacritty sets TERM=alacritty; remote hosts that lack the
-        # alacritty terminfo entry (anything not running hydra/orchid's
-        # alacritty.terminfo)
+        # Locally wezterm sets TERM=wezterm; remote hosts that lack the wezterm
+        # terminfo entry (anything not running hydra/orchid's wezterm.terminfo)
         # then drop TUI apps like the mysql client to dumb-terminal mode — no
         # readline, no arrow keys, no tab completion. sshd always honours the
         # client-sent TERM (no AcceptEnv needed), so override it to a term every

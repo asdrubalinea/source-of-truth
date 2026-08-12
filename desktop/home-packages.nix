@@ -247,7 +247,7 @@ in {
     # zoxide is enabled as programs.zoxide in misc/fish.nix: the binary is inert
     # without the shell hook that records directory visits.
     # Warp lives in desktop/warp.nix (package + declarative settings.toml).
-    # alacritty is installed by programs.alacritty (rices/niri/alacritty.nix).
+    wezterm
 
     # --- Desktop integration ---
     appimage-run # run AppImages via Nix
