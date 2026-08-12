@@ -105,7 +105,12 @@
 
         shell = {
           # font_family is set by the stylix noctalia target (fonts.sansSerif.name).
-          screen_corners.enabled = true;
+          # Off since the negative struts in niri.nix: windows now reach the
+          # display edges and already round themselves at radius 12
+          # (window-rules.nix geometry-corner-radius). Noctalia's screen-corner
+          # overlay masks a second, differently-sized curve on top of that, so
+          # the two radii visibly disagree at every corner. One rounding wins.
+          screen_corners.enabled = false;
 
           # Noctalia's clipboard history is on by default and "adopts orphaned
           # selections" — it takes Wayland selection ownership so content

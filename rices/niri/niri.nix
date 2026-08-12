@@ -434,10 +434,26 @@ lib.mkIf config.rices.niri.enable {
           inactive.color = c.base01;
         };
 
-        # Gap windows away from the screen edges so they sit inside the floating
-        # Noctalia bar's margin (noctalia-widgets.nix sets the bar's margins to
-        # the same value, so window columns line up with the bar's edges).
+        # Inner gaps only. `gaps` applies both between windows and around the
+        # screen edges; matching negative struts cancel just the outer half
+        # (the documented niri idiom for inner-vs-outer gaps). So a lone window
+        # runs edge to edge and reads as fullscreen, while two or more still get
+        # 2*gaps of separation between columns.
+        #
+        # niri has no smart-gaps: window rules can't match on window count, so
+        # this is as close as the config gets without an event-stream daemon
+        # toggling maximize-window-to-edges.
         gaps = 8;
+
+        struts = {
+          left = -8;
+          right = -8;
+          # Not -8: the Noctalia bar floats with its own 8px margin and rounded
+          # corners, so pulling windows flush against it leaves the window's
+          # square corner clashing with the bar's radius. Leave the top gap.
+          top = 0;
+          bottom = -8;
+        };
       };
 
       # Prefer no client-side decorations
