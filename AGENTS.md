@@ -7,10 +7,10 @@
 - `modules/`, `services/`, `hardware/`, and `desktop/` provide reusable Nix modules.
 - `disks/` contains Disko layouts; `packages/` contains custom package definitions.
 - `rices/` holds UI theming, waybar, fonts, and wallpaper assets.
-- `scripts/` and top-level `*.sh` are operational helpers (apply, format, install).
+- `scripts/` and top-level `*.sh` are operational helpers (update-home, format, install).
 
 ## Build, Test, and Development Commands
-- `nixos-rebuild switch --flake '.#<host>' --sudo`: apply a host configuration (used by `scripts/system-apply.nix`).
+- `nh os switch` / `nh home switch -b backup` (or `apply` for both): activate the current host's NixOS and Home Manager configs. `nh` is enabled per host via `programs.nh.flake`, which sets `NH_FLAKE`.
 - `nix flake update`: update flake inputs (the old `./update-flakes.sh` wrapper was removed).
 - `./build-vm`: build the non-destructive `tempest-vm` QEMU clone (`system.build.vmWithDisko`); run `./result/bin/disko-vm`.
 - `./tempest-format`: format/mount disks for the `tempest` layout (destructive).

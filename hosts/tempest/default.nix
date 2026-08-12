@@ -30,7 +30,7 @@
 
     # Services
     ../../services/borg-backup.nix
-    ../../services/nix-cleanup.nix
+    # (nix-cleanup.nix removed — GC is programs.nh.clean below)
     ../../services/redshift.nix
     ../../services/grafana/default.nix
 
@@ -79,7 +79,22 @@
   programs.nh = {
     enable = true;
     flake = "/persist/source-of-truth";
+
+    # Weekly GC. `nh clean all` beats nix.gc because it walks *every* profile —
+    # system, per-user, and the home-manager generations — plus the gcroots
+    # nix.gc never touches; nix.gc only prunes the system profile, so HM
+    # generations piled up until a manual run. Persistent timer, so a laptop
+    # that was asleep on the scheduled day catches up at the next boot.
+    clean = {
+      enable = true;
+      extraArgs = "--keep 5 --keep-since 7d";
+    };
   };
+
+  # Mutually exclusive with programs.nh.clean (the nh module warns if both are
+  # on) — modules/nix.nix defaults it to true. nix.optimise stays enabled there:
+  # nh clean does not hardlink-dedupe the store.
+  nix.gc.automatic = false;
 
   # System Version
   system.stateVersion = "24.11";

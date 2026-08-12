@@ -1,24 +1,8 @@
 { config, pkgs, ... }:
 
-let
-  userApply = pkgs.writeScriptBin "user-apply" ''
-    #!${pkgs.stdenv.shell}
-    pushd /etc/nixos/source-of-truth
-
-    home-manager switch --flake '.#irene-router'
-
-    popd
-  '';
-
-  systemApply = (pkgs.callPackage ../scripts/system-apply.nix {
-    configPath = "/etc/nixos/source-of-truth";
-  }).systemApply;
-
-in
 {
-  imports = [
-    ../scripts/system-clean.nix
-  ];
+  # Applying and cleaning is `nh` (NH_FLAKE=/etc/nixos/source-of-truth):
+  # `nh os switch`, `nh home switch -c irene-router`, `nh clean all`.
 
   # Let Home Manager install and manage itself.
   programs.home-manager.enable = true;
@@ -32,9 +16,6 @@ in
     iperf
     pciutils
     ookla-speedtest
-
-    userApply
-    systemApply
   ];
 }
 

@@ -235,7 +235,7 @@ option leaves no units, no binds and no waybar behind. `transform` is written on
 both mounts rather than omitted in landscape, because kanshi leaves a property it
 doesn't mention alone — switching back has to actively un-rotate the panel.
 
-Flipping it needs `user-apply` plus a kanshi restart or a replug: kanshi commits a
+Flipping it needs an HM activation (`nh home switch -b backup`) plus a kanshi restart or a replug: kanshi commits a
 profile when the output set changes, not when its config is rewritten.
 
 ## Consequences

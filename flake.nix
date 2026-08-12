@@ -369,7 +369,7 @@
       };
   in {
     # Expose the locked home-manager CLI so it can be bootstrapped without
-    # relying on whatever's in PATH — useful right after a config-apply that
+    # relying on whatever's in PATH — useful right after an `nh os switch` that
     # tears down /etc/profiles/per-user/irene before the first standalone HM
     # activation:
     #   nix run /persist/source-of-truth#home-manager -- switch \

@@ -44,7 +44,7 @@ let
   # rices/niri/tofi.nix:42-47), and rices/niri/marquee.nix compiles to nothing
   # when its option is null.
   #
-  # Applying a flip: `user-apply`, then restart kanshi
+  # Applying a flip: `nh home switch -b backup`, then restart kanshi
   # (`systemctl --user restart kanshi`) or replug the panel — kanshi commits a
   # profile on output changes, not on config reload, so an already-committed
   # rotation otherwise stays up until something re-triggers the profile.

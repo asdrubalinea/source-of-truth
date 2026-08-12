@@ -36,31 +36,31 @@ server — plus Home Manager for `irene` — from a single declarative tree.
 
 ## 🚀 Quick start
 
-Everything is driven from the flake root against `.#<host>`. Wrapper scripts `pushd`
-into `/persist/source-of-truth` so `.#` resolves to the current host by hostname.
+Everything is driven by [`nh`](https://github.com/nix-community/nh), enabled per host
+with `programs.nh.flake` — that sets `NH_FLAKE`, so the commands work from any
+directory and resolve the config by hostname / `$USER@$HOSTNAME`.
 
 ```sh
 # Apply a host's NixOS config (current host)
-system-apply              # → nixos-rebuild switch --flake '.#' --sudo
+nh os switch              # → nixos-rebuild switch, with a package diff
 
 # Apply standalone Home Manager
-home-manager switch --flake '.#irene@tempest'
-user-apply                # tempest wrapper, runs the above with -b backup
+nh home switch -b backup  # → homeConfigurations."irene@<host>"
 
-# On tempest, a full system change = BOTH:
-system-apply && user-apply
+# Both, in order — the daily command
+apply                     # shell alias, misc/aliases.nix
 ```
 
-> [!TIP]
-> On **tempest**, NixOS and Home Manager are two separate activations.
-> Run `system-apply` *then* `user-apply` to land a complete change.
+Useful flags: `-n` dry run, `-a` ask before activating, `-u` update all flake
+inputs first, `-U <input>` update one, `-d always` force the package diff.
 
 ### Housekeeping
 
 ```sh
 update-home        # tempest: bump only the HM-side flake inputs
 nix flake update   # bump everything (old ./update-flakes.sh wrapper removed)
-system-clean       # drop old generations, GC, optimize the store
+nh clean all       # drop old generations + GC — system, user *and* HM profiles
+                   # (runs weekly on its own via programs.nh.clean)
 ```
 
 > [!CAUTION]
@@ -91,7 +91,7 @@ flake.nix              # inputs, multi-channel overlay, nixosConfigurations + ho
 ├── desktop/           # editor/terminal/app configs (helix, neovim, emacs, zed, tmux, fonts…)
 ├── rices/             # desktop environments — estradiol · hypr · niri
 ├── packages/          # custom derivations (pkgs.callPackage)
-├── scripts/           # writeScriptBin wrappers (system-apply, battery, brightness…)
+├── scripts/           # writeScriptBin wrappers (update-home, battery, sitrep…)
 └── disks/             # disko layouts
 ```
 

@@ -41,9 +41,8 @@ in {
     ../../desktop/telegram-sandbox.nix
 
     # System utilities
-    ../../scripts/system-clean.nix
-    ../../scripts/config-apply.nix
-    ../../scripts/user-apply.nix
+    # Applying and cleaning is `nh` (enabled in hosts/tempest/default.nix):
+    # `nh os switch`, `nh home switch -b backup`, `nh clean all`.
     ../../scripts/update-home.nix
     ../../scripts/port-forward.nix
     ../../scripts/claude-sandboxed.nix

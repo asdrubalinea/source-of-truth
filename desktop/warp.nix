@@ -32,7 +32,7 @@
   # The consequence is that changing a setting in Warp's GUI applies for the
   # rest of the session (the value lives in the in-memory `DocumentMut`) but is
   # lost on restart. To change a setting for real, edit it here and re-run
-  # `user-apply` — Warp hot-reloads settings.toml (crates/integration/src/test/
+  # `nh home switch` — Warp hot-reloads settings.toml (crates/integration/src/test/
   # settings_file_hot_reload.rs), so the new value is picked up without a
   # restart.
   #

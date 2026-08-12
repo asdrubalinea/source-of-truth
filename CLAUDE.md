@@ -8,13 +8,17 @@ Personal NixOS flake configuring three hosts (`tempest`, `orchid`, `hydra`) plus
 
 ## Common commands
 
-Rebuilds are done from the flake root against `.#<host>`:
+Applying config is [`nh`](https://github.com/nix-community/nh), enabled per host with `programs.nh = { enable = true; flake = "<repo path>"; }` (tempest and orchid: `/persist/source-of-truth`; hydra: `/home/irene/source-of-truth`). That option sets `NH_FLAKE`, so every `nh` command works from any directory — no `pushd`, no wrapper scripts:
 
-- `nixos-rebuild switch --flake '.#tempest' --sudo` — apply a host config. Wrapped as `config-apply` / `system-apply` (installed via home-manager from `scripts/config-apply.nix` and `scripts/system-apply.nix`) — both `pushd` into `/persist/source-of-truth` and run `nixos-rebuild switch --flake '.#' --sudo`, so `.#` resolves to the current host's `nixosConfigurations` entry by hostname.
-- `home-manager switch --flake '.#irene@<host>'` — apply a standalone Home Manager config. Both `orchid` and `tempest` have entries under `homeConfigurations` (`irene@orchid`, `irene@tempest`). On tempest there's a `user-apply` wrapper (`scripts/user-apply.nix`) that runs this with `-b backup`. On tempest a system change therefore needs **both** `system-apply` and `user-apply`.
+- `nh os switch` — activate the current host's `nixosConfigurations` entry (resolved by hostname). Handles its own privilege elevation and prints an nvd package diff.
+- `nh home switch -b backup` — activate `homeConfigurations."irene@<host>"` (resolved from `$USER@$HOSTNAME`; `-c` overrides). `-b backup` is passed by habit so a conflicting file is moved aside instead of aborting the switch.
+- `apply` — shell alias (`misc/aliases.nix`) for `nh os switch && nh home switch -b backup`. Both hosts run HM standalone, so a full system change needs both activations; this is the daily command.
+- Useful flags on either: `-n` dry run, `-a` ask before activating, `-u` update all flake inputs first, `-U <input>` update one, `-d always` force the package diff.
 - `update-home` (tempest only, `scripts/update-home.nix`) — `nix flake update` for the subset of inputs that only affect tempest's HM closure (`nixpkgs-home`, `claude-code`, `zen-browser`, `hn-tui-flake`, `emacs-overlay`, `stylix`, `hyprland`). `niri` and `helix` are intentionally excluded because both also live in tempest's system layer.
 - `nix flake update` — update all flake inputs (the old `./update-flakes.sh` wrapper was removed).
-- `system-clean` (from `scripts/system-clean.nix`) — delete old generations, GC, optimize the store.
+- `nh clean all` — delete old generations and GC across **all** profiles (system, per-user, home-manager) plus gcroots — `nix.gc` only ever pruned the system profile. Runs weekly on its own via `programs.nh.clean` (`--keep 5 --keep-since 7d`), so it rarely needs invoking by hand. `nix.gc.automatic` is set to `false` on every host that enables it (the two are mutually exclusive); `nix.optimise` stays on, since `nh clean` doesn't hardlink-dedupe. Replaces the old `system-clean` wrapper and `services/nix-cleanup.nix`.
+
+The old `config-apply` / `system-apply` / `user-apply` / `system-clean` `writeScriptBin` wrappers were deleted in favor of the above — if you find a reference to one, it's stale.
 
 A non-destructive `tempest-vm` clone exists for testing the full config (disko layout + impermanence + niri) in QEMU without touching hardware:
 
@@ -27,7 +31,7 @@ Disk / install helpers are **destructive** — they wipe and reformat the target
 
 No test framework — validation is "does `nixos-rebuild` evaluate and switch successfully on the relevant host".
 
-**Do not run `nixos-rebuild` (build, switch, dry-build, dry-activate, …), `home-manager switch`, `config-apply`, `system-apply`, `user-apply`, or any other command that builds or activates the system config.** The user runs all rebuilds themselves. Make the edits and stop — do not "verify" by building.
+**Do not run `nixos-rebuild` (build, switch, dry-build, dry-activate, …), `home-manager switch`, `nh os` / `nh home` / `nh clean`, `apply`, or any other command that builds or activates the system config.** The user runs all rebuilds themselves. Make the edits and stop — do not "verify" by building.
 
 ## Architecture
 
@@ -44,16 +48,16 @@ Each host's `default.nix` is the composition root: imports its own `system/*.nix
 **Shared modules** (imported by hosts):
 - `modules/` — cross-cutting system modules (`nix.nix`, `gaming.nix`, `secure-boot.nix`).
 - `hardware/` — opt-in hardware modules (audio, bluetooth, framework, pipewire, rocm, zfs, tlp). Hosts pick what they need.
-- `services/` — NixOS services (borg-backup, btrfs-snapshots, caddy, grafana, glance, syncthing, ssh-secure, redshift, nix-cleanup, thermal-logger). Each is imported à la carte.
+- `services/` — NixOS services (borg-backup, btrfs-snapshots, caddy, grafana, glance, syncthing, ssh-secure, redshift, thermal-logger). Each is imported à la carte.
 - `desktop/` — editor/terminal/app configs consumed from Home Manager (vscode, helix, neovim, emacs, zed, tmux, fonts, home-packages, gnome/kde/plasma).
 - `rices/{estradiol,hypr,niri}` — desktop environments. Each rice has a `system.nix` (imported by the host) and a `default.nix` / home-manager-side files (imported by the home config). `tempest` currently uses `niri`; `orchid` currently uses `estradiol`.
 - `packages/` — custom derivations called via `pkgs.callPackage` from home configs.
-- `scripts/` — Nix files that build small `writeScriptBin` wrappers (`config-apply`, `system-apply`, `system-clean`, `port-forward`, `battery`, `brightness`, `wait-ac`, `thermal-logger`). These are installed into `home.packages` by importing the script module from a home config. Larger ones (`cage`, `sitrep`) are `writeShellApplication`s whose body lives in a sibling `.sh` file — those are shellcheck-gated at build time, so a warning-level finding fails the build.
+- `scripts/` — Nix files that build small `writeScriptBin` wrappers (`update-home`, `port-forward`, `battery`, `brightness`, `wait-ac`, `thermal-logger`). These are installed into `home.packages` by importing the script module from a home config. Larger ones (`cage`, `sitrep`) are `writeShellApplication`s whose body lives in a sibling `.sh` file — those are shellcheck-gated at build time, so a warning-level finding fails the build.
 - `sitrep` (`scripts/sitrep.nix` + `scripts/sitrep.sh`) — one-screen health readout: alerts, load/PSI, memory, ZFS pools, SMART, filesystems, backup units, failed services, network, power/thermal, and this boot's log errors grouped by shape. Feature-detects everything, so it degrades rather than fails on hosts without ZFS or a battery. SMART needs root (`sudo sitrep`); the unprivileged run says so instead of printing zeroes. Renders into `$BODY` inside a brace group so the alert block can be printed above the detail — any loop that raises an alert must use `done < <(cmd)`, never `cmd | while`, or the alert is lost in the subshell.
 
 **Nixpkgs channels**: `flake.nix` builds a `multiChannelOverlay` exposing `pkgs.stable` (nixos-25.11), `pkgs.trunk`, and `pkgs.custom` (both `github:nixos/nixpkgs`). Default `nixpkgs` is `nixos-unstable`. Reach for `pkgs.stable.foo` when unstable breaks something. Other overlays active globally: `emacs-overlay`, `niri`, `claude-code`, `nix-cachyos-kernel`. `allowUnfree = true`.
 
-**Home Manager integration**: both desktop hosts now run HM **standalone** via `homeConfigurations` — `irene@orchid` and `irene@tempest`. On both hosts a system change requires two activations: `system-apply` (or `config-apply`) for NixOS, then `home-manager switch --flake '.#irene@<host>'` (wrapped as `user-apply` on tempest) for HM.
+**Home Manager integration**: both desktop hosts now run HM **standalone** via `homeConfigurations` — `irene@orchid` and `irene@tempest`. On both hosts a system change requires two activations: `nh os switch` for NixOS, then `nh home switch -b backup` for HM — `apply` runs both in order.
 
 Tempest's HM build uses a separate `nixpkgs-home` flake input (also tracking `nixos-unstable`) consumed via `mkHomePkgs` in `flake.nix`. This lets `update-home` advance the HM channel without touching the system channel. The same `overlays` list is applied to both `mkPkgs` and `mkHomePkgs`, so `pkgs.stable.foo` still resolves identically in HM modules. `flake.nix` also exposes the locked HM CLI as `packages.<system>.home-manager` so you can bootstrap with `nix run /persist/source-of-truth#home-manager -- switch --flake '.#irene@tempest' -b backup` when `home-manager` isn't on PATH yet.
 
@@ -61,7 +65,7 @@ Home configs themselves are composition roots that import a rice, desktop module
 
 ## Conventions worth knowing
 
-- The working directory is `/persist/source-of-truth` and several scripts hard-code that path. Don't move the tree without updating `scripts/config-apply.nix` and `homes/orchid.nix`'s `user-apply`/`system-apply` wrappers.
+- The working directory is `/persist/source-of-truth` and several scripts hard-code that path. Don't move the tree without updating `programs.nh.flake` in `hosts/tempest/default.nix` and `hosts/orchid/default.nix`, plus `scripts/update-home.nix`.
 - Secrets go through `sops-nix` (imported in `homes/orchid.nix`). Don't commit raw secrets.
 - Host `specialArgs` / `extraSpecialArgs` inject `inputs` and `hostname` — modules expect these available.
 - Nix formatting: 2-space indent (alejandra / nixpkgs-fmt if available). Shell scripts use explicit `set -euo pipefail` where relevant, or plain `#!/bin/sh` for simple wrappers (e.g. `build-vm`, `tempest-install`).

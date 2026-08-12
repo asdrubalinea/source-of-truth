@@ -1,19 +1,5 @@
 { pkgs, inputs, ... }:
 let
-  user-apply = pkgs.writeScriptBin "user-apply" ''
-    #!${pkgs.stdenv.shell}
-    pushd /persist/source-of-truth/
-
-    home-manager switch --flake '.#irene@orchid' "$@"
-
-    popd
-  '';
-
-  system-apply =
-    (pkgs.callPackage ../scripts/system-apply.nix {
-      configPath = "/persist/source-of-truth";
-    }).systemApply;
-
   arc-size = (
     pkgs.writeShellScriptBin "arc-size" ''
       cat /proc/spl/kstat/zfs/arcstats | grep '^size ' | awk '{ print $3 }' | awk '{ print $1 / (1024 * 1024 * 1024) " GiB" }'
@@ -37,7 +23,8 @@ in
     ../desktop/helix.nix
     # ../desktop/emacs
 
-    ../scripts/system-clean.nix
+    # Applying and cleaning is `nh` (enabled in hosts/orchid/default.nix):
+    # `nh os switch`, `nh home switch -b backup`, `nh clean all`.
     ../scripts/port-forward.nix
 
     ../misc/fish.nix
@@ -90,8 +77,6 @@ in
   };
 
   home.packages = [
-    user-apply
-    system-apply
     arc-size
     nix-size
   ];
