@@ -278,6 +278,9 @@ in {
     inputs.zen-browser.packages.x86_64-linux.default # Zen Browser
 
     # --- Communication & productivity ---
+    # IRC. Wayland-native (iced), SASL/SCRAM and TLS out of the box, no
+    # scripting layer to configure. Swap for `weechat` if the TUI is wanted.
+    halloy
     keepassxc
     mailspring-with-keyring
     obsidian
