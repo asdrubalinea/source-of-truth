@@ -63,11 +63,11 @@
 
 let
   pname = "brave-origin";
-  version = "1.94.70";
+  version = "1.95.65";
 
   src = fetchurl {
     url = "https://github.com/brave/brave-browser/releases/download/v${version}/brave-origin-nightly_${version}_amd64.deb";
-    hash = "sha256-3Iy0Lza1DliQFaHoGMxIaE6lVcbytDp+T+NzWj3nyNE=";
+    hash = "sha256-3HGLK4iT0BLx3hH5sI0l2qJj5UrckUrXNdebbg1ughA=";
   };
 
   inherit (lib)
