@@ -19,99 +19,102 @@ in {
   home.packages = with pkgs; [
     # --- Core system utilities ---
     bc # GNU calculator — `bc -l` for float math inside pipelines
+    bubblewrap
     coreutils
-    dmidecode # DMI/SMBIOS: board, firmware and DIMM identity
     file
-    gnupg
-    inxi # one-shot hardware/system summary
-    lshw # hardware tree
     lsof
     moreutils # sponge, ts, vipe, chronic, ifne, errno, pee, vidir
     ntfs3g
-    nvme-cli # NVMe health/log pages that smartctl doesn't surface
-    openssl
     # GNU parallel. moreutils ships its own `parallel`, but nixpkgs gives that
     # one a worse meta.priority precisely so this wins the profile collision.
     parallel
-    pciutils
     progress # live throughput/ETA for an already-running cp/dd/tar
     psmisc # pstree, killall, fuser, peekfd
     pv # pipe viewer — progress in the middle of a pipeline
+
+    # --- Hardware, firmware & power ---
+    cdrtools # optical disc authoring/burning
+    ddcutil # DDC/CI — external monitor brightness and inputs
+    dmidecode # DMI/SMBIOS: board, firmware and DIMM identity
+    inxi # one-shot hardware/system summary
+    lm_sensors
+    lshw # hardware tree
+    nvme-cli # NVMe health/log pages that smartctl doesn't surface
+    pciutils
+    powertop
     sbctl # UEFI Secure Boot key management
     smartmontools # smartctl
-    trash-cli # trash-put: reversible rm, follows the XDG trash spec
-    usbutils
     upower
-    bubblewrap
-    # opencode # no longer used
-    ddcutil
+    usbutils
 
-    # --- System info & monitoring ---
+    # --- System monitoring & tracing ---
     btop
     dool # dstat replacement
     fastfetch
     htop
     hyfetch # neofetch fork
     iotop # per-process disk IO (root)
-    lm_sensors
     ltrace # library-call tracer
     nvtopPackages.amd # AMD GPU monitor
-    onefetch # repo summary (git)
-    powertop
     procs # ps with tree view and search
     s-tui # CPU frequency/temperature/power TUI; also drives stress-ng
     strace # syscall tracer
     stress-ng # load generator for thermal / stability testing
     sysstat # iostat, mpstat, pidstat, sar
-    yek
 
-    # --- File management & text processing ---
-    # `sg` (set-group, from shadow) is shadowed by ast-grep's `sg` in this
-    # profile; use `ast-grep` for the linter and `/run/wrappers/bin/sg` for the
-    # setgid one if it ever comes up.
-    ast-grep # structural (AST) code search and rewrite
-    bat
-    cdrtools
-    choose # human-readable cut/awk field selection
-    csvlens
+    # --- File management ---
     czkawka # duplicate finder/cleanup
-    datamash # group/sum/mean over columns
-    difftastic # `difft` — syntax-aware diff
     dust # du, sorted, drawn as a tree
     duf # df with a readable table
     dysk # df that reports the actual mount/filesystem layout
     eza
     fd
+    kdePackages.dolphin # KDE file manager
+    nautilus
+    ncdu
+    nemo
+    nnn # terminal file manager
+    sshfs
+    trash-cli # trash-put: reversible rm, follows the XDG trash spec
+    tree
+    yazi
+
+    # --- Archives & compression ---
+    lz4
+    ouch # one verb to (de)compress any archive format
+    p7zip # 7z
+    pigz # parallel gzip
+    unar # free RAR/StuffIt/… extractor (`lsar` lists)
+    unzip
+    xz
+    zip
+    zstd
+
+    # --- Text, data & code processing ---
+    # `sg` (set-group, from shadow) is shadowed by ast-grep's `sg` in this
+    # profile; use `ast-grep` for the linter and `/run/wrappers/bin/sg` for the
+    # setgid one if it ever comes up.
+    ast-grep # structural (AST) code search and rewrite
+    bat
+    choose # human-readable cut/awk field selection
+    csvlens
+    datamash # group/sum/mean over columns
+    difftastic # `difft` — syntax-aware diff
     glow # render Markdown in the terminal
     hexyl # xxd, but colourised and legible
     jc # convert classic CLI output to JSON — pairs with jq
     jless # pager for JSON/YAML
-    kdePackages.dolphin # KDE file manager
     jq
     lnav # log navigator: format autodetect, SQL over log files
-    lz4
     miller # `mlr` — awk/sed/cut for CSV/TSV/JSON
-    ncdu
-    nnn # terminal file manager
-    ouch # one verb to (de)compress any archive format
-    p7zip # 7z
-    pigz # parallel gzip
     ripgrep
     # rga — ripgrep through PDFs, archives and office docs. Its closure looks
     # huge but is nearly all ffmpeg/pandoc/poppler-utils, already installed here.
     ripgrep-all
     sd # sed for the common case: literal/regex replace without escaping games
-    sshfs
     tokei # count code by language
-    unar # free RAR/StuffIt/… extractor (`lsar` lists)
-    unzip
     xxd
-    xz
-    yazi
     yq-go # jq for YAML/TOML/XML
-    zip
-    zstd
-    tree
 
     # --- Networking & HTTP ---
     # mtr is not here on purpose: hosts/tempest/system/environment.nix enables
@@ -146,25 +149,13 @@ in {
     restic
     # vorta # Borg GUI
 
-    # --- Nix & developer tooling ---
+    # --- Nix tooling ---
     alejandra
     cachix
     comma # `, <cmd>` runs any nixpkgs binary once; reads the nix-index database
     deadnix # find unused Nix bindings
-    delta # syntax-highlighting pager for git diffs
-    devenv
     devbox
-    entr # run a command whenever the files fed to it change
-    git-absorb # fold staged hunks into the commits that introduced them
-    git-extras # git-summary, git-effort, git-undo, …
-    gitleaks # scan history for committed secrets (sops-nix keeps the real ones out)
-    gitui
-    hyperfine # statistically sound command benchmarking
-    # httptoolkit
-    just
-    jujutsu # VCS
-    lazygit
-    lazyjj # TUI for jujutsu
+    devenv
     lurk # Nix helper (see nixpkgs description)
     manix # search NixOS/HM option and nixpkgs function docs
     nil # Nix LSP
@@ -176,11 +167,27 @@ in {
     nixpkgs-fmt
     nvd # diff two generations package-by-package
     statix # Nix anti-pattern linter
-    tig # ncurses git history browser
-    watchexec # entr, but with glob/ignore rules
-    gh # GitHub CLI (used by magit/forge)
 
-    inputs.hn-tui-flake.packages.${stdenv.hostPlatform.system}.hackernews-tui # hn TUI
+    # --- Git & version control ---
+    delta # syntax-highlighting pager for git diffs
+    gh # GitHub CLI (used by magit/forge)
+    git-absorb # fold staged hunks into the commits that introduced them
+    git-extras # git-summary, git-effort, git-undo, …
+    gitleaks # scan history for committed secrets (sops-nix keeps the real ones out)
+    gitui
+    jujutsu # VCS
+    lazygit
+    lazyjj # TUI for jujutsu
+    tig # ncurses git history browser
+
+    # --- Developer tooling ---
+    entr # run a command whenever the files fed to it change
+    hyperfine # statistically sound command benchmarking
+    just
+    onefetch # repo summary (git)
+    watchexec # entr, but with glob/ignore rules
+    yek # serialize a repo into LLM-ready text
+    # httptoolkit
 
     # --- Languages & runtimes ---
     bun
@@ -206,23 +213,23 @@ in {
       ]))
     uv # Python package manager
 
-    # Language servers (consumed by emacs eglot, helix, etc.)
+    # --- Language servers (consumed by emacs eglot, helix, etc.) ---
+    bash-language-server
+    clang-tools
+    gopls
+    harper # Grammar/spell LSP for prose (markdown/typst/org)
+    jdt-language-server # Java LSP (Eclipse JDT.LS)
+    marksman # Markdown LSP
+    phpactor # PHP LSP
     pyright
     ruff
     rust-analyzer
-    gopls
-    clang-tools
-    typescript-language-server
-    tinymist # Typst LSP
+    taplo # TOML LSP + formatter
     texlab # LaTeX LSP
-    bash-language-server
-    marksman # Markdown LSP
-    phpactor # PHP LSP
+    tinymist # Typst LSP
+    typescript-language-server
     vscode-langservers-extracted # HTML/CSS/JSON/ESLint LSPs
     vue-language-server # Vue 3 LSP (Volar)
-    jdt-language-server # Java LSP (Eclipse JDT.LS)
-    harper # Grammar/spell LSP for prose (markdown/typst/org)
-    taplo # TOML LSP + formatter
     yaml-language-server
 
     # --- Containers & virtualization ---
@@ -234,9 +241,9 @@ in {
     alacritty
     asciinema # terminal session recorder
     direnv
+    (callPackage ../packages/drift.nix {src = inputs.drift;})
     fzf
     ghostty
-    (callPackage ../packages/drift.nix {src = inputs.drift;})
     grc
     kitty
     rlwrap # bolt readline onto REPLs that lack it
@@ -244,10 +251,10 @@ in {
     starship
     tealdeer # `tldr` — worked examples instead of a full man page
     tmux
+    wezterm
     # zoxide is enabled as programs.zoxide in misc/fish.nix: the binary is inert
     # without the shell hook that records directory visits.
     # Warp lives in desktop/warp.nix (package + declarative settings.toml).
-    wezterm
 
     # --- Desktop integration ---
     appimage-run # run AppImages via Nix
@@ -266,19 +273,21 @@ in {
     brave
     (callPackage ../packages/brave-origin.nix {})
     firefox
-    tor-browser
     google-chrome
+    tor-browser
     inputs.zen-browser.packages.x86_64-linux.default # Zen Browser
 
     # --- Communication & productivity ---
     keepassxc
-    obsidian
-    telegram-desktop
-    signal-desktop
-    # thunderbird
     mailspring-with-keyring
-    # vesktop
+    obsidian
+    signal-desktop
+    telegram-desktop
     zoom-us
+    # thunderbird
+    # vesktop
+
+    # --- AI agent CLIs ---
     claude-code
     llm-agents.codex # OpenAI Codex CLI; 0.146.0 vs nixpkgs unstable's 0.118.0
     llm-agents.opencode
@@ -293,55 +302,57 @@ in {
     llm-agents.rtk
     # antigravity
 
-    # --- Media, graphics & documents ---
+    # --- Media & graphics ---
     chafa # render images as terminal graphics (kitty/sixel protocols)
     feh
     ffmpeg
     ghostscript
-    # gimp3
     imagemagick
-    # inkscape
     kdePackages.gwenview # KDE image viewer
-    kdePackages.okular
     krita
     libheif
     mpv
-    nautilus
-    nemo
     obs-studio
     vlc
+    # gimp3
+    # inkscape
+
+    # --- Documents & office ---
+    kdePackages.okular
     onlyoffice-desktopeditors
-    xournalpp
+    pandoc # convert between document formats
     typst
-    # (texlive.combine {inherit (texlive) scheme-full;})
+    xournalpp
     zathura # PDF viewer with SyncTeX inverse search
+    # (texlive.combine {inherit (texlive) scheme-full;})
 
     # --- PDF tooling (read / extract / OCR / convert / manipulate) ---
     # ghostscript + imagemagick (above) already cover rasterize/convert; these
     # add the text/table/OCR extraction an LLM pipeline needs. The Python libs
     # (pymupdf, pymupdf4llm, pdfplumber, markitdown) live on the python3 env
     # further up, not here. (docling dropped — torch/ML closure.)
-    poppler-utils # pdftotext / pdftoppm / pdfimages / pdfinfo / pdffonts / pdftohtml / pdf{detach,separate,unite}
+    img2pdf # lossless images -> PDF
     mupdf # mutool: render, extract text/images, clean, show structure
-    qpdf # inspect / repair / decrypt / linearize PDF structure
-    pdftk # merge / split / rotate, dump+update metadata, fill forms
+    ocrmypdf # add a searchable OCR text layer to scanned PDFs
     pdfcpu # Go CLI: optimize, encrypt, validate, extract images/text/pages
     pdfgrep # grep across PDF text
-    ocrmypdf # add a searchable OCR text layer to scanned PDFs
+    pdftk # merge / split / rotate, dump+update metadata, fill forms
+    poppler-utils # pdftotext / pdftoppm / pdfimages / pdfinfo / pdffonts / pdftohtml / pdf{detach,separate,unite}
+    qpdf # inspect / repair / decrypt / linearize PDF structure
     tesseract # OCR engine backing ocrmypdf (English only; see tesseract.withLanguages)
-    img2pdf # lossless images -> PDF
-    pandoc # convert between document formats
 
     # --- Data & databases ---
     dbeaver-bin
-    # litecli # disabled: cli-helpers tests fail in unstable (Pygments ANSI mismatch)
     sqlite
     sqlitebrowser
     tableplus
+    # litecli # disabled: cli-helpers tests fail in unstable (Pygments ANSI mismatch)
 
-    # --- Security testing ---
+    # --- Security & crypto ---
     age # modern file encryption; same recipient format sops-nix already uses
     burpsuite
+    gnupg
+    openssl
     pwgen
     qrencode # QR codes from the shell (wifi creds, TOTP URIs, links to phone)
     ssh-audit # audit an sshd's algorithms — pairs with services/ssh-secure.nix
@@ -354,5 +365,6 @@ in {
     blahaj
     gay # rainbow output filter
     ponysay
+    inputs.hn-tui-flake.packages.${stdenv.hostPlatform.system}.hackernews-tui # hn TUI
   ];
 }
