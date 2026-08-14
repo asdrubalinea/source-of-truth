@@ -1,0 +1,26 @@
+# Ember 3400K Dark — https://github.com/carpdiem/ember (MIT)
+# Redshift-safe palette: colors stay distinguishable under warm-screen filtering.
+# Hand-mapped from palettes/ember.json (surfaces bg_0..bg_5/fg_0..fg_2, terminal,
+# categorical) onto base16 slots. Ember ships only 3 foreground roles, so
+# base06/base07 both reuse fg_0.
+system: "base16"
+name: "Ember 3400K Dark"
+author: "carpdiem"
+variant: "dark"
+palette:
+  base00: "090807" # bg_0  default background
+  base01: "181612" # bg_2  lighter background
+  base02: "201D19" # bg_3  selection background
+  base03: "908472" # fg_2  comments
+  base04: "BDAE93" # fg_1  dark foreground
+  base05: "DDD0B2" # fg_0  default foreground
+  base06: "DDD0B2" # fg_0
+  base07: "DDD0B2" # fg_0
+  base08: "F5AD9A" # terminal red
+  base09: "DDAA69" # categorical two (orange)
+  base0A: "CA9246" # terminal yellow
+  base0B: "7EB798" # terminal green
+  base0C: "70DBD8" # terminal cyan
+  base0D: "B4C6F7" # terminal blue
+  base0E: "D895C2" # terminal magenta
+  base0F: "945D48" # categorical five (brown)

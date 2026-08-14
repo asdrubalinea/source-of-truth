@@ -13,7 +13,11 @@ lib.mkIf config.rices.niri.enable {
 
   stylix = {
     enable = true;
-    base16Scheme = "${pkgs.base16-schemes}/share/themes/oxocarbon-dark.yaml";
+    # Ember 3400K Dark — https://github.com/carpdiem/ember
+    # Palette authored to stay distinguishable under the
+    # redshift filter tempest runs (services/redshift.nix, night ≈3700K).
+    # oxocarbon-dark's blues/magentas collapse into each other once warmed.
+    base16Scheme = ./ember-3400k-dark.yaml;
 
     # Icon theme for Qt/KDE apps (Dolphin, Okular, …). Off by default; without
     # it only `hicolor` is present and Dolphin's toolbar/file icons fall back
