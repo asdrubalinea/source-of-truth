@@ -1,11 +1,11 @@
 { config, pkgs, ... }:
 
 {
-  # Milan
+  # Las Palmas de Gran Canaria
   location = {
     provider = "manual";
-    latitude = 45.46;
-    longitude = 9.19;
+    latitude = 28.1235;
+    longitude = -15.4363;
   };
 
   services.redshift = { enable = true; };
