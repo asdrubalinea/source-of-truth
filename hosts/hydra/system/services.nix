@@ -39,5 +39,9 @@
         ROCKET_LOG = "critical";
       };
     };
+
+    # Read-only mirror of orchid's vault (services/vaultwarden-mirror.nix).
+    # Keeps the module's default key path under /var/lib/vaultwarden-mirror/ssh.
+    vaultwarden-mirror.enable = true;
   };
 }

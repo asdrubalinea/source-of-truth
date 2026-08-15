@@ -110,6 +110,14 @@
         ROCKET_LOG = "critical";
       };
     };
+
+    # Read-only mirror of orchid's vault (services/vaultwarden-mirror.nix).
+    # The key path is overridden because tempest's root is tmpfs — the module's
+    # default lives under /var/lib and would be wiped on every boot.
+    vaultwarden-mirror = {
+      enable = true;
+      sshKeyPath = "/persist/secrets/vaultwarden-backup/id_ed25519";
+    };
   };
 
   # Cap the monitoring stack's resource use on this laptop. The shared module

@@ -11,7 +11,7 @@
     ./system/services.nix
     ./system/backup-notify.nix
     ./system/session.nix
-    ./system/vaultwarden-sync.nix
+    ../../services/vaultwarden-mirror.nix
     ./system/virtualization.nix
     ./system/firejail.nix
     ./system/memory.nix
