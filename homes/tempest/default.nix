@@ -207,13 +207,12 @@ in {
     };
   };
 
-  services.mako = {
-    enable = true;
-    settings = {
-      default-timeout = 5000;
-    };
-  };
+  # (mako removed — rices/niri/noctalia.nix mkForce-disables it; Noctalia owns
+  # notifications on this host, so the block only looked live.)
 
+  # The only colour-temperature filter on this host. redshift used to be enabled
+  # too (services/redshift.nix) but its `randr` backend has no X display under
+  # niri: it exited 1 on every start and systemd restart-looped it forever.
   services.wlsunset = {
     enable = true;
     latitude = 28.1235; # Las Palmas de Gran Canaria, Spain
