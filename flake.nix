@@ -36,7 +36,13 @@
     };
     ucodenix.url = "github:e-tho/ucodenix";
     nix-cachyos-kernel = {
-      url = "github:xddxdd/nix-cachyos-kernel/release";
+      # PINNED, do not move to `release` until linux-cachyos-lts >= 6.18.44.
+      # 6.18.42 (rev 879f45ee, 2026-08-04) reproduces the niri redraw flicker
+      # with mesa 26.1.6 — see docs/amdgpu-6.18.42-redraw-flicker.md. 4f3c8ca0 is
+      # lts 6.18.40, the last version observed clean. The amdgpu fix is
+      # reported in 6.18.44 (niri-wm/niri#4433), which `release` has not
+      # published yet.
+      url = "github:xddxdd/nix-cachyos-kernel/4f3c8ca048091c5fbad5447c660133ac1a151ac7";
       # Do NOT override nixpkgs — upstream's lantian attic cache only has
       # store paths built against its pinned nixpkgs. Following ours forces
       # a full local kernel rebuild on every change.
