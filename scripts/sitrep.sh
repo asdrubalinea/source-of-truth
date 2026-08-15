@@ -405,12 +405,26 @@ BACKUP_UNITS=(
   # scrub kicked off by hand or by the backup orchestrator leaves this unit at
   # "never run" while ZFS POOLS above correctly shows a recent scrub.
   "zfs-scrub|zfs-scrub timer"
-  "nix-gc|nix store gc"
+  # `nh-clean`, not `nix-gc`: GC moved to programs.nh.clean (hosts/tempest/
+  # default.nix) and nix.gc.automatic is off, so nix-gc.service does not exist —
+  # this row read "never run" forever while the real job went unwatched.
+  "nh-clean|nix store gc"
 )
 
 backup_row() {
   local unit="$1" label="$2" props state result last next last_e next_e st note col
-  systemctl cat "$unit.service" >/dev/null 2>&1 || return 0
+
+  # A curated unit that does not exist is a MONITORING GAP, not a no-op: it means
+  # the unit was renamed or dropped and this row has been silently absent ever
+  # since. (This is exactly how `nix-gc` sat here unnoticed after GC moved to
+  # programs.nh.clean.) Say so instead of returning, so a rename surfaces on the
+  # next run rather than never.
+  if ! systemctl cat "$unit.service" >/dev/null 2>&1; then
+    warn "$unit.service does not exist — renamed or removed? this row is unmonitored"
+    printf '  %s %s %s%s%s\n' \
+      "$(dot warn)" "$(pad "$label" 21)" "$YEL" "$(pad "no such unit" 12)" "$R"
+    return 0
+  fi
 
   props=$(systemctl show "$unit.service" \
     -p ActiveState -p Result -p ActiveEnterTimestamp -p InactiveEnterTimestamp 2>/dev/null)
