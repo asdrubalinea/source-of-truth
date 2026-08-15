@@ -56,7 +56,13 @@ let
   # success is emitted inline at the end of the orchestrator so the no-op skip
   # paths (drive absent / already imported) stay silent.
   backup-notify = pkgs.callPackage ../../../packages/backup-notify.nix { };
-  usbUnit = "tempest-backup-external.service";
+
+  # The one place this unit is named. It is referenced from the systemd unit
+  # attribute, the udev rule that triggers it, the fail-notification argument,
+  # and backup-verify.sh — which is a plain .sh file that cannot see this
+  # binding, so it receives the name through the prelude below.
+  usbUnitName = "tempest-backup-external";
+  usbUnit = "${usbUnitName}.service";
 
   # Integrity-scrub cadence for the backup pool. The pool is only importable
   # during a run, so a periodic scrub has to ride along with the backup
@@ -258,6 +264,7 @@ let
         POOL=${pool}
         PARENT=${parent}
         ALTROOT=${altroot}
+        USB_UNIT=${usbUnit}
         SCRUB_MAX_AGE=${toString scrubMaxAgeSec}
         PAIRS=(${lib.concatMapStringsSep " " (p: "${p.src}:${p.dst}") pairs})
       ''
@@ -275,10 +282,10 @@ in
   # Fire a backup the moment the drive is plugged in. ZFS labels the member
   # partition with the pool name, so this matches our drive on any USB port.
   services.udev.extraRules = ''
-    ACTION=="add", SUBSYSTEM=="block", ENV{ID_FS_TYPE}=="zfs_member", ENV{ID_FS_LABEL}=="${pool}", TAG+="systemd", ENV{SYSTEMD_WANTS}="tempest-backup-external.service"
+    ACTION=="add", SUBSYSTEM=="block", ENV{ID_FS_TYPE}=="zfs_member", ENV{ID_FS_LABEL}=="${pool}", TAG+="systemd", ENV{SYSTEMD_WANTS}="${usbUnit}"
   '';
 
-  systemd.services.tempest-backup-external = {
+  systemd.services.${usbUnitName} = {
     description = "Replicate ZFS snapshots to the external USB backup pool";
     # No wantedBy: started only on plug-in (udev, above) or by the timer below.
     serviceConfig = {
@@ -306,7 +313,7 @@ in
 
   # Daily fallback for "left it plugged in" — no-ops cleanly when the drive is
   # absent. Persistent catches a missed run after the laptop was off/asleep.
-  systemd.timers.tempest-backup-external = {
+  systemd.timers.${usbUnitName} = {
     wantedBy = [ "timers.target" ];
     timerConfig = {
       OnCalendar = "daily";

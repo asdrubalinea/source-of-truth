@@ -71,7 +71,7 @@ printf '\n%s── external backup verification ──%s\n\n' "$b" "$r"
 
 # ── import ──────────────────────────────────────────────────────────────────
 
-if timeout 30 systemctl is-active --quiet tempest-backup-external.service; then
+if timeout 30 systemctl is-active --quiet "$USB_UNIT"; then
   note "a backup run is IN PROGRESS — figures below are a moving target"
 fi
 
