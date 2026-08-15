@@ -91,12 +91,6 @@ in
     };
   };
 
-  # services.glance = {
-  #   enable = true;
-  #   openFirewall = true;
-  #   settings.server.port = 5678;
-  # };
-
   services.ncps = {
     enable = true;
     server = {

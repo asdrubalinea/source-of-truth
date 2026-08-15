@@ -18,7 +18,6 @@
 in {
   imports = [
     # Desktop environment and theming
-    inputs.hyprland.homeManagerModules.default
     inputs.stylix.homeModules.stylix
 
     # ../../rices/estradiol

@@ -105,8 +105,8 @@
   # THP, which arrives as always / defer+madvise. And vm.max_map_count is already
   # raised to 1048576 by nixpkgs itself, not by us.
   #
-  # NOTE: modules/gaming.nix also defines boot.kernel.sysctl."vm.swappiness"
-  # (as 1) and sets transparent_hugepage=never. tempest does not import it, and
-  # must not without reconciling the two: two plain definitions of the same
-  # sysctl are an option conflict at eval time, not a silent override.
+  # NOTE: any second module defining boot.kernel.sysctl."vm.swappiness" cannot
+  # simply be imported alongside this one — two plain definitions of the same
+  # sysctl are an option conflict at eval time, not a silent override. (This
+  # warned about modules/gaming.nix, which has since been deleted as unimported.)
 }
