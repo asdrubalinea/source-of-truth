@@ -32,8 +32,10 @@ let
 
   # --- Brightness (Mod brightness keys) ------------------------------------
   # One control, two backends. When the internal panel is an active niri output,
-  # adjust its backlight with brightnessctl (laptop use). When clamshell-docked
-  # (eDP-1 disabled) there is no backlight — brightness on an external (esp. the
+  # adjust its backlight with brightnessctl (laptop use). Which output that is —
+  # `rices.niri.internalOutput`, ./default.nix — is the only host fact this file
+  # reads. When clamshell-docked (that output disabled) there is no backlight, so
+  # brightness on an external (esp. the
   # emissive QD-OLED) goes over DDC/CI with ddcutil (VCP 0x10). The else-branch
   # fires for ANY clamshell profile; ddcutil only succeeds on externals that
   # expose DDC/CI (needs hardware.i2c.enable in hosts/tempest/hardware.nix). Tune
@@ -43,7 +45,7 @@ let
     set -u
     dir="''${1:-up}"
     step=5
-    if ${niri} msg --json outputs | ${jq} -e '(."eDP-1".logical // null) != null' >/dev/null 2>&1; then
+    if ${niri} msg --json outputs | ${jq} -e '(."${config.rices.niri.internalOutput}".logical // null) != null' >/dev/null 2>&1; then
       case "$dir" in
         up)   exec ${pkgs.brightnessctl}/bin/brightnessctl set "$step%+" ;;
         down) exec ${pkgs.brightnessctl}/bin/brightnessctl set "$step%-" ;;

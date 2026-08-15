@@ -65,6 +65,19 @@ in {
   # binding both need.
   rices.niri.enable = true;
 
+  # Machine policy: readable terminal size on THIS machine's panels. A font size
+  # is a function of the display it is read on, so the rice deliberately leaves
+  # `stylix.fonts.sizes.terminal` unset (see rices/niri/stylix.nix) rather than
+  # branching on hostname inside itself.
+  stylix.fonts.sizes.terminal = 16;
+
+  # Machine policy: where this machine is. Stated once, consumed twice — wlsunset
+  # (below) needs a lat/long to compute sunset; Noctalia geocodes a place name via
+  # api.noctalia.dev for its weather / night-light / auto-theme. The rice owns only
+  # the invariant that Noctalia must not re-locate itself by IP
+  # (`location.auto_locate = false`, rices/niri/noctalia.nix).
+  programs.noctalia.settings.location.address = "Las Palmas, Spain";
+
   home = {
     username = "irene";
     homeDirectory = "/home/irene";

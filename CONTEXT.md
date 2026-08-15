@@ -78,12 +78,25 @@ modes fused into one complaint. The glossary keeps them apart.
   estradiol.
 - **machine policy** — per-host facts a rice must not bake in: monitor
   identities and layout (the kanshi profiles), the systemd units a bar
-  readout watches (e.g. the backup-health indicator), and per-host audio
-  correction (a speaker DSP/EQ profile tuned to a specific laptop's drivers).
+  readout watches (e.g. the backup-health indicator), per-host audio
+  correction (a speaker DSP/EQ profile tuned to a specific laptop's drivers),
+  a readable terminal font size (a function of the panel it is read on), and
+  where the machine physically is (sunset times, weather).
   These belong with the
   host, not the rice. A rice consumes them as inputs, and degrades cleanly
   (a readout collapses to nothing) when the thing it would describe is absent
   on a given machine.
+  The tell for a leak is a **hostname** appearing inside a rice: a rice that
+  branches on which machine it is running on has stopped describing a desktop.
+  `rices/niri` holds to this; `rices/estradiol` does not yet — its
+  `hyprland.nix` still carries whole per-host monitor layouts behind
+  `hostname == …`, which is exactly what `homes/tempest/monitors.nix` extracted
+  for niri.
+  Machine policy reaching the rice takes whichever of two forms is smaller —
+  the host *defines* the value directly into a module the rice also configures
+  (no rice option at all, when the rice never reads it back), or the rice
+  *declares* an option for it (when rice logic depends on the value, as with
+  `rices.niri.marquee` and `rices.niri.internalOutput`).
 - **bar** — the rice's single status strip: workspaces, live readouts, clock,
   indicators. There is exactly one per rice, and on tempest it **hides itself**,
   reappearing only while the pointer is at the screen edge — an OLED lives longer

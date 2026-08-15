@@ -1,5 +1,4 @@
 { pkgs
-, hostname
 , lib
 , config
 , ...
@@ -14,8 +13,8 @@ lib.mkIf config.rices.niri.enable {
   stylix = {
     enable = true;
     # Ember 3400K Dark — https://github.com/carpdiem/ember
-    # Palette authored to stay distinguishable under the
-    # redshift filter tempest runs (services/redshift.nix, night ≈3700K).
+    # Palette authored to stay distinguishable under the colour-temperature
+    # filter tempest runs (wlsunset, homes/tempest/default.nix, night 4000K).
     # oxocarbon-dark's blues/magentas collapse into each other once warmed.
     base16Scheme = ./ember-3400k-dark.yaml;
 
@@ -34,7 +33,7 @@ lib.mkIf config.rices.niri.enable {
       vscode.enable = false;
       waybar.enable = false;
 
-      # Terminals are themed by stylix directly (base16 oxocarbon-dark). kitty's
+      # Terminals are themed by stylix directly (base16 ember-3400k-dark). kitty's
       # target appends `include /nix/store/<hash>-base16.conf` to kitty.conf; that
       # store-root include is fine, but kitty.nix sets `auto_reload_config = -1` so
       # the config-reload watcher never spawns (it watches kitty.conf's realpath
@@ -58,14 +57,14 @@ lib.mkIf config.rices.niri.enable {
     };
 
     fonts = {
-      sizes = {
-        terminal =
-          if hostname == "tempest"
-          then 16
-          else if hostname == "orchid"
-          then 22
-          else 18;
-      };
+      # sizes.terminal is NOT set here. A readable terminal size is a function of
+      # the panel it is read on, so it is machine policy and comes from
+      # homes/<host>/ (tempest: 16, in homes/tempest/default.nix). This used to be
+      # an `if hostname == "tempest" … else if hostname == "orchid"` ladder inside
+      # the rice — which put host *names* in a module that is supposed to describe
+      # a desktop, and whose orchid arm was dead anyway (orchid runs estradiol,
+      # which has its own ladder in rices/estradiol/stylix.nix). Unset, stylix's
+      # own default applies. See "machine policy" in CONTEXT.md.
 
       serif = {
         package = pkgs.dejavu_fonts;

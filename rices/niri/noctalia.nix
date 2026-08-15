@@ -27,7 +27,7 @@
       # ── Theming ────────────────────────────────────────────────────────────
       # Colors come from stylix. The stylix bump landed the noctalia v5 target
       # (danth/stylix#2364 — see modules/noctalia/hm.nix in the stylix store
-      # path): it maps the base16 scheme (oxocarbon-dark, set in stylix.nix)
+      # path): it maps the base16 scheme (ember-3400k-dark, set in stylix.nix)
       # into noctalia's Material-3 tokens as a `custom_palette`, and sets
       # theme.source = "custom" / theme.mode from stylix polarity. We just consume
       # that here — no source/mode override — which is the whole reason this rice
@@ -52,13 +52,16 @@
         # .font_family / wallpaper.default.path) is entirely owned by the stylix
         # noctalia target — see the Theming note above.
 
-        # Weather / Night-Light / auto-theme location. `address` is geocoded via
-        # api.noctalia.dev; auto_locate MUST stay off or its IP-geolocation timer
-        # overwrites it.
-        location = {
-          address = "Las Palmas, Spain";
-          auto_locate = false;
-        };
+        # Weather / Night-Light / auto-theme location. `auto_locate` MUST stay off
+        # or its IP-geolocation timer overwrites whatever address is set — that is
+        # the rice's half of this, and the only half that is about the desktop.
+        #
+        # The address itself is machine policy: where the machine lives is not a
+        # property of the rice, and this host already states it once, as the
+        # wlsunset coordinates in homes/tempest/default.nix. `location.address` is
+        # set right beside them so the two can't drift apart. It is geocoded via
+        # api.noctalia.dev, so it is a place name rather than a lat/long pair.
+        location.auto_locate = false;
 
         # Noctalia owns the wallpaper (replacing the old awww service). It draws a
         # background-layer surface (namespace "noctalia-wallpaper") that ignores
