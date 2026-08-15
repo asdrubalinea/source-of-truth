@@ -85,13 +85,13 @@ Toggling a feature means editing that list — not flipping a global option.
 flake.nix              # inputs, multi-channel overlay, nixosConfigurations + homeConfigurations
 ├── hosts/             # per-machine composition roots (tempest, orchid, hydra)
 ├── homes/             # Home Manager configs (irene@orchid, irene@tempest)
-├── modules/           # cross-cutting system modules (nix, gaming, secure-boot)
-├── hardware/          # opt-in hardware (audio, bluetooth, framework, pipewire, rocm, zfs, tlp)
-├── services/          # à-la-carte NixOS services (borg, caddy, grafana, glance, syncthing…)
+├── modules/           # cross-cutting system modules (nix, secure-boot)
+├── hardware/          # opt-in hardware (audio, bluetooth, framework, zfs, tlp)
+├── services/          # à-la-carte NixOS services (borg, caddy, grafana, syncthing, vaultwarden-mirror…)
 ├── desktop/           # editor/terminal/app configs (helix, neovim, emacs, zed, tmux, fonts…)
-├── rices/             # desktop environments — estradiol · hypr · niri
+├── rices/             # desktop environments — estradiol · niri
 ├── packages/          # custom derivations (pkgs.callPackage)
-├── scripts/           # writeScriptBin wrappers (update-home, battery, sitrep…)
+├── scripts/           # writeScriptBin wrappers (update-home, keep-awake, sitrep…)
 └── disks/             # disko layouts
 ```
 
