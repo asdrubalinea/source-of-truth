@@ -422,8 +422,11 @@ lib.mkIf config.rices.niri.enable {
         border = {
           enable = true;
           width = 2;
-          active.color = c.base03;
-          inactive.color = c.base01;
+          # Same palette entries, just alpha-dimmed: on OLED the borders blend
+          # against near-black, so alpha darkens them without shifting hue.
+          # Turn the suffixes up/down to taste (ff = undimmed).
+          active.color = c.base03 + "73"; # 45%
+          inactive.color = c.base01 + "26"; # 15%
         };
 
         # Inner gaps only. `gaps` applies both between windows and around the
