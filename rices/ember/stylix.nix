@@ -35,12 +35,12 @@ lib.mkIf config.rices.ember.enable {
     # exports XCURSOR_THEME/XCURSOR_SIZE; the two compositors draw their own
     # cursor from their own config, so the same name is repeated in
     # compositors/{niri,mango} — keep the three in sync.
-    # Amber because the rice is ember; -Ice (white) and -Classic (black) are the
-    # other two Bibata variants.
+    # -Classic is the black variant; -Ice (white) and -Amber (orange) are the
+    # other two.
     cursor = {
       package = pkgs.bibata-cursors;
-      name = "Bibata-Modern-Amber";
-      size = 24;
+      name = "Bibata-Modern-Classic";
+      size = 20;
     };
 
     targets = {

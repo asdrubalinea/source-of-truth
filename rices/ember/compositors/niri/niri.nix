@@ -461,8 +461,8 @@ lib.mkIf config.rices.ember.niri.enable {
       # niri's own default is "default", so without this the pointer would change
       # appearance as it moved between niri's surfaces and an app's.
       cursor = {
-        theme = "Bibata-Modern-Amber";
-        size = 24;
+        theme = "Bibata-Modern-Classic";
+        size = 20;
       };
 
       # Animations. Force-disabled in the VM only (hosts/tempest/vm.nix) — every
