@@ -258,16 +258,30 @@ a sandbox cannot reach a host session's socket at all.
 | `$HOME/.nix-profile` | ro-bind-try | home-manager programs (immutable store refs) |
 | `$HOME/.config/opencode` | ro-bind | opencode config when present on the host |
 | `$HOME/.local/share/opencode/auth.json` | ro-bind-try | opencode credentials |
-| `$HOME/.cache/opencode` | bind-try | opencode plugin/model cache when present on the host (rw) |
+| `$HOME/.cache` | bind-try | **The whole host cache dir, read-write** — not just `.cache/opencode`. See the note below. |
 | `$HOME/.pi` | bind | Pi config dir (auth.json, settings.json, models.json, sessions, tools) when present (rw) |
+| `$HOME/.hermes` | bind | Hermes config dir, holds credentials, when present (rw) |
+| `$HOME/.codex` | bind | Codex CLI config dir, holds credentials, when present (rw) |
 | `$HOME/.config/fish` | ro-bind | Fish shell config (aliases, prompt, key bindings, theme) when present (ro) |
 | `$HOME/.config/helix` | ro-bind | Helix config (including Steel cogs and init files) when present (ro) |
+| `$HOME/.config/git` | ro-bind | Git config (user identity, aliases, signing) when present (ro) |
+| `$HOME/.config/zellij` | ro-bind | Zellij config (keybinds, layouts, theme) when present (ro) |
 | `$HOME/.local/share/fish` | bind | Fish shell history when present (rw) |
 | `$HOME/.claude` | bind | Claude Code data dir (auth, config, projects history) when present (rw) |
 | `$HOME/.claude.json` | bind-try | Claude Code legacy config blob (rw) |
 | `$HOME/.agents` | bind | Claude Code skill store, which `~/.claude/skills` symlinks into, when present (rw) |
 | resolved `$HOME/.claude/skills/*` targets | ro-bind-try | Skills symlinked in from elsewhere on the host (ro) |
 | cwd (PWD at launch) | rw | Working directory |
+
+> [!WARNING]
+> The cache bind is `$HOME/.cache`, the entire directory, read-write. An earlier
+> version of this document claimed it was `$HOME/.cache/opencode`; that was an
+> understatement of the exposure. Every tool's host cache is visible and writable
+> from inside the sandbox — a compromised agent can read and poison all of it, not
+> only opencode's. Narrowing it back to per-tool subdirectories means enumerating
+> every tool that caches, which is why it is wide; treat it as part of the trusted
+> surface, and do not keep anything under `~/.cache` you would not hand to a
+> sandboxed agent.
 
 `--ro-bind-try` is used for optional sources, so a missing `~/.nix-profile` or
 missing opencode auth file does not prevent the sandbox from starting.
@@ -295,14 +309,17 @@ sandbox.  It is removed on teardown.
   bound read-only at its exact path when it exists, so sandboxed opencode can
   authenticate.  This grants the agent read access to the provider tokens.
   See §6.5.
-- The opencode cache (`$HOME/.cache/opencode`) MUST be exposed at its exact
-  path when it exists on the host.  It holds opencode's installed plugin
-  packages and the resolved model list; without it opencode re-resolves
-  `@latest` plugins from the npm registry on every fresh sandbox, adding
-  several seconds of cold start (and hanging much longer offline).  It is
-  bound read-write so sandboxed opencode can refresh its cache, which means a
-  compromised agent could write to that host cache directory; it contains no
-  credentials.
+- The host cache directory (`$HOME/.cache`) MUST be exposed at its exact path
+  when it exists on the host.  The motivating case is opencode: `.cache/opencode`
+  holds its installed plugin packages and the resolved model list, and without it
+  opencode re-resolves `@latest` plugins from the npm registry on every fresh
+  sandbox, adding several seconds of cold start (and hanging much longer
+  offline).  The bind is the whole `.cache` tree rather than that one
+  subdirectory, because every other tool that warms a cache would otherwise need
+  its own enumerated row.  It is bound read-write, so a compromised agent can
+  read and write **every** tool's host cache, not only opencode's — poisoning a
+  cached plugin or model list is a persistence path back onto the host.  No
+  credentials are expected under `~/.cache`; do not put any there.
 - The Pi config directory (`$HOME/.pi`) MUST be bound at its exact
   path when it exists on the host, so sandboxed `pi` inherits the host's
   providers, auth, settings and saved sessions and can persist sessions and
@@ -378,8 +395,11 @@ home.
 The sandbox:
 
 - MUST NOT expose the host's home directory (only a tmpfs).
-- MUST NOT expose desktop sockets (ssh-agent, Wayland, D-Bus, PipeWire,
-  gnupg, keyring).
+- MUST NOT expose desktop sockets (ssh-agent, D-Bus, PipeWire, gnupg, keyring).
+  The Wayland socket is the one exception: `$XDG_RUNTIME_DIR/$WAYLAND_DISPLAY`
+  IS bound when set, because clipboard and screenshot paste (`wl-paste`, image
+  paste in Claude Code) do not work without it.  That grants the sandbox the
+  usual Wayland client powers — reading and setting the clipboard above all.
 - MUST expose the user's home-manager profile read-only at `$HOME/.nix-profile`
   so installed programs are usable; this exposes only immutable store symlinks,
   never writable HOME contents or secrets.
@@ -387,14 +407,25 @@ The sandbox:
   `$HOME/.config/opencode` when it exists on the host, so sandboxed opencode
   starts with the user's usual config; this exposes only that config
   directory, never writable HOME contents or secrets.
-- MUST expose the opencode cache at `$HOME/.cache/opencode` when it exists on
-  the host, so sandboxed opencode does not re-resolve `@latest` plugins from
-  the network on a fresh (empty HOME) sandbox; it is bound read-write so the
-  cache can be refreshed, and contains no credentials.
+- MUST expose the host cache at `$HOME/.cache` when it exists on the host, so
+  sandboxed opencode does not re-resolve `@latest` plugins from the network on
+  a fresh (empty HOME) sandbox.  This is the whole cache tree, read-write, not
+  just `.cache/opencode` — every tool's cache is readable and writable from
+  inside (see §5.2).
 - MUST expose the Pi config directory at `$HOME/.pi` when it exists
   on the host, so sandboxed `pi` starts with the user's usual providers,
   auth and settings and can persist sessions and tool state.  It is bound
   read-write (see §5.2).
+- MUST expose the Hermes (`$HOME/.hermes`) and Codex (`$HOME/.codex`) config
+  directories at their exact paths when they exist, read-write, for the same
+  reason as `.pi` — and with the same consequence: both hold credentials, so
+  the sandboxed agent can read and rewrite them.
+- MUST expose the git config at `$HOME/.config/git` when it exists on the host,
+  read-only, so commits from inside the sandbox carry the user's identity and
+  aliases.
+- MUST expose the zellij config at `$HOME/.config/zellij` when it exists on the
+  host, read-only, so the sandboxed multiplexer matches the host's keybinds,
+  layouts and theme.
 - MUST expose the fish shell config at `$HOME/.config/fish` when it exists
   on the host, so shell aliases, prompt, key bindings and theme are available
   inside the sandbox.  It is bound read-only.
@@ -409,11 +440,21 @@ The sandbox:
 
 ### 6.5.  Credential exposure
 
-Binding `$HOME/.local/share/opencode/auth.json` read-only means the sandboxed
-agent holds the same provider tokens it uses itself: it is literally reading
-open code's own credentials.  With the default shared network an agent could
-transmit those tokens anywhere.  This is an accepted trade-off for agent use;
-use `--nonet` if the credentials must never leave the machine.
+Four binds carry credentials into the sandbox:
+
+| Bind | Mode | What it hands over |
+|------|------|--------------------|
+| `$HOME/.local/share/opencode/auth.json` | ro | opencode's provider tokens |
+| `$HOME/.pi` | rw | Pi's provider credentials (`auth.json`) |
+| `$HOME/.hermes` | rw | Hermes' credentials |
+| `$HOME/.codex` | rw | Codex CLI's credentials |
+| `$HOME/.claude`, `$HOME/.claude.json` | rw | Claude Code's auth and config |
+
+The sandboxed agent therefore holds the same provider tokens it uses itself, and
+for everything but opencode it can also **rewrite** them.  With the default
+shared network it could transmit any of them anywhere.  This is an accepted
+trade-off for agent use; use `--nonet` if the credentials must never leave the
+machine.
 
 ### 6.6.  Host-session protection
 
