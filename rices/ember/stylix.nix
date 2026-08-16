@@ -28,6 +28,21 @@ lib.mkIf config.rices.ember.enable {
       light = "breeze";
     };
 
+    # Nothing set a cursor theme, so wlroots fell back to the X11 core cursor
+    # (the blocky black arrow) under mango — niri only looked fine because
+    # smithay ships a nicer built-in fallback. stylix.cursor drives
+    # home.pointerCursor, which is what themes the cursor *clients* draw and
+    # exports XCURSOR_THEME/XCURSOR_SIZE; the two compositors draw their own
+    # cursor from their own config, so the same name is repeated in
+    # compositors/{niri,mango} — keep the three in sync.
+    # Amber because the rice is ember; -Ice (white) and -Classic (black) are the
+    # other two Bibata variants.
+    cursor = {
+      package = pkgs.bibata-cursors;
+      name = "Bibata-Modern-Amber";
+      size = 24;
+    };
+
     targets = {
       neovim.enable = false;
       vscode.enable = false;

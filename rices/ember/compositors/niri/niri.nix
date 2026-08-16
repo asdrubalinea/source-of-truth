@@ -456,6 +456,15 @@ lib.mkIf config.rices.ember.niri.enable {
       # Prefer no client-side decorations
       prefer-no-csd = true;
 
+      # Compositor-drawn cursor. Same theme as the mango layer and as
+      # stylix.cursor in ../../stylix.nix (which themes the client-drawn ones) —
+      # niri's own default is "default", so without this the pointer would change
+      # appearance as it moved between niri's surfaces and an app's.
+      cursor = {
+        theme = "Bibata-Modern-Amber";
+        size = 24;
+      };
+
       # Animations. Force-disabled in the VM only (hosts/tempest/vm.nix) — every
       # animated frame there goes through the emulated virgl path.
       animations = {

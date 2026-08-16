@@ -159,6 +159,14 @@ in
         warpcursor = 0; # niri does not warp the pointer on keyboard focus
         enable_hotarea = 0; # niri: gestures.hot-corners.enable = false
 
+        # --- Cursor ----------------------------------------------------------
+        # The compositor-drawn cursor. Must match stylix.cursor in ../../stylix.nix
+        # (which themes the client-drawn ones) or the pointer changes appearance
+        # depending on which surface it is over. Unset, wlroots falls back to the
+        # X11 core cursor.
+        cursor_theme = "Bibata-Modern-Amber";
+        cursor_size = 24;
+
         # --- Input ----------------------------------------------------------
         xkb_rules_layout = "us";
         xkb_rules_variant = "intl";
