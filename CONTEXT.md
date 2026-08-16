@@ -16,7 +16,7 @@ tempest keeps a 3-2-1 backup. Three legs, each with its own meaning of "ran":
 ### Backup states
 
 - **failed** — a backup leg *ran and errored*. This is the only condition that
-  raises an alarm (the **health indicator** in the bar goes red). It is a latched state: it persists
+  raises an **alarm**. It is a latched state: it persists
   until the next successful run of that leg clears it. The syncoid (USB) leg
   also counts as failed if, after replicating, the backup pool reports
   unhealthy (see *integrity scrub* — the run can only inspect the SSD while the
@@ -27,11 +27,20 @@ tempest keeps a 3-2-1 backup. Three legs, each with its own meaning of "ran":
   silently — that staleness is intentionally *not* surfaced.)
 - **healthy** — every leg's last run either succeeded or was a clean no-op.
 
+- **alarm** — how a failure reaches the user. It is *not* the bar: the
+  backup-health readout described in `docs/adr/0003` was dropped in the Noctalia
+  v5 migration, because v5's `custom_button` cannot poll a script (see
+  `rices/niri/noctalia-widgets.nix`). The two surviving channels are a desktop
+  notification fired by the unit itself (`system/backup-notify.nix`) and the
+  alert block at the top of `sitrep`, which is pulled rather than pushed. The
+  latching described above therefore lives in the units and in what `sitrep`
+  reads, not in a widget.
+
 ### Pool health
 
 - **integrity scrub** — a full ZFS scrub of a pool to detect/repair silent
-  corruption. `rpool` (internal) is scrubbed weekly and its health is shown
-  always (the health indicator in the bar). The external **backup** pool can only be scrubbed while the
+  corruption. `rpool` (internal) is scrubbed weekly and its health is reported
+  unconditionally by `sitrep`, healthy or not. The external **backup** pool can only be scrubbed while the
   drive is attached, so its scrub rides along with a backup run on a *stale*
   cadence (skipped if scrubbed recently), and an unhealthy result fails that
   run rather than showing as its own always-on indicator.
@@ -77,8 +86,8 @@ modes fused into one complaint. The glossary keeps them apart.
   independent of the machine it runs on. tempest's rice is niri; orchid's is
   estradiol.
 - **machine policy** — per-host facts a rice must not bake in: monitor
-  identities and layout (the kanshi profiles), the systemd units a bar
-  readout watches (e.g. the backup-health indicator), per-host audio
+  identities and layout (the kanshi profiles), the systemd units a health
+  readout watches (e.g. which backup legs exist on this machine), per-host audio
   correction (a speaker DSP/EQ profile tuned to a specific laptop's drivers),
   a readable terminal font size (a function of the panel it is read on), and
   where the machine physically is (sunset times, weather).

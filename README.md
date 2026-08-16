@@ -2,15 +2,15 @@
 
 # ❄️ source-of-truth
 
-**One flake. Three machines. Zero snowflakes.** 🏳️‍⚧️
+**One flake. Four machines. Zero snowflakes.** 🏳️‍⚧️
 
-A personal [NixOS](https://nixos.org) monorepo wiring up a laptop, a desktop, and a
-server — plus Home Manager for `irene` — from a single declarative tree.
+A personal [NixOS](https://nixos.org) monorepo wiring up a laptop, a desktop, a
+server and a Pi — plus Home Manager for `irene` — from a single declarative tree.
 
 [![NixOS](https://img.shields.io/badge/NixOS-unstable-5277C3?logo=nixos&logoColor=white)](https://nixos.org)
 [![Flakes](https://img.shields.io/badge/flakes-enabled-7EB1DD?logo=nixos&logoColor=white)](https://nixos.wiki/wiki/Flakes)
 [![Home Manager](https://img.shields.io/badge/home--manager-standalone-41A6B5)](https://github.com/nix-community/home-manager)
-![Hosts](https://img.shields.io/badge/hosts-3-blueviolet)
+![Hosts](https://img.shields.io/badge/hosts-4-blueviolet)
 ![License](https://img.shields.io/badge/license-do_whatever-lightgrey)
 
 </div>
@@ -28,9 +28,11 @@ server — plus Home Manager for `irene` — from a single declarative tree.
 | **`tempest`** ⛈️ | Framework AMD AI 300 laptop | `disko` + `impermanence` + `lanzaboote` (secure boot) + `ucodenix`, CachyOS kernel, ZFS, [niri](https://github.com/YaLTeR/niri) scrolling WM |
 | **`orchid`** 🌸 | Desktop workstation | standalone Home Manager, `estradiol` rice |
 | **`hydra`** 🐍 | QEMU guest server | runs Caddy, Grafana, Glance — the always-on box |
+| **`zephyr`** 🍃 | Raspberry Pi 3B+ (aarch64) | headless; cross-built on tempest under binfmt, flashed as an SD image ([ADR 0005](docs/adr/)) |
 
-> `hosts/router.nix` is a single-file router variant that's drafted but **not** currently
-> wired into `nixosConfigurations`.
+> `tempest-vm` is a fifth `nixosConfigurations` entry — the same tempest config built with
+> the physical-hardware layer dropped, for testing disko + impermanence + niri in QEMU.
+> Build it with `./build-vm`.
 
 ---
 
@@ -83,7 +85,7 @@ Toggling a feature means editing that list — not flipping a global option.
 
 ```
 flake.nix              # inputs, multi-channel overlay, nixosConfigurations + homeConfigurations
-├── hosts/             # per-machine composition roots (tempest, orchid, hydra)
+├── hosts/             # per-machine composition roots (tempest, orchid, hydra, zephyr)
 ├── homes/             # Home Manager configs (irene@orchid, irene@tempest)
 ├── modules/           # cross-cutting system modules (nix, secure-boot)
 ├── hardware/          # opt-in hardware (audio, bluetooth, framework, zfs, tlp)
@@ -136,7 +138,7 @@ a clean no-op, not a failure.
 - **Secrets** go through [`sops-nix`](https://github.com/Mic92/sops-nix). Never commit raw secrets.
 - **Formatting** — 2-space indent, `alejandra` / `nixpkgs-fmt`.
 - **Commits** — short, lowercase summaries; one logical change; mention the host/module touched.
-- **No test framework** — validation is "does `nixos-rebuild` evaluate and switch cleanly."
+- **No test framework** — validation is "does `nh os switch` evaluate and switch cleanly."
 
 See [`AGENTS.md`](./AGENTS.md) for the author-maintained guidelines and
 [`CLAUDE.md`](./CLAUDE.md) for the agent-oriented map of the repo.
