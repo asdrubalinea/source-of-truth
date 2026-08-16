@@ -259,6 +259,24 @@ in
               "SUPER+SHIFT,${key},tag,${toString i}"
             ])
           (lib.range 1 tagCount);
+
+        # --- Mouse ------------------------------------------------------------
+        # The module only emits what is declared, so with no mousebind lines the
+        # pointer could not move a window at all. Dropping a dragged window is
+        # what actually crosses outputs: on button release mango calls
+        # setmon(grabc, xytomon(cursor)) and re-tags the window if the target
+        # tag changed, so a drag onto the second display lands there. Same
+        # chords as upstream's defaults, minus upstream's bare
+        # `NONE,btn_middle,togglemaximizescreen`: a modifier-less mousebind still
+        # matches for the middle button (buttonpress() only exempts left/right),
+        # and a matched bind returns before wlr_seat_pointer_notify_button, so
+        # the press never reaches the client — no paste, no close-tab, just the
+        # window flipping in and out of maximize. Middle click belongs to the
+        # app; niri binds nothing to it either.
+        mousebind = [
+          "SUPER,btn_left,moveresize,curmove"
+          "SUPER,btn_right,moveresize,curresize"
+        ];
       };
     };
   };
