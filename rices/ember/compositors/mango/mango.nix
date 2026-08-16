@@ -227,6 +227,15 @@ in
           "SUPER+SHIFT,Up,exchange_client,up"
           "SUPER+SHIFT,Down,exchange_client,down"
 
+          # Monitors. Same convention as the tag keys: CTRL picks the monitor
+          # axis, SHIFT carries the focused window along. focusdir/exchange_client
+          # above stop at the output edge, so without these a window can never
+          # leave the display it opened on.
+          "SUPER+CTRL,Left,focusmon,left"
+          "SUPER+CTRL,Right,focusmon,right"
+          "SUPER+CTRL+SHIFT,Left,tagmon,left"
+          "SUPER+CTRL+SHIFT,Right,tagmon,right"
+
           # Screenshots
           "SUPER+SHIFT,s,spawn,${screenshot} region"
           "SUPER+SHIFT,d,spawn,${screenshot} screen"
