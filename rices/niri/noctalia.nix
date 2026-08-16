@@ -87,16 +87,29 @@
         # runtime via settings.toml.
         wallpaper = {
           enabled = true;
-          directory = "~/Pictures/Wallpapers";
-          # The stylix target also pins wallpaper.default.path (to its own `image`)
-          # at normal priority, so mkForce the rice's seeded starter image to win.
-          # OLED panel: pick the lowest-APL seeded image. shinobu-kocho-dark is
-          # neon-on-true-black — 5% mean luminance, 1% of pixels above 80%, and
-          # the black field is *actually* #000 so those subpixels stay off (no
-          # emission, no wear). The previous pick (vintage-car, 46% mean) and the
-          # runtime one it replaced (wallhaven-k881zd, 75%) both light most of
-          # the panel for hours with a static image — the burn-in case.
-          default.path = lib.mkForce "~/Pictures/Wallpapers/shinobu-kocho-dark.png";
+          # Point the picker/rotation at the curated OLED pool, not the whole
+          # library — ~/Pictures/Wallpapers also holds hand-dropped images that
+          # were never measured (several sit at 54–93% mean luminance), and
+          # automation would happily park one of those on the panel all day.
+          # ../wallpaper/default.nix seeds oled/ and records the measurements.
+          directory = "~/Pictures/Wallpapers/oled";
+
+          # Rotate rather than burn one image in. A static image is the OLED
+          # failure mode: the same subpixels driven at the same level for hours.
+          # Cycling the pool at the default 1800s spreads the wear, and every
+          # image in the pool is low-APL on true black, so it stays cheap in
+          # panel-hours either way. `order` is already "random" by default.
+          automation.enabled = true;
+
+          # The stylix target also pins wallpaper.default.path (to its own
+          # `image`) at normal priority, so mkForce the rice's seeded starter
+          # image to win. This is only the cold-start fallback now — the
+          # automation timer writes each pick into the state settings.toml,
+          # which deep-merges over this. shinobu-kocho-dark is the lowest-APL
+          # image in the pool (5% mean, 1% of pixels above 80%, black field
+          # *actually* #000 so those subpixels stay off), so it is the right
+          # thing to show before the first rotation lands.
+          default.path = lib.mkForce "~/Pictures/Wallpapers/oled/shinobu-kocho-dark.png";
         };
 
         brightness.enable_ddcutil = true;
