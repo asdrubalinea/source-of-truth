@@ -290,7 +290,7 @@ in {
     halloy
     keepassxc
     mailspring-with-keyring
-    obsidian
+    # obsidian is installed by ../desktop/obsidian.nix, which also owns its config
     signal-desktop
     telegram-desktop
     zoom-us

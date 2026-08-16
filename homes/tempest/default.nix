@@ -35,6 +35,7 @@ in {
     ../../desktop/tmux.nix
     ../../desktop/zellij.nix
     # ../../desktop/warp.nix
+    ../../desktop/obsidian.nix
     ../../desktop/home-packages.nix
     ../../desktop/mimeapps.nix
     ../../desktop/telegram-sandbox.nix
