@@ -45,7 +45,6 @@ in
       # scratch on each boot (and any manual installs are simply lost).
       "/var/lib/flatpak"
       "/var/lib/tailscale"
-      "/var/lib/sddm"
       "/var/lib/grafana"
       "/var/lib/prometheus2"
       "/var/lib/prometheus-node-exporter"
