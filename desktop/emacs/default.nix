@@ -95,7 +95,7 @@ in
 
   # Emacs server (daemon) disabled for now — the niri Mod+Shift+Return frame
   # bind that drove it has been repurposed for the floating terminal scratchpad
-  # (rices/niri/niri.nix). Flip `enable` back to true to restore the daemon +
+  # (rices/ember/compositors/niri/niri.nix). Flip `enable` back to true to restore the daemon +
   # socket activation; the emacsclient bind would also need re-adding.
   services.emacs = {
     enable = false;

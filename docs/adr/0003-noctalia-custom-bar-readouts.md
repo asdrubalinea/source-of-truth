@@ -26,7 +26,7 @@ restricted to `{primary, secondary, tertiary, error, none}`.
 ## Decision
 
 - **Port each readout to a `CustomButton`, keeping the shell scripts.** A new
-  `rices/niri/noctalia-widgets.nix` owns `programs.noctalia-shell.settings.bar`
+  `rices/ember/noctalia-widgets.nix` owns `programs.noctalia-shell.settings.bar`
   (position + full `widgets` layout) and defines the six scripts;
   `noctalia.nix` keeps shell enable + theming.
 - **Rewrite state coloring into Noctalia's 5-value vocabulary.** Alarms →
@@ -88,11 +88,11 @@ command's stdout as live text. `textCommand`, `parseJson` and `textIntervalMs`
 So the port described above no longer exists:
 
 - **`power`, `fans`, `cpu-hog`, `mem-hog`, `health`, `flights` are dropped.**
-  The shell scripts went with them; `git log rices/niri/noctalia-widgets.nix`
+  The shell scripts went with them; `git log rices/ember/noctalia-widgets.nix`
   before 2026-07-19 has the bodies if any are ever wanted back.
 - **The three stat pills survive**, now as v5's built-in `sysmon` widget.
 - **"The bar layout is Nix-owned" survives** and is the part of this ADR still
-  in force — `rices/niri/noctalia-widgets.nix` still owns the layout, just in
+  in force — `rices/ember/noctalia-widgets.nix` still owns the layout, just in
   `config.toml`. Note that Noctalia writes a `settings.toml` that overrides the
   Nix-pinned `config.toml`, so "Nix-owned" is now weaker than it was.
 

@@ -18,7 +18,7 @@
   # from mis-selecting the installed vdpau wrapper (libva-vdpau-driver), which
   # would route hardware video decode through a worse path. Harmless if decode
   # already works; verify with `vainfo`. This is AMD-specific machine policy, so
-  # it lives with the host rather than in the niri rice (see CONTEXT.md).
+  # it lives with the host rather than in the ember rice (see CONTEXT.md).
   environment.sessionVariables = {
     LIBVA_DRIVER_NAME = "radeonsi";
   };

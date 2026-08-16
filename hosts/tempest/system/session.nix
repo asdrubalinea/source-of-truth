@@ -10,7 +10,11 @@ let
   # after a soft-reboot, reset on a full reboot (a built-in signal, no marker
   # files). So the wrapper:
   #   - soft-reboot (>= 1) → `exec niri-session`, landing back in the desktop
-  #     hands-free.
+  #     hands-free. niri specifically, not "whichever session you last picked":
+  #     the hands-free path is the one that must not strand you, so it stays on
+  #     the compositor known to work rather than tracking tuigreet's remembered
+  #     choice. Log into mango, soft-reboot, and you come back up in niri — pick
+  #     mango again at the greeter. See docs/adr/0012.
   #   - cold boot (0)      → exit immediately, which makes greetd fall through to
   #     `default_session` (tuigreet) — the plain TTY greeter, where you log in
   #     yourself.
@@ -43,7 +47,17 @@ in
         user = "irene";
       };
       default_session = {
-        command = "${pkgs.tuigreet}/bin/tuigreet --time --remember --cmd niri-session";
+        # `--sessions` rather than a hard-coded `--cmd`: tempest installs two
+        # compositor layers of the ember rice (niri and mango), each of which
+        # contributes a wayland-session entry via
+        # `services.displayManager.sessionPackages`. tuigreet lists what is in
+        # that directory, so adding or removing a compositor changes the menu
+        # with no edit here. `--remember-session` reopens on the last one picked,
+        # which is what makes trying a second compositor cheap.
+        #
+        # This is the ONLY place a session is chosen interactively; the
+        # soft-reboot path above deliberately does not consult it.
+        command = "${pkgs.tuigreet}/bin/tuigreet --time --remember --remember-session --sessions /run/current-system/sw/share/wayland-sessions";
         user = "greeter";
       };
     };

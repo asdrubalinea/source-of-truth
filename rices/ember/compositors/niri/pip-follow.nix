@@ -63,7 +63,7 @@ let
     done
   '';
 in
-lib.mkIf config.rices.niri.enable {
+lib.mkIf config.rices.ember.niri.enable {
   systemd.user.services.niri-pip-follow = {
     Unit = {
       Description = "Keep the Picture-in-Picture window on the focused niri workspace";

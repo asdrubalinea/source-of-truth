@@ -30,7 +30,7 @@ tempest keeps a 3-2-1 backup. Three legs, each with its own meaning of "ran":
 - **alarm** — how a failure reaches the user. It is *not* the bar: the
   backup-health readout described in `docs/adr/0003` was dropped in the Noctalia
   v5 migration, because v5's `custom_button` cannot poll a script (see
-  `rices/niri/noctalia-widgets.nix`). The two surviving channels are a desktop
+  `rices/ember/noctalia-widgets.nix`). The two surviving channels are a desktop
   notification fired by the unit itself (`system/backup-notify.nix`) and the
   alert block at the top of `sitrep`, which is pulled rather than pushed. The
   latching described above therefore lives in the units and in what `sitrep`
@@ -79,12 +79,32 @@ modes fused into one complaint. The glossary keeps them apart.
 
 ## Desktop (rices)
 
-- **rice** — a self-contained desktop environment: the Wayland compositor
-  (niri / hyprland) plus its shell furniture — bar, launcher, notifications,
-  lockscreen, terminals, theming, idle handling, wallpaper, window rules. A
-  rice defines *what the desktop is and how it behaves*; it is meant to be
-  independent of the machine it runs on. tempest's rice is niri; orchid's is
-  estradiol.
+- **rice** — a desktop environment: the shell furniture — bar, launcher,
+  notifications, lockscreen, terminals, theming, idle handling, wallpaper —
+  together with one or more compositors that can run underneath it. A rice
+  defines *what the desktop is and how it behaves*; it is meant to be
+  independent of the machine it runs on. tempest's rice is **ember**; orchid's is
+  **estradiol**.
+  A rice is **not** named after its compositor. ember runs on either niri or
+  mango and is recognisably the same desktop on both, which is the whole reason
+  the word stopped meaning "the compositor plus its trimmings".
+  _Avoid_: theme (that's colours only), desktop environment (implies one
+  compositor), setup.
+- **compositor layer** — one compositor under a rice: the window manager itself
+  plus the bindings, layout and window rules only its own config language can
+  express (`rices/ember/compositors/<name>/`). A rice may carry several. They are
+  **not** alternatives you choose at rebuild time — on tempest both are installed
+  in one generation and the session is picked at the greeter, per login.
+  The boundary is load-bearing in both directions. Because every enabled layer is
+  evaluated in the same generation, no option may be *defined* by two of them; an
+  option only one layer needs may live inside it (the **marquee** does), but
+  anything shared belongs to the rice. And the furniture must never name a
+  compositor: where it genuinely needs something only a compositor can do —
+  powering panels off at idle is the one case — it branches at *runtime* on which
+  session is live, rather than being duplicated per layer. See `docs/adr/0012-one-rice-two-compositors.md`.
+  _Flagged ambiguity_: "compositor" alone means the program (niri, mango); a
+  **compositor layer** is the directory of config that drives it. Enabling a
+  layer installs a session; it does not select one.
 - **machine policy** — per-host facts a rice must not bake in: monitor
   identities and layout (the kanshi profiles), the systemd units a health
   readout watches (e.g. which backup legs exist on this machine), per-host audio
@@ -97,7 +117,7 @@ modes fused into one complaint. The glossary keeps them apart.
   on a given machine.
   The tell for a leak is a **hostname** appearing inside a rice: a rice that
   branches on which machine it is running on has stopped describing a desktop.
-  `rices/niri` holds to this; `rices/estradiol` does not yet — its
+  `rices/ember` holds to this; `rices/estradiol` does not yet — its
   `hyprland.nix` still carries whole per-host monitor layouts behind
   `hostname == …`, which is exactly what `homes/tempest/monitors.nix` extracted
   for niri.
@@ -105,7 +125,19 @@ modes fused into one complaint. The glossary keeps them apart.
   the host *defines* the value directly into a module the rice also configures
   (no rice option at all, when the rice never reads it back), or the rice
   *declares* an option for it (when rice logic depends on the value, as with
-  `rices.niri.marquee` and `rices.niri.internalOutput`).
+  `rices.ember.marquee` and `rices.ember.internalOutput`).
+- **workspace** — the canonical word for "one of the ten things Mod+1..0
+  switches between". It is the *user-facing* concept and it survives a change of
+  compositor; the mechanism underneath does not.
+  _Flagged ambiguity_: niri workspaces are dynamic and per-output — they are
+  created and destroyed as you use them, and a window is on exactly one. mango
+  has **tags** instead (a dwl inheritance): a fixed set that always exists, a
+  bitmask, so one window can be on several at once and an empty tag never
+  disappears. ember pins mango to ten tags so the same ten keys land in the same
+  ten places, but "the workspace list" is a niri idea with no mango counterpart,
+  and a *sticky* window is a mango idea (`isglobal`) that niri has to fake. When
+  precision matters, say **tag** for mango and **workspace** for niri; say
+  *workspace* when you mean the thing the user switches.
 - **bar** — the rice's single status strip: workspaces, live readouts, clock,
   indicators. There is exactly one per rice, and on tempest it **hides itself**,
   reappearing only while the pointer is at the screen edge — an OLED lives longer
@@ -117,13 +149,17 @@ modes fused into one complaint. The glossary keeps them apart.
   never means that one. Which units a bar readout watches is **machine policy**.
 - **scratchpad** — a window kept running but parked out of view, summoned by a
   keybind as a floating overlay onto whatever workspace is focused and
-  dismissed with the same key. On tempest (niri) the canonical tenant is
-  Telegram (Mod+T). _Avoid_: special workspace, drop-down, quake terminal.
-  _Flagged ambiguity_: niri has no native scratchpad and no hidden workspace,
-  so unlike Hyprland's `togglespecialworkspace` this is **emulated** — the
-  parked window still lives on a real (bottom-most) workspace and remains
-  visible in the overview. "Scratchpad" here names that emulated behaviour, not
-  a first-class compositor feature.
+  dismissed with the same key. On tempest the canonical tenant is Telegram
+  (Mod+T). _Avoid_: special workspace, drop-down, quake terminal.
+  _Flagged ambiguity_: the word names a **behaviour**, and the two compositor
+  layers deliver it by different means. Under niri it is **emulated** — niri has
+  no native scratchpad and no hidden workspace, so unlike Hyprland's
+  `togglespecialworkspace` the parked window still lives on a real (bottom-most)
+  workspace and stays visible in the overview; a daemon flips it in and out (ADR
+  0006). Under mango it is a first-class compositor feature
+  (`toggle_named_scratchpad`), so there is no daemon and nothing to spawn and
+  hide at startup. Statements about "how the scratchpad works" are therefore
+  only true of one layer — say which.
 - **marquee** — a strip along one edge of a single output, permanently removed
   from the tiling area and impossible for any window to cover, whose tenant is
   moving content. On tempest it is the top of the portrait OLED, the panel's full

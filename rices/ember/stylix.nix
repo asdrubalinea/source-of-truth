@@ -3,7 +3,7 @@
 , config
 , ...
 }:
-lib.mkIf config.rices.niri.enable {
+lib.mkIf config.rices.ember.enable {
   # stylix's gtk target now sets `gtk.gtk4.theme = config.gtk.theme` (adw-gtk3).
   # We deliberately leave gtk4/libadwaita apps unthemed, so override it back to
   # null — mkForce is required because stylix defines a non-null value and the

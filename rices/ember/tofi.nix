@@ -2,11 +2,11 @@
 , config
 , ...
 }:
-lib.mkIf config.rices.niri.enable {
+lib.mkIf config.rices.ember.enable {
   # tofi is this rice's *menu* widget, not its launcher — the launcher is
   # Noctalia. Its only two users are hand-rolled pickers that pipe rows in and
   # read a line out: the marquee's cast/dark menu (./marquee.nix) and the audio
-  # output switcher (./niri.nix). They pass rows and a prompt; every decision
+  # output switcher (./compositors/niri/niri.nix). They pass rows and a prompt; every decision
   # about how a picker LOOKS lives here.
   #
   # GEOMETRY: always the whole output, never an explicitly-sized card. That is

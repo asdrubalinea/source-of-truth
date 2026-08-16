@@ -1,9 +1,9 @@
 { lib, config, ... }:
 let
-  cfg = config.rices.niri;
+  cfg = config.rices.ember;
 in
 lib.mkIf cfg.enable {
-  # Bar layout for the niri rice, merged into Noctalia's config.toml.
+  # Bar layout for the ember rice, merged into Noctalia's config.toml.
   #
   # IMPORTANT v4→v5 regression: Noctalia v5 is a ground-up C++ rewrite whose
   # `custom_button` widget only RUNS a command on click/scroll — it can no longer
@@ -39,7 +39,7 @@ lib.mkIf cfg.enable {
       # …and DON'T flash it on every workspace change (`show_on_workspace_switch`
       # defaults to true — confirmed with `noctalia config export full`). That
       # reveal exists to tell you where you landed after a *relative* switch, but
-      # every workspace bind in ./niri.nix is absolute (Mod+1…Mod+0 →
+      # every workspace bind in ./compositors/niri/niri.nix is absolute (Mod+1…Mod+0 →
       # focus-workspace = N) and Mod+E opens the overview, so it announced
       # something already known and then animated away. Off is also strictly less
       # on-screen time for the panel this bar hides itself to protect.

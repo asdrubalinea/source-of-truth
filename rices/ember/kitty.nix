@@ -1,5 +1,5 @@
 { config, lib, ... }:
-lib.mkIf config.rices.niri.enable {
+lib.mkIf config.rices.ember.enable {
   programs.kitty = {
     enable = true;
     settings = {

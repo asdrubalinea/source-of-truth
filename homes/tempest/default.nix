@@ -5,7 +5,7 @@
 }: let
   # SDRangel segfaults under Qt's Wayland platform plugin (its OpenGL spectrum/
   # scope widgets crash on startup); the global QT_QPA_PLATFORM=wayland from the
-  # niri rice (rices/niri/niri.nix) is what selects that plugin. Pin just this
+  # niri rice (rices/ember/compositors/niri/niri.nix) is what selects that plugin. Pin just this
   # app to XWayland — niri runs xwayland-satellite, so `xcb` connects fine and
   # the GL widgets are stable there. (Verified: SIGSEGV on wayland, clean on
   # xcb.) Must be --set, not --set-default, to override the inherited wayland.
@@ -21,7 +21,7 @@ in {
     inputs.stylix.homeModules.stylix
 
     # ../../rices/estradiol
-    ../../rices/niri # the niri rice (declares rices.niri.*; enabled below)
+    ../../rices/ember # the ember rice (declares rices.ember.*; enabled below)
     ./monitors.nix # machine policy: monitor identities + layout (kanshi)
     ./soft-reboot.nix # machine policy: Mod+Shift+R soft-reboot trigger (autologin gate lives in hosts/tempest/system/session.nix)
     # ./speakers.nix # machine policy: built-in speaker DSP correction (EasyEffects) — disabled: leaks onto AirPods
@@ -54,19 +54,27 @@ in {
     ../../misc/fish.nix
   ];
 
-  # Activate the niri rice. Its machine policy stays out here: monitor layout is
+  # Activate the ember rice. Its machine policy stays out here: monitor layout is
   # ./monitors.nix. See docs/adr/0004-niri-rice-as-enable-module.md.
   #
-  # `rices.niri.marquee` (docs/adr/0011) is machine policy too, and it lives in
+  # `rices.ember.marquee` (docs/adr/0011) is machine policy too, and it lives in
   # ./monitors.nix rather than here: the band exists only because the QD-OLED is
   # mounted portrait, so it is derived from that file's `oledMount` switch
   # alongside the panel's rotation and logical size, off the one panel-identity
   # binding both need.
-  rices.niri.enable = true;
+  rices.ember.enable = true;
+
+  # Both compositor layers, installed side by side: the session is picked at the
+  # greeter per login, not at rebuild time (hosts/tempest/system/session.nix).
+  # These are not exclusive and there is no "current" one here — the soft-reboot
+  # autologin is the only thing that names a default, and it names niri.
+  # See docs/adr/0012-one-rice-two-compositors.md.
+  rices.ember.niri.enable = true;
+  rices.ember.mango.enable = true;
 
   # Machine policy: readable terminal size on THIS machine's panels. A font size
   # is a function of the display it is read on, so the rice deliberately leaves
-  # `stylix.fonts.sizes.terminal` unset (see rices/niri/stylix.nix) rather than
+  # `stylix.fonts.sizes.terminal` unset (see rices/ember/stylix.nix) rather than
   # branching on hostname inside itself.
   stylix.fonts.sizes.terminal = 16;
 
@@ -74,7 +82,7 @@ in {
   # (below) needs a lat/long to compute sunset; Noctalia geocodes a place name via
   # api.noctalia.dev for its weather / night-light / auto-theme. The rice owns only
   # the invariant that Noctalia must not re-locate itself by IP
-  # (`location.auto_locate = false`, rices/niri/noctalia.nix).
+  # (`location.auto_locate = false`, rices/ember/noctalia.nix).
   programs.noctalia.settings.location.address = "Las Palmas, Spain";
 
   home = {
@@ -219,7 +227,7 @@ in {
     };
   };
 
-  # (mako removed — rices/niri/noctalia.nix mkForce-disables it; Noctalia owns
+  # (mako removed — rices/ember/noctalia.nix mkForce-disables it; Noctalia owns
   # notifications on this host, so the block only looked live.)
 
   # The only colour-temperature filter on this host. redshift used to be enabled

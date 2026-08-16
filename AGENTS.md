@@ -6,9 +6,12 @@
 - `homes/` holds Home Manager configs per user/host (e.g., `homes/orchid.nix`).
 - `modules/`, `services/`, `hardware/`, and `desktop/` provide reusable Nix modules.
 - `disks/` contains Disko layouts; `packages/` contains custom package definitions.
-- `rices/` holds whole desktop environments — compositor, shell furniture, theming,
-  fonts, wallpaper. `niri` (tempest) and `estradiol` (orchid). No waybar: tempest's
-  shell is Noctalia, and the one remaining waybar process is the marquee's strut.
+- `rices/` holds whole desktop environments — shell furniture, theming, fonts,
+  wallpaper, plus the compositor(s) that run under them. `ember` (tempest) and
+  `estradiol` (orchid). ember is one rice with two *compositor layers*,
+  `rices/ember/compositors/{niri,mango}/`: both are installed and the session is
+  picked at the greeter per login (ADR 0012). No waybar: tempest's shell is
+  Noctalia, and the one remaining waybar process is the marquee's strut.
 - `docs/` holds long-form notes and `docs/adr/` the decision records — read the
   relevant ADR before changing anything it covers.
 - `scripts/` holds the `writeScriptBin` / `writeShellApplication` helpers. The

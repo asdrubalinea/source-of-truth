@@ -1,5 +1,5 @@
 { lib, config, ... }:
-lib.mkIf config.rices.niri.enable {
+lib.mkIf config.rices.ember.enable {
   # Colors come from stylix's alacritty target (see stylix.nix). This module only
   # sets structural/behavioural options.
   programs.alacritty = {

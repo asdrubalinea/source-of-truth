@@ -1,10 +1,19 @@
 # niri rice becomes an enable-options Home-Manager module; machine policy factored out
 
-Status: accepted (2026-06-05)
+Status: accepted (2026-06-05), amended by
+[0012](0012-one-rice-two-compositors.md) (2026-08-16)
+
+> **Amendment.** Everything below still holds — the enable-module shape, the
+> two-halves split, the machine-policy boundary — but the names have moved. The
+> rice is now `rices/ember/` and carries two *compositor layers*
+> (`rices/ember/compositors/{niri,mango}/`), so `rices.niri.enable` became
+> `rices.ember.enable` plus one flag per layer, and `rices.niri.{marquee,
+> internalOutput}` became `rices.ember.*`. Read the option names here as
+> historical; the reasoning is not.
 
 ## Context
 
-The niri rice (`rices/niri/`, ~1.5k lines) is wired in two halves: a 3-line
+The niri rice (`rices/ember/`, ~1.5k lines) is wired in two halves: a 3-line
 system half (`system.nix`, `programs.niri.enable` + fish + fonts) imported by
 `hosts/tempest/default.nix`, and the home half (`default.nix`) imported by
 `homes/tempest/default.nix`. There is exactly one consumer — tempest. orchid runs

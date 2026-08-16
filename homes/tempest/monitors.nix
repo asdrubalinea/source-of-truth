@@ -1,8 +1,8 @@
 { ... }:
 # Machine policy for tempest: monitor identities and layout. These are per-host
 # facts (specific BOE/Samsung/LG panel serials and their modes/positions), not
-# part of the niri rice — a rice describes "what the desktop is", independent of
-# the machine it runs on. Factored out of rices/niri so the rice stays portable.
+# part of the ember rice — a rice describes "what the desktop is", independent of
+# the machine it runs on. Factored out of rices/ember so the rice stays portable.
 # See the "machine policy" entry in CONTEXT.md and docs/adr/0004.
 #
 # NOTE on the portable BOE panel ("BOE Display Unknown"): its EDID preferred
@@ -40,8 +40,8 @@ let
   # it in oled-desk-portable, and whether the marquee exists at all. NOTHING
   # else in the tree needs editing — the rice resolves orientation at runtime
   # (Mod+G's even split reads the focused output's geometry — see `evenSplit` in
-  # rices/niri/niri.nix; tofi places itself with percentage `padding-*`, see
-  # rices/niri/tofi.nix), and rices/niri/marquee.nix compiles to nothing when its
+  # rices/ember/compositors/niri/niri.nix; tofi places itself with percentage `padding-*`, see
+  # rices/ember/tofi.nix), and rices/ember/compositors/niri/marquee.nix compiles to nothing when its
   # option is null.
   #
   # Applying a flip: `nh home switch -b backup`, then restart kanshi
@@ -61,7 +61,7 @@ let
   # THE panel identity for this monitor, in kanshi's make/model/serial form. The
   # marquee's `panel` is fed from this same binding (below), because the two must
   # be byte-identical — the marquee matches by make/model/serial through niri's
-  # IPC, never by connector (see PANEL IDENTITY in rices/niri/marquee.nix).
+  # IPC, never by connector (see PANEL IDENTITY in rices/ember/compositors/niri/marquee.nix).
   oledPanel = "Micro-Star Int'l Co., Ltd. MAG 272U E16 0x01010101";
 
   # 3840x2160 at scale 1.5 is 2560x1440 logical; the quarter-turn swaps the two.
@@ -108,12 +108,12 @@ in {
   # so *because* of how the panel is mounted — the band's whole purpose is the
   # portrait mount's high top edge. So it is derived from oledMount rather than
   # set independently, and standing the panel back up removes it: null means this
-  # machine has no marquee and none of rices/niri/marquee.nix exists.
+  # machine has no marquee and none of rices/ember/compositors/niri/marquee.nix exists.
   #
   # 16:9 of a 2560-wide landscape panel would be 1440 deep — the entire screen —
   # so the arithmetic agrees with the ergonomics. The rice derives the depth from
   # `width`; nothing else needs it.
-  rices.niri.marquee =
+  rices.ember.marquee =
     if oledPortrait
     then {
       panel = oledPanel;

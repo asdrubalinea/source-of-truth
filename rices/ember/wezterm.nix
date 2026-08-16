@@ -1,5 +1,5 @@
 { pkgs, lib, config, ... }:
-lib.mkIf config.rices.niri.enable {
+lib.mkIf config.rices.ember.enable {
   programs.wezterm = {
     enable = true;
     extraConfig = ''

@@ -1,5 +1,5 @@
 { lib, config, ... }:
-lib.mkIf config.rices.niri.enable (
+lib.mkIf config.rices.ember.enable (
   let
     inherit (config.lib.stylix.colors.withHashtag)
       base00 base01 base02 base03 base04 base05 base07 base0D base0E;
@@ -18,7 +18,7 @@ lib.mkIf config.rices.niri.enable (
 
     colorScheme = ''
       [ColorScheme]
-      # Generated from the stylix base16 scheme (see rices/niri/stylix.nix).
+      # Generated from the stylix base16 scheme (see rices/ember/stylix.nix).
       # Role order: windowText, button, light, midlight, dark, mid, text,
       # brightText, buttonText, base, window, shadow, highlight, highlightedText,
       # link, linkVisited, alternateBase, <unused>, toolTipBase, toolTipText,
@@ -39,7 +39,7 @@ lib.mkIf config.rices.niri.enable (
     '';
   in
   {
-    # Qt platform-theme plumbing for the niri rice.
+    # Qt platform-theme plumbing for the ember rice.
     #
     # We do NOT use stylix's qt target: it is Kvantum-only (warns on any other
     # style) and its autoEnable is gated on `nixosConfig != null`, so it doesn't
@@ -50,8 +50,8 @@ lib.mkIf config.rices.niri.enable (
     # The rest of the stack:
     #   - HM's qt module installs qt5ct/qt6ct and sets QT_QPA_PLATFORMTHEME in the
     #     systemd user session.
-    #   - niri.nix sets QT_QPA_PLATFORMTHEME (and drops QT_STYLE_OVERRIDE) in the
-    #     niri session env so apps launched from key binds / launcher pick it up.
+    #   - each compositor layer sets QT_QPA_PLATFORMTHEME (and drops QT_STYLE_OVERRIDE) in its
+    #     session env, so apps launched from key binds / the launcher pick it up.
     #   - Icons: stylix.icons stays enabled (breeze-dark/breeze) for gtk.iconTheme;
     #     qtct.conf's icon_theme wires the same set into Qt apps.
     qt = {

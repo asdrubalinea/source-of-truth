@@ -95,6 +95,19 @@
       # dropped libdisplay-info_0_2 the build fails loudly rather than silently.
       inputs.nixpkgs.url = "github:NixOS/nixpkgs/e72e4f299401a3689d4b3d5fc6496b11db7064eb";
     };
+    mangowm = {
+      url = "github:mangowm/mango";
+      # DO follow here, unlike niri above — the reasoning inverts. There is no
+      # upstream cache for mango either way, so `follows` costs nothing in build
+      # time and saves evaluating a second nixpkgs; it is also what mango's own
+      # install docs prescribe. mango is a small C build against wlroots +
+      # scenefx, not a 277 MB Rust one.
+      #
+      # This input carries both halves of the mango layer: nixosModules.mango
+      # (which replaces the thinner nixpkgs module) and hmModules.mango, which
+      # nixpkgs has no equivalent of at all. See ADR 0012.
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     noctalia = {
       url = "github:noctalia-dev/noctalia-shell";
       # Do NOT add `inputs.nixpkgs.follows = "nixpkgs"`. Noctalia's Cachix
@@ -303,6 +316,11 @@
       emacs-overlay.overlay
       niri.overlays.niri
       niriPrebuiltOverlay
+      # Provides `pkgs.mango`. Needed because the compositor is referenced from
+      # three places that must agree on one derivation: the NixOS session
+      # (rices/ember/compositors/mango/system.nix), the HM config validator, and
+      # the `mmsg` call in rices/ember/swayidle.nix.
+      inputs.mangowm.overlays.default
       claude-code.overlays.default
       # `default` builds against our nixpkgs; `pinned` would use upstream's own
       # revision to guarantee attic cache hits. See the input's comment above

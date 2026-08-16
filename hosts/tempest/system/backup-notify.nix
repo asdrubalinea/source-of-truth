@@ -7,7 +7,7 @@
 # every run, so a notification on each outcome is wanted.
 #
 # These replace the old always-on bar health readout, which Noctalia v5 can no
-# longer drive (see packages/backup-notify.nix and rices/niri/noctalia-widgets.nix).
+# longer drive (see packages/backup-notify.nix and rices/ember/noctalia-widgets.nix).
 #
 # The third backup leg — the external USB pool — only exists on the physical
 # host, so its failure wiring and its (skip-aware) success notification live in

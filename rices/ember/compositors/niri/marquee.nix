@@ -4,7 +4,7 @@
 , ...
 }:
 let
-  cfg = config.rices.niri.marquee;
+  cfg = config.rices.ember.marquee;
 
   # The marquee (CONTEXT.md): a strip along the top of one output, permanently
   # removed from niri's working area and impossible for any window to cover,
@@ -333,7 +333,7 @@ in
   # per-host facts, so they come from homes/<host>/ — the rice only derives the
   # depth. Null (the default) means this machine has no marquee, and nothing in
   # this file exists.
-  options.rices.niri.marquee = lib.mkOption {
+  options.rices.ember.marquee = lib.mkOption {
     default = null;
     description = "The marquee reserved on one output: which panel, and how wide it is.";
     type = lib.types.nullOr (lib.types.submodule {
@@ -357,7 +357,7 @@ in
     });
   };
 
-  config = lib.mkIf (config.rices.niri.enable && cfg != null) {
+  config = lib.mkIf (config.rices.ember.niri.enable && cfg != null) {
     systemd.user.services.niri-marquee-strut = {
       Unit = {
         Description = "Reserve the marquee band at the top of one output";

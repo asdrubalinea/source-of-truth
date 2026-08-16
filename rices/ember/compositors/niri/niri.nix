@@ -20,7 +20,7 @@ let
   # the JSON, so `--json` consumers silently get a jq parse error and every
   # script here misreads the session. The compositor is the SYSTEM one —
   # greetd launches `niri-session` from /run/current-system/sw (see
-  # rices/niri/system.nix `programs.niri.package`, and the niri.service unit
+  # rices/ember/system.nix `programs.niri.package`, and the niri.service unit
   # ships inside that same package), which is pinned to pkgs.niri-unstable.
   # Changing the compositor means changing that option and every
   # pkgs.niri-unstable in this rice together (niri.nix, marquee.nix,
@@ -33,7 +33,7 @@ let
   # --- Brightness (Mod brightness keys) ------------------------------------
   # One control, two backends. When the internal panel is an active niri output,
   # adjust its backlight with brightnessctl (laptop use). Which output that is —
-  # `rices.niri.internalOutput`, ./default.nix — is the only host fact this file
+  # `rices.ember.internalOutput`, ./default.nix — is the only host fact this file
   # reads. When clamshell-docked (that output disabled) there is no backlight, so
   # brightness on an external (esp. the
   # emissive QD-OLED) goes over DDC/CI with ddcutil (VCP 0x10). The else-branch
@@ -45,7 +45,7 @@ let
     set -u
     dir="''${1:-up}"
     step=5
-    if ${niri} msg --json outputs | ${jq} -e '(."${config.rices.niri.internalOutput}".logical // null) != null' >/dev/null 2>&1; then
+    if ${niri} msg --json outputs | ${jq} -e '(."${config.rices.ember.internalOutput}".logical // null) != null' >/dev/null 2>&1; then
       case "$dir" in
         up)   exec ${pkgs.brightnessctl}/bin/brightnessctl set "$step%+" ;;
         down) exec ${pkgs.brightnessctl}/bin/brightnessctl set "$step%-" ;;
@@ -343,7 +343,7 @@ let
     spawn = "${pkgs.wezterm}/bin/wezterm start --always-new-process --class scratchpad-terminal";
   };
 in
-lib.mkIf config.rices.niri.enable {
+lib.mkIf config.rices.ember.niri.enable {
   programs.niri = {
     # Not the compositor — the session comes from the system package. This is what
     # home-manager validates the generated KDL against, so it has to be the same
@@ -371,7 +371,7 @@ lib.mkIf config.rices.niri.enable {
         # its LockContext). Default is "login", which assumes a privileged caller
         # — an unprivileged locker hits "pam_unix(login:account): setuid failed"
         # and can never unlock. Point it at a dedicated /etc/pam.d/noctalia
-        # instead (defined in rices/niri/system.nix). niri exports this to the
+        # instead (defined in rices/ember/system.nix). niri exports this to the
         # processes it spawns, including the noctalia spawn-at-startup, so the
         # already-running shell that handles every lock path picks it up.
         NOCTALIA_PAM_SERVICE = "noctalia";
@@ -477,7 +477,7 @@ lib.mkIf config.rices.niri.enable {
         }
         # NNN stack: the Noctalia shell (bar + notifications + launcher) is NOT
         # spawned here anymore. It runs as a supervised systemd user service
-        # (programs.noctalia.systemd.enable, in rices/niri/noctalia.nix) with
+        # (programs.noctalia.systemd.enable, in rices/ember/noctalia.nix) with
         # Restart=on-failure bound to graphical-session.target, so a segfault in
         # the v5 dev build self-heals instead of leaving a dead desktop. Spawning
         # it here too would double-launch a singleton shell.

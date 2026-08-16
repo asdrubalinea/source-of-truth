@@ -134,7 +134,7 @@ in {
     nethogs # per-process bandwidth (root)
     nmap
     postman
-    socat # the everything-relay (also used by rices/niri/marquee.nix)
+    socat # the everything-relay (also used by rices/ember/compositors/niri/marquee.nix)
     tcpdump # packet capture (root)
     traceroute
     wget
@@ -203,7 +203,7 @@ in {
     # opencv/pandas closure.)
     #
     # pygobject3 (the `gi` module) was here for the v4 Noctalia Screen Toolkit's
-    # webcam-mirror tool, which the v5 migration dropped (rices/niri/noctalia.nix).
+    # webcam-mirror tool, which the v5 migration dropped (rices/ember/noctalia.nix).
     # Nothing in the tree imports `gi` today; it stays only because a bare python3
     # can't, so any future GObject script would otherwise need this env rebuilt.
     # Safe to drop.

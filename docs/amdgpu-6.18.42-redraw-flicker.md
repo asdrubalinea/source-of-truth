@@ -55,7 +55,7 @@ machine while flickering.
 - `programs.niri.settings.debug."wait-for-frame-completion-before-queueing"`
   only papers over the EGL/Chromium clients and costs latency (serialises
   render → queue; at 165 Hz the ~6 ms budget makes frames droppable). Removed
-  from `rices/niri/niri.nix`.
+  from `rices/ember/compositors/niri/niri.nix`.
 - Not a niri regression: survived niri v25.08 and unstable 2026-08-02.
 - Not VRR (`niri msg outputs` says "supported, disabled" everywhere), not
   output-specific, not fractional scaling.

@@ -32,8 +32,13 @@
     ../../services/borg-backup.nix
     ../../services/grafana/default.nix
 
-    # Desktop environment
-    ../../rices/niri/system.nix
+    # Desktop environment — the ember rice's NixOS half, then one file per
+    # compositor layer. Both sessions are installed; which one runs is chosen at
+    # the greeter (./system/session.nix). Dropping a compositor is dropping its
+    # line here and its `rices.ember.<name>.enable` in homes/tempest.
+    ../../rices/ember/system.nix
+    ../../rices/ember/compositors/niri/system.nix
+    ../../rices/ember/compositors/mango/system.nix
 
     # --- Filesystem + boot layer: shared so the VM reproduces tempest's EXACT
     #     on-disk layout (GPT + LUKS + LVM + swap + ZFS datasets + tmpfs root +

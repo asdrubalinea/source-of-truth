@@ -25,8 +25,15 @@ in
 {
   home.packages = [ niriSoftReboot ];
 
-  # Merge into the niri rice's settings (attrset/list merge across modules).
+  # Merge into each compositor layer's settings (attrset/list merge across
+  # modules). The trigger is machine policy, so it is bound in both — the key
+  # does the same thing whichever session is running. `lib.mkIf` is unnecessary:
+  # an unenabled layer's whole config is gated, so a stray setting is inert.
   programs.niri.settings = {
     binds."Mod+Shift+R".action.spawn = [ "${niriSoftReboot}/bin/niri-soft-reboot" ];
   };
+
+  wayland.windowManager.mango.settings.bind = [
+    "SUPER+SHIFT,r,spawn,${niriSoftReboot}/bin/niri-soft-reboot"
+  ];
 }

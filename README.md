@@ -42,7 +42,7 @@ server and a Pi — plus Home Manager for `irene` — from a single declarative 
 
 | Host | What it is | Highlights |
 |------|------------|------------|
-| **`tempest`** ⛈️ | Framework AMD AI 300 laptop | `disko` + `impermanence` + `lanzaboote` (secure boot) + `ucodenix`, CachyOS kernel, ZFS-on-LUKS, [niri](https://github.com/YaLTeR/niri) scrolling WM |
+| **`tempest`** ⛈️ | Framework AMD AI 300 laptop | `disko` + `impermanence` + `lanzaboote` (secure boot) + `ucodenix`, CachyOS kernel, ZFS-on-LUKS, [niri](https://github.com/YaLTeR/niri) or [mango](https://github.com/mangowm/mango), chosen at the greeter |
 | **`orchid`** 🌸 | Desktop workstation | standalone Home Manager, `estradiol` rice |
 | **`hydra`** 🐍 | QEMU guest server | Caddy, Grafana, Glance — the always-on box |
 | **`zephyr`** 🍃 | Raspberry Pi 3B+ (aarch64) | headless; cross-built on tempest under binfmt, flashed as an SD image |
@@ -138,7 +138,7 @@ flake.nix              # inputs, multi-channel overlay, nixosConfigurations + ho
 ├── hardware/          # opt-in hardware (audio, bluetooth, framework, zfs, tlp)
 ├── services/          # à-la-carte NixOS services (borg, caddy, grafana, syncthing, vaultwarden-mirror…)
 ├── desktop/           # editor/terminal/app configs (helix, neovim, emacs, zed, tmux, fonts…)
-├── rices/             # desktop environments — estradiol · niri
+├── rices/             # desktop environments — estradiol · ember (niri + mango layers)
 ├── packages/          # custom derivations (pkgs.callPackage)
 ├── scripts/           # writeScriptBin / writeShellApplication wrappers
 └── disks/             # disko layouts
@@ -206,7 +206,7 @@ lives in [`docs/adr/`](docs/adr/):
 | [0001](docs/adr/0001-zfs-on-luks-tempest.md) | ZFS on LUKS for tempest |
 | [0002](docs/adr/0002-external-usb-backup.md) | External USB backup pool |
 | [0003](docs/adr/0003-noctalia-custom-bar-readouts.md) | Custom bar readouts in Noctalia |
-| [0004](docs/adr/0004-niri-rice-as-enable-module.md) | The niri rice is the one enable-module |
+| [0004](docs/adr/0004-niri-rice-as-enable-module.md) | The rice is the one enable-module *(amended by 0012)* |
 | [0005](docs/adr/0005-rpi3-mainline-sd-image.md) | Mainline SD image for the Pi 3 |
 | [0006](docs/adr/0006-niri-scratchpad-via-nirius.md) | Scratchpad via the nirius daemon, not a hand-rolled script |
 | [0007](docs/adr/0007-niri-soft-reboot-session.md) | Soft-reboot the niri session |
@@ -214,10 +214,12 @@ lives in [`docs/adr/`](docs/adr/):
 | [0009](docs/adr/0009-oled-external-sdr-under-niri.md) | External OLED in SDR under niri |
 | [0010](docs/adr/0010-tempest-opportunistic-media-automation.md) | Opportunistic media automation |
 | [0011](docs/adr/0011-marquee-on-the-portrait-oled.md) | The marquee band on the portrait OLED |
+| [0012](docs/adr/0012-one-rice-two-compositors.md) | One rice (ember), two compositors: niri and mango side by side |
 
 Longer war stories — the [amdgpu 6.18.42 redraw flicker](docs/amdgpu-6.18.42-redraw-flicker.md),
 [ZFS install](docs/tempest-zfs-install.md), [NVMe migration](docs/tempest-migrate-to-nvme.md) —
-live alongside them in [`docs/`](docs/).
+live alongside them in [`docs/`](docs/), as does the
+[mango ↔ niri cheat-sheet](docs/mango-vs-niri.md) for tempest's two compositors.
 
 ---
 

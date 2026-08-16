@@ -62,7 +62,7 @@
     # output. niri centers new floating windows by default, so
     # default-floating-position is omitted (see the Telegram rule above). The
     # app-id comes from wezterm's `--class scratchpad-terminal`. See
-    # rices/niri/niri.nix (terminalScratchpad).
+    # rices/ember/compositors/niri/niri.nix (terminalScratchpad).
     matches = [{ app-id = "scratchpad-terminal"; }];
     open-floating = true;
     default-column-width = {

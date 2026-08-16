@@ -2,7 +2,7 @@
 {
   imports = [ inputs.noctalia.homeModules.default ];
 
-  config = lib.mkIf config.rices.niri.enable {
+  config = lib.mkIf config.rices.ember.enable {
     # Noctalia is the "shell" leg of the NNN stack — an all-in-one desktop shell
     # (bar + launcher + notifications + lockscreen). It replaces waybar, dropped
     # from the rice's default.nix, and takes the launcher role off tofi — which
@@ -23,7 +23,7 @@
       # around output hotplug / session teardown, which this docked+suspend setup
       # hits constantly. As a service a crash self-heals in ~1s; as a niri child it
       # just left a dead bar until a manual relaunch (which re-crashed). The
-      # spawn-at-startup entry in niri.nix is removed so it isn't double-launched.
+      # spawn-at-startup entry in compositors/niri/niri.nix is removed so it isn't double-launched.
       systemd.enable = true;
 
       # ── Theming ────────────────────────────────────────────────────────────
@@ -67,7 +67,7 @@
 
         # Noctalia owns the wallpaper (replacing the old awww service). It draws a
         # background-layer surface (namespace "noctalia-wallpaper") that ignores
-        # exclusive zones — niri's layer-rule in niri.nix reparents it into niri's
+        # exclusive zones — niri's layer-rule in compositors/niri/niri.nix reparents it into niri's
         # backdrop.
         #
         # v5 only renders a surface when it has a PERSISTED image path:
@@ -137,7 +137,7 @@
 
         shell = {
           # font_family is set by the stylix noctalia target (fonts.sansSerif.name).
-          # Off since the negative struts in niri.nix: windows now reach the
+          # Off since the negative struts in compositors/niri/niri.nix: windows now reach the
           # display edges and already round themselves at radius 12
           # (window-rules.nix geometry-corner-radius). Noctalia's screen-corner
           # overlay masks a second, differently-sized curve on top of that, so
@@ -161,13 +161,13 @@
       };
     };
 
-    # A systemd user service only inherits the handful of vars niri pushes via
+    # A systemd user service only inherits the handful of vars the compositor pushes via
     # `systemctl --user import-environment` (WAYLAND_DISPLAY, XDG_CURRENT_DESKTOP,
-    # DBUS_SESSION_BUS_ADDRESS, XAUTHORITY) — NOT niri's per-process `environment`
+    # DBUS_SESSION_BUS_ADDRESS, XAUTHORITY) — NOT the compositor’s per-session `env`
     # block. So re-export the two vars noctalia actually needs that live there:
     #   - NOCTALIA_PAM_SERVICE: without it the lockscreen falls back to PAM "login"
-    #     → "setuid failed" → can never unlock (see the comment in niri.nix).
-    #   - QT_QPA_PLATFORM=wayland: keep the Qt platform explicit, as under niri.
+    #     → "setuid failed" → can never unlock (see the comment in compositors/niri/niri.nix).
+    #   - QT_QPA_PLATFORM=wayland: keep the Qt platform explicit, as in both layers.
     systemd.user.services.noctalia.Service.Environment = [
       "NOCTALIA_PAM_SERVICE=noctalia"
       "QT_QPA_PLATFORM=wayland"

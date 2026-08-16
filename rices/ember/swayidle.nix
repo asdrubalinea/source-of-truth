@@ -57,7 +57,7 @@ let
   # client may hold the ext-session-lock, so a duplicate swaylock just fails to
   # acquire it (and would exit non-zero, noise). swayidle's user-service PATH has
   # no profile, so pidof/swaylock are called by absolute store path.
-  lockNow = pkgs.writeShellScript "niri-lock" ''
+  lockNow = pkgs.writeShellScript "ember-lock" ''
     ${pkgs.procps}/bin/pidof swaylock > /dev/null 2>&1 && exit 0
     exec ${swaylock}
   '';
@@ -70,10 +70,46 @@ let
   # inhibitor-blocked path, and could let the box suspend before the surface is up
   # and resume unlocked — the bug we hit). Guarded so we don't double-launch over
   # an already-running swaylock from the idle path.
-  lockBeforeSleep = pkgs.writeShellScript "niri-lock-before-sleep" ''
+  lockBeforeSleep = pkgs.writeShellScript "ember-lock-before-sleep" ''
     ${pkgs.procps}/bin/pidof swaylock > /dev/null 2>&1 || ${swaylock}
     # Small settle before the screen is frozen for s2idle.
     ${pkgs.coreutils}/bin/sleep 0.3
+  '';
+
+  # --- Monitor power, per session ------------------------------------------
+  # swayidle is furniture: ONE user service, wanted by graphical-session.target,
+  # which both compositor layers reach. Every other command here is
+  # compositor-agnostic (swaylock, wezterm, systemctl); powering the panels off is
+  # not, and there is no shared protocol for it either — niri exposes it as an IPC
+  # action, mango as an mmsg dispatch, per output.
+  #
+  # Rather than duplicate the unit per session, branch on the socket each
+  # compositor exports into the session environment. That variable is the same
+  # thing Noctalia detects on (CompositorKind in compositor_detect.cpp), so the
+  # test is the ecosystem's convention, not a guess.
+  #
+  # niri-unstable must match the running compositor or `niri msg` refuses to talk
+  # to it (see the `niri` binding in compositors/niri/niri.nix). mango's dispatch
+  # is per-monitor with no "all" form, so we enumerate what it reports; the loop
+  # is a no-op if it reports nothing, which is the right behaviour for a session
+  # with no outputs rather than an error.
+  monitorPower = pkgs.writeShellScript "ember-monitor-power" ''
+    set -u
+    case "''${1:-off}" in
+      off) niri_action=power-off-monitors; mango_action=sleep_monitor ;;
+      on)  niri_action=power-on-monitors;  mango_action=wakeup_monitor ;;
+      *) exit 2 ;;
+    esac
+
+    if [ -n "''${NIRI_SOCKET:-}" ]; then
+      exec ${pkgs.niri-unstable}/bin/niri msg action "$niri_action"
+    elif [ -n "''${MANGO_INSTANCE_SIGNATURE:-}" ]; then
+      ${pkgs.mango}/bin/mmsg get all-monitors \
+        | ${pkgs.jq}/bin/jq -r '.[].name // empty' \
+        | while read -r mon; do
+            ${pkgs.mango}/bin/mmsg dispatch "$mango_action,$mon" || true
+          done
+    fi
   '';
 
   # On AC power we keep the machine awake (services like the auxologico bot keep
@@ -85,7 +121,7 @@ let
   # charging, so the wrapper no-ops and the desktop just sits with screens off,
   # fully awake — the Framework has no S3, so s2idle is the deep state, which is
   # exactly what we want to avoid while charging.
-  suspendOrOnBattery = pkgs.writeShellScript "niri-suspend-or-not" ''
+  suspendOrOnBattery = pkgs.writeShellScript "ember-suspend-or-not" ''
     for s in /sys/class/power_supply/*/status; do
       [ -r "$s" ] || continue
       [ "$(cat "$s")" != "Discharging" ] && exit 0
@@ -93,7 +129,7 @@ let
     exec ${pkgs.systemd}/bin/systemctl suspend
   '';
 in
-lib.mkIf config.rices.niri.enable {
+lib.mkIf config.rices.ember.enable {
   # Lock is handled by swaylock (NOT Noctalia's lockscreen — see the let block for
   # why). swayidle owns the idle timers + the logind lock/sleep events below.
   # before-sleep locks swaylock synchronously (see lockBeforeSleep); the `lock`
@@ -117,11 +153,14 @@ lib.mkIf config.rices.niri.enable {
         # protection, so the drift screensaver (300s) and idle lock (600s)
         # below are effectively unreachable in the on-screen state, but kept
         # for the manual/rental paths where the screen is left on.
-        # niri-unstable: same package as the running compositor, or `niri msg`
-        # bails out on a version mismatch (see the `niri` binding in niri.nix).
+        # Powering panels off is the one thing in this file only the compositor
+        # can do, and swayidle is furniture — one user service, started by
+        # graphical-session.target under whichever session you logged into. So the
+        # command is a dispatcher (see monitorPower in the let block) rather than
+        # a compositor's CLI, and this timer works unchanged in both.
         timeout = 120;
-        command = "${pkgs.niri-unstable}/bin/niri msg action power-off-monitors";
-        resumeCommand = "${pkgs.niri-unstable}/bin/niri msg action power-on-monitors";
+        command = "${monitorPower} off";
+        resumeCommand = "${monitorPower} on";
       }
       {
         # 20 min: suspend on battery only. On AC the wrapper above no-ops (the

@@ -1,9 +1,9 @@
 # The marquee: a permanently reserved 16:9 band on tempest's portrait QD-OLED
 
-Status: accepted — implemented in `rices/niri/marquee.nix`, but **currently
+Status: accepted — implemented in `rices/ember/compositors/niri/marquee.nix`, but **currently
 inactive**: the marquee is derived from the OLED's mount, and
 `homes/tempest/monitors.nix` has `oledMount = "landscape"`, which sets
-`rices.niri.marquee = null` and makes the whole module evaluate to nothing. This
+`rices.ember.marquee = null` and makes the whole module evaluate to nothing. This
 is the designed off-state, not drift — the band exists to compensate for the
 portrait mount's high top edge, so standing the panel up removes the reason for
 it. Flipping `oledMount` back to `"portrait"` brings everything below into
@@ -28,7 +28,7 @@ The reserve and the pixels are **two separate, independently-lived processes**:
 an always-on, opaque-black, module-less **waybar** owns the exclusive zone
 (`niri-marquee-strut.service`), and an on-demand **mpvpaper** draws the video
 (`niri-marquee.service`, transient). The mechanism lives in
-`rices/niri/marquee.nix`; machine policy supplies only `rices.niri.marquee =
+`rices/ember/compositors/niri/marquee.nix`; machine policy supplies only `rices.ember.marquee =
 { panel; width; }` from `homes/tempest/`, and the rice derives the 810 depth as
 `width * 9 / 16` so no derived number is ever hand-typed.
 
@@ -92,7 +92,7 @@ edges), `set_size(0,0)` and `set_exclusive_zone(-1)` are hard-coded at
 `src/main.c:701-708` with no CLI escape, and ~6 lines would turn them into flags
 for an exactly-band-sized surface that reserves its own space. **Rejected because
 it couples the panel's working area to a video decoder staying alive.**
-`rices/niri/noctalia.nix:23` records this machine already losing a shell
+`rices/ember/noctalia.nix:23` records this machine already losing a shell
 component to a crash loop; under that design an mpvpaper crash would jolt every
 window on the panel up 810px and back down on restart. Splitting the concerns
 means a dead video just leaves a dark band.
@@ -100,7 +100,7 @@ means a dead video just leaves a dark band.
 waybar is also the **dark backdrop**: it is opaque black, not transparent, so an
 untenanted marquee is unlit pixels rather than a static image.
 
-`rices/niri/waybar/` — the pre-Noctalia bar, superseded per ADR-0003 and
+`rices/niri/waybar/` (as it then was) — the pre-Noctalia bar, superseded per ADR-0003 and
 imported by nothing — is deleted in the same change. It was going to collide with
 the strut on `programs.waybar.settings`; the strut ended up not using that module
 at all, but a dead bar config that nothing imports is still worth removing.
@@ -134,7 +134,7 @@ other half is wrong; both were found by running it:
 
 | surface | layer | why |
 | --- | --- | --- |
-| Noctalia wallpaper | `background`, reparented into niri's **backdrop** | already so, via the `place-within-backdrop` layer-rule at `rices/niri/niri.nix:614-624`; the backdrop renders behind everything, and unlike `background` proper it is not relocated per workspace |
+| Noctalia wallpaper | `background`, reparented into niri's **backdrop** | already so, via the `place-within-backdrop` layer-rule at `rices/ember/compositors/niri/niri.nix:614-624`; the backdrop renders behind everything, and unlike `background` proper it is not relocated per workspace |
 | waybar (reserve + dark backdrop) | `bottom` | the only layer it can reach that is still below windows; it slides on a switch, but it is either hidden behind the video or plain black |
 | mpvpaper (video) | `top` | the lowest layer niri renders at a fixed position |
 
@@ -174,7 +174,7 @@ Two reasons, and the first is the whole point of the feature:
 - **Burn-in.** No window can ever cover the band, which makes whatever it shows
   the single most exposed surface on the machine — worse than the persistent bar
   that `auto_hide` + `reserve_space = false` were introduced to mitigate
-  (`rices/niri/noctalia-widgets.nix:26-37`). So an empty marquee shows *nothing*:
+  (`rices/ember/noctalia-widgets.nix:26-37`). So an empty marquee shows *nothing*:
   not the wallpaper, not a paused frame. On OLED, dark means pixels off. A
   *paused* tenant is the one way to put a static frame there on purpose, which is
   why pausing hands the panel back to swayidle — see *Why playback holds an idle
@@ -182,7 +182,7 @@ Two reasons, and the first is the whole point of the feature:
 
 ## Why playback holds an idle inhibitor
 
-Watching is not input. Untouched, `rices/niri/swayidle.nix` puts the `drift`
+Watching is not input. Untouched, `rices/ember/swayidle.nix` puts the `drift`
 screensaver fullscreen over the video at 300s, locks at 600s, powers the monitors
 off at 900s and suspends at 1200s — and mpvpaper contains **no idle-inhibit code
 whatsoever**, so unlike a browser it never holds the session up.
@@ -228,16 +228,16 @@ that mount is a single binding, `oledMount` in `homes/tempest/monitors.nix`:
 Also derived from it: the panel's logical size, and where the portable panel
 stacks under it in the `oled-desk-portable` profile. Both mounts share one
 `oledOutput` attrset and one panel-identity binding, which is also what feeds
-`rices.niri.marquee.panel` — that is why the marquee option moved out of
+`rices.ember.marquee.panel` — that is why the marquee option moved out of
 `homes/tempest/default.nix` and in beside the kanshi profile. The requirement that
 the two strings stay byte-identical (*Why a waybar that is not a bar*) is now
 structural rather than a comment asking you to remember.
 
 Nothing else in the tree is orientation-aware at build time, which is the reason
 one line is enough: `Mod+G`'s even split reads the focused output's geometry at
-runtime (`rices/niri/niri.nix:159-167`), tofi places itself in percentages of
-whatever output it lands on (`rices/niri/tofi.nix:42-47`), and
-`rices/niri/marquee.nix` is wrapped in `lib.mkIf (… && cfg != null)` so a null
+runtime (`rices/ember/compositors/niri/niri.nix:159-167`), tofi places itself in percentages of
+whatever output it lands on (`rices/ember/tofi.nix:42-47`), and
+`rices/ember/compositors/niri/marquee.nix` is wrapped in `lib.mkIf (… && cfg != null)` so a null
 option leaves no units, no binds and no waybar behind. `transform` is written on
 both mounts rather than omitted in landscape, because kanshi leaves a property it
 doesn't mention alone — switching back has to actively un-rotate the panel.
@@ -274,7 +274,7 @@ profile when the output set changes, not when its config is rewritten.
   touch it, which is deliberate: they belong to the browser.
 - **DRM streaming can never be a tenant.** The marquee can only host what yt-dlp
   can fetch, so Netflix/Prime/Disney+ are out, and there is no marquee at all on
-  the laptop-only or ultrawide profiles. `rices/niri/pip-follow.nix` and the PiP
+  the laptop-only or ultrawide profiles. `rices/ember/compositors/niri/pip-follow.nix` and the PiP
   window rules therefore stay — the marquee does **not** supersede them, and
   CONTEXT.md keeps the two concepts explicitly distinct.
 - **Playback quality is capped at 1440p.** The band is 2160x1215 *physical*

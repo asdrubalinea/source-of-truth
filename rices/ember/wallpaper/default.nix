@@ -17,7 +17,7 @@
 #
 # The flat directory keeps the bright ones (mean 0.47–0.66) for manual picking —
 # they are fine for an hour, not for an unattended all-day rotation.
-lib.mkIf config.rices.niri.enable {
+lib.mkIf config.rices.ember.enable {
   home.file."Pictures/Wallpapers/oled/shinobu-kocho-dark.png".source = ./shinobu-kocho-dark.png;
   home.file."Pictures/Wallpapers/oled/mitsuri-kanroji-3840x2160-22627.png".source = ./mitsuri-kanroji-3840x2160-22627.png;
   home.file."Pictures/Wallpapers/oled/kawaii-cat-girl-5120x2880-26545.png".source = ./kawaii-cat-girl-5120x2880-26545.png;

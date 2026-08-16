@@ -18,7 +18,7 @@
       set -ga terminal-overrides ",*256col*:Tc"
 
       # tmux only forwards capabilities it believes the outer terminal has, so
-      # spell them out for wezterm (rices/niri/wezterm.nix sets TERM=wezterm):
+      # spell them out for wezterm (rices/ember/wezterm.nix sets TERM=wezterm):
       # truecolor, coloured/curly underlines for helix diagnostics, OSC 8
       # hyperlinks, and CSI-u extended keys.
       set -as terminal-features ",wezterm*:RGB:usstyle:hyperlinks:extkeys"

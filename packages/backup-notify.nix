@@ -3,7 +3,7 @@
 #
 # Background: the noctalia bar used to carry a live storage/backup-health
 # readout, but Noctalia v5's custom_button can no longer poll a script (see
-# rices/niri/noctalia-widgets.nix). Push notifications replace that pull readout
+# rices/ember/noctalia-widgets.nix). Push notifications replace that pull readout
 # — each backup/scrub unit reports success or failure as it finishes.
 #
 # Self-contained: it reaches into the user's session bus itself, so it can be
