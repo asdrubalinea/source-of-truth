@@ -232,8 +232,15 @@ lib.mkIf config.rices.ember.enable {
         top = 4,
         bottom = 4,
       }
-      config.initial_cols = 160
-      config.initial_rows = 48
+      -- No initial_cols/initial_rows: both compositors tile every window, so the
+      -- requested grid is never honoured anyway — and under mango it is actively
+      -- harmful. mango maps the window first (configure 0x0), then sends the tile
+      -- size and the output's fractional scale (2, ceil of 1.5) in the same
+      -- batch; wezterm acks the tile, then re-asserts the initial 160x48 grid at
+      -- the new scale and commits a buffer smaller than the tile. The border is
+      -- drawn at the tile, so the window looks correct but the wallpaper shows
+      -- through on the right and bottom. Verified with WAYLAND_DEBUG=1: buffer
+      -- 4168x2744 for a 2548x1436 tile with these set, 5096x2872 without.
       config.window_decorations = "NONE"
 
       return config
