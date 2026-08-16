@@ -32,7 +32,10 @@ What survived was the wish for a single thing to *enable*.
   behind `lib.mkIf`. Set in `homes/tempest/default.nix`. This deliberately deviates
   from the repo convention (CLAUDE.md: "no central enable-options layer; host
   composition is explicit `imports`"). The only prior options module is
-  `options/passthrough.nix` (`vfio.enable`).
+  `options/passthrough.nix` (`vfio.enable`). *(2026-08-16: that module was
+  imported by no host and has since been deleted, so `rices.niri.enable` is now
+  the sole enable-option in the tree — this ADR's deviation became the rule by
+  attrition rather than by decision.)*
 - **The system half stays a plain import.** `programs.niri.enable` must live at
   the NixOS level (package + Wayland session + portals/polkit); the HM module
   only writes config. Under standalone HM the two layers activate separately

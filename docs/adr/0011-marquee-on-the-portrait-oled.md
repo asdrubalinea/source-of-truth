@@ -1,6 +1,13 @@
 # The marquee: a permanently reserved 16:9 band on tempest's portrait QD-OLED
 
-Status: accepted — implemented in `rices/niri/marquee.nix`. Two sections were
+Status: accepted — implemented in `rices/niri/marquee.nix`, but **currently
+inactive**: the marquee is derived from the OLED's mount, and
+`homes/tempest/monitors.nix` has `oledMount = "landscape"`, which sets
+`rices.niri.marquee = null` and makes the whole module evaluate to nothing. This
+is the designed off-state, not drift — the band exists to compensate for the
+portrait mount's high top edge, so standing the panel up removes the reason for
+it. Flipping `oledMount` back to `"portrait"` brings everything below into
+force. Two sections were
 amended during implementation, both because a claim read out of waybar's and
 mpvpaper's source assumed *wlroots'* conventions and niri does not follow them:
 *Why a waybar that is not a bar* (panel identity) and *Layer assignment*.
