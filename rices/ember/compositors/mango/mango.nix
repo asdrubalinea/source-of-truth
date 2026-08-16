@@ -133,16 +133,22 @@ in
         # at 15%. Noctalia ships its own mango colour template — leave it OFF, it
         # would try to write into ~/.config/mango, which Home Manager owns as a
         # read-only store symlink.
+        #
+        # Everything from urgentcolor down to splitcolor is *also* a border
+        # colour — mango swaps the border to it while a window is in that state —
+        # so they get the same 73 the focused border does. At ff they were the
+        # one thing on an OLED panel glowing at full brightness against
+        # near-black. rootcolor/shadowscolor aren't borders and stay opaque.
         focuscolor = colour "73" c.base03;
         bordercolor = colour "26" c.base01;
         rootcolor = colour "ff" c.base00;
-        urgentcolor = colour "ff" c.base08;
-        scratchpadcolor = colour "ff" c.base0E;
-        globalcolor = colour "ff" c.base0D;
-        overlaycolor = colour "ff" c.base0C;
-        maximizescreencolor = colour "ff" c.base0B;
+        urgentcolor = colour "73" c.base08;
+        scratchpadcolor = colour "73" c.base0E;
+        globalcolor = colour "73" c.base0D;
+        overlaycolor = colour "73" c.base0C;
+        maximizescreencolor = colour "73" c.base0B;
         shadowscolor = colour "ff" c.base00;
-        splitcolor = colour "ff" c.base0A;
+        splitcolor = colour "73" c.base0A;
         dropcolor = colour "80" c.base0A;
 
         # --- Animations ----------------------------------------------------
