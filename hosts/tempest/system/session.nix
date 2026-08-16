@@ -1,4 +1,4 @@
-{ pkgs, ... }:
+{ config, pkgs, ... }:
 let
   # greetd's `initial_session` fires on EVERY greetd start — both a cold boot and
   # a `systemctl soft-reboot`. We only want the hands-free autologin after a
@@ -55,9 +55,15 @@ in
         # with no edit here. `--remember-session` reopens on the last one picked,
         # which is what makes trying a second compositor cheap.
         #
+        # The path MUST be `sessionData.desktops`, not
+        # /run/current-system/sw/share/wayland-sessions: sessionPackages are
+        # collected into their own symlinkJoin which the display-manager module
+        # exports only through XDG_DATA_DIRS — nothing ever lands under `sw`, so
+        # that directory does not exist and the menu comes up empty.
+        #
         # This is the ONLY place a session is chosen interactively; the
         # soft-reboot path above deliberately does not consult it.
-        command = "${pkgs.tuigreet}/bin/tuigreet --time --remember --remember-session --sessions /run/current-system/sw/share/wayland-sessions";
+        command = "${pkgs.tuigreet}/bin/tuigreet --time --remember --remember-session --sessions ${config.services.displayManager.sessionData.desktops}/share/wayland-sessions";
         user = "greeter";
       };
     };
