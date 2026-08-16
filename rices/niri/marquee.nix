@@ -318,8 +318,9 @@ let
 
     # Playback, not tenancy, is what holds the idle chain off. Releasing it while
     # paused is also the burn-in answer: a paused tenant is a static frame in a
-    # band no window can ever cover, so swayidle's screensaver is exactly what
-    # should come over it — at 300s, with the panel powering off at 900s.
+    # band no window can ever cover, so swayidle is exactly what should come over
+    # it — panels off at 120s (and the drift screensaver at 300s, if something
+    # kept them on).
     if [ "$want" = true ]; then
       ${systemctl} --user stop niri-marquee-awake.service
     else
@@ -374,7 +375,7 @@ in
     # The keep-awake, held for exactly as long as the tenant is *playing* rather
     # than for the whole tenancy (CONTEXT.md). Watching registers as no activity
     # at all and mpvpaper holds no inhibitor of its own, so without this
-    # ./swayidle.nix would put the drift screensaver over the video at 300s and
+    # ./swayidle.nix would power the panels off under the video at 120s and
     # suspend the machine at 1200s. swayidle drops all four of its timeouts while
     # any logind `idle` inhibitor is held, so one lock covers the whole chain —
     # the same lever ../../scripts/keep-awake.nix uses.

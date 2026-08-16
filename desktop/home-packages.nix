@@ -170,7 +170,7 @@ in {
 
     # --- Git & version control ---
     delta # syntax-highlighting pager for git diffs
-    gh # GitHub CLI (used by magit/forge)
+    gh # GitHub CLI
     git-absorb # fold staged hunks into the commits that introduced them
     git-extras # git-summary, git-effort, git-undo, …
     gitleaks # scan history for committed secrets (sops-nix keeps the real ones out)
@@ -196,12 +196,17 @@ in {
     luarocks
     nodejs
     php
-    # pygobject3 (the `gi` module) rides on the interpreter for niri's noctalia
-    # Screen Toolkit webcam-mirror tool; a bare python3 can't import it. The PDF
-    # libs share this one interpreter on purpose — a second python3.withPackages
-    # would collide on bin/python3 in the home profile. pymupdf/pymupdf4llm and
-    # markitdown emit LLM-friendly Markdown; pdfplumber pulls tables; pypdf does
-    # structural split/merge. (camelot dropped — opencv/pandas closure.)
+    # The PDF libs share this one interpreter on purpose — a second
+    # python3.withPackages would collide on bin/python3 in the home profile.
+    # pymupdf/pymupdf4llm and markitdown emit LLM-friendly Markdown; pdfplumber
+    # pulls tables; pypdf does structural split/merge. (camelot dropped —
+    # opencv/pandas closure.)
+    #
+    # pygobject3 (the `gi` module) was here for the v4 Noctalia Screen Toolkit's
+    # webcam-mirror tool, which the v5 migration dropped (rices/niri/noctalia.nix).
+    # Nothing in the tree imports `gi` today; it stays only because a bare python3
+    # can't, so any future GObject script would otherwise need this env rebuilt.
+    # Safe to drop.
     (python3.withPackages (ps:
       with ps; [
         pygobject3
@@ -213,7 +218,8 @@ in {
       ]))
     uv # Python package manager
 
-    # --- Language servers (consumed by emacs eglot, helix, etc.) ---
+    # --- Language servers (consumed by helix, zed, vscode) ---
+    # Not emacs: desktop/emacs is not imported by any home config today.
     bash-language-server
     clang-tools
     gopls
@@ -254,7 +260,8 @@ in {
     wezterm
     # zoxide is enabled as programs.zoxide in misc/fish.nix: the binary is inert
     # without the shell hook that records directory visits.
-    # Warp lives in desktop/warp.nix (package + declarative settings.toml).
+    # Warp lives in desktop/warp.nix (package + declarative settings.toml),
+    # imported by homes/orchid.nix. Commented out on tempest.
 
     # --- Desktop integration ---
     appimage-run # run AppImages via Nix
@@ -292,16 +299,16 @@ in {
 
     # --- AI agent CLIs ---
     claude-code
-    llm-agents.codex # OpenAI Codex CLI; 0.146.0 vs nixpkgs unstable's 0.118.0
+    llm-agents.codex # OpenAI Codex CLI — llm-agents tracks upstream far closer than nixpkgs does
     llm-agents.opencode
     # OpenCode 2 preview, from npm's `next` channel. Installs as `opencode2`,
     # so it sits alongside the 1.x `opencode` binary rather than replacing it.
     llm-agents.opencode2
     llm-agents.pi
     llm-agents.hermes-agent # Nous Research self-improving agent
-    # rtk 0.44.1, and llm-agents.nix sets doCheck = false, so this sidesteps the
-    # cargo-test failure that forced the trunk.rtk pin. It also installs the
-    # hooks tree under $out/libexec/rtk/hooks (jq wrapped), which nixpkgs omits.
+    # llm-agents.nix sets doCheck = false, which sidesteps the cargo-test failure
+    # that forced the old trunk.rtk pin. It also installs the hooks tree under
+    # $out/libexec/rtk/hooks (jq wrapped), which nixpkgs omits.
     llm-agents.rtk
     # antigravity
 

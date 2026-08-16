@@ -27,6 +27,10 @@
   };
 
   boot.zfs = {
+    # orchid only. tempest deliberately does NOT pin this — see the long note in
+    # hosts/tempest/system/zfs.nix for why the module default (pkgs.zfs, i.e.
+    # whatever nixpkgs calls stable) is the better choice. The same reasoning
+    # applies here; this pin is inherited, not argued for.
     package = pkgs.zfs_unstable;
     forceImportAll = false;
   };

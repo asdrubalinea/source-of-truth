@@ -19,14 +19,14 @@
   #   ├── ESP    (4G, vfat)            → /boot   (lanzaboote signed UKIs)
   #   └── luks   (100%, LUKS2)         → "crypt"  (--sector-size 4096)
   #         └── LVM PV → VG "pool"
-  #               ├── swap (40G)       plain LV, hibernation/resume
+  #               ├── swap (40G)       plain LV (see the note on it below)
   #               ├── root (95%)       → zpool "rpool"
   #               └── (~5% unallocated VG headroom — see root below)
   #
   # Everything in this file is fixed at install time and cannot be changed
   # without reformatting. LUKS is kept (not ZFS-native encryption) so the
   # existing TPM2 auto-unlock carries over; LVM is kept so swap stays a plain LV
-  # (never a zvol) for safe hibernation under a single LUKS container.
+  # (never a zvol) under a single LUKS container.
   # See docs/adr/0001-zfs-on-luks-tempest.md.
   #
   # 4K alignment (do this on the NEW drive BEFORE running tempest-format):
@@ -111,9 +111,15 @@
       pool = {
         type = "lvm_vg";
         lvs = {
-          # Plain swap LV (not a zvol) so hibernation is safe under ZFS.
-          # boot.resumeDevice = /dev/mapper/pool-swap is set in system/boot.nix.
-          # 40G > 32G RAM (hibernation needs swap >= RAM).
+          # Plain swap LV, never a zvol: swapping onto a zvol deadlocks under
+          # memory pressure, and a hibernation image on one is unrecoverable.
+          # Sized 40G > 32G RAM to the "swap >= RAM" hibernation rule — but
+          # hibernation does NOT work on this machine and is not expected to
+          # (ZFS root forces `nohibernate`, and the firmware exposes no S3; see
+          # system/boot.nix and hardware/framework.nix). The size is headroom
+          # kept against a future where it becomes possible, since this layout
+          # can't be changed without reformatting. boot.resumeDevice is set in
+          # system/boot.nix for the same reason and never actually resumes.
           swap = {
             size = "40G";
             content = {

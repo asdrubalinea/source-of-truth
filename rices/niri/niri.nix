@@ -456,7 +456,8 @@ lib.mkIf config.rices.niri.enable {
       # Prefer no client-side decorations
       prefer-no-csd = true;
 
-      # Animations (conditional on host)
+      # Animations. Force-disabled in the VM only (hosts/tempest/vm.nix) — every
+      # animated frame there goes through the emulated virgl path.
       animations = {
         slowdown = 0.7;
       };
@@ -501,20 +502,6 @@ lib.mkIf config.rices.niri.enable {
         # Floating terminal scratchpad: summon/dismiss a near-fullscreen floating
         # wezterm (own app-id "scratchpad-terminal"); see the let block above.
         "Mod+Shift+Return".action.spawn = [ "${terminalScratchpad.toggle}" ];
-        # Disabled for now (Emacs server is off — see desktop/emacs/default.nix).
-        # This key used to open a new Emacs frame on the running daemon. Bare
-        # "emacsclient" so niri picks up the home-manager-installed myEmacs from
-        # PATH rather than pulling a second emacs build into the niri closure.
-        # Pass `-d $WAYLAND_DISPLAY` (e.g. "wayland-1") so the pgtk daemon
-        # asks GDK for a Wayland display rather than inheriting niri's
-        # xwayland DISPLAY=:0 and opening an X11 frame ("pure-GTK under X"
-        # warning). Wayland frame shows up in `niri msg windows` with the
-        # lowercase app id "emacs"; the X11 fallback is "Emacs".
-        # "Mod+Shift+Return".action.spawn = [
-        #   "sh"
-        #   "-c"
-        #   ''exec emacsclient -c -d "$WAYLAND_DISPLAY"''
-        # ];
         # Same key as before; now drives Noctalia's launcher instead of tofi.
         # v5 IPC: `noctalia msg <command>` replaced `noctalia-shell ipc call …`;
         # the launcher panel is toggled via the generic panel-toggle handler.

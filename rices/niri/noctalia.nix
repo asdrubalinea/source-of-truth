@@ -4,10 +4,12 @@
 
   config = lib.mkIf config.rices.niri.enable {
     # Noctalia is the "shell" leg of the NNN stack — an all-in-one desktop shell
-    # (bar + launcher + notifications + lockscreen). It replaces waybar (bar) and
-    # tofi (launcher), both dropped from the rice's default.nix, and supersedes
-    # mako (notifications) — force mako off so two notification daemons don't
-    # fight over the same dbus name.
+    # (bar + launcher + notifications + lockscreen). It replaces waybar, dropped
+    # from the rice's default.nix, and takes the launcher role off tofi — which
+    # stays imported (./tofi.nix) as the rice's *menu* widget, for the marquee's
+    # cast picker and the audio-output switcher. It also supersedes mako
+    # (notifications) — force mako off so two notification daemons don't fight
+    # over the same dbus name.
     services.mako.enable = lib.mkForce false;
 
     programs.noctalia = {

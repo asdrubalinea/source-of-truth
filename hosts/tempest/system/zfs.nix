@@ -4,8 +4,9 @@
   # disks/tempest.nix; networking.hostId is set in system/networking.nix
   # (required by ZFS). See docs/adr/0001-zfs-on-luks-tempest.md.
   #
-  # This is intentionally tempest-local rather than ../../hardware/zfs.nix —
-  # that module hard-codes orchid's smartd recipient and multi-NVMe device list.
+  # This is intentionally tempest-local rather than hardware/zfs.nix — that
+  # module hard-codes orchid's smartd recipient and multi-NVMe device list, and
+  # pins boot.zfs.package = zfs_unstable, which the note below argues against.
 
   boot.supportedFilesystems = [ "zfs" ];
   boot.initrd.supportedFilesystems = [ "zfs" ];
@@ -58,7 +59,7 @@
   # Last-resort recovery, if a boot ever does refuse (e.g. the pool was imported
   # from rescue media and not exported): add `zfs_force=1` to the kernel command
   # line for that one boot — not turning this back on permanently. NOTE that this
-  # hatch disappears once ../../modules/secure-boot.nix is enabled: lanzaboote
+  # hatch disappears once modules/secure-boot.nix is enabled: lanzaboote
   # boots signed UKIs and systemd-stub ignores cmdline edits under Secure Boot, so
   # from then on the only fix is external rescue media. Prefer keeping the pool
   # cleanly exported over relying on the hatch.

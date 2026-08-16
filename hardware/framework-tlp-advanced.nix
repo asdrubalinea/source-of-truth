@@ -1,16 +1,16 @@
 { lib, ... }:
 {
   services = {
-    # Enable TLP for advanced tuning
+    # mkForce on both: hardware/framework.nix (which imports this file) sets the
+    # same two at normal priority, and TLP and power-profiles-daemon are mutually
+    # exclusive — so state the winner here, where the TLP settings live.
     tlp.enable = lib.mkForce true;
-
-    # Explicitly disable conflicting daemons
     power-profiles-daemon.enable = lib.mkForce false;
 
-    # Enable thermal management
+    # Also set, identically, in hardware/framework.nix. Same values so it
+    # evaluates fine, but the duplication is unintentional — one of the two
+    # should own them.
     thermald.enable = true;
-
-    # Enable TRIM for SSD health
     fstrim.enable = true;
   };
 

@@ -77,7 +77,7 @@ let
   '';
 
   # On AC power we keep the machine awake (services like the auxologico bot keep
-  # running, backups complete) but the screens still power off via the 900s
+  # running, backups complete) but the screens still power off via the 120s
   # timer; only on battery do we actually suspend. swayidle's suspend timeout
   # (1200s) runs this wrapper instead of a bare `systemctl suspend`. The check
   # reads sysfs directly (no extra deps): suspend only when EVERY real battery

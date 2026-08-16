@@ -30,7 +30,6 @@
 
     # Services
     ../../services/borg-backup.nix
-    # (nix-cleanup.nix removed — GC is programs.nh.clean below)
     ../../services/grafana/default.nix
 
     # Desktop environment

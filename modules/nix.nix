@@ -16,7 +16,7 @@
       ] ++ (
         if config.networking.hostName == "tempest" then [
           # "http://orchid.boreal-city.ts.net:8501/"
-          "https://attic.xuyh0120.win/lantian"
+          "https://attic.xuyh0120.win/lantian" # xddxdd/nix-cachyos-kernel's own attic; only holds paths built against its pinned nixpkgs, see flake.nix
           "https://noctalia.cachix.org" # prebuilt Noctalia v5 / Quickshell (needs noctalia input NOT following nixpkgs; see flake.nix)
           # "https://cache.garnix.io" # disabled: R2 backend unreachable from this network
         ]

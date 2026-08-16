@@ -1,5 +1,13 @@
 # Machine policy: per-host speaker DSP correction for tempest's built-in speakers.
 #
+# CURRENTLY DISABLED — this file is commented out of homes/tempest/default.nix
+# because the correction leaked onto the AirPods. The mechanism that is supposed
+# to prevent exactly that (framework-flat as the OUTPUT autoload *fallback*) is
+# described below, but it only works once the fallback is enabled by hand in
+# EasyEffects' Preset Autoloading tab — that flag lives in EE's Qt settings db,
+# not in Nix. Re-enabling this import without also doing that one-time GUI toggle
+# reproduces the leak. Everything below assumes it has been done.
+#
 # The Framework 13 chassis fires its speakers downward, which makes them sound
 # thin and resonant. cab404's measured EasyEffects chain (the "Gracefu's Edits"
 # profile + a 27 dB convolution impulse response) corrects that. See

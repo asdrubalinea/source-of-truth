@@ -39,10 +39,10 @@ let
   # `transform`, the panel's logical size, where the portable panel stacks under
   # it in oled-desk-portable, and whether the marquee exists at all. NOTHING
   # else in the tree needs editing — the rice resolves orientation at runtime
-  # (Mod+G's even split reads the focused output's geometry,
-  # rices/niri/niri.nix:159-167; tofi places itself in percentages,
-  # rices/niri/tofi.nix:42-47), and rices/niri/marquee.nix compiles to nothing
-  # when its option is null.
+  # (Mod+G's even split reads the focused output's geometry — see `evenSplit` in
+  # rices/niri/niri.nix; tofi places itself with percentage `padding-*`, see
+  # rices/niri/tofi.nix), and rices/niri/marquee.nix compiles to nothing when its
+  # option is null.
   #
   # Applying a flip: `nh home switch -b backup`, then restart kanshi
   # (`systemctl --user restart kanshi`) or replug the panel — kanshi commits a

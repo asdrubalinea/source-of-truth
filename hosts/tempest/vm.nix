@@ -43,8 +43,8 @@
   # Setting them at top level errors ("virtualisation.cores does not exist"), so
   # route guest tuning through disko.tests.extraConfig.
   disko.tests.extraConfig = {
-    # Host has 16 threads; a niri desktop + xwayland + noctalia + emacs daemon +
-    # the virgl render thread is cramped on 4. 8 keeps the host responsive too.
+    # Host has 16 threads; a niri desktop + xwayland + noctalia + the virgl
+    # render thread is cramped on 4. 8 keeps the host responsive too.
     virtualisation.cores = 8;
 
     # impermanence requires every filesystem backing /persist to be

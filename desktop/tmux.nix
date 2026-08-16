@@ -25,7 +25,6 @@
       # Request disambiguated keys from wezterm and hand them to apps that ask.
       set -s extended-keys on
       
-      # Set pane base index to 1
       setw -g pane-base-index 1
 
       # Zellij-like keybindings
