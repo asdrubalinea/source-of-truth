@@ -56,6 +56,23 @@ Identical unless the right column says otherwise.
   full-width already (`scroller_default_proportion = 1.0`).
 - **Emacs popup frames** get 45% of the output instead of a fixed 1100px —
   scroller widths are proportions, not pixels.
+- **Killing the compositor does not restart the session.** Under niri it did, and
+  safely: niri ships a real `niri.service` (`Type=notify`,
+  `BindsTo=`/`Before=graphical-session.target`), and `niri-session` blocks on
+  `systemctl --user --wait start niri.service`, then forces the session down with
+  `niri-shutdown.target` (`Conflicts=graphical-session.target`) and unsets
+  `WAYLAND_DISPLAY`. Compositor death is a systemd event, so every
+  `PartOf=graphical-session.target` client is cleanly *stopped* and comes back on
+  the next login.
+
+  mango ships no systemd units at all — the only artifact is the passive
+  `mango-session.target` home-manager writes, and mango itself is a bare
+  greeter-launched process that pokes `systemctl --user start
+  mango-session.target` once from `autostart.sh`. Nothing blocks on it and there
+  is no shutdown target, so systemd never learns it died:
+  `graphical-session.target` stays `active`, and the *replacement* mango's `start`
+  is a no-op against an already-active target, so nothing is recycled. Restart
+  policies (below) paper over it; the asymmetry itself is unfixed.
 
 ## If something looks wrong
 
@@ -63,9 +80,11 @@ Identical unless the right column says otherwise.
   never started. mango reaches it through `~/.config/mango/autostart.sh`, which
   the HM module only writes when `autostart_sh` is non-empty. Check
   `systemctl --user status mango-session.target`.
-- **Screens never blank at idle** → `ember-monitor-power` branches on
-  `$MANGO_INSTANCE_SIGNATURE`; confirm it is set in the session
-  (`systemctl --user show-environment`).
+- **Screens never blank at idle** → check `systemctl --user is-active swayidle`
+  first (see "Everything died after you restarted mango" below) — a dead idle
+  manager is the likelier cause and it reads as `inactive`, not `failed`. If it is
+  running, `ember-monitor-power` branches on `$MANGO_INSTANCE_SIGNATURE`; confirm
+  it is set in the session (`systemctl --user show-environment`).
 - **Window borders are the wrong colour** → Noctalia's own mango colour template
   got enabled. It must stay off; `~/.config/mango/config.conf` is a read-only
   store symlink and colours come from stylix via
@@ -76,6 +95,17 @@ Identical unless the right column says otherwise.
 - **Monitors are misarranged** → still kanshi
   (`homes/tempest/monitors.nix`), same as niri; mango implements
   wlr-output-management, so nothing compositor-specific is involved.
+- **Everything died after you restarted mango** → the clients restart-looped
+  against the dead socket and hit systemd's stock start limit (5 tries /
+  `RestartSec=100ms` / 10s), which lands them in **`inactive`, not `failed`** — so
+  `systemctl --user --failed` looks clean while swayidle, kanshi and the idle
+  inhibitor are all dead. On 2026-08-19 swayidle sat dead for three hours that
+  way: no panel power-off, no idle suspend. noctalia fails differently again — it
+  handles display loss gracefully and **exits 0**, so `Restart=on-failure`
+  declines and there is not even a restart-job line in the journal.
+  `homes/tempest/default.nix` sets `StartLimitIntervalSec=0` + `RestartSec=2` on
+  the five session clients, and `rices/ember/noctalia.nix` upgrades noctalia to
+  `Restart=always`, so they now reconnect on their own within ~2s of a new mango.
 - **Screencast picks the wrong backend under *niri* after this landed** → mango's
   NixOS module pulls in xdg-desktop-portal-wlr system-wide. See risk 3 in ADR
   0012.

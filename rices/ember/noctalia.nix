@@ -178,6 +178,27 @@
       "QT_QPA_PLATFORM=wayland"
     ];
 
+    # The module's Restart=on-failure (see the comment above) only covers the
+    # segfault case. It does NOT cover losing the compositor, because noctalia
+    # handles that *gracefully* and exits 0:
+    #
+    #   10:36:49 noctalia[22246]: [main] Wayland display closed during failed to
+    #            read Wayland events; shutting down (display_error=32 (Broken pipe))
+    #
+    # systemd sees a clean exit, on-failure declines to act, and there is not even
+    # a "Scheduled restart job" line in the journal — the bar is simply gone until
+    # a manual `systemctl --user start noctalia`. That is what happened when mango
+    # was restarted on 2026-08-19: noctalia stayed down for the 93 seconds until it
+    # was started by hand.
+    #
+    # Restart=always covers both exits with one word. It does not fight an explicit
+    # `systemctl --user stop` (systemd never restarts after an intentional stop), so
+    # the only behaviour this gives up is letting noctalia quit itself on purpose —
+    # which for the session's bar/shell is not a thing we want anyway. Paired with
+    # StartLimitIntervalSec=0 in homes/tempest/default.nix so a relaunch storm can't
+    # trip the start limiter and make it permanent.
+    systemd.user.services.noctalia.Service.Restart = lib.mkForce "always";
+
     # Screenshot / annotate / record / OCR tooling. These were the runtime deps
     # of the v4 "Screen Toolkit" Noctalia plugin. v5 manages plugins differently
     # — a `[plugins]` table in config.toml plus `noctalia msg plugins …` at

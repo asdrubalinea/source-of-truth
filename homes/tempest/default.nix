@@ -1,6 +1,7 @@
 {
   inputs,
   pkgs,
+  lib,
   ...
 }: let
   # SDRangel segfaults under Qt's Wayland platform plugin (its OpenGL spectrum/
@@ -241,4 +242,50 @@ in {
     latitude = 28.1235; # Las Palmas de Gran Canaria, Spain
     longitude = -15.4363;
   };
+
+  # Keep the Wayland client services alive across a compositor restart.
+  #
+  # When the compositor goes away — a session switch, or a plain crash, which on
+  # this box is routine — the Wayland socket is pulled out from under every client
+  # service at once. systemd's stock policy is RestartSec=100ms with
+  # StartLimitBurst=5 over StartLimitIntervalSec=10s, so each one burns all five
+  # retries inside half a second, long before a new compositor exists to connect
+  # to. Then it hits the start limit and stops for good: swayidle exited 253
+  # ("Unable to connect to the compositor") five times in 1.2s on 2026-08-19 and
+  # sat dead for the next three hours, so the 120s panel power-off and the 1200s
+  # idle suspend in rices/ember/swayidle.nix simply never ran. Every fix in that
+  # file is about what swayidle *does* on a timer, and none of it matters while
+  # the daemon is not running.
+  #
+  # Worse, the end state is `inactive (dead)`, not `failed` — a start-limit-hit
+  # unit does not appear in `systemctl --user --failed`, so the unit list looked
+  # clean the whole time. kanshi hit the identical limit at 10:36:11 the same
+  # morning; wlsunset ships Restart=no and so dies on the first disconnect.
+  #
+  # noctalia is in the list for the limiter only — it fails a different way (a
+  # clean exit 0 that on-failure ignores), handled in rices/ember/noctalia.nix.
+  #
+  # Retry indefinitely and slowly instead: StartLimitIntervalSec=0 disables the
+  # rate limiter, and 2s between attempts makes an unbounded retry cheap.
+  # PartOf=graphical-session.target (set by all three modules) still stops these
+  # on a real logout, so nothing can spin once the session is genuinely over —
+  # the retries only cover the window where the compositor is missing.
+  #
+  # ponytail: this trades the start limiter's one virtue — giving up loudly on a
+  # permanently broken command — for a log line every 2s. A unit here flapping for
+  # a non-compositor reason (bad flag, missing binary) will now retry forever
+  # rather than stop; `journalctl --user -u <unit>` is where that shows up.
+  #
+  # wlsunset is the one that ships Restart=no, so a single disconnect ends it for
+  # the rest of the session. swayidle and kanshi already carry Restart=always from
+  # their own modules, and noctalia gets it in rices/ember/noctalia.nix (next to
+  # the reasoning about *why* it needs more than on-failure) — so wlsunset is the
+  # only Restart this block has to set.
+  systemd.user.services = lib.mkMerge [
+    (lib.genAttrs ["swayidle" "kanshi" "wlsunset" "noctalia" "wayland-pipewire-idle-inhibit"] (_: {
+      Unit.StartLimitIntervalSec = 0;
+      Service.RestartSec = 2;
+    }))
+    {wlsunset.Service.Restart = lib.mkForce "always";}
+  ];
 }
