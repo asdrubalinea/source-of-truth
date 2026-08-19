@@ -140,7 +140,8 @@ in {
     wget
     whois
     xh # HTTPie-style HTTP client, Rust
-    yt-dlp
+    # yt-dlp comes from ./yt-dlp.nix — the plain package cannot download from
+    # YouTube without a PO-token provider behind it.
 
     # --- Backup & sync ---
     borgbackup

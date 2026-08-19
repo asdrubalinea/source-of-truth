@@ -37,6 +37,7 @@ in {
     # ../../desktop/warp.nix
     ../../desktop/obsidian.nix
     ../../desktop/home-packages.nix
+    ../../desktop/yt-dlp.nix
     ../../desktop/mimeapps.nix
     ../../desktop/telegram-sandbox.nix
 

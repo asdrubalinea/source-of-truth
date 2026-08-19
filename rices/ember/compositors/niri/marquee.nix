@@ -80,6 +80,9 @@ let
   mpvpaper = "${pkgs.mpvpaper}/bin/mpvpaper";
   tofiBin = "${pkgs.tofi}/bin/tofi";
   wlPaste = "${pkgs.wl-clipboard}/bin/wl-paste";
+  # Plain pkgs.yt-dlp 403s on nearly every YouTube video now, and a band fed a
+  # YouTube link is the common case — see ../../../../packages/yt-dlp-pot.nix.
+  ytDlp = pkgs.callPackage ../../../../packages/yt-dlp-pot.nix { };
   gawk = "${pkgs.gawk}/bin/gawk";
 
   # PANEL IDENTITY. Neither tool can be told about a panel by identity under
@@ -204,7 +207,7 @@ let
     "keepaspect=yes"
     "hwdec=auto"
     "ytdl-format=bestvideo[height<=?${toString cfg.width}]+bestaudio/best"
-    "script-opts=ytdl_hook-ytdl_path=${pkgs.yt-dlp}/bin/yt-dlp"
+    "script-opts=ytdl_hook-ytdl_path=${ytDlp}/bin/yt-dlp"
     "input-ipc-server=$XDG_RUNTIME_DIR/marquee.sock"
   ];
 
