@@ -55,6 +55,7 @@ in {
     hyfetch # neofetch fork
     iotop # per-process disk IO (root)
     ltrace # library-call tracer
+    lurk # strace, but legible — coloured, filtered syscall output
     nvtopPackages.amd # AMD GPU monitor
     procs # ps with tree view and search
     s-tui # CPU frequency/temperature/power TUI; also drives stress-ng
@@ -80,9 +81,12 @@ in {
     yazi
 
     # --- Archives & compression ---
+    # `7zz` — official upstream 7-Zip. Replaces the abandoned p7zip fork (it
+    # was stuck on a 2016 upstream) and reads RAR5, so `unar` is now only
+    # here for StuffIt and the older RAR variants.
+    _7zz
     lz4
     ouch # one verb to (de)compress any archive format
-    p7zip # 7z
     pigz # parallel gzip
     unar # free RAR/StuffIt/… extractor (`lsar` lists)
     unzip
@@ -157,7 +161,6 @@ in {
     deadnix # find unused Nix bindings
     devbox
     devenv
-    lurk # Nix helper (see nixpkgs description)
     manix # search NixOS/HM option and nixpkgs function docs
     nil # Nix LSP
     nix-diff # explain why two derivations differ
@@ -165,7 +168,6 @@ in {
     nix-output-monitor # `nom` — readable build output; pipe nix builds through it
     nix-tree
     nixd # Nix LSP
-    nixpkgs-fmt
     nvd # diff two generations package-by-package
     statix # Nix anti-pattern linter
 
@@ -315,7 +317,6 @@ in {
 
     # --- Media & graphics ---
     chafa # render images as terminal graphics (kitty/sixel protocols)
-    feh
     ffmpeg
     ghostscript
     imagemagick
@@ -324,6 +325,7 @@ in {
     libheif
     mpv
     obs-studio
+    swayimg # Wayland-native image viewer; replaced feh, which was X11-only
     vlc
     # gimp3
     # inkscape

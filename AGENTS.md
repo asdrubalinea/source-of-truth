@@ -31,7 +31,7 @@
 ## Coding Style & Naming Conventions
 - Nix files use two-space indentation; keep attribute sets aligned and readable.
 - Prefer concise, descriptive file names (e.g., `hosts/<name>/system/networking.nix`).
-- Format Nix with `alejandra` or `nixpkgs-fmt` when available.
+- Format Nix with `alejandra`.
 - Small shell wrappers use `#!/bin/sh` or `#!/usr/bin/env bash` and keep flags
   explicit. The larger ones (`scripts/cage.sh`, `scripts/sitrep.sh`) are
   `writeShellApplication` bodies: no shebang of their own, and **shellcheck runs

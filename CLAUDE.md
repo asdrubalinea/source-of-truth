@@ -70,5 +70,5 @@ Home configs themselves are composition roots that import a rice, desktop module
 - The working directory is `/persist/source-of-truth` and several scripts hard-code that path. Don't move the tree without updating `programs.nh.flake` in `hosts/tempest/default.nix` and `hosts/orchid/default.nix`, plus `scripts/update-home.nix`.
 - Secrets go through `sops-nix` (imported in `homes/orchid.nix`). Don't commit raw secrets.
 - Host `specialArgs` / `extraSpecialArgs` inject `inputs` and `hostname` — modules expect these available.
-- Nix formatting: 2-space indent (alejandra / nixpkgs-fmt if available). Shell scripts use explicit `set -euo pipefail` where relevant, or plain `#!/bin/sh` for simple wrappers (e.g. `build-vm`, `tempest-install`).
+- Nix formatting: 2-space indent (alejandra). Shell scripts use explicit `set -euo pipefail` where relevant, or plain `#!/bin/sh` for simple wrappers (e.g. `build-vm`, `tempest-install`).
 - Commit style (per `AGENTS.md` and recent log): short, lowercase summaries, one logical change per commit, mention the host or module touched.

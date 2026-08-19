@@ -227,7 +227,7 @@ live alongside them in [`docs/`](docs/), as does the
 
 - **Don't move the tree** — `/persist/source-of-truth` is hard-coded in several scripts.
 - **Secrets** go through [`sops-nix`](https://github.com/Mic92/sops-nix). Never commit raw secrets.
-- **Formatting** — 2-space indent, `alejandra` / `nixpkgs-fmt`.
+- **Formatting** — 2-space indent, `alejandra`.
 - **Commits** — short, lowercase summaries; one logical change; mention the host/module touched.
 - **Shell** — `writeShellApplication` bodies are shellcheck-gated at build time; a warning fails the build.
 - **No test framework** — validation is "does `nh os switch` evaluate and switch cleanly."
