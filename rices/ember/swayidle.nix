@@ -238,4 +238,36 @@ lib.mkIf config.rices.ember.enable {
       after-resume = "${pkgs.kanshi}/bin/kanshictl reload";
     };
   };
+
+  # Panels went dark 120s into a video, because Chrome takes no Wayland idle
+  # inhibitor for ordinary in-page playback. The inhibit path itself is sound —
+  # proved in a headless nested mango, where a 3s swayidle timeout fired on the
+  # dot with nothing held and never fired at all while wlinhibit held one — so
+  # mango honours inhibitors and swayidle obeys them (its timeouts register with
+  # obey_inhibitors = true; only its internal 0s resume probe uses the
+  # input-idle variant that ignores them). The gap is app-side, and closing it
+  # app-side means one rule per browser, forever.
+  #
+  # So inhibit on the thing every video actually has in common: sound. This
+  # daemon holds ONE inhibitor for as long as any non-corked sink-input exists,
+  # which covers Chrome, Firefox and mpv alike, and drops it the moment playback
+  # stops — so an idle desktop still goes dark on schedule, which is the whole
+  # point of the 120s timer on an OLED.
+  #
+  # Ceiling: a muted or silent video does not register a sink-input and will
+  # still time out. If that turns up in practice the next rung is mango's own
+  # `idleinhibit_when_focus` window rule, but that inhibits whenever the window
+  # is focused (video or not), which is a much worse deal for the panels.
+  systemd.user.services.sway-audio-idle-inhibit = {
+    Unit = {
+      Description = "Hold a Wayland idle inhibitor while audio is playing";
+      PartOf = [ "graphical-session.target" ];
+      After = [ "graphical-session.target" ];
+    };
+    Service = {
+      ExecStart = "${pkgs.sway-audio-idle-inhibit}/bin/sway-audio-idle-inhibit";
+      Restart = "on-failure";
+    };
+    Install.WantedBy = [ "graphical-session.target" ];
+  };
 }
