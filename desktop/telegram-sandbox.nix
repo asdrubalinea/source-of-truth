@@ -1,6 +1,8 @@
-{ pkgs, lib, ... }:
-
-let
+{
+  pkgs,
+  lib,
+  ...
+}: let
   firejailArgs = [
     "--profile=${pkgs.firejail}/etc/firejail/telegram-desktop.profile"
     "--blacklist=/persist"
@@ -11,16 +13,15 @@ let
   telegramBin = "${pkgs.telegram-desktop}/bin/Telegram";
 
   firejailCmd = lib.concatStringsSep " " (
-    [ "/run/wrappers/bin/firejail" ] ++ firejailArgs ++ [ "--" telegramBin ]
+    ["/run/wrappers/bin/firejail"] ++ firejailArgs ++ ["--" telegramBin]
   );
 
   telegramSandboxed = pkgs.writeShellApplication {
     name = "telegram-sandboxed";
-    text = builtins.replaceStrings [ "@firejailCmd@" ] [ firejailCmd ] (builtins.readFile ./telegram-sandbox.sh);
+    text = builtins.replaceStrings ["@firejailCmd@"] [firejailCmd] (builtins.readFile ./telegram-sandbox.sh);
   };
-in
-{
-  home.packages = [ telegramSandboxed ];
+in {
+  home.packages = [telegramSandboxed];
 
   xdg.desktopEntries."org.telegram.desktop" = {
     name = "Telegram";
@@ -29,8 +30,8 @@ in
     type = "Application";
     terminal = false;
     exec = "${firejailCmd} -- %U";
-    categories = [ "Chat" "Network" "InstantMessaging" "Qt" ];
-    mimeType = [ "x-scheme-handler/tg" "x-scheme-handler/tonsite" ];
+    categories = ["Chat" "Network" "InstantMessaging" "Qt"];
+    mimeType = ["x-scheme-handler/tg" "x-scheme-handler/tonsite"];
 
     settings = {
       TryExec = "/run/wrappers/bin/firejail";

@@ -1,4 +1,8 @@
-{ config, lib, ... }:
+{
+  config,
+  lib,
+  ...
+}:
 # Wallpaper is now drawn by Noctalia (see ../noctalia.nix), not awww. This module
 # seeds images into Noctalia's picker directory so a fresh machine comes up with
 # a wallpaper instead of Noctalia's bundled default. The directory itself stays

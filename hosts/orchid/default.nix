@@ -1,5 +1,4 @@
-{ ... }:
-{
+{...}: {
   imports = [
     # Hardware
     ./hardware.nix

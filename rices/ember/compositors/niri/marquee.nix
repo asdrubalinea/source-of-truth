@@ -1,9 +1,9 @@
-{ pkgs
-, lib
-, config
-, ...
-}:
-let
+{
+  pkgs,
+  lib,
+  config,
+  ...
+}: let
   cfg = config.rices.ember.marquee;
 
   # The marquee (CONTEXT.md): a strip along the top of one output, permanently
@@ -82,7 +82,7 @@ let
   wlPaste = "${pkgs.wl-clipboard}/bin/wl-paste";
   # Plain pkgs.yt-dlp 403s on nearly every YouTube video now, and a band fed a
   # YouTube link is the common case — see ../../../../packages/yt-dlp-pot.nix.
-  ytDlp = pkgs.callPackage ../../../../packages/yt-dlp-pot.nix { };
+  ytDlp = pkgs.callPackage ../../../../packages/yt-dlp-pot.nix {};
   gawk = "${pkgs.gawk}/bin/gawk";
 
   # PANEL IDENTITY. Neither tool can be told about a panel by identity under
@@ -330,8 +330,7 @@ let
       ${systemctl} --user start niri-marquee-awake.service
     fi
   '';
-in
-{
+in {
   # Machine policy: which panel carries the marquee and how wide it is. Both are
   # per-host facts, so they come from homes/<host>/ — the rice only derives the
   # depth. Null (the default) means this machine has no marquee, and nothing in
@@ -364,15 +363,15 @@ in
     systemd.user.services.niri-marquee-strut = {
       Unit = {
         Description = "Reserve the marquee band at the top of one output";
-        PartOf = [ "graphical-session.target" ];
-        After = [ "graphical-session.target" ];
+        PartOf = ["graphical-session.target"];
+        After = ["graphical-session.target"];
       };
       Service = {
         ExecStart = "${strut}";
         Restart = "always";
         RestartSec = 1;
       };
-      Install.WantedBy = [ "graphical-session.target" ];
+      Install.WantedBy = ["graphical-session.target"];
     };
 
     # The keep-awake, held for exactly as long as the tenant is *playing* rather
@@ -389,8 +388,8 @@ in
     systemd.user.services.niri-marquee-awake = {
       Unit = {
         Description = "Hold off idle while the marquee tenant plays";
-        BindsTo = [ "niri-marquee.service" ];
-        After = [ "niri-marquee.service" ];
+        BindsTo = ["niri-marquee.service"];
+        After = ["niri-marquee.service"];
       };
       Service.ExecStart = lib.concatStringsSep " " [
         systemdInhibit
@@ -421,8 +420,8 @@ in
     # Cast / replace / go dark, and pause. Both free against every bind in
     # ./niri.nix and ../../homes/tempest/soft-reboot.nix.
     programs.niri.settings.binds = {
-      "Mod+Y".action.spawn = [ "${marqueeCast}" ];
-      "Mod+Shift+Y".action.spawn = [ "${marqueePause}" ];
+      "Mod+Y".action.spawn = ["${marqueeCast}"];
+      "Mod+Shift+Y".action.spawn = ["${marqueePause}"];
     };
   };
 }

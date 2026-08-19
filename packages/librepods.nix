@@ -53,8 +53,7 @@
   libxrandr,
   vulkan-loader,
   wayland,
-}:
-let
+}: let
   # iced 0.14 renders through wgpu and takes its window from winit; both dlopen
   # their backends at runtime instead of linking them, so these have to be on
   # LD_LIBRARY_PATH and not merely in buildInputs. List mirrors the buildInputs
@@ -77,53 +76,53 @@ let
     wayland
   ];
 in
-rustPlatform.buildRustPackage {
-  pname = "librepods";
-  # Cargo.toml says 0.1.0 and there is no tag on the branch, so date the rev.
-  version = "0.1.0-unstable-2026-05-15";
+  rustPlatform.buildRustPackage {
+    pname = "librepods";
+    # Cargo.toml says 0.1.0 and there is no tag on the branch, so date the rev.
+    version = "0.1.0-unstable-2026-05-15";
 
-  src = fetchFromGitHub {
-    owner = "librepods-org";
-    repo = "librepods";
-    rev = "672e65ad36eebf21ff1c1a508066f9197ee56d17";
-    hash = "sha256-EuIYvBqBtpgutVqPOLIO3E9OhVzQ5q5TDoz/F+9MHEE=";
-  };
+    src = fetchFromGitHub {
+      owner = "librepods-org";
+      repo = "librepods";
+      rev = "672e65ad36eebf21ff1c1a508066f9197ee56d17";
+      hash = "sha256-EuIYvBqBtpgutVqPOLIO3E9OhVzQ5q5TDoz/F+9MHEE=";
+    };
 
-  # The monorepo holds the Android app and the old Qt client too; the rewrite is
-  # its own crate under linux-rust/.
-  sourceRoot = "source/linux-rust";
+    # The monorepo holds the Android app and the old Qt client too; the rewrite is
+    # its own crate under linux-rust/.
+    sourceRoot = "source/linux-rust";
 
-  cargoHash = "sha256-17dE+oYvECU4f1SL6LHS95sXEea/Z0VgTPQ4u6TZTic=";
+    cargoHash = "sha256-17dE+oYvECU4f1SL6LHS95sXEea/Z0VgTPQ4u6TZTic=";
 
-  nativeBuildInputs = [
-    pkg-config
-    makeWrapper
-  ];
+    nativeBuildInputs = [
+      pkg-config
+      makeWrapper
+    ];
 
-  buildInputs = runtimeLibs;
+    buildInputs = runtimeLibs;
 
-  # No test targets in the crate.
-  doCheck = false;
+    # No test targets in the crate.
+    doCheck = false;
 
-  # cargoInstallHook only lands the binary. Upstream places the desktop entry
-  # and icon from their AppImage Justfile, which we do not run, so do it here —
-  # otherwise the app has no launcher entry and the tray/window fall back to a
-  # missing-icon placeholder.
-  postInstall = ''
-    install -Dm644 assets/me.kavishdevar.librepods.desktop \
-      $out/share/applications/me.kavishdevar.librepods.desktop
-    install -Dm644 assets/icon.png \
-      $out/share/icons/hicolor/256x256/apps/me.kavishdevar.librepods.png
+    # cargoInstallHook only lands the binary. Upstream places the desktop entry
+    # and icon from their AppImage Justfile, which we do not run, so do it here —
+    # otherwise the app has no launcher entry and the tray/window fall back to a
+    # missing-icon placeholder.
+    postInstall = ''
+      install -Dm644 assets/me.kavishdevar.librepods.desktop \
+        $out/share/applications/me.kavishdevar.librepods.desktop
+      install -Dm644 assets/icon.png \
+        $out/share/icons/hicolor/256x256/apps/me.kavishdevar.librepods.png
 
-    wrapProgram $out/bin/librepods \
-      --prefix LD_LIBRARY_PATH : ${lib.makeLibraryPath runtimeLibs}
-  '';
+      wrapProgram $out/bin/librepods \
+        --prefix LD_LIBRARY_PATH : ${lib.makeLibraryPath runtimeLibs}
+    '';
 
-  meta = {
-    description = "AirPods liberated from Apple's ecosystem (Rust rewrite)";
-    homepage = "https://github.com/librepods-org/librepods";
-    license = lib.licenses.gpl3Only;
-    mainProgram = "librepods";
-    platforms = lib.platforms.linux;
-  };
-}
+    meta = {
+      description = "AirPods liberated from Apple's ecosystem (Rust rewrite)";
+      homepage = "https://github.com/librepods-org/librepods";
+      license = lib.licenses.gpl3Only;
+      mainProgram = "librepods";
+      platforms = lib.platforms.linux;
+    };
+  }

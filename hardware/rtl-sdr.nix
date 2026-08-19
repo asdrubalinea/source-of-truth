@@ -1,5 +1,4 @@
-{ config, ... }:
-{
+{config, ...}: {
   # RTL-SDR Blog V4 USB dongle (RTL2832U + R828D tuner).
   #
   # `hardware.rtl-sdr.enable` installs the udev rules (so the device is owned by
@@ -15,5 +14,5 @@
 
   # CLI tools (rtl_test, rtl_fm, rtl_power, rtl_eeprom, rtl_sdr) from the exact
   # package the udev rules use — handy for verifying the dongle (`rtl_test -t`).
-  environment.systemPackages = [ config.hardware.rtl-sdr.package ];
+  environment.systemPackages = [config.hardware.rtl-sdr.package];
 }

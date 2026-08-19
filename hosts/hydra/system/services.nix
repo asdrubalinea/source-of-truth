@@ -1,5 +1,4 @@
-{ ... }:
-{
+{...}: {
   systemd.services.vaultwarden = {
     serviceConfig = {
       Restart = "always";
@@ -22,7 +21,7 @@
       openFirewall = true;
       useRoutingFeatures = "server";
       permitCertUid = "caddy";
-      extraSetFlags = [ "--advertise-exit-node" ];
+      extraSetFlags = ["--advertise-exit-node"];
     };
 
     vaultwarden = {

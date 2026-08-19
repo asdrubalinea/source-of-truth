@@ -1,4 +1,4 @@
-{ ... }:
+{...}:
 # The NixOS half of the ember rice's *furniture* — the parts every compositor
 # layer needs, whichever one you log into. The compositors themselves are enabled
 # from ./compositors/<name>/system.nix, imported alongside this one by the host.
@@ -28,7 +28,7 @@
   # the default config gives it standard unix auth via the setuid unix_chkpwd
   # helper (plus fingerprint when fprintd is enabled). Without it, unlocking fails.
   # Furniture, not compositor: swayidle/swaylock run under either session.
-  security.pam.services.swaylock = { };
+  security.pam.services.swaylock = {};
 
   # Noctalia's lockscreen authenticates via PAM. It defaults to the `login`
   # service (LockContext.qml: NOCTALIA_PAM_SERVICE || "login"), but `login`
@@ -41,5 +41,5 @@
   # place an env var can be set per session. This mirrors what swaylock/hyprlock
   # do. Kept even though swaylock now owns the lock path, so Noctalia's own lock
   # IPC (if ever invoked) still authenticates rather than dead-locking on `login`.
-  security.pam.services.noctalia = { };
+  security.pam.services.noctalia = {};
 }

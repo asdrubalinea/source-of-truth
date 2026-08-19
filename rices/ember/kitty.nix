@@ -1,4 +1,8 @@
-{ config, lib, ... }:
+{
+  config,
+  lib,
+  ...
+}:
 lib.mkIf config.rices.ember.enable {
   programs.kitty = {
     enable = true;

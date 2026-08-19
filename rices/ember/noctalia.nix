@@ -1,6 +1,11 @@
-{ inputs, lib, pkgs, config, ... }:
 {
-  imports = [ inputs.noctalia.homeModules.default ];
+  inputs,
+  lib,
+  pkgs,
+  config,
+  ...
+}: {
+  imports = [inputs.noctalia.homeModules.default];
 
   config = lib.mkIf config.rices.ember.enable {
     # Noctalia is the "shell" leg of the NNN stack — an all-in-one desktop shell

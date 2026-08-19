@@ -1,10 +1,10 @@
-{ config
-, pkgs
-, inputs
-, lib
-, ...
-}:
-let
+{
+  config,
+  pkgs,
+  inputs,
+  lib,
+  ...
+}: let
   cfg = config.rices.ember;
 
   # Stylix's palette WITHOUT the leading '#': mango takes colours as 0xRRGGBBAA,
@@ -14,7 +14,7 @@ let
   colour = alpha: base: "0x${base}${alpha}";
 
   windowRules = import ./window-rules.nix;
-  playClipboard = import ../../play-clipboard.nix { inherit pkgs; };
+  playClipboard = import ../../play-clipboard.nix {inherit pkgs;};
 
   # niri has a built-in `screenshot` action; mango has none, so the two screenshot
   # binds go through grim/slurp. A script rather than an inline command because
@@ -41,8 +41,7 @@ let
   # them so Mod+1..0 lands on the same tag it lands on under niri.
   tagCount = 10;
   tagRules = map (i: "id:${toString i},layout_name:scroller") (lib.range 1 tagCount);
-in
-{
+in {
   config = lib.mkIf (cfg.enable && cfg.mango.enable) {
     # mango re-reads config.conf only when told to (there is no inotify watch in
     # its source), and the file it reads is a store symlink — the inode never
@@ -51,7 +50,7 @@ in
     # edit. `|| true` because this also runs from the niri session, from a TTY,
     # and on a first activation before any compositor exists, where mmsg has no
     # socket to talk to and must not fail the switch.
-    home.activation.reloadMango = lib.hm.dag.entryAfter [ "linkGeneration" ] ''
+    home.activation.reloadMango = lib.hm.dag.entryAfter ["linkGeneration"] ''
       run ${pkgs.mango}/bin/mmsg dispatch reload_config > /dev/null 2>&1 || true
     '';
 
@@ -202,75 +201,79 @@ in
         # see docs/mango-vs-niri.md for the full mapping and the four binds that
         # have no mango counterpart (Mod+G even-split, Mod+O audio switcher, and
         # the two brightness keys).
-        bind = [
-          # Terminal, launcher, apps
-          "SUPER,Return,spawn,${wezterm}"
-          "SUPER,space,spawn,noctalia msg panel-toggle launcher"
-          "SUPER,b,spawn,${pkgs.blueman}/bin/blueman-manager"
-          "SUPER,p,spawn,${pkgs.pavucontrol}/bin/pavucontrol"
-          "SUPER,n,spawn,${pkgs.kdePackages.dolphin}/bin/dolphin"
-          "SUPER,l,spawn,${pkgs.systemd}/bin/loginctl lock-session"
-          "SUPER+SHIFT,b,spawn,${inputs.zen-browser.packages.x86_64-linux.beta}/bin/zen-beta"
-          "SUPER,y,spawn,${playClipboard}"
+        bind =
+          [
+            # Terminal, launcher, apps
+            "SUPER,Return,spawn,${wezterm}"
+            "SUPER,space,spawn,noctalia msg panel-toggle launcher"
+            "SUPER,b,spawn,${pkgs.blueman}/bin/blueman-manager"
+            "SUPER,p,spawn,${pkgs.pavucontrol}/bin/pavucontrol"
+            "SUPER,n,spawn,${pkgs.kdePackages.dolphin}/bin/dolphin"
+            "SUPER,l,spawn,${pkgs.systemd}/bin/loginctl lock-session"
+            "SUPER+SHIFT,b,spawn,${inputs.zen-browser.packages.x86_64-linux.beta}/bin/zen-beta"
+            "SUPER,y,spawn,${playClipboard}"
 
-          # Scratchpads. Format: appid,title,command — `none` for whichever field
-          # is not being matched on. mango launches the command itself on first
-          # use and toggles visibility thereafter, so unlike the niri layer there
-          # is nothing to spawn-and-hide at startup.
-          "SUPER,t,toggle_named_scratchpad,org.telegram.desktop,none,telegram-sandboxed"
-          "SUPER+SHIFT,Return,toggle_named_scratchpad,scratchpad-terminal,none,${wezterm} start --always-new-process --class scratchpad-terminal"
-          "SUPER+SHIFT,t,toggle_scratchpad"
+            # Scratchpads. Format: appid,title,command — `none` for whichever field
+            # is not being matched on. mango launches the command itself on first
+            # use and toggles visibility thereafter, so unlike the niri layer there
+            # is nothing to spawn-and-hide at startup.
+            "SUPER,t,toggle_named_scratchpad,org.telegram.desktop,none,telegram-sandboxed"
+            "SUPER+SHIFT,Return,toggle_named_scratchpad,scratchpad-terminal,none,${wezterm} start --always-new-process --class scratchpad-terminal"
+            "SUPER+SHIFT,t,toggle_scratchpad"
 
-          # Window management
-          "SUPER,q,killclient"
-          "SUPER,f,togglefullscreen"
-          "SUPER,m,togglemaximizescreen"
-          "SUPER+SHIFT,space,centerwin"
-          "SUPER,e,toggleoverview"
-          "SUPER+SHIFT,e,quit"
+            # Window management
+            "SUPER,q,killclient"
+            "SUPER,f,togglefullscreen"
+            "SUPER,m,togglemaximizescreen"
+            "SUPER+SHIFT,space,centerwin"
+            "SUPER,e,toggleoverview"
+            "SUPER+SHIFT,e,quit"
 
-          # Focus and move. Left/right walk the scroller strip; up/down walk the
-          # stack inside a column, which is what niri's focus-window-up/down do.
-          "SUPER,Left,focusdir,left"
-          "SUPER,Right,focusdir,right"
-          "SUPER,Up,focusdir,up"
-          "SUPER,Down,focusdir,down"
-          "SUPER+SHIFT,Left,exchange_client,left"
-          "SUPER+SHIFT,Right,exchange_client,right"
-          "SUPER+SHIFT,Up,exchange_client,up"
-          "SUPER+SHIFT,Down,exchange_client,down"
+            # Focus and move. Left/right walk the scroller strip; up/down walk the
+            # stack inside a column, which is what niri's focus-window-up/down do.
+            "SUPER,Left,focusdir,left"
+            "SUPER,Right,focusdir,right"
+            "SUPER,Up,focusdir,up"
+            "SUPER,Down,focusdir,down"
+            "SUPER+SHIFT,Left,exchange_client,left"
+            "SUPER+SHIFT,Right,exchange_client,right"
+            "SUPER+SHIFT,Up,exchange_client,up"
+            "SUPER+SHIFT,Down,exchange_client,down"
 
-          # Monitors. Same convention as the tag keys: CTRL picks the monitor
-          # axis, SHIFT carries the focused window along. focusdir/exchange_client
-          # above stop at the output edge, so without these a window can never
-          # leave the display it opened on.
-          "SUPER+CTRL,Left,focusmon,left"
-          "SUPER+CTRL,Right,focusmon,right"
-          "SUPER+CTRL+SHIFT,Left,tagmon,left"
-          "SUPER+CTRL+SHIFT,Right,tagmon,right"
+            # Monitors. Same convention as the tag keys: CTRL picks the monitor
+            # axis, SHIFT carries the focused window along. focusdir/exchange_client
+            # above stop at the output edge, so without these a window can never
+            # leave the display it opened on.
+            "SUPER+CTRL,Left,focusmon,left"
+            "SUPER+CTRL,Right,focusmon,right"
+            "SUPER+CTRL+SHIFT,Left,tagmon,left"
+            "SUPER+CTRL+SHIFT,Right,tagmon,right"
 
-          # Screenshots
-          "SUPER+SHIFT,s,spawn,${screenshot} region"
-          "SUPER+SHIFT,d,spawn,${screenshot} screen"
+            # Screenshots
+            "SUPER+SHIFT,s,spawn,${screenshot} region"
+            "SUPER+SHIFT,d,spawn,${screenshot} screen"
 
-          # Media and volume
-          "NONE,XF86AudioRaiseVolume,spawn,${pkgs.pamixer}/bin/pamixer -i 5"
-          "NONE,XF86AudioLowerVolume,spawn,${pkgs.pamixer}/bin/pamixer -d 5"
-          "NONE,XF86AudioMute,spawn,${pkgs.pamixer}/bin/pamixer --toggle-mute"
-          "NONE,XF86AudioPlay,spawn,${pkgs.playerctl}/bin/playerctl play-pause"
-          "NONE,XF86AudioNext,spawn,${pkgs.playerctl}/bin/playerctl next"
-          "NONE,XF86AudioPrev,spawn,${pkgs.playerctl}/bin/playerctl previous"
-        ]
-        # Mod+1..0 views a tag, Mod+Shift+1..0 sends the window to it — the same
-        # ten keys niri binds to focus-workspace / move-window-to-workspace. `0`
-        # is tag 10, which is why tag_num is 10 and not the mango default of 9.
-        ++ lib.concatMap
-          (i:
-            let key = if i == 10 then "0" else toString i; in
-            [
-              "SUPER,${key},view,${toString i}"
-              "SUPER+SHIFT,${key},tag,${toString i}"
-            ])
+            # Media and volume
+            "NONE,XF86AudioRaiseVolume,spawn,${pkgs.pamixer}/bin/pamixer -i 5"
+            "NONE,XF86AudioLowerVolume,spawn,${pkgs.pamixer}/bin/pamixer -d 5"
+            "NONE,XF86AudioMute,spawn,${pkgs.pamixer}/bin/pamixer --toggle-mute"
+            "NONE,XF86AudioPlay,spawn,${pkgs.playerctl}/bin/playerctl play-pause"
+            "NONE,XF86AudioNext,spawn,${pkgs.playerctl}/bin/playerctl next"
+            "NONE,XF86AudioPrev,spawn,${pkgs.playerctl}/bin/playerctl previous"
+          ]
+          # Mod+1..0 views a tag, Mod+Shift+1..0 sends the window to it — the same
+          # ten keys niri binds to focus-workspace / move-window-to-workspace. `0`
+          # is tag 10, which is why tag_num is 10 and not the mango default of 9.
+          ++ lib.concatMap
+          (i: let
+            key =
+              if i == 10
+              then "0"
+              else toString i;
+          in [
+            "SUPER,${key},view,${toString i}"
+            "SUPER+SHIFT,${key},tag,${toString i}"
+          ])
           (lib.range 1 tagCount);
 
         # --- Mouse ------------------------------------------------------------

@@ -1,5 +1,8 @@
-{ config, pkgs, ... }:
-let
+{
+  config,
+  pkgs,
+  ...
+}: let
   # greetd's `initial_session` fires on EVERY greetd start — both a cold boot and
   # a `systemctl soft-reboot`. We only want the hands-free autologin after a
   # soft-reboot (that session was already authenticated). A cold boot reaches
@@ -30,8 +33,7 @@ let
     [ "''${count:-0}" -ge 1 ] || exit 0
     exec niri-session
   '';
-in
-{
+in {
   # Login / session manager for the niri desktop.
   #
   # `default_session` (tuigreet) is the TTY greeter: shown on every cold/full

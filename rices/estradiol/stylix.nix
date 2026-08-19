@@ -1,5 +1,8 @@
-{ pkgs, hostname, ... }:
 {
+  pkgs,
+  hostname,
+  ...
+}: {
   stylix = {
     enable = true;
     autoEnable = true;
@@ -16,12 +19,11 @@
     fonts = {
       sizes = {
         terminal =
-          if hostname == "tempest" then
-            18
-          else if hostname == "orchid" then
-            22
-          else
-            18;
+          if hostname == "tempest"
+          then 18
+          else if hostname == "orchid"
+          then 22
+          else 18;
       };
 
       serif = {

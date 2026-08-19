@@ -1,4 +1,4 @@
-{ ... }:
+{...}:
 # The niri compositor layer of the ember rice: the scrolling-tiling window
 # manager, its bindings, its window rules, and the two things that exist only to
 # work around what niri lacks (an emulated scratchpad, and a sticky-PiP follower).

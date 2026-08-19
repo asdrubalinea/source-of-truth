@@ -1,5 +1,4 @@
-{ pkgs, ... }:
-{
+{pkgs, ...}: {
   services.scx = {
     # Enable the sched_ext framework. scx_lavd (Latency-criticality Aware Virtual
     # Deadline) is interactive-focused like the previous scx_bpfland, but adds
@@ -21,7 +20,7 @@
     # build id, e.g. lavd_1.1.2_x86_64_unknown_linux_gnu).
     enable = true;
     scheduler = "scx_lavd";
-    extraArgs = [ "--autopower" ];
+    extraArgs = ["--autopower"];
   };
 
   boot = {
@@ -71,7 +70,7 @@
     ];
 
     # KVM support for virtualization
-    kernelModules = [ "kvm-amd" "i2c-dev" ];
+    kernelModules = ["kvm-amd" "i2c-dev"];
 
     # Early boot configuration
     initrd = {
@@ -126,7 +125,7 @@
   systemd.coredump.enable = false;
   # Without this, the kernel default pattern "core" dumps into the crashing
   # process's cwd — which for GUI apps is usually $HOME.
-  systemd.tmpfiles.rules = [ "d /var/lib/coredump 1777 root root -" ];
+  systemd.tmpfiles.rules = ["d /var/lib/coredump 1777 root root -"];
   boot.kernel.sysctl."kernel.core_pattern" = "/var/lib/coredump/core.%e.%p.%s.%t";
 
   # Full Magic SysRq for an orderly emergency reboot when the desktop locks up.

@@ -1,6 +1,5 @@
-{ pkgs, ... }:
-{
-  environment.systemPackages = with pkgs; [ zfs ];
+{pkgs, ...}: {
+  environment.systemPackages = with pkgs; [zfs];
 
   # Enable SMART daemon
   services.smartd = {
@@ -20,8 +19,8 @@
     defaults.monitored = "-a -o on -S on -T permissive";
 
     devices = [
-      { device = "/dev/nvme0n1"; }
-      { device = "/dev/nvme1n1"; }
+      {device = "/dev/nvme0n1";}
+      {device = "/dev/nvme1n1";}
       # { device = "/dev/nvme2n1"; }
     ];
   };
@@ -35,7 +34,7 @@
     forceImportAll = false;
   };
 
-  boot.supportedFilesystems = [ "zfs" ];
+  boot.supportedFilesystems = ["zfs"];
 
   services.zfs = {
     autoScrub = {

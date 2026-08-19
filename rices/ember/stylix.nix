@@ -1,7 +1,8 @@
-{ pkgs
-, lib
-, config
-, ...
+{
+  pkgs,
+  lib,
+  config,
+  ...
 }:
 lib.mkIf config.rices.ember.enable {
   # stylix's gtk target now sets `gtk.gtk4.theme = config.gtk.theme` (adw-gtk3).

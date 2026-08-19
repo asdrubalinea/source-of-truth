@@ -1,5 +1,4 @@
-{ pkgs, ... }:
-{
+{pkgs, ...}: {
   # ZFS enablement for tempest (ZFS-on-LUKS). The pool layout lives in
   # disks/tempest.nix; networking.hostId is set in system/networking.nix
   # (required by ZFS). See docs/adr/0001-zfs-on-luks-tempest.md.
@@ -8,8 +7,8 @@
   # module hard-codes orchid's smartd recipient and multi-NVMe device list, and
   # pins boot.zfs.package = zfs_unstable, which the note below argues against.
 
-  boot.supportedFilesystems = [ "zfs" ];
-  boot.initrd.supportedFilesystems = [ "zfs" ];
+  boot.supportedFilesystems = ["zfs"];
+  boot.initrd.supportedFilesystems = ["zfs"];
 
   # boot.zfs.package is deliberately NOT set here. The module default is already
   # pkgs.zfs — nixpkgs' current stable OpenZFS line, zfs_2_4 today — and tracking
@@ -72,7 +71,7 @@
   # lives on ZFS) for eval/build while leaving ~24 GiB for everything else.
   # 8 * 1024^3 = 8589934592. Set via kernel cmdline so it applies at module load
   # in the initrd, before the root pool import. Pairs with system/memory.nix.
-  boot.kernelParams = [ "zfs.zfs_arc_max=8589934592" ];
+  boot.kernelParams = ["zfs.zfs_arc_max=8589934592"];
 
   # Explicitly activate the LVM volume group that backs the pool, in the initrd,
   # before the pool import. The rpool vdev is the logical volume /dev/pool/root
@@ -87,9 +86,9 @@
   # `vgchange -ay` here makes the LV deterministically present for the import.
   boot.initrd.systemd.services.activate-pool = {
     description = "Activate LVM volume group pool (holds the rpool vdev)";
-    after = [ "cryptsetup.target" ];
-    before = [ "zfs-import-rpool.service" ];
-    wantedBy = [ "zfs-import-rpool.service" ];
+    after = ["cryptsetup.target"];
+    before = ["zfs-import-rpool.service"];
+    wantedBy = ["zfs-import-rpool.service"];
     unitConfig.DefaultDependencies = false;
     serviceConfig = {
       Type = "oneshot";
@@ -122,7 +121,7 @@
     enable = true;
     notifications.wall.enable = true;
     defaults.monitored = "-a -o on -S on -T permissive";
-    devices = [{ device = "/dev/nvme0n1"; }];
+    devices = [{device = "/dev/nvme0n1";}];
   };
 
   # Light local-snapshot policy on the mutable state. borg remains the offsite

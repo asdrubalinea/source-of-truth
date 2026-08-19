@@ -30,14 +30,14 @@
 # unfenced this month, not anything durable. When 403s come back, re-run the
 # matrix (`yt-dlp --extractor-args youtube:player_client=<one> -f ba -o - <url>`
 # over each client) and update the list.
-{ lib
-, runCommand
-, makeWrapper
-, python3Packages
-, deno
-, ffmpeg
-}:
-let
+{
+  lib,
+  runCommand,
+  makeWrapper,
+  python3Packages,
+  deno,
+  ffmpeg,
+}: let
   # The plugin has to share an interpreter with yt-dlp: discovery works by
   # importing the `yt_dlp_plugins` namespace package off sys.path, not by any
   # search of the filesystem.
@@ -46,19 +46,19 @@ let
     ps.bgutil-ytdlp-pot-provider
   ]);
 in
-runCommand "yt-dlp-pot"
-{
-  nativeBuildInputs = [ makeWrapper ];
-  meta = {
-    description = "yt-dlp with a PO-token provider, a JS runtime and non-SABR clients";
-    mainProgram = "yt-dlp";
-  };
-} ''
-  mkdir -p $out/bin
-  # Only bin/yt-dlp is exposed: linking the whole python env into the profile
-  # would drop a bin/python3 there too.
-  makeWrapper ${env}/bin/yt-dlp $out/bin/yt-dlp \
-    --prefix PATH : ${lib.makeBinPath [ deno ffmpeg ]} \
-    --add-flags --extractor-args \
-    --add-flags 'youtube:player_client=tv_simply,web_embedded,mweb'
-''
+  runCommand "yt-dlp-pot"
+  {
+    nativeBuildInputs = [makeWrapper];
+    meta = {
+      description = "yt-dlp with a PO-token provider, a JS runtime and non-SABR clients";
+      mainProgram = "yt-dlp";
+    };
+  } ''
+    mkdir -p $out/bin
+    # Only bin/yt-dlp is exposed: linking the whole python env into the profile
+    # would drop a bin/python3 there too.
+    makeWrapper ${env}/bin/yt-dlp $out/bin/yt-dlp \
+      --prefix PATH : ${lib.makeBinPath [deno ffmpeg]} \
+      --add-flags --extractor-args \
+      --add-flags 'youtube:player_client=tv_simply,web_embedded,mweb'
+  ''

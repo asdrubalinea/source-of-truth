@@ -1,5 +1,4 @@
-{ pkgs, ... }:
-{
+{pkgs, ...}: {
   programs.fish.enable = true;
 
   # No local nh/apply setup: deploys are remote. tempest builds the

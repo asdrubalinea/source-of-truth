@@ -1,5 +1,4 @@
-{ ... }:
-{
+{...}: {
   security.sudo.enable = true;
   security.doas.enable = true;
 
@@ -7,7 +6,7 @@
 
   security.doas.extraRules = [
     {
-      users = [ "irene" ];
+      users = ["irene"];
       keepEnv = true;
       noPass = true;
     }

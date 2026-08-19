@@ -1,6 +1,8 @@
-{ config, lib, ... }:
-
 {
+  config,
+  lib,
+  ...
+}: {
   programs.tmux = {
     enable = true;
     # tmux-256color, not screen-256color: the screen entry is missing the
@@ -24,7 +26,7 @@
       set -as terminal-features ",wezterm*:RGB:usstyle:hyperlinks:extkeys"
       # Request disambiguated keys from wezterm and hand them to apps that ask.
       set -s extended-keys on
-      
+
       setw -g pane-base-index 1
 
       # Zellij-like keybindings

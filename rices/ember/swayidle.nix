@@ -1,8 +1,13 @@
-{ pkgs, inputs, lib, config, ... }:
-let
+{
+  pkgs,
+  inputs,
+  lib,
+  config,
+  ...
+}: let
   colors = config.lib.stylix.colors;
 
-  drift = pkgs.callPackage ../../packages/drift.nix { src = inputs.drift; };
+  drift = pkgs.callPackage ../../packages/drift.nix {src = inputs.drift;};
 
   # --always-new-process is load-bearing twice over: it keeps `--class` ours (a
   # plain `wezterm start` lets an already-running instance spawn the window,
@@ -173,101 +178,101 @@ let
     exec ${pkgs.systemd}/bin/systemctl suspend
   '';
 in
-lib.mkIf config.rices.ember.enable {
-  # Lock is handled by swaylock (NOT Noctalia's lockscreen — see the let block for
-  # why). swayidle owns the idle timers + the logind lock/sleep events below.
-  # before-sleep locks swaylock synchronously (see lockBeforeSleep); the `lock`
-  # event locks on idle (600s lock-session) and manual `loginctl lock-session`.
-  services.swayidle = {
-    enable = true;
-    systemdTargets = [ "graphical-session.target" ];
-    timeouts = [
-      {
-        timeout = 300;
-        command = "${driftStart}";
-        resumeCommand = "${driftStop}";
-      }
-      {
-        timeout = 600;
-        command = "${pkgs.systemd}/bin/loginctl lock-session";
-      }
-      {
-        # OLED anti burn-in: power the panels off early (120s). This is the
-        # earliest timer on purpose — a dark, off panel is the best burn-in
-        # protection, so the drift screensaver (300s) and idle lock (600s)
-        # below are effectively unreachable in the on-screen state, but kept
-        # for the manual/rental paths where the screen is left on.
-        # Powering panels off is the one thing in this file only the compositor
-        # can do, and swayidle is furniture — one user service, started by
-        # graphical-session.target under whichever session you logged into. So the
-        # command is a dispatcher (see monitorPower in the let block) rather than
-        # a compositor's CLI, and this timer works unchanged in both.
-        timeout = 120;
-        command = "${monitorPower} off";
-        resumeCommand = "${monitorPower} on";
-      }
-      {
-        # 20 min: suspend on battery only. On AC the wrapper above no-ops (the
-        # machine stays awake with screens off, so services keep running); on
-        # battery it falls through to systemctl suspend and the box drops to
-        # s2idle (S0ix), the only suspend state this Framework exposes. Nothing
-        # else here suspends on inactivity — logind only acts on the lid — so
-        # without this the laptop would just sit with its screen off on battery,
-        # fully awake and draining.
-        timeout = 1200;
-        command = "${suspendOrOnBattery}";
-      }
-    ];
-    events = {
-      before-sleep = "${lockBeforeSleep}";
-      lock = "${lockNow}";
+  lib.mkIf config.rices.ember.enable {
+    # Lock is handled by swaylock (NOT Noctalia's lockscreen — see the let block for
+    # why). swayidle owns the idle timers + the logind lock/sleep events below.
+    # before-sleep locks swaylock synchronously (see lockBeforeSleep); the `lock`
+    # event locks on idle (600s lock-session) and manual `loginctl lock-session`.
+    services.swayidle = {
+      enable = true;
+      systemdTargets = ["graphical-session.target"];
+      timeouts = [
+        {
+          timeout = 300;
+          command = "${driftStart}";
+          resumeCommand = "${driftStop}";
+        }
+        {
+          timeout = 600;
+          command = "${pkgs.systemd}/bin/loginctl lock-session";
+        }
+        {
+          # OLED anti burn-in: power the panels off early (120s). This is the
+          # earliest timer on purpose — a dark, off panel is the best burn-in
+          # protection, so the drift screensaver (300s) and idle lock (600s)
+          # below are effectively unreachable in the on-screen state, but kept
+          # for the manual/rental paths where the screen is left on.
+          # Powering panels off is the one thing in this file only the compositor
+          # can do, and swayidle is furniture — one user service, started by
+          # graphical-session.target under whichever session you logged into. So the
+          # command is a dispatcher (see monitorPower in the let block) rather than
+          # a compositor's CLI, and this timer works unchanged in both.
+          timeout = 120;
+          command = "${monitorPower} off";
+          resumeCommand = "${monitorPower} on";
+        }
+        {
+          # 20 min: suspend on battery only. On AC the wrapper above no-ops (the
+          # machine stays awake with screens off, so services keep running); on
+          # battery it falls through to systemctl suspend and the box drops to
+          # s2idle (S0ix), the only suspend state this Framework exposes. Nothing
+          # else here suspends on inactivity — logind only acts on the lid — so
+          # without this the laptop would just sit with its screen off on battery,
+          # fully awake and draining.
+          timeout = 1200;
+          command = "${suspendOrOnBattery}";
+        }
+      ];
+      events = {
+        before-sleep = "${lockBeforeSleep}";
+        lock = "${lockNow}";
 
-      # The manual "restart kanshi after every resume" step, automated. Resuming
-      # from s2idle re-enumerates the external panels (USB4/DP tunnels come back),
-      # and mango enables a freshly-created output by default and places it with
-      # layout_add_auto — so the lid panel lights up and the geometry is whatever
-      # mango chose. kanshi does NOT fix this on its own: its match ignores
-      # enabled/mode/position, so `current_profile` still matches the new head set
-      # and match_and_apply keeps it and re-applies nothing.
-      #
-      # `kanshictl reload` is the smallest thing that does fix it — it clears
-      # current_profile before re-matching, forcing a full commit of the profile's
-      # enable/mode/position/scale. Same effect as the systemctl restart, without
-      # dropping the wayland connection. Harmless under niri, which is why it can
-      # live here in the shared unit rather than behind a compositor test.
-      after-resume = "${pkgs.kanshi}/bin/kanshictl reload";
+        # The manual "restart kanshi after every resume" step, automated. Resuming
+        # from s2idle re-enumerates the external panels (USB4/DP tunnels come back),
+        # and mango enables a freshly-created output by default and places it with
+        # layout_add_auto — so the lid panel lights up and the geometry is whatever
+        # mango chose. kanshi does NOT fix this on its own: its match ignores
+        # enabled/mode/position, so `current_profile` still matches the new head set
+        # and match_and_apply keeps it and re-applies nothing.
+        #
+        # `kanshictl reload` is the smallest thing that does fix it — it clears
+        # current_profile before re-matching, forcing a full commit of the profile's
+        # enable/mode/position/scale. Same effect as the systemctl restart, without
+        # dropping the wayland connection. Harmless under niri, which is why it can
+        # live here in the shared unit rather than behind a compositor test.
+        after-resume = "${pkgs.kanshi}/bin/kanshictl reload";
+      };
     };
-  };
 
-  # Panels went dark 120s into a video, because Chrome takes no Wayland idle
-  # inhibitor for ordinary in-page playback. The inhibit path itself is sound —
-  # proved in a headless nested mango, where a 3s swayidle timeout fired on the
-  # dot with nothing held and never fired at all while wlinhibit held one — so
-  # mango honours inhibitors and swayidle obeys them (its timeouts register with
-  # obey_inhibitors = true; only its internal 0s resume probe uses the
-  # input-idle variant that ignores them). The gap is app-side, and closing it
-  # app-side means one rule per browser, forever.
-  #
-  # So inhibit on the thing every video actually has in common: sound. This
-  # daemon holds ONE inhibitor for as long as any non-corked sink-input exists,
-  # which covers Chrome, Firefox and mpv alike, and drops it the moment playback
-  # stops — so an idle desktop still goes dark on schedule, which is the whole
-  # point of the 120s timer on an OLED.
-  #
-  # Ceiling: a muted or silent video does not register a sink-input and will
-  # still time out. If that turns up in practice the next rung is mango's own
-  # `idleinhibit_when_focus` window rule, but that inhibits whenever the window
-  # is focused (video or not), which is a much worse deal for the panels.
-  systemd.user.services.sway-audio-idle-inhibit = {
-    Unit = {
-      Description = "Hold a Wayland idle inhibitor while audio is playing";
-      PartOf = [ "graphical-session.target" ];
-      After = [ "graphical-session.target" ];
+    # Panels went dark 120s into a video, because Chrome takes no Wayland idle
+    # inhibitor for ordinary in-page playback. The inhibit path itself is sound —
+    # proved in a headless nested mango, where a 3s swayidle timeout fired on the
+    # dot with nothing held and never fired at all while wlinhibit held one — so
+    # mango honours inhibitors and swayidle obeys them (its timeouts register with
+    # obey_inhibitors = true; only its internal 0s resume probe uses the
+    # input-idle variant that ignores them). The gap is app-side, and closing it
+    # app-side means one rule per browser, forever.
+    #
+    # So inhibit on the thing every video actually has in common: sound. This
+    # daemon holds ONE inhibitor for as long as any non-corked sink-input exists,
+    # which covers Chrome, Firefox and mpv alike, and drops it the moment playback
+    # stops — so an idle desktop still goes dark on schedule, which is the whole
+    # point of the 120s timer on an OLED.
+    #
+    # Ceiling: a muted or silent video does not register a sink-input and will
+    # still time out. If that turns up in practice the next rung is mango's own
+    # `idleinhibit_when_focus` window rule, but that inhibits whenever the window
+    # is focused (video or not), which is a much worse deal for the panels.
+    systemd.user.services.sway-audio-idle-inhibit = {
+      Unit = {
+        Description = "Hold a Wayland idle inhibitor while audio is playing";
+        PartOf = ["graphical-session.target"];
+        After = ["graphical-session.target"];
+      };
+      Service = {
+        ExecStart = "${pkgs.sway-audio-idle-inhibit}/bin/sway-audio-idle-inhibit";
+        Restart = "on-failure";
+      };
+      Install.WantedBy = ["graphical-session.target"];
     };
-    Service = {
-      ExecStart = "${pkgs.sway-audio-idle-inhibit}/bin/sway-audio-idle-inhibit";
-      Restart = "on-failure";
-    };
-    Install.WantedBy = [ "graphical-session.target" ];
-  };
-}
+  }

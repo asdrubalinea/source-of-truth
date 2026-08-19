@@ -1,5 +1,9 @@
-{ pkgs, lib, config, ... }:
-let
+{
+  pkgs,
+  lib,
+  config,
+  ...
+}: let
   # niri-unstable, matching the compositor the system session runs — a mismatched
   # CLI answers `niri msg` with a version-warning line instead of JSON. See the
   # `niri` binding in niri.nix.
@@ -63,18 +67,18 @@ let
     done
   '';
 in
-lib.mkIf config.rices.ember.niri.enable {
-  systemd.user.services.niri-pip-follow = {
-    Unit = {
-      Description = "Keep the Picture-in-Picture window on the focused niri workspace";
-      PartOf = [ "graphical-session.target" ];
-      After = [ "graphical-session.target" ];
+  lib.mkIf config.rices.ember.niri.enable {
+    systemd.user.services.niri-pip-follow = {
+      Unit = {
+        Description = "Keep the Picture-in-Picture window on the focused niri workspace";
+        PartOf = ["graphical-session.target"];
+        After = ["graphical-session.target"];
+      };
+      Service = {
+        ExecStart = "${pipFollow}";
+        Restart = "always";
+        RestartSec = 1;
+      };
+      Install.WantedBy = ["graphical-session.target"];
     };
-    Service = {
-      ExecStart = "${pipFollow}";
-      Restart = "always";
-      RestartSec = 1;
-    };
-    Install.WantedBy = [ "graphical-session.target" ];
-  };
-}
+  }

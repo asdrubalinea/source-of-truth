@@ -1,5 +1,4 @@
-{ pkgs, ... }:
-{
+{pkgs, ...}: {
   boot = {
     initrd = {
       availableKernelModules = [
@@ -10,14 +9,14 @@
         "usb_storage"
         "sd_mod"
       ];
-      kernelModules = [ ];
+      kernelModules = [];
     };
 
     kernelModules = [
       "kvm-amd"
       "amdgpu"
     ];
-    extraModulePackages = [ ];
+    extraModulePackages = [];
     kernelPackages = pkgs.linuxPackages_zen;
 
     kernelParams = [

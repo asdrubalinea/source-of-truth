@@ -1,5 +1,4 @@
-{ ... }:
-{
+{...}: {
   networking = {
     hostName = "hydra";
     hostId = "31c78e4a";
@@ -9,8 +8,8 @@
 
     firewall = {
       enable = true;
-      allowedTCPPorts = [ ];
-      allowedUDPPorts = [ ];
+      allowedTCPPorts = [];
+      allowedUDPPorts = [];
       interfaces.tailscale0.allowedTCPPorts = [
         80
         443

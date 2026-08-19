@@ -1,8 +1,22 @@
-{ lib, config, ... }:
+{
+  lib,
+  config,
+  ...
+}:
 lib.mkIf config.rices.ember.enable (
   let
-    inherit (config.lib.stylix.colors.withHashtag)
-      base00 base01 base02 base03 base04 base05 base07 base0D base0E;
+    inherit
+      (config.lib.stylix.colors.withHashtag)
+      base00
+      base01
+      base02
+      base03
+      base04
+      base05
+      base07
+      base0D
+      base0E
+      ;
 
     # A qtct ColorScheme is 22 QPalette roles, in the fixed order qt5ct/qt6ct
     # expect (documented inline below). We derive them from the stylix base16
@@ -10,10 +24,28 @@ lib.mkIf config.rices.ember.enable (
     # Fusion style match gtk/terminals/noctalia. This replaces the file Noctalia's
     # "qt" runtime template used to write at ~/.config/qt{5,6}ct/colors/noctalia.conf.
     paletteRow = lib.concatStringsSep ", " [
-      base05 base01 base03 base02 base00 base01 # windowText button light midlight dark mid
-      base05 base07 base05 base00 base00 base00 # text brightText buttonText base window shadow
-      base0D base00 base0D base0E base01 base00 # highlight highlightedText link linkVisited alternateBase <unused>
-      base01 base05 base04 base0D #               toolTipBase toolTipText placeholderText accent
+      base05
+      base01
+      base03
+      base02
+      base00
+      base01 # windowText button light midlight dark mid
+      base05
+      base07
+      base05
+      base00
+      base00
+      base00 # text brightText buttonText base window shadow
+      base0D
+      base00
+      base0D
+      base0E
+      base01
+      base00 # highlight highlightedText link linkVisited alternateBase <unused>
+      base01
+      base05
+      base04
+      base0D #               toolTipBase toolTipText placeholderText accent
     ];
 
     colorScheme = ''
@@ -37,8 +69,7 @@ lib.mkIf config.rices.ember.enable (
       standard_dialogs=default
       style=Fusion
     '';
-  in
-  {
+  in {
     # Qt platform-theme plumbing for the ember rice.
     #
     # We do NOT use stylix's qt target: it is Kvantum-only (warns on any other

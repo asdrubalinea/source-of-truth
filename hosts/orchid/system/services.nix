@@ -1,13 +1,10 @@
-{ inputs, ... }:
-let
+{inputs, ...}: let
   system = "x86_64-linux";
   getNixosModule = flake:
-    if flake ? nixosModules && flake.nixosModules ? default then
-      flake.nixosModules.default
-    else
-      flake.nixosModules.${system}.default;
-in
-{
+    if flake ? nixosModules && flake.nixosModules ? default
+    then flake.nixosModules.default
+    else flake.nixosModules.${system}.default;
+in {
   imports = [
     (getNixosModule inputs.diapee-bot)
     (getNixosModule inputs.tribunale-scrape)
@@ -30,7 +27,7 @@ in
         repo = "ssh://u518612@u518612.your-storagebox.de:23/./backups/orchid-vault";
         ssh_key_file = "/home/irene/.ssh/id_ed25519";
         password_file = "/persist/borg-vault-backup/passphrase";
-        paths = [ "/persist/Vault" ];
+        paths = ["/persist/Vault"];
       };
 
       home-irene = {
@@ -38,7 +35,7 @@ in
         repo = "ssh://u518612@u518612.your-storagebox.de:23/./backups/orchid-home-irene";
         ssh_key_file = "/home/irene/.ssh/id_ed25519";
         password_file = "/persist/borg-home-backup/passphrase";
-        paths = [ "/home/irene" ];
+        paths = ["/home/irene"];
       };
     };
   };
@@ -47,7 +44,7 @@ in
     enable = true;
     useRoutingFeatures = "server";
     permitCertUid = "caddy";
-    extraSetFlags = [ "--advertise-exit-node" ];
+    extraSetFlags = ["--advertise-exit-node"];
   };
 
   # services.ollama = {

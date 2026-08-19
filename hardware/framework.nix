@@ -1,5 +1,4 @@
-{ pkgs, ... }:
-let
+{pkgs, ...}: let
   # ---------- Thunderbolt dock: tear down around s2idle, don't repair on resume ----------
   # The only sleep state this Framework exposes is s2idle (no S3; ZFS rules out
   # hibernation — see boot.nix). Suspending with the dock's USB4 tunnels live
@@ -34,7 +33,7 @@ let
   # Both hooks run from systemd's near-empty sleep environment, so they get an
   # explicit PATH rather than spelling out a store path per call — they do enough
   # real work now that inline paths drowned the logic.
-  sleepPath = pkgs.lib.makeBinPath [ pkgs.coreutils pkgs.systemd ];
+  sleepPath = pkgs.lib.makeBinPath [pkgs.coreutils pkgs.systemd];
 
   tbSleepDown = pkgs.writeShellScript "tb-sleep-down" ''
     export PATH=${sleepPath}
@@ -200,8 +199,7 @@ let
 
     udevadm trigger --subsystem-match=drm --action=change 2>/dev/null || true
   '';
-in
-{
+in {
   imports = [
     ./framework-tlp-advanced.nix
   ];
@@ -215,8 +213,8 @@ in
   systemd.services = {
     disable-fingerprint-led = {
       description = "Disable Framework Laptop Fingerprint LED at boot";
-      wantedBy = [ "multi-user.target" ];
-      after = [ "multi-user.target" ];
+      wantedBy = ["multi-user.target"];
+      after = ["multi-user.target"];
 
       serviceConfig = {
         Type = "oneshot";
@@ -228,8 +226,8 @@ in
 
     set-default-brightness = {
       description = "Set default brightness level";
-      wantedBy = [ "multi-user.target" ];
-      after = [ "multi-user.target" ];
+      wantedBy = ["multi-user.target"];
+      after = ["multi-user.target"];
 
       serviceConfig = {
         Type = "oneshot";
@@ -249,8 +247,8 @@ in
     # stop (and thus ExecStop) only happens on the way out.
     tb-sleep = {
       description = "Thunderbolt teardown around s2idle + external-DP repair on resume";
-      wantedBy = [ "sleep.target" ];
-      before = [ "sleep.target" ];
+      wantedBy = ["sleep.target"];
+      before = ["sleep.target"];
       unitConfig.StopWhenUnneeded = true;
       serviceConfig = {
         Type = "oneshot";
@@ -269,7 +267,7 @@ in
   services = {
     fwupd = {
       enable = true;
-      extraRemotes = [ "lvfs-testing" ];
+      extraRemotes = ["lvfs-testing"];
     };
 
     # Hibernation is unavailable here: ZFS root forces `nohibernate` (pool
@@ -294,7 +292,7 @@ in
   # hang ever survives the teardown above, the (persistent) journal names the
   # last device that made it down — the next suspect (likely the MT7925 Wi-Fi).
   # Only emits during suspend/resume. See ADR 0008.
-  systemd.tmpfiles.rules = [ "w /sys/power/pm_debug_messages - - - - 1" ];
+  systemd.tmpfiles.rules = ["w /sys/power/pm_debug_messages - - - - 1"];
 
   # Force the MT7925 (RZ717) Wi-Fi to power/control=on. This box's only sleep state
   # is s2idle and its PCIe power-gating doesn't re-enumerate: once this chip is

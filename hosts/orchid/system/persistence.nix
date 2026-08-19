@@ -1,5 +1,4 @@
-{ ... }:
-{
+{...}: {
   fileSystems."/" = {
     device = "zroot/local/root";
     fsType = "zfs";
@@ -30,5 +29,5 @@
     fsType = "zfs";
   };
 
-  swapDevices = [ ];
+  swapDevices = [];
 }

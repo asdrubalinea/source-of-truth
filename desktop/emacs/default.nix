@@ -1,6 +1,4 @@
-{ pkgs, ... }:
-
-let
+{pkgs, ...}: let
   # The parser in `emacsWithPackagesFromUsePackage` reads a single source for
   # `(use-package ...)' decls — it doesn't follow runtime `(load ...)' calls.
   # Concatenate init.el + every lisp/*.el so the parser sees every package
@@ -17,7 +15,8 @@ let
     ./lisp/mail.el
     ./lisp/keys.el
   ];
-  parserConfig = pkgs.writeText "init-concat.el"
+  parserConfig =
+    pkgs.writeText "init-concat.el"
     (builtins.concatStringsSep "\n" (map builtins.readFile elispModules));
 
   myEmacs = pkgs.emacsWithPackagesFromUsePackage {
@@ -42,35 +41,35 @@ let
           rev = "56db02ee386d009ddb8b1482310f1f9beeefb810";
           hash = "sha256-qH1QnG5G+0UiH/v0KaS7oSpQZY+BkUMZvrjbx6kyFhg=";
         };
-        packageRequires = [ self.transient self.websocket self.web-server ];
+        packageRequires = [self.transient self.websocket self.web-server];
         recipe = pkgs.writeText "claude-code-ide-recipe" ''
           (claude-code-ide :fetcher github :repo "manzaltu/claude-code-ide.el")
         '';
       };
     };
-    extraEmacsPackages = epkgs: with epkgs; [
-      use-package
-      treesit-grammars.with-all-grammars
-      vterm
-      compile-angel
-      benchmark-init
-      # Provided as a manual emacs package in nixpkgs (the elisp ships as
-      # the `mu4e` output of `pkgs.mu`, but `epkgs.mu4e` already wraps it
-      # properly for the load-path). `(use-package mu4e :ensure nil)' in
-      # init.el resolves against this.
-      mu4e
-      # Manual-package in nixpkgs: builds the native ghostel-module.so with
-      # zig at flake-eval time, so `M-x ghostel` doesn't try to download or
-      # compile a module at runtime.
-      ghostel
-      # Bundles `telega-server` linked against pkgs.tdlib; api-id/api-hash
-      # come from ~/.config/telega/{api-id,api-hash} at runtime.
-      telega
-    ];
+    extraEmacsPackages = epkgs:
+      with epkgs; [
+        use-package
+        treesit-grammars.with-all-grammars
+        vterm
+        compile-angel
+        benchmark-init
+        # Provided as a manual emacs package in nixpkgs (the elisp ships as
+        # the `mu4e` output of `pkgs.mu`, but `epkgs.mu4e` already wraps it
+        # properly for the load-path). `(use-package mu4e :ensure nil)' in
+        # init.el resolves against this.
+        mu4e
+        # Manual-package in nixpkgs: builds the native ghostel-module.so with
+        # zig at flake-eval time, so `M-x ghostel` doesn't try to download or
+        # compile a module at runtime.
+        ghostel
+        # Bundles `telega-server` linked against pkgs.tdlib; api-id/api-hash
+        # come from ~/.config/telega/{api-id,api-hash} at runtime.
+        telega
+      ];
   };
-in
-{
-  home.packages = [ myEmacs ];
+in {
+  home.packages = [myEmacs];
 
   # ~/.emacs.d/ already exists (eln-cache, auto-save-list), which makes Emacs
   # pick that as user-emacs-directory and ignore XDG.  Drop the init files

@@ -1,5 +1,4 @@
-{ lib, ... }:
-{
+{lib, ...}: {
   services = {
     # mkForce on both: hardware/framework.nix (which imports this file) sets the
     # same two at normal priority, and TLP and power-profiles-daemon are mutually

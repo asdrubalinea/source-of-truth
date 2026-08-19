@@ -79,8 +79,7 @@
   # the kernel refused an unprivileged overlayfs mount over ZFS; fix by adding
   # pkgs.fuse-overlayfs and setting storage.options.mount_program rather than
   # living with vfs, which full-copies every layer.
-  virtualisation.containers.storage.settings.storage.rootless_storage_path =
-    "/var/lib/containers/rootless/$USER";
+  virtualisation.containers.storage.settings.storage.rootless_storage_path = "/var/lib/containers/rootless/$USER";
 
   # Resolve unqualified image names. Without this, `distrobox create --image
   # debian:latest` dies with 'short-name "debian:latest" did not resolve to an

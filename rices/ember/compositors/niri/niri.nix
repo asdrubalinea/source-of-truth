@@ -1,12 +1,12 @@
-{ config
-, pkgs
-, inputs
-, lib
-, ...
-}:
-let
+{
+  config,
+  pkgs,
+  inputs,
+  lib,
+  ...
+}: let
   windowRules = import ./window-rules.nix;
-  playClipboard = import ../../play-clipboard.nix { inherit pkgs; };
+  playClipboard = import ../../play-clipboard.nix {inherit pkgs;};
   c = config.lib.stylix.colors.withHashtag;
 
   # --- Scratchpads (nirius-backed) -----------------------------------------
@@ -268,56 +268,58 @@ let
   #            if the window didn't move it wasn't a member yet, so we establish
   #            membership (park it, or pull it here) — making the toggle
   #            self-heal an un-parked or freshly-respawned window.
-  mkScratchpad = { name, appId, spawn }:
-    let
-      exists = ''${niri} msg --json windows | ${jq} -e 'any(.[]; .app_id == "${appId}")' >/dev/null'';
-      workspaceOf = ''${niri} msg --json windows | ${jq} -r 'first(.[] | select(.app_id == "${appId}")) | .workspace_id // empty' '';
-      init = pkgs.writeShellScript "${name}-scratchpad-init" ''
-        set -u
-        if ! ${exists}; then
-          ${spawn} &
-        fi
-        # Wait up to ~60s for the window to map — a slow (e.g. firejail) cold
-        # start was otherwise leaving it un-parked, so the toggle silently no-op'd.
-        i=0
-        while [ "$i" -lt 600 ]; do
-          ${exists} && break
-          ${sleep} 0.1
-          i=$((i + 1))
-        done
-        # Make it a scratchpad member (also parks/hides it). Retry until niriusd
-        # accepts the request — spawn-at-startup entries launch concurrently —
-        # but break on first success: a second toggle would un-member it.
-        i=0
-        while [ "$i" -lt 100 ]; do
-          ${nirius} scratchpad-toggle --app-id "${appId}" && break
-          ${sleep} 0.1
-          i=$((i + 1))
-        done
-      '';
-      toggle = pkgs.writeShellScript "${name}-scratchpad-toggle" ''
-        set -u
-        ws=$(${workspaceOf})
-        if [ -z "$ws" ]; then
-          # Not running → launch, park, then show it here.
-          ${init}
-          ${nirius} scratchpad-show --app-id "${appId}"
-          exit 0
-        fi
-        fws=$(${niri} msg --json workspaces | ${jq} -r 'first(.[] | select(.is_focused)) | .id')
+  mkScratchpad = {
+    name,
+    appId,
+    spawn,
+  }: let
+    exists = ''${niri} msg --json windows | ${jq} -e 'any(.[]; .app_id == "${appId}")' >/dev/null'';
+    workspaceOf = ''${niri} msg --json windows | ${jq} -r 'first(.[] | select(.app_id == "${appId}")) | .workspace_id // empty' '';
+    init = pkgs.writeShellScript "${name}-scratchpad-init" ''
+      set -u
+      if ! ${exists}; then
+        ${spawn} &
+      fi
+      # Wait up to ~60s for the window to map — a slow (e.g. firejail) cold
+      # start was otherwise leaving it un-parked, so the toggle silently no-op'd.
+      i=0
+      while [ "$i" -lt 600 ]; do
+        ${exists} && break
+        ${sleep} 0.1
+        i=$((i + 1))
+      done
+      # Make it a scratchpad member (also parks/hides it). Retry until niriusd
+      # accepts the request — spawn-at-startup entries launch concurrently —
+      # but break on first success: a second toggle would un-member it.
+      i=0
+      while [ "$i" -lt 100 ]; do
+        ${nirius} scratchpad-toggle --app-id "${appId}" && break
+        ${sleep} 0.1
+        i=$((i + 1))
+      done
+    '';
+    toggle = pkgs.writeShellScript "${name}-scratchpad-toggle" ''
+      set -u
+      ws=$(${workspaceOf})
+      if [ -z "$ws" ]; then
+        # Not running → launch, park, then show it here.
+        ${init}
         ${nirius} scratchpad-show --app-id "${appId}"
-        ${sleep} 0.15
-        now=$(${workspaceOf})
-        if [ "$ws" = "$fws" ] && [ "$now" = "$fws" ]; then
-          # Meant to hide but stayed put → not a member → park it.
-          ${nirius} scratchpad-toggle --app-id "${appId}"
-        elif [ "$ws" != "$fws" ] && [ "$now" != "$fws" ]; then
-          # Meant to summon but stayed away → not a member → pull it here.
-          ${nirius} move-to-current-workspace --app-id "${appId}"
-        fi
-      '';
-    in
-    { inherit init toggle; };
+        exit 0
+      fi
+      fws=$(${niri} msg --json workspaces | ${jq} -r 'first(.[] | select(.is_focused)) | .id')
+      ${nirius} scratchpad-show --app-id "${appId}"
+      ${sleep} 0.15
+      now=$(${workspaceOf})
+      if [ "$ws" = "$fws" ] && [ "$now" = "$fws" ]; then
+        # Meant to hide but stayed put → not a member → park it.
+        ${nirius} scratchpad-toggle --app-id "${appId}"
+      elif [ "$ws" != "$fws" ] && [ "$now" != "$fws" ]; then
+        # Meant to summon but stayed away → not a member → pull it here.
+        ${nirius} move-to-current-workspace --app-id "${appId}"
+      fi
+    '';
+  in {inherit init toggle;};
 
   # Telegram: always-open (parked at login), summoned with Mod+T.
   # `telegram-sandboxed` is the firejail wrapper from desktop/telegram-sandbox.nix,
@@ -344,306 +346,306 @@ let
     spawn = "${pkgs.wezterm}/bin/wezterm start --always-new-process --class scratchpad-terminal";
   };
 in
-lib.mkIf config.rices.ember.niri.enable {
-  programs.niri = {
-    # Not the compositor — the session comes from the system package. This is what
-    # home-manager validates the generated KDL against, so it has to be the same
-    # version that will actually load it (see the `niri` binding above).
-    package = pkgs.niri-unstable;
-    settings = {
-      environment = {
-        CLUTTER_BACKEND = "wayland";
-        GDK_BACKEND = "wayland,x11";
-        MOZ_ENABLE_WAYLAND = "1";
-        NIXOS_OZONE_WL = "1";
-        QT_QPA_PLATFORM = "wayland";
-        QT_WAYLAND_DISABLE_WINDOWDECORATION = "1";
-        # Apps launched from niri (binds / tofi-drun) inherit this env, not the
-        # systemd user env (spawn-at-startup only imports 4 vars). Set the Qt
-        # platform theme here so Dolphin et al. pick up qt.nix's qtct config +
-        # Noctalia's dynamic color file. "qt5ct" also loads the qt6ct plugin
-        # (its plugin Keys are ["qt6ct","qt5ct"]). No QT_STYLE_OVERRIDE — style
-        # is selected by qtct.conf (style=Fusion).
-        QT_QPA_PLATFORMTHEME = "qt5ct";
-        ELECTRON_OZONE_PLATFORM_HINT = "wayland";
-        XDG_SESSION_TYPE = "wayland";
-        XDG_CURRENT_DESKTOP = "niri";
-        # Noctalia's lockscreen authenticates against this PAM service (read by
-        # its LockContext). Default is "login", which assumes a privileged caller
-        # — an unprivileged locker hits "pam_unix(login:account): setuid failed"
-        # and can never unlock. Point it at a dedicated /etc/pam.d/noctalia
-        # instead (defined in rices/ember/system.nix). niri exports this to the
-        # processes it spawns, including the noctalia spawn-at-startup, so the
-        # already-running shell that handles every lock path picks it up.
-        NOCTALIA_PAM_SERVICE = "noctalia";
-      };
+  lib.mkIf config.rices.ember.niri.enable {
+    programs.niri = {
+      # Not the compositor — the session comes from the system package. This is what
+      # home-manager validates the generated KDL against, so it has to be the same
+      # version that will actually load it (see the `niri` binding above).
+      package = pkgs.niri-unstable;
+      settings = {
+        environment = {
+          CLUTTER_BACKEND = "wayland";
+          GDK_BACKEND = "wayland,x11";
+          MOZ_ENABLE_WAYLAND = "1";
+          NIXOS_OZONE_WL = "1";
+          QT_QPA_PLATFORM = "wayland";
+          QT_WAYLAND_DISABLE_WINDOWDECORATION = "1";
+          # Apps launched from niri (binds / tofi-drun) inherit this env, not the
+          # systemd user env (spawn-at-startup only imports 4 vars). Set the Qt
+          # platform theme here so Dolphin et al. pick up qt.nix's qtct config +
+          # Noctalia's dynamic color file. "qt5ct" also loads the qt6ct plugin
+          # (its plugin Keys are ["qt6ct","qt5ct"]). No QT_STYLE_OVERRIDE — style
+          # is selected by qtct.conf (style=Fusion).
+          QT_QPA_PLATFORMTHEME = "qt5ct";
+          ELECTRON_OZONE_PLATFORM_HINT = "wayland";
+          XDG_SESSION_TYPE = "wayland";
+          XDG_CURRENT_DESKTOP = "niri";
+          # Noctalia's lockscreen authenticates against this PAM service (read by
+          # its LockContext). Default is "login", which assumes a privileged caller
+          # — an unprivileged locker hits "pam_unix(login:account): setuid failed"
+          # and can never unlock. Point it at a dedicated /etc/pam.d/noctalia
+          # instead (defined in rices/ember/system.nix). niri exports this to the
+          # processes it spawns, including the noctalia spawn-at-startup, so the
+          # already-running shell that handles every lock path picks it up.
+          NOCTALIA_PAM_SERVICE = "noctalia";
+        };
 
-      hotkey-overlay = {
-        skip-at-startup = true;
-      };
+        hotkey-overlay = {
+          skip-at-startup = true;
+        };
 
-      xwayland-satellite.enable = true;
+        xwayland-satellite.enable = true;
 
-      gestures = {
-        hot-corners.enable = false;
-      };
+        gestures = {
+          hot-corners.enable = false;
+        };
 
-      # Input configuration
-      input = {
-        focus-follows-mouse.enable = true;
+        # Input configuration
+        input = {
+          focus-follows-mouse.enable = true;
 
-        keyboard = {
-          xkb = {
-            layout = "us";
-            variant = "intl";
+          keyboard = {
+            xkb = {
+              layout = "us";
+              variant = "intl";
+            };
+          };
+
+          touchpad = {
+            tap = true;
+            natural-scroll = true;
+            accel-speed = 0.3;
+            scroll-factor = 0.8;
+          };
+
+          mouse = {
+            natural-scroll = false;
+            accel-speed = -0.4;
+            scroll-factor = 0.8;
           };
         };
 
-        touchpad = {
-          tap = true;
-          natural-scroll = true;
-          accel-speed = 0.3;
-          scroll-factor = 0.8;
+        layout = {
+          background-color = "transparent";
+
+          default-column-width.proportion = 1.0;
+
+          shadow.enable = false;
+
+          focus-ring.enable = false;
+
+          border = {
+            enable = true;
+            width = 2;
+            # Same palette entries, just alpha-dimmed: on OLED the borders blend
+            # against near-black, so alpha darkens them without shifting hue.
+            # Turn the suffixes up/down to taste (ff = undimmed).
+            active.color = c.base03 + "73"; # 45%
+            inactive.color = c.base01 + "26"; # 15%
+          };
+
+          # Inner gaps only. `gaps` applies both between windows and around the
+          # screen edges; matching negative struts cancel just the outer half
+          # (the documented niri idiom for inner-vs-outer gaps). So a lone window
+          # runs edge to edge and reads as fullscreen, while two or more still get
+          # 2*gaps of separation between columns.
+          #
+          # niri has no smart-gaps: window rules can't match on window count, so
+          # this is as close as the config gets without an event-stream daemon
+          # toggling maximize-window-to-edges.
+          gaps = 8;
+
+          struts = {
+            left = -8;
+            right = -8;
+            # Not -8: the Noctalia bar floats with its own 8px margin and rounded
+            # corners, so pulling windows flush against it leaves the window's
+            # square corner clashing with the bar's radius. Leave the top gap.
+            top = 0;
+            bottom = -8;
+          };
         };
 
-        mouse = {
-          natural-scroll = false;
-          accel-speed = -0.4;
-          scroll-factor = 0.8;
-        };
-      };
+        # Prefer no client-side decorations
+        prefer-no-csd = true;
 
-      layout = {
-        background-color = "transparent";
-
-        default-column-width.proportion = 1.0;
-
-        shadow.enable = false;
-
-        focus-ring.enable = false;
-
-        border = {
-          enable = true;
-          width = 2;
-          # Same palette entries, just alpha-dimmed: on OLED the borders blend
-          # against near-black, so alpha darkens them without shifting hue.
-          # Turn the suffixes up/down to taste (ff = undimmed).
-          active.color = c.base03 + "73"; # 45%
-          inactive.color = c.base01 + "26"; # 15%
+        # Compositor-drawn cursor. Same theme as the mango layer and as
+        # stylix.cursor in ../../stylix.nix (which themes the client-drawn ones) —
+        # niri's own default is "default", so without this the pointer would change
+        # appearance as it moved between niri's surfaces and an app's.
+        cursor = {
+          theme = "Bibata-Modern-Classic";
+          size = 20;
         };
 
-        # Inner gaps only. `gaps` applies both between windows and around the
-        # screen edges; matching negative struts cancel just the outer half
-        # (the documented niri idiom for inner-vs-outer gaps). So a lone window
-        # runs edge to edge and reads as fullscreen, while two or more still get
-        # 2*gaps of separation between columns.
-        #
-        # niri has no smart-gaps: window rules can't match on window count, so
-        # this is as close as the config gets without an event-stream daemon
-        # toggling maximize-window-to-edges.
-        gaps = 8;
-
-        struts = {
-          left = -8;
-          right = -8;
-          # Not -8: the Noctalia bar floats with its own 8px margin and rounded
-          # corners, so pulling windows flush against it leaves the window's
-          # square corner clashing with the bar's radius. Leave the top gap.
-          top = 0;
-          bottom = -8;
+        # Animations. Force-disabled in the VM only (hosts/tempest/vm.nix) — every
+        # animated frame there goes through the emulated virgl path.
+        animations = {
+          slowdown = 0.7;
         };
-      };
 
-      # Prefer no client-side decorations
-      prefer-no-csd = true;
+        # Spawn commands at startup
+        spawn-at-startup = [
+          {
+            command = [
+              "${pkgs.systemd}/bin/systemctl"
+              "--user"
+              "import-environment"
+              "WAYLAND_DISPLAY"
+              "XDG_CURRENT_DESKTOP"
+              "DBUS_SESSION_BUS_ADDRESS"
+              "XAUTHORITY"
+            ];
+          }
+          # NNN stack: the Noctalia shell (bar + notifications + launcher) is NOT
+          # spawned here anymore. It runs as a supervised systemd user service
+          # (programs.noctalia.systemd.enable, in rices/ember/noctalia.nix) with
+          # Restart=on-failure bound to graphical-session.target, so a segfault in
+          # the v5 dev build self-heals instead of leaving a dead desktop. Spawning
+          # it here too would double-launch a singleton shell.
+          # Scratchpads: the nirius daemon, then launch Telegram and park it hidden
+          # in the scratchpad. Mod+T summons it. The terminal scratchpad
+          # (Mod+Shift+Return) is spawned lazily on first use, so it isn't here.
+          # See the let block above.
+          {command = ["${pkgs.nirius}/bin/niriusd"];}
+          {command = ["${telegramScratchpad.init}"];}
+        ];
 
-      # Compositor-drawn cursor. Same theme as the mango layer and as
-      # stylix.cursor in ../../stylix.nix (which themes the client-drawn ones) —
-      # niri's own default is "default", so without this the pointer would change
-      # appearance as it moved between niri's surfaces and an app's.
-      cursor = {
-        theme = "Bibata-Modern-Classic";
-        size = 20;
-      };
-
-      # Animations. Force-disabled in the VM only (hosts/tempest/vm.nix) — every
-      # animated frame there goes through the emulated virgl path.
-      animations = {
-        slowdown = 0.7;
-      };
-
-      # Spawn commands at startup
-      spawn-at-startup = [
-        {
-          command = [
-            "${pkgs.systemd}/bin/systemctl"
-            "--user"
-            "import-environment"
-            "WAYLAND_DISPLAY"
-            "XDG_CURRENT_DESKTOP"
-            "DBUS_SESSION_BUS_ADDRESS"
-            "XAUTHORITY"
+        # Keybindings
+        binds = with pkgs; {
+          # Terminal and launcher. Bare `wezterm` defaults to the `start`
+          # subcommand, which hands the request to a running wezterm GUI instance
+          # of the same class when there is one — so extra windows are cheap
+          # (kitty was a fresh process per press). The scratchpad below
+          # deliberately opts out of that; see the let block.
+          "Mod+Return".action.spawn = [
+            "${pkgs.wezterm}/bin/wezterm"
           ];
-        }
-        # NNN stack: the Noctalia shell (bar + notifications + launcher) is NOT
-        # spawned here anymore. It runs as a supervised systemd user service
-        # (programs.noctalia.systemd.enable, in rices/ember/noctalia.nix) with
-        # Restart=on-failure bound to graphical-session.target, so a segfault in
-        # the v5 dev build self-heals instead of leaving a dead desktop. Spawning
-        # it here too would double-launch a singleton shell.
-        # Scratchpads: the nirius daemon, then launch Telegram and park it hidden
-        # in the scratchpad. Mod+T summons it. The terminal scratchpad
-        # (Mod+Shift+Return) is spawned lazily on first use, so it isn't here.
-        # See the let block above.
-        { command = [ "${pkgs.nirius}/bin/niriusd" ]; }
-        { command = [ "${telegramScratchpad.init}" ]; }
-      ];
+          # Floating terminal scratchpad: summon/dismiss a near-fullscreen floating
+          # wezterm (own app-id "scratchpad-terminal"); see the let block above.
+          "Mod+Shift+Return".action.spawn = ["${terminalScratchpad.toggle}"];
+          # Same key as before; now drives Noctalia's launcher instead of tofi.
+          # v5 IPC: `noctalia msg <command>` replaced `noctalia-shell ipc call …`;
+          # the launcher panel is toggled via the generic panel-toggle handler.
+          "Mod+Space".action.spawn = [
+            "noctalia"
+            "msg"
+            "panel-toggle"
+            "launcher"
+          ];
 
-      # Keybindings
-      binds = with pkgs; {
-        # Terminal and launcher. Bare `wezterm` defaults to the `start`
-        # subcommand, which hands the request to a running wezterm GUI instance
-        # of the same class when there is one — so extra windows are cheap
-        # (kitty was a fresh process per press). The scratchpad below
-        # deliberately opts out of that; see the let block.
-        "Mod+Return".action.spawn = [
-          "${pkgs.wezterm}/bin/wezterm"
+          "Mod+B".action.spawn = ["${pkgs.blueman}/bin/blueman-manager"];
+          "Mod+P".action.spawn = ["${pkgs.pavucontrol}/bin/pavucontrol"];
+          # Pick the default output device by name (EasyEffects follows it).
+          "Mod+O".action.spawn = ["${audioOutputSwitcher}"];
+          "Mod+N".action.spawn = ["${pkgs.kdePackages.dolphin}/bin/dolphin"];
+          "Mod+L".action.spawn = ["${pkgs.systemd}/bin/loginctl" "lock-session"];
+
+          # Telegram scratchpad: summon/dismiss on the focused workspace.
+          "Mod+T".action.spawn = ["${telegramScratchpad.toggle}"];
+          # Send the focused window into / pull it out of the scratchpad.
+          "Mod+Shift+T".action.spawn = ["${nirius}" "scratchpad-toggle"];
+
+          # Window management
+          "Mod+Q".action.close-window = {};
+          "Mod+F".action.fullscreen-window = {};
+          "Mod+M".action.maximize-column = {};
+
+          # Even 50/50 split of the focused window and its neighbour, along
+          # whichever axis suits the output's orientation — two half-width columns
+          # in landscape, one full-width column halved top/bottom in portrait.
+          "Mod+G".action.spawn = ["${evenSplit}"];
+
+          # Focus movement
+          "Mod+Left".action.focus-column-left = {};
+          "Mod+Right".action.focus-column-right = {};
+          "Mod+Up".action.focus-window-up = {};
+          "Mod+Down".action.focus-window-down = {};
+
+          # Move windows
+          "Mod+Shift+Left".action.move-column-left = {};
+          "Mod+Shift+Right".action.move-column-right = {};
+          "Mod+Shift+Up".action.move-window-up = {};
+          "Mod+Shift+Down".action.move-window-down = {};
+
+          # Browser
+          "Mod+Shift+B".action.spawn = ["${inputs.zen-browser.packages.x86_64-linux.beta}/bin/zen-beta"];
+
+          # Copy a video URL, play it in mpv instead of the browser's decoder.
+          "Mod+Y".action.spawn = ["${playClipboard}"];
+
+          # Screenshots (using niri's built-in UI)
+          "Mod+Shift+S".action.screenshot = {};
+          "Mod+Shift+D".action.screenshot-screen = {};
+
+          # Workspaces 1-10
+          "Mod+1".action.focus-workspace = 1;
+          "Mod+2".action.focus-workspace = 2;
+          "Mod+3".action.focus-workspace = 3;
+          "Mod+4".action.focus-workspace = 4;
+          "Mod+5".action.focus-workspace = 5;
+          "Mod+6".action.focus-workspace = 6;
+          "Mod+7".action.focus-workspace = 7;
+          "Mod+8".action.focus-workspace = 8;
+          "Mod+9".action.focus-workspace = 9;
+          "Mod+0".action.focus-workspace = 10;
+
+          # Move to workspaces 1-10
+          "Mod+Shift+1".action.move-window-to-workspace = 1;
+          "Mod+Shift+2".action.move-window-to-workspace = 2;
+          "Mod+Shift+3".action.move-window-to-workspace = 3;
+          "Mod+Shift+4".action.move-window-to-workspace = 4;
+          "Mod+Shift+5".action.move-window-to-workspace = 5;
+          "Mod+Shift+6".action.move-window-to-workspace = 6;
+          "Mod+Shift+7".action.move-window-to-workspace = 7;
+          "Mod+Shift+8".action.move-window-to-workspace = 8;
+          "Mod+Shift+9".action.move-window-to-workspace = 9;
+          "Mod+Shift+0".action.move-window-to-workspace = 10;
+
+          # Media keys
+          "XF86AudioRaiseVolume".action.spawn = [
+            "${pamixer}/bin/pamixer"
+            "-i"
+            "5"
+          ];
+          "XF86AudioLowerVolume".action.spawn = [
+            "${pamixer}/bin/pamixer"
+            "-d"
+            "5"
+          ];
+          "XF86AudioMute".action.spawn = [
+            "${pamixer}/bin/pamixer"
+            "--toggle-mute"
+          ];
+          # Brightness keys route through brightnessAdjust: backlight when the
+          # laptop panel is active, ddcutil/DDC-CI when clamshell (see let block).
+          "XF86MonBrightnessUp".action.spawn = ["${brightnessAdjust}" "up"];
+          "XF86MonBrightnessDown".action.spawn = ["${brightnessAdjust}" "down"];
+
+          # Media control
+          "XF86AudioPlay".action.spawn = [
+            "${playerctl}/bin/playerctl"
+            "play-pause"
+          ];
+          "XF86AudioNext".action.spawn = [
+            "${playerctl}/bin/playerctl"
+            "next"
+          ];
+          "XF86AudioPrev".action.spawn = [
+            "${playerctl}/bin/playerctl"
+            "previous"
+          ];
+
+          # Toggle floating (niri alternative - use center-column)
+          "Mod+Shift+Space".action.center-column = {};
+
+          "Mod+E".action.toggle-overview = {};
+
+          # Quit niri
+          "Mod+Shift+E".action.quit.skip-confirmation = true;
+        };
+        window-rules = windowRules;
+        layer-rules = [
+          # Noctalia's wallpaper surface (background layer, ignores exclusive
+          # zones) — reparent it into niri's backdrop so it shows behind
+          # gapped/transparent windows and in the overview. v5 uses a single fixed
+          # layer-shell namespace "noctalia-wallpaper" (v4 carried a per-output
+          # suffix); prefix match keeps it forward-compatible.
+          {
+            matches = [{namespace = "^noctalia-wallpaper";}];
+            place-within-backdrop = true;
+          }
         ];
-        # Floating terminal scratchpad: summon/dismiss a near-fullscreen floating
-        # wezterm (own app-id "scratchpad-terminal"); see the let block above.
-        "Mod+Shift+Return".action.spawn = [ "${terminalScratchpad.toggle}" ];
-        # Same key as before; now drives Noctalia's launcher instead of tofi.
-        # v5 IPC: `noctalia msg <command>` replaced `noctalia-shell ipc call …`;
-        # the launcher panel is toggled via the generic panel-toggle handler.
-        "Mod+Space".action.spawn = [
-          "noctalia"
-          "msg"
-          "panel-toggle"
-          "launcher"
-        ];
-
-        "Mod+B".action.spawn = [ "${pkgs.blueman}/bin/blueman-manager" ];
-        "Mod+P".action.spawn = [ "${pkgs.pavucontrol}/bin/pavucontrol" ];
-        # Pick the default output device by name (EasyEffects follows it).
-        "Mod+O".action.spawn = [ "${audioOutputSwitcher}" ];
-        "Mod+N".action.spawn = [ "${pkgs.kdePackages.dolphin}/bin/dolphin" ];
-        "Mod+L".action.spawn = [ "${pkgs.systemd}/bin/loginctl" "lock-session" ];
-
-        # Telegram scratchpad: summon/dismiss on the focused workspace.
-        "Mod+T".action.spawn = [ "${telegramScratchpad.toggle}" ];
-        # Send the focused window into / pull it out of the scratchpad.
-        "Mod+Shift+T".action.spawn = [ "${nirius}" "scratchpad-toggle" ];
-
-        # Window management
-        "Mod+Q".action.close-window = { };
-        "Mod+F".action.fullscreen-window = { };
-        "Mod+M".action.maximize-column = { };
-
-        # Even 50/50 split of the focused window and its neighbour, along
-        # whichever axis suits the output's orientation — two half-width columns
-        # in landscape, one full-width column halved top/bottom in portrait.
-        "Mod+G".action.spawn = [ "${evenSplit}" ];
-
-        # Focus movement
-        "Mod+Left".action.focus-column-left = { };
-        "Mod+Right".action.focus-column-right = { };
-        "Mod+Up".action.focus-window-up = { };
-        "Mod+Down".action.focus-window-down = { };
-
-        # Move windows
-        "Mod+Shift+Left".action.move-column-left = { };
-        "Mod+Shift+Right".action.move-column-right = { };
-        "Mod+Shift+Up".action.move-window-up = { };
-        "Mod+Shift+Down".action.move-window-down = { };
-
-        # Browser
-        "Mod+Shift+B".action.spawn = [ "${inputs.zen-browser.packages.x86_64-linux.beta}/bin/zen-beta" ];
-
-        # Copy a video URL, play it in mpv instead of the browser's decoder.
-        "Mod+Y".action.spawn = [ "${playClipboard}" ];
-
-        # Screenshots (using niri's built-in UI)
-        "Mod+Shift+S".action.screenshot = { };
-        "Mod+Shift+D".action.screenshot-screen = { };
-
-        # Workspaces 1-10
-        "Mod+1".action.focus-workspace = 1;
-        "Mod+2".action.focus-workspace = 2;
-        "Mod+3".action.focus-workspace = 3;
-        "Mod+4".action.focus-workspace = 4;
-        "Mod+5".action.focus-workspace = 5;
-        "Mod+6".action.focus-workspace = 6;
-        "Mod+7".action.focus-workspace = 7;
-        "Mod+8".action.focus-workspace = 8;
-        "Mod+9".action.focus-workspace = 9;
-        "Mod+0".action.focus-workspace = 10;
-
-        # Move to workspaces 1-10
-        "Mod+Shift+1".action.move-window-to-workspace = 1;
-        "Mod+Shift+2".action.move-window-to-workspace = 2;
-        "Mod+Shift+3".action.move-window-to-workspace = 3;
-        "Mod+Shift+4".action.move-window-to-workspace = 4;
-        "Mod+Shift+5".action.move-window-to-workspace = 5;
-        "Mod+Shift+6".action.move-window-to-workspace = 6;
-        "Mod+Shift+7".action.move-window-to-workspace = 7;
-        "Mod+Shift+8".action.move-window-to-workspace = 8;
-        "Mod+Shift+9".action.move-window-to-workspace = 9;
-        "Mod+Shift+0".action.move-window-to-workspace = 10;
-
-        # Media keys
-        "XF86AudioRaiseVolume".action.spawn = [
-          "${pamixer}/bin/pamixer"
-          "-i"
-          "5"
-        ];
-        "XF86AudioLowerVolume".action.spawn = [
-          "${pamixer}/bin/pamixer"
-          "-d"
-          "5"
-        ];
-        "XF86AudioMute".action.spawn = [
-          "${pamixer}/bin/pamixer"
-          "--toggle-mute"
-        ];
-        # Brightness keys route through brightnessAdjust: backlight when the
-        # laptop panel is active, ddcutil/DDC-CI when clamshell (see let block).
-        "XF86MonBrightnessUp".action.spawn = [ "${brightnessAdjust}" "up" ];
-        "XF86MonBrightnessDown".action.spawn = [ "${brightnessAdjust}" "down" ];
-
-        # Media control
-        "XF86AudioPlay".action.spawn = [
-          "${playerctl}/bin/playerctl"
-          "play-pause"
-        ];
-        "XF86AudioNext".action.spawn = [
-          "${playerctl}/bin/playerctl"
-          "next"
-        ];
-        "XF86AudioPrev".action.spawn = [
-          "${playerctl}/bin/playerctl"
-          "previous"
-        ];
-
-        # Toggle floating (niri alternative - use center-column)
-        "Mod+Shift+Space".action.center-column = { };
-
-        "Mod+E".action.toggle-overview = { };
-
-        # Quit niri
-        "Mod+Shift+E".action.quit.skip-confirmation = true;
       };
-      window-rules = windowRules;
-      layer-rules = [
-        # Noctalia's wallpaper surface (background layer, ignores exclusive
-        # zones) — reparent it into niri's backdrop so it shows behind
-        # gapped/transparent windows and in the overview. v5 uses a single fixed
-        # layer-shell namespace "noctalia-wallpaper" (v4 carried a per-output
-        # suffix); prefix match keeps it forward-compatible.
-        {
-          matches = [{ namespace = "^noctalia-wallpaper"; }];
-          place-within-backdrop = true;
-        }
-      ];
     };
-  };
-}
+  }

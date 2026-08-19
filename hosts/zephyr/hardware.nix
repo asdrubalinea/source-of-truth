@@ -1,5 +1,4 @@
-{ lib, ... }:
-{
+{lib, ...}: {
   nixpkgs.hostPlatform = lib.mkDefault "aarch64-linux";
 
   # Onboard Ethernet works with in-kernel drivers; redistributable firmware is

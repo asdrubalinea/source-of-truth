@@ -1,5 +1,8 @@
-{ config, pkgs, ... }:
-
+{
+  config,
+  pkgs,
+  ...
+}:
 # Email: mu4e + mbsync (isync) + msmtp.
 # Two accounts: fastmail (primary) and pec (Italian PEC, @pec.it = Aruba PEC).
 #
@@ -23,7 +26,6 @@
 # To migrate creds to pass / sops / GPG later, change only `passwordCommand`.
 # Hosts below are the documented Aruba PEC defaults
 # (https://guide.pec.it/.../configurare-casella-pec-programma-posta.aspx).
-
 {
   programs.mbsync.enable = true;
   programs.msmtp.enable = true;
@@ -48,8 +50,7 @@
       tls.enable = true;
     };
 
-    passwordCommand =
-      "cat ${config.home.homeDirectory}/.config/mail/fastmail-password";
+    passwordCommand = "cat ${config.home.homeDirectory}/.config/mail/fastmail-password";
 
     mbsync = {
       enable = true;
@@ -76,8 +77,7 @@
       tls.enable = true;
     };
 
-    passwordCommand =
-      "cat ${config.home.homeDirectory}/.config/mail/pec-password";
+    passwordCommand = "cat ${config.home.homeDirectory}/.config/mail/pec-password";
 
     mbsync = {
       enable = true;

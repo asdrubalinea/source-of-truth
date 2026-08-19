@@ -1,4 +1,8 @@
-{ pkgs, lib, ... }:
+{
+  pkgs,
+  lib,
+  ...
+}:
 #
 # Time-Machine-style local backup for tempest: ZFS replication of the
 # irreplaceable datasets onto an encrypted ZFS pool living on an external USB
@@ -55,7 +59,7 @@ let
   # wired via systemd OnFailure= below so a crash anywhere in the run is caught;
   # success is emitted inline at the end of the orchestrator so the no-op skip
   # paths (drive absent / already imported) stay silent.
-  backup-notify = pkgs.callPackage ../../../packages/backup-notify.nix { };
+  backup-notify = pkgs.callPackage ../../../packages/backup-notify.nix {};
 
   # The one place this unit is named. It is referenced from the systemd unit
   # attribute, the udev rule that triggers it, the fail-notification argument,
@@ -163,9 +167,10 @@ let
       # If that sync snapshot is ever destroyed by hand, the next run has no
       # common base and must reseed the whole pool.
       ${lib.concatMapStringsSep "\n" (p: ''
-        log "replicating ${p.src} -> ${p.dst}"
-        syncoid --recvOptions=u --quiet ${p.src} ${p.dst}
-      '') pairs}
+          log "replicating ${p.src} -> ${p.dst}"
+          syncoid --recvOptions=u --quiet ${p.src} ${p.dst}
+        '')
+        pairs}
 
       # Expire old snapshots on the backup per the deep-retention policy above.
       sanoid --configdir=${pruneConfDir} --prune-snapshots --verbose
@@ -234,7 +239,7 @@ let
 
   ejectBin = pkgs.writeShellApplication {
     name = "tempest-backup-eject";
-    runtimeInputs = [ pkgs.zfs ];
+    runtimeInputs = [pkgs.zfs];
     text = ''
       zpool export ${pool} && echo "'${pool}' exported — safe to unplug."
     '';
@@ -270,8 +275,7 @@ let
       ''
       + builtins.readFile ./backup-verify.sh;
   };
-in
-{
+in {
   environment.systemPackages = [
     backupBin
     browseBin
@@ -295,7 +299,7 @@ in
     # Any failure (mid-run crash or the explicit unhealthy-pool exit 1) raises a
     # desktop notification. Success is notified inline by the orchestrator so a
     # plug-less timer tick (which no-ops, exiting 0) stays silent.
-    onFailure = [ "backup-notify-usb-fail.service" ];
+    onFailure = ["backup-notify-usb-fail.service"];
   };
 
   systemd.services.backup-notify-usb-fail = {
@@ -314,7 +318,7 @@ in
   # Daily fallback for "left it plugged in" — no-ops cleanly when the drive is
   # absent. Persistent catches a missed run after the laptop was off/asleep.
   systemd.timers.${usbUnitName} = {
-    wantedBy = [ "timers.target" ];
+    wantedBy = ["timers.target"];
     timerConfig = {
       OnCalendar = "daily";
       Persistent = true;

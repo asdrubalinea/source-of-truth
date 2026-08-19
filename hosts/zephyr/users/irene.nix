@@ -1,5 +1,4 @@
-{ pkgs, ... }:
-{
+{pkgs, ...}: {
   users = {
     mutableUsers = false;
 
@@ -7,7 +6,7 @@
 
     users.irene = {
       isNormalUser = true;
-      extraGroups = [ "wheel" ];
+      extraGroups = ["wheel"];
       hashedPassword = (import ../../../passwords).password;
       shell = pkgs.fish;
 

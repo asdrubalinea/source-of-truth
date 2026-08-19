@@ -1,6 +1,4 @@
-{ pkgs, ... }:
-
-let
+{pkgs, ...}: let
   sitrep = pkgs.writeShellApplication {
     name = "sitrep";
     # Everything the script reaches for is pinned here rather than inherited
@@ -26,7 +24,6 @@ let
     ];
     text = builtins.readFile ./sitrep.sh;
   };
-in
-{
-  home.packages = [ sitrep ];
+in {
+  home.packages = [sitrep];
 }

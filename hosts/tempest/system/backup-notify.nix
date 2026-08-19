@@ -1,4 +1,8 @@
-{ pkgs, lib, ... }:
+{
+  pkgs,
+  lib,
+  ...
+}:
 #
 # Desktop notifications for the backup/scrub units that exist on both the real
 # laptop AND the VM: the weekly rpool integrity scrub (services.zfs.autoScrub →
@@ -13,11 +17,15 @@
 # host, so its failure wiring and its (skip-aware) success notification live in
 # the physical-only system/backup-external.nix instead.
 let
-  backup-notify = pkgs.callPackage ../../../packages/backup-notify.nix { };
+  backup-notify = pkgs.callPackage ../../../packages/backup-notify.nix {};
 
   # A oneshot that fires exactly one notification. `result` is ok|fail, `label`
   # the human name, `unit` the monitored unit (named in the failure body).
-  notifier = { result, label, unit }: {
+  notifier = {
+    result,
+    label,
+    unit,
+  }: {
     description = "Desktop ${result} notification: ${label}";
     serviceConfig = {
       Type = "oneshot";
@@ -39,7 +47,7 @@ let
   # own run (which carries its own scrub + health check).
   scrubNotify = pkgs.writeShellApplication {
     name = "backup-notify-scrub";
-    runtimeInputs = [ backup-notify pkgs.zfs pkgs.gnugrep ];
+    runtimeInputs = [backup-notify pkgs.zfs pkgs.gnugrep];
     text = ''
       pool=rpool
       if zpool status -x "$pool" 2>/dev/null | grep -q "is healthy"; then
@@ -49,8 +57,7 @@ let
       fi
     '';
   };
-in
-{
+in {
   systemd.services = {
     backup-notify-scrub = {
       description = "Desktop notification: ZFS scrub result";
@@ -80,10 +87,10 @@ in
 
     # Merge OnSuccess=/OnFailure= into the units the zfs / borgbackup modules
     # generate.
-    zfs-scrub.onSuccess = [ "backup-notify-scrub.service" ];
-    zfs-scrub.onFailure = [ "backup-notify-scrub-fail.service" ];
+    zfs-scrub.onSuccess = ["backup-notify-scrub.service"];
+    zfs-scrub.onFailure = ["backup-notify-scrub-fail.service"];
 
-    borgbackup-job-home-irene.onSuccess = [ "backup-notify-borg-ok.service" ];
-    borgbackup-job-home-irene.onFailure = [ "backup-notify-borg-fail.service" ];
+    borgbackup-job-home-irene.onSuccess = ["backup-notify-borg-ok.service"];
+    borgbackup-job-home-irene.onFailure = ["backup-notify-borg-fail.service"];
   };
 }

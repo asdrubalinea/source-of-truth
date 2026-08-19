@@ -1,13 +1,13 @@
-{ pkgs, ... }:
-{
+{pkgs, ...}: {
   programs.vscode = {
     enable = true;
-    package = pkgs.vscode.fhsWithPackages (ps: with ps; [
-      rustup
-      zlib
-      openssl.dev
-      pkg-config
-    ]);
+    package = pkgs.vscode.fhsWithPackages (ps:
+      with ps; [
+        rustup
+        zlib
+        openssl.dev
+        pkg-config
+      ]);
     profiles.default = {
       userSettings = {
         "editor.fontFamily" = "Maple Mono, monospace";
@@ -17,10 +17,10 @@
         "nix.serverPath" = "nixd";
         "nix.serverSettings" = {
           nixd = {
-            formatting.command = [ "alejandra" ];
+            formatting.command = ["alejandra"];
           };
         };
-        "nix.hiddenLanguageServerErrors" = [ "textDocument/definition" ];
+        "nix.hiddenLanguageServerErrors" = ["textDocument/definition"];
         "[nix]" = {
           "editor.defaultFormatter" = "jnoortheen.nix-ide";
           "editor.formatOnSave" = true;

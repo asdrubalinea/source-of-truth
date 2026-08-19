@@ -1,4 +1,8 @@
-{ inputs, pkgs, ... }:
+{
+  inputs,
+  pkgs,
+  ...
+}:
 # NixOS half of the mango compositor layer: the compositor package, its portals,
 # and the wayland-session entry the greeter lists (mango's derivation carries
 # `providedSessions = [ "mango" ]`, which the module turns into a
@@ -9,7 +13,7 @@
 # `disabledModules = [ "programs/wayland/mango.nix" ]`, so importing it REPLACES
 # nixpkgs' own two-option module rather than fighting it — do not import both.
 {
-  imports = [ inputs.mangowm.nixosModules.mango ];
+  imports = [inputs.mangowm.nixosModules.mango];
 
   programs.mango = {
     enable = true;

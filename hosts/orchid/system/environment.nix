@@ -1,7 +1,9 @@
-{ inputs, pkgs, ... }:
 {
-  environment.systemPackages =
-    with pkgs;
+  inputs,
+  pkgs,
+  ...
+}: {
+  environment.systemPackages = with pkgs;
     [
       neovim
       git

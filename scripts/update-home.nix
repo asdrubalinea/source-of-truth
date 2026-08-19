@@ -1,6 +1,4 @@
-{ pkgs, ... }:
-
-let
+{pkgs, ...}: let
   updateHome = pkgs.writeScriptBin "update-home" ''
     #!${pkgs.stdenv.shell}
     set -e
@@ -24,7 +22,6 @@ let
 
     popd
   '';
-in
-{
-  home.packages = [ updateHome ];
+in {
+  home.packages = [updateHome];
 }

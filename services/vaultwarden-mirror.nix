@@ -69,8 +69,7 @@ let
       printf >&2 'Warning: could not reach %s, using existing local data\n' '${primaryHost}'
     fi
   '';
-in
-{
+in {
   options.services.vaultwarden-mirror = {
     enable = lib.mkEnableOption "Vaultwarden read-only mirror of ${primaryHost}";
 
@@ -165,7 +164,7 @@ in
     };
 
     systemd.timers.vaultwarden-mirror-refresh = {
-      wantedBy = [ "timers.target" ];
+      wantedBy = ["timers.target"];
       timerConfig = {
         OnBootSec = "3m";
         OnUnitActiveSec = "5m";

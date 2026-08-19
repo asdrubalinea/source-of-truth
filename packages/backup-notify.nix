@@ -14,15 +14,15 @@
 #     label  human name shown in the notification (e.g. "Borg offsite backup")
 #     unit   systemd unit, named in the failure body so the journal is one
 #            copy-paste away
-{ writeShellApplication
-, libnotify
-, util-linux
-, coreutils
+{
+  writeShellApplication,
+  libnotify,
+  util-linux,
+  coreutils,
 }:
-
 writeShellApplication {
   name = "backup-notify";
-  runtimeInputs = [ libnotify util-linux coreutils ];
+  runtimeInputs = [libnotify util-linux coreutils];
   text = ''
     result=''${1:?usage: backup-notify <ok|fail> <label> <unit>}
     label=''${2:?usage: backup-notify <ok|fail> <label> <unit>}

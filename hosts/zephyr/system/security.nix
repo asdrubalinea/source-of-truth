@@ -1,5 +1,4 @@
-{ pkgs, ... }:
-{
+{pkgs, ...}: {
   security = {
     doas = {
       enable = true;
@@ -7,7 +6,7 @@
 
       extraRules = [
         {
-          users = [ "irene" ];
+          users = ["irene"];
           keepEnv = true;
           noPass = true;
         }

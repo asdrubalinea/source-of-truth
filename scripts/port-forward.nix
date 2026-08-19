@@ -1,6 +1,4 @@
-{ pkgs, ... }:
-
-let
+{pkgs, ...}: let
   portForward = pkgs.writeScriptBin "port-forward" ''
     #!${pkgs.stdenv.shell}
 
@@ -22,7 +20,6 @@ let
 
     exec ssh $SSH_ARGS "$REMOTE_HOST"
   '';
-in
-{
-  home.packages = [ portForward ];
+in {
+  home.packages = [portForward];
 }

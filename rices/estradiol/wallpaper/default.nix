@@ -1,4 +1,4 @@
-{ pkgs, ... }: {
+{pkgs, ...}: {
   home.file.".wallpaper".source = ./camo.jpeg;
-  home.packages = [ pkgs.awww ];
+  home.packages = [pkgs.awww];
 }

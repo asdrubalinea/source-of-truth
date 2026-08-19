@@ -1,5 +1,4 @@
-{ ... }:
-{
+{...}: {
   networking = {
     hostName = "orchid";
     hostId = "f00dbabe";

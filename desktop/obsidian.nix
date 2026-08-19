@@ -1,18 +1,33 @@
-{ pkgs
-, lib
-, config
-, ...
-}:
-let
+{
+  pkgs,
+  lib,
+  config,
+  ...
+}: let
   # The vault Obsidian opens (registered in ~/.config/obsidian/obsidian.json,
   # which stays runtime state — it records window geometry and last-opened).
   vault = "Vault.new";
 
-  json = (pkgs.formats.json { }).generate;
+  json = (pkgs.formats.json {}).generate;
 
-  inherit (config.lib.stylix.colors.withHashtag)
-    base00 base01 base02 base03 base04 base05 base07
-    base08 base09 base0A base0B base0C base0D base0E base0F;
+  inherit
+    (config.lib.stylix.colors.withHashtag)
+    base00
+    base01
+    base02
+    base03
+    base04
+    base05
+    base07
+    base08
+    base09
+    base0A
+    base0B
+    base0C
+    base0D
+    base0E
+    base0F
+    ;
 
   # Obsidian's built-in theme derives every surface from a 00→100 greyscale ramp
   # plus eight named hues, so recolouring those variables is enough to theme the
@@ -45,9 +60,8 @@ let
       --color-pink: ${base0F};
     }
   '';
-in
-{
-  home.packages = [ pkgs.obsidian ];
+in {
+  home.packages = [pkgs.obsidian];
 
   # Obsidian keeps config *inside* the vault, so these land in a git repo that
   # obsidian-git pushes to mobile. Everything declared here is listed in
@@ -68,7 +82,7 @@ in
       # No community theme: the built-in one is what stylixSnippet recolours.
       # A theme like Things sets its own --color-base-* and would win.
       cssTheme = "";
-      enabledCssSnippets = [ "stylix" ];
+      enabledCssSnippets = ["stylix"];
       accentColor = base0E;
 
       interfaceFontFamily = config.stylix.fonts.sansSerif.name;
@@ -104,8 +118,18 @@ in
     };
 
     "${vault}/.obsidian/hotkeys.json".source = json "hotkeys.json" {
-      "command-palette:open" = [{ modifiers = [ "Mod" "Shift" ]; key = "P"; }];
-      "switcher:open" = [{ modifiers = [ "Mod" ]; key = "O"; }];
+      "command-palette:open" = [
+        {
+          modifiers = ["Mod" "Shift"];
+          key = "P";
+        }
+      ];
+      "switcher:open" = [
+        {
+          modifiers = ["Mod"];
+          key = "O";
+        }
+      ];
     };
 
     # Which *core* plugins are on. Community plugins stay runtime-managed (see

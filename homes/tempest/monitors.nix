@@ -1,4 +1,4 @@
-{ ... }:
+{...}:
 # Machine policy for tempest: monitor identities and layout. These are per-host
 # facts (specific BOE/Samsung/LG panel serials and their modes/positions), not
 # part of the ember rice — a rice describes "what the desktop is", independent of

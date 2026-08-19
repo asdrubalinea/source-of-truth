@@ -1,4 +1,4 @@
-{ pkgs, ... }:
+{pkgs, ...}:
 # NixOS half of the niri compositor layer: the compositor package itself and the
 # `niri-session` wayland-session entry the greeter lists. Furniture that both
 # layers share (fonts, upower, PAM services) lives in ../../system.nix.

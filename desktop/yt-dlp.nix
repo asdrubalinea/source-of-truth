@@ -2,9 +2,8 @@
 # The wrapper (and the reasoning behind it) is ../packages/yt-dlp-pot.nix; this
 # module is only the two halves that have to exist at runtime: the binary on
 # PATH, and the provider it talks to.
-{ pkgs, ... }:
-{
-  home.packages = [ (pkgs.callPackage ../packages/yt-dlp-pot.nix { }) ];
+{pkgs, ...}: {
+  home.packages = [(pkgs.callPackage ../packages/yt-dlp-pot.nix {})];
 
   # A daemon rather than something spawned per download: the plugin's HTTP
   # provider has no way to start one, and the alternative script mode wants a
@@ -26,6 +25,6 @@
       Restart = "on-failure";
     };
 
-    Install.WantedBy = [ "default.target" ];
+    Install.WantedBy = ["default.target"];
   };
 }

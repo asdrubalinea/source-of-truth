@@ -12,9 +12,8 @@
 # over a static-web-server user service at http://127.0.0.1:8080, wiring the
 # Server's --cors-allow-origin to match. Defaults are loopback-only; set
 # web.address / web.corsOrigin to reach it from the LAN.
-{ inputs, ... }:
-{
-  imports = [ inputs.flights.homeManagerModules.default ];
+{inputs, ...}: {
+  imports = [inputs.flights.homeManagerModules.default];
 
   services.flights-server = {
     enable = true;

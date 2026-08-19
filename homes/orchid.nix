@@ -1,5 +1,8 @@
-{ pkgs, inputs, ... }:
-let
+{
+  pkgs,
+  inputs,
+  ...
+}: let
   arc-size = (
     pkgs.writeShellScriptBin "arc-size" ''
       cat /proc/spl/kstat/zfs/arcstats | grep '^size ' | awk '{ print $3 }' | awk '{ print $1 / (1024 * 1024 * 1024) " GiB" }'
@@ -11,8 +14,7 @@ let
       zfs list -o name,used -t filesystem,volume -Hp | awk -v dataset='zroot/local/nix' '$1 == dataset { printf "%.0f GiB", $2/1024/1024/1024 }'
     ''
   );
-in
-{
+in {
   imports = [
     inputs.hyprland.homeManagerModules.default
     # inputs.stylix.homeManagerModules.stylix
@@ -103,12 +105,13 @@ in
 
   programs.vscode = {
     enable = true;
-    package = pkgs.vscode.fhsWithPackages (ps: with ps; [
-      rustup
-      zlib
-      openssl.dev
-      pkg-config
-    ]);
+    package = pkgs.vscode.fhsWithPackages (ps:
+      with ps; [
+        rustup
+        zlib
+        openssl.dev
+        pkg-config
+      ]);
   };
 
   programs.nix-index = {
@@ -120,5 +123,4 @@ in
   # than a manual `starship init` in misc/fish.nix, which double-initialised it
   # on hosts that also enabled programs.starship.
   programs.starship.enable = true;
-
 }

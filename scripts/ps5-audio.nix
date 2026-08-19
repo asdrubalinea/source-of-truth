@@ -1,6 +1,4 @@
-{ pkgs, ... }:
-
-let
+{pkgs, ...}: let
   # The PS5 Pro plays natively on the monitor; the monitor's analog out feeds the
   # CalDigit dock's rear "Audio In", and this loops that input into whatever sink
   # is current (usually the AirPods). The dock's capture PCM is a genuine stereo
@@ -75,5 +73,4 @@ let
         ;;
     esac
   '';
-in
-{ home.packages = [ ps5-audio ]; }
+in {home.packages = [ps5-audio];}

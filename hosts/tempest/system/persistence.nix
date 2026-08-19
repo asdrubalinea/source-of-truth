@@ -1,12 +1,18 @@
-{ lib, config, ... }:
-let
-  persistedFiles = map
+{
+  lib,
+  config,
+  ...
+}: let
+  persistedFiles =
+    map
     (
-      f: if builtins.isString f then f else f.file
+      f:
+        if builtins.isString f
+        then f
+        else f.file
     )
     config.environment.persistence."/persist".files;
-in
-{
+in {
   # Filesystem configuration for impermanence setup.
   # The tmpfs root, plus /persist, /nix and /var/lib/sbctl, are all owned by
   # disko (disks/tempest.nix — the root via disko.devices.nodev."/", which also

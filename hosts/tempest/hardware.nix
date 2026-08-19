@@ -1,5 +1,9 @@
-{ lib, config, pkgs, ... }:
 {
+  lib,
+  config,
+  pkgs,
+  ...
+}: {
   # Hardware platform specification
   nixpkgs.hostPlatform = lib.mkDefault "x86_64-linux";
 
@@ -10,7 +14,7 @@
     cpu.amd.updateMicrocode = lib.mkDefault config.hardware.enableRedistributableFirmware;
     enableAllFirmware = true;
     enableRedistributableFirmware = true;
-    firmware = [ pkgs.linux-firmware ];
+    firmware = [pkgs.linux-firmware];
 
     # Enable CPU virtualization features
     cpu.amd.sev.enable = true;
@@ -46,7 +50,7 @@
 
   # Hardware-specific services
   services = {
-    xserver.videoDrivers = [ "amdgpu" ];
+    xserver.videoDrivers = ["amdgpu"];
     hardware.bolt.enable = true; # Thunderbolt 4 support
   };
 }

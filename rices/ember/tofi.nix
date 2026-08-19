@@ -1,6 +1,7 @@
-{ lib
-, config
-, ...
+{
+  lib,
+  config,
+  ...
 }:
 lib.mkIf config.rices.ember.enable {
   # tofi is this rice's *menu* widget, not its launcher — the launcher is

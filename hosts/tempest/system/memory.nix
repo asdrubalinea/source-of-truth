@@ -1,5 +1,4 @@
-{ ... }:
-{
+{...}: {
   # Memory-resilience tuning for this 32 GiB ZFS laptop. Pairs with the 8 GiB
   # ARC cap in system/zfs.nix and the existing earlyoom in system/services.nix
   # (whose RAM-only trigger stays correct regardless of how full zram gets —
@@ -38,7 +37,7 @@
   #
   # zswap is a write cache designed to spare a slow backing device. zram is not
   # a slow backing device. Pick one; here it is zram.
-  boot.kernelParams = [ "zswap.enabled=0" ];
+  boot.kernelParams = ["zswap.enabled=0"];
 
   boot.kernel.sysctl = {
     # zram makes swapping cheap, so bias the kernel toward reclaiming anonymous

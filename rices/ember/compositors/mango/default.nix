@@ -1,4 +1,4 @@
-{ inputs, ... }:
+{inputs, ...}:
 # The mango compositor layer of the ember rice. mango is a dwl descendant
 # (wlroots + scenefx) with a PaperWM-style `scroller` layout, which is what makes
 # it a plausible stand-in for niri; the rest of the desktop above it is unchanged.

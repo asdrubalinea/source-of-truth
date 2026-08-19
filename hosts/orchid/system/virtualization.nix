@@ -1,5 +1,4 @@
-{ ... }:
-{
+{...}: {
   # vfio.enable = false;
 
   # specialisation."VFIO".configuration = {
@@ -8,7 +7,7 @@
   # };
 
   programs.virt-manager.enable = true;
-  users.groups.libvirtd.members = [ "irene" ];
+  users.groups.libvirtd.members = ["irene"];
 
   virtualisation = {
     libvirtd = {

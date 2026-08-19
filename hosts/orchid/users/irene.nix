@@ -1,5 +1,4 @@
-{ pkgs, ... }:
-{
+{pkgs, ...}: {
   users = {
     mutableUsers = false;
     extraUsers.root.hashedPassword = (import ../../../passwords).password;

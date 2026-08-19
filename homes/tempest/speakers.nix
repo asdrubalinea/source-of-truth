@@ -74,7 +74,12 @@ in {
       # fallback enabled, EasyEffects keeps the last preset loaded on an entry-less device,
       # so the speaker chain leaks. Result once configured: built-in speakers ->
       # framework-speakers, everything else -> flat.
-      ${flatName} = { output = { blocklist = [ ]; plugins_order = [ ]; }; };
+      ${flatName} = {
+        output = {
+          blocklist = [];
+          plugins_order = [];
+        };
+      };
     };
   };
 
@@ -82,10 +87,12 @@ in {
   # can't be derived; referenced by kernel-name, resolved against this irs/ directory),
   # plus the two per-route autoload bindings for the built-in node: Speakers -> the
   # correction, Headphones (3.5mm jack) -> flat, so the speaker IR never colours the jack.
-  xdg.dataFile = builtins.listToAttrs [
-    (mkOutputAutoload speakerRoute presetName)
-    (mkOutputAutoload headphoneRoute flatName)
-  ] // {
-    "easyeffects/irs/${irFile}".source = ./easyeffects/${irFile};
-  };
+  xdg.dataFile =
+    builtins.listToAttrs [
+      (mkOutputAutoload speakerRoute presetName)
+      (mkOutputAutoload headphoneRoute flatName)
+    ]
+    // {
+      "easyeffects/irs/${irFile}".source = ./easyeffects/${irFile};
+    };
 }

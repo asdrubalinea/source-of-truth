@@ -17,9 +17,13 @@
 # Everything under the ZFS datasets starts empty, so it's a fresh tempest with no
 # personal files; home-manager populates /home/irene (a bind-mount of the empty
 # rpool/persist/home dataset) on first boot.
-{ inputs, lib, pkgs, ... }:
 {
-  imports = [ inputs.home-manager.nixosModules.home-manager ];
+  inputs,
+  lib,
+  pkgs,
+  ...
+}: {
+  imports = [inputs.home-manager.nixosModules.home-manager];
 
   # Guest sizing. disko's interactive-vm maps disko.memSize -> memorySize; the
   # default (1024 MB) is far too small for a niri desktop. (memSize is a real
@@ -74,10 +78,14 @@
     # the thing to revert (drop back to a bare `-device virtio-vga-gl`).
     virtualisation.qemu.options = [
       "-vga none"
-      "-object" "memory-backend-memfd,id=mem0,size=8G,share=on"
-      "-machine" "memory-backend=mem0"
-      "-device" "virtio-vga-gl,blob=true,hostmem=4G"
-      "-display" "gtk,gl=on"
+      "-object"
+      "memory-backend-memfd,id=mem0,size=8G,share=on"
+      "-machine"
+      "memory-backend=mem0"
+      "-device"
+      "virtio-vga-gl,blob=true,hostmem=4G"
+      "-display"
+      "gtk,gl=on"
     ];
   };
 
@@ -95,7 +103,7 @@
       hostname = "tempest";
     };
     users.irene = {
-      imports = [ ../../homes/tempest ];
+      imports = [../../homes/tempest];
 
       # stylix enables `stylix.overlays.enable` by default, which sets
       # nixpkgs.overlays inside the HM config. Combined with useGlobalPkgs that
@@ -131,8 +139,8 @@
   systemd.services.home-manager-irene = {
     unitConfig.RequiresMountsFor = "/home/irene";
     # /home/irene lives on the persist ZFS dataset; make sure it's mounted.
-    after = [ "home-irene.mount" ];
-    requires = [ "home-irene.mount" ];
+    after = ["home-irene.mount"];
+    requires = ["home-irene.mount"];
   };
 
   # Declaratively seed the (public) flake into /persist (a real ZFS dataset in
@@ -142,10 +150,10 @@
   # real laptop's /persist.
   systemd.services.seed-source-of-truth = {
     description = "Clone source-of-truth into /persist";
-    wantedBy = [ "multi-user.target" ];
-    after = [ "network-online.target" ];
-    wants = [ "network-online.target" ];
-    path = [ pkgs.git ];
+    wantedBy = ["multi-user.target"];
+    after = ["network-online.target"];
+    wants = ["network-online.target"];
+    path = [pkgs.git];
     unitConfig = {
       ConditionPathExists = "!/persist/source-of-truth/.git";
       # Retry a handful of times: network-online.target can fire before DNS/egress

@@ -1,4 +1,7 @@
-{ pkgs, inputs }: {
+{
+  pkgs,
+  inputs,
+}: {
   # The one thing nh doesn't do in a single call: system + home in order.
   # nh resolves the flake from NH_FLAKE and homeConfigurations from
   # $USER@$HOSTNAME, so this is host-agnostic.
