@@ -44,6 +44,17 @@ let
 in
 {
   config = lib.mkIf (cfg.enable && cfg.mango.enable) {
+    # mango re-reads config.conf only when told to (there is no inotify watch in
+    # its source), and the file it reads is a store symlink — the inode never
+    # changes in place, activation swaps the link. So poke it once the new
+    # generation is linked and `nh home switch` alone is enough to apply a config
+    # edit. `|| true` because this also runs from the niri session, from a TTY,
+    # and on a first activation before any compositor exists, where mmsg has no
+    # socket to talk to and must not fail the switch.
+    home.activation.reloadMango = lib.hm.dag.entryAfter [ "linkGeneration" ] ''
+      run ${pkgs.mango}/bin/mmsg dispatch reload_config > /dev/null 2>&1 || true
+    '';
+
     wayland.windowManager.mango = {
       enable = true;
 
