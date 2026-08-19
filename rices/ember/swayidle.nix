@@ -221,6 +221,21 @@ lib.mkIf config.rices.ember.enable {
     events = {
       before-sleep = "${lockBeforeSleep}";
       lock = "${lockNow}";
+
+      # The manual "restart kanshi after every resume" step, automated. Resuming
+      # from s2idle re-enumerates the external panels (USB4/DP tunnels come back),
+      # and mango enables a freshly-created output by default and places it with
+      # layout_add_auto — so the lid panel lights up and the geometry is whatever
+      # mango chose. kanshi does NOT fix this on its own: its match ignores
+      # enabled/mode/position, so `current_profile` still matches the new head set
+      # and match_and_apply keeps it and re-applies nothing.
+      #
+      # `kanshictl reload` is the smallest thing that does fix it — it clears
+      # current_profile before re-matching, forcing a full commit of the profile's
+      # enable/mode/position/scale. Same effect as the systemctl restart, without
+      # dropping the wayland connection. Harmless under niri, which is why it can
+      # live here in the shared unit rather than behind a compositor test.
+      after-resume = "${pkgs.kanshi}/bin/kanshictl reload";
     };
   };
 }
