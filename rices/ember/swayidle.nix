@@ -43,7 +43,13 @@ let
     "-f" # daemonize, but only AFTER the lock surface is up (see lockBeforeSleep)
     "--ignore-empty-password"
     "--show-failed-attempts"
-    "--indicator"
+    # NOT `--indicator`: swaylock 1.8.6 has no such option, and getopt_long's
+    # prefix matching makes it *ambiguous* against the seven --indicator-* flags,
+    # so swaylock printed its usage and exited 1 before ever touching Wayland.
+    # Every lock since this line was added was a no-op: the idle `lock` event did
+    # nothing, and lockBeforeSleep's inhibitor was released instantly, so the box
+    # suspended unlocked and resumed straight to the desktop with no prompt.
+    "--indicator-idle-visible"
     "--color ${colors.base00}"
     "--inside-color ${colors.base01}"
     "--inside-wrong-color ${colors.base08}"
