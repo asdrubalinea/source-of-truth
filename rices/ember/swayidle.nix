@@ -253,25 +253,52 @@ in
     # input-idle variant that ignores them). The gap is app-side, and closing it
     # app-side means one rule per browser, forever.
     #
-    # So inhibit on the thing every video actually has in common: sound. This
-    # daemon holds ONE inhibitor for as long as any non-corked sink-input exists,
-    # which covers Chrome, Firefox and mpv alike, and drops it the moment playback
-    # stops — so an idle desktop still goes dark on schedule, which is the whole
-    # point of the 120s timer on an OLED.
+    # So inhibit on the thing every video actually has in common: sound.
     #
-    # Ceiling: a muted or silent video does not register a sink-input and will
-    # still time out. If that turns up in practice the next rung is mango's own
+    # This was `sway-audio-idle-inhibit` until 2026-08-19, and that NEVER WORKED.
+    # Despite the name and the nixpkgs description ("Prevent swayidle/hypridle from
+    # sleeping"), the 0.2.0 build contains no Wayland client at all:
+    #
+    #   ldd + /proc/<pid>/maps → libpulse, libdbus, libsystemd, no libwayland
+    #   grep -ao zwp_idle_inhibit… → nothing
+    #   grep -ao org.freedesktop.login1.Manager → present
+    #
+    # It takes a *logind* idle inhibitor (visible as `systemd-inhibit --list` →
+    # idle/block "Audio is playing"). swayidle's timers come from the Wayland idle
+    # protocol; logind's idle inhibitor is invisible to them, so every video since
+    # the daemon was added still hit the 120s power-off. The nested-mango test above
+    # validated `wlinhibit` — a real Wayland client — which is why it looked proven.
+    # Lesson: verify the protocol, not the package name.
+    #
+    # wayland-pipewire-idle-inhibit is the real thing — it binds
+    # zwp_idle_inhibit_manager_v1 and reads pipewire directly, so it covers Chrome,
+    # Firefox and mpv alike with no per-app rules. `-w` is passed explicitly even
+    # though wayland is already the default backend: the whole reason this file
+    # needed rewriting is a silent inhibitor backend, so the one that matters is
+    # spelled out rather than inherited.
+    #
+    # -d 5 (the default) only inhibits for streams longer than 5s, which keeps
+    # notification blips and UI clicks from holding the panels awake — strictly
+    # better than the old daemon's "any non-corked sink-input".
+    #
+    # Ceiling: a muted or silent video produces no pipewire stream and will still
+    # time out. If that turns up in practice the next rung is mango's own
     # `idleinhibit_when_focus` window rule, but that inhibits whenever the window
     # is focused (video or not), which is a much worse deal for the panels.
-    systemd.user.services.sway-audio-idle-inhibit = {
+    #
+    # Being a genuine Wayland client, this one now dies with the compositor — so it
+    # is in the restart-policy list in homes/tempest/default.nix alongside swayidle
+    # and kanshi. The old logind-only daemon never needed that, which is exactly why
+    # it survived a mango restart looking healthy while doing nothing.
+    systemd.user.services.wayland-pipewire-idle-inhibit = {
       Unit = {
-        Description = "Hold a Wayland idle inhibitor while audio is playing";
+        Description = "Hold a Wayland idle inhibitor while pipewire is playing audio";
         PartOf = ["graphical-session.target"];
         After = ["graphical-session.target"];
       };
       Service = {
-        ExecStart = "${pkgs.sway-audio-idle-inhibit}/bin/sway-audio-idle-inhibit";
-        Restart = "on-failure";
+        ExecStart = "${pkgs.wayland-pipewire-idle-inhibit}/bin/wayland-pipewire-idle-inhibit -w";
+        Restart = "always";
       };
       Install.WantedBy = ["graphical-session.target"];
     };
