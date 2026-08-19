@@ -15,11 +15,16 @@ let
     echo $! > "$XDG_RUNTIME_DIR/drift-screensaver.pid"
   '';
 
+  # Every external here MUST be an absolute store path or a bash builtin. swayidle
+  # runs its commands with the systemd user-manager PATH, which has no coreutils —
+  # bare `cat`/`rm` here died with "command not found" on every single resume, so
+  # `kill ""` never killed anything and the screensaver window leaked, forever.
+  # `$(< file)` is the builtin read, which is why it needs no store path.
   driftStop = pkgs.writeShellScript "drift-screensaver-stop" ''
     pidfile="$XDG_RUNTIME_DIR/drift-screensaver.pid"
     if [ -f "$pidfile" ]; then
-      kill "$(cat "$pidfile")" 2>/dev/null || true
-      rm -f "$pidfile"
+      kill "$(< "$pidfile")" 2>/dev/null || true
+      ${pkgs.coreutils}/bin/rm -f "$pidfile"
     fi
   '';
 
@@ -121,10 +126,18 @@ let
   # charging, so the wrapper no-ops and the desktop just sits with screens off,
   # fully awake — the Framework has no S3, so s2idle is the deep state, which is
   # exactly what we want to avoid while charging.
+  #
+  # `BAT*`, not `*`: peripheral batteries land in the same directory
+  # (hidpp_battery_N for the Logitech receiver, controller batteries, …) and a
+  # mouse sitting at Full would short-circuit the loop and veto every suspend.
+  # Same absolute-path rule as driftStop above — `$(< …)` is the bash builtin;
+  # the bare `cat` this used to call was never on swayidle's PATH, so the read
+  # returned empty, the != test passed and this ALWAYS exited 0. Idle suspend on
+  # battery has never once fired.
   suspendOrOnBattery = pkgs.writeShellScript "ember-suspend-or-not" ''
-    for s in /sys/class/power_supply/*/status; do
+    for s in /sys/class/power_supply/BAT*/status; do
       [ -r "$s" ] || continue
-      [ "$(cat "$s")" != "Discharging" ] && exit 0
+      [ "$(< "$s")" != "Discharging" ] && exit 0
     done
     exec ${pkgs.systemd}/bin/systemctl suspend
   '';
