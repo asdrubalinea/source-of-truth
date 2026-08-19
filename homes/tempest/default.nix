@@ -36,6 +36,7 @@ in {
     ../../desktop/zellij.nix
     # ../../desktop/warp.nix
     ../../desktop/obsidian.nix
+    ../../desktop/hn-tui.nix
     ../../desktop/home-packages.nix
     ../../desktop/yt-dlp.nix
     ../../desktop/mimeapps.nix

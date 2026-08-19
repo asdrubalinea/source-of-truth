@@ -35,6 +35,7 @@ in {
     ../desktop/warp.nix
 
     ../desktop/home-packages.nix
+    ../desktop/hn-tui.nix
     ../desktop/yt-dlp.nix
     # ../desktop/orchid-gaming-packages.nix
   ];

@@ -378,6 +378,5 @@ in {
     blahaj
     gay # rainbow output filter
     ponysay
-    inputs.hn-tui-flake.packages.${stdenv.hostPlatform.system}.hackernews-tui # hn TUI
   ];
 }

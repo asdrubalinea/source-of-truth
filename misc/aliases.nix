@@ -1,7 +1,4 @@
-{
-  pkgs,
-  inputs,
-}: {
+{pkgs}: {
   # The one thing nh doesn't do in a single call: system + home in order.
   # nh resolves the flake from NH_FLAKE and homeConfigurations from
   # $USER@$HOSTNAME, so this is host-agnostic.
@@ -18,5 +15,5 @@
   please = "${pkgs.doas}/bin/doas";
   neofetch = "${pkgs.hyfetch}/bin/hyfetch";
   fetch = "${pkgs.hyfetch}/bin/hyfetch";
-  hn = "${inputs.hn-tui-flake.packages.${pkgs.stdenv.hostPlatform.system}.hackernews-tui}/bin/hackernews_tui";
+  hn = "${pkgs.hackernews-tui}/bin/hackernews_tui";
 }

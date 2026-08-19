@@ -1,8 +1,4 @@
-{
-  pkgs,
-  inputs,
-  ...
-}: {
+{pkgs, ...}: {
   # Frecency-ranked directory jumping. Enabled as a program rather than
   # dropped into desktop/home-packages.nix because the binary does nothing
   # without the shell hook that records every visit — same reasoning as the
@@ -26,7 +22,7 @@
     # (drop this line) once home-manager guards the missing script.
     generateCompletions = false;
 
-    shellAliases = import ./aliases.nix {inherit pkgs inputs;};
+    shellAliases = import ./aliases.nix {inherit pkgs;};
 
     shellAbbrs = {};
 

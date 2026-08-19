@@ -163,10 +163,6 @@
       url = "github:mattwparas/helix/steel-event-system";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    hn-tui-flake = {
-      url = "github:asdrubalinea/hn-tui-flake";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
     claude-code.url = "github:sadjow/claude-code-nix";
     llm-agents = {
       url = "github:numtide/llm-agents.nix";
