@@ -198,6 +198,38 @@
       # crane and rust-overlay against rust-toolchain.toml, and that pin is the
       # combination upstream actually builds against.
     };
+    openlogi = {
+      # PINNED to a specific rev, and not to a tag, because neither end of the
+      # range works:
+      #
+      #   - nixpkgs (every branch) is on 0.6.25, which predates 0.6.27's
+      #     "recognise Lightspeed receiver 046d:c547 (G915, G502 X)" (#574).
+      #     tempest's receiver is exactly that, so on 0.6.25 `detect()` skips it
+      #     and the mouse never appears — hence taking the input at all.
+      #   - v0.7.1, the newest tag, does not build: its outputHashes names
+      #     gpui-updater-0.0.6 while its Cargo.lock pins 0.0.7, and
+      #     importCargoLock rejects the stale key. Repaired the next day by
+      #     d5d3a7e5 "make Linux packaging first-class", which also added the
+      #     flake's nixosModules output.
+      #   - master (2026-08-19) panics at startup: that day's refactor wave built
+      #     a `tokio::time::interval` on GPUI's executor, where no Tokio reactor
+      #     exists (crates/openlogi-desktop/src/main.rs:468, from a2613f56
+      #     "stop scanning for cameras with no window open"). It fires as soon as
+      #     a camera is present, and tempest has a C920. That wave also renamed
+      #     openlogi-gui to openlogi-desktop.
+      #
+      # 822c6e41 is the last commit before that wave: repaired packaging, no
+      # camera timer, binary still `openlogi-gui`. Bump it deliberately, and
+      # check `openlogi list` plus a GUI launch afterwards.
+      #
+      # Like warp below, this is a from-source gpui/Rust build with no published
+      # substituter, so it rebuilds slowly whenever this rev moves. `follows` is
+      # correct here: upstream pins nothing but nixpkgs and there is no cache to
+      # miss. If a bump fails against our channel (rustc too old for the
+      # workspace), drop the `follows` to use upstream's own pin.
+      url = "github:AprilNEA/OpenLogi/822c6e4181f0118713473bcc524e6a7fbd51f5a4";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     nix-flatpak.url = "github:gmodena/nix-flatpak";
   };
 

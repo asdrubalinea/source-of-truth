@@ -27,6 +27,7 @@
       # Shared hardware modules
       ../../hardware/bluetooth.nix
       ../../hardware/audio.nix
+      ../../hardware/openlogi.nix
       ../../hardware/rtl-sdr.nix
       ../../hardware/sdrplay.nix
 
