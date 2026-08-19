@@ -103,7 +103,32 @@ let
   # to it (see the `niri` binding in compositors/niri/niri.nix). mango's dispatch
   # is per-monitor with no "all" form, so we enumerate what it reports; the loop
   # is a no-op if it reports nothing, which is the right behaviour for a session
-  # with no outputs rather than an error.
+  # with no outputs rather than an error. `get all-monitors` answers with a
+  # {"monitors":[...]} wrapper, not a bare array — filtering `.[].name` makes jq
+  # error out and the loop silently never runs (the bug that left mango's panels
+  # on while niri's went dark).
+  #
+  # NEVER TOUCH A MONITOR KANSHI DISABLED. `get all-monitors` lists every monitor
+  # mango knows, including the ones kanshi has *disabled* (eDP-1 in every docked
+  # profile), and `wakeup_monitor` is unconditional — it sets enabled=true and
+  # clears only_sleep. Wake the lid panel that way and, because it was removed
+  # from the layout when kanshi disabled it, mango re-adds it with
+  # `wlr_output_layout_add_auto`: wherever mango picks, not where kanshi put it.
+  # That is the "resume, layout is fucked, restart kanshi" bug.
+  #
+  # niri's power-on-monitors distinguishes "powered off" from "disabled"; mango's
+  # sleep/wake pair does not — but mango's *state* does, and reports it. Both
+  # sleep_monitor and a kanshi disable set enabled=false, yet updatemons only
+  # drops the output from the layout when only_sleep is 0, so:
+  #
+  #   kanshi-disabled → out of the layout → mmsg reports width/height 0
+  #   slept by us     → stays in the layout → mmsg reports its real geometry
+  #
+  # `select(.width > 0)` is therefore exactly "monitors this session is allowed to
+  # drive", for both directions, with no state to keep between the two calls — a
+  # swayidle restart mid-sleep can't strand the session with black panels, and
+  # `on` can't light up a panel kanshi deliberately turned off. (`active` is not
+  # the flag to test: in mmsg it means "is the selected monitor".)
   monitorPower = pkgs.writeShellScript "ember-monitor-power" ''
     set -u
     case "''${1:-off}" in
@@ -116,7 +141,7 @@ let
       exec ${pkgs.niri-unstable}/bin/niri msg action "$niri_action"
     elif [ -n "''${MANGO_INSTANCE_SIGNATURE:-}" ]; then
       ${pkgs.mango}/bin/mmsg get all-monitors \
-        | ${pkgs.jq}/bin/jq -r '.[].name // empty' \
+        | ${pkgs.jq}/bin/jq -r '.monitors[] | select(.width > 0) | .name' \
         | while read -r mon; do
             ${pkgs.mango}/bin/mmsg dispatch "$mango_action,$mon" || true
           done
