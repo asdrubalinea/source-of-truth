@@ -6,6 +6,7 @@
 }:
 let
   windowRules = import ./window-rules.nix;
+  playClipboard = import ../../play-clipboard.nix { inherit pkgs; };
   c = config.lib.stylix.colors.withHashtag;
 
   # --- Scratchpads (nirius-backed) -----------------------------------------
@@ -557,6 +558,9 @@ lib.mkIf config.rices.ember.niri.enable {
 
         # Browser
         "Mod+Shift+B".action.spawn = [ "${inputs.zen-browser.packages.x86_64-linux.beta}/bin/zen-beta" ];
+
+        # Copy a video URL, play it in mpv instead of the browser's decoder.
+        "Mod+Y".action.spawn = [ "${playClipboard}" ];
 
         # Screenshots (using niri's built-in UI)
         "Mod+Shift+S".action.screenshot = { };

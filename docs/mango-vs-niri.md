@@ -19,6 +19,7 @@ Identical unless the right column says otherwise.
 | Mod+B / Mod+P / Mod+N | blueman / pavucontrol / dolphin | same |
 | Mod+L | `loginctl lock-session` | same |
 | Mod+Shift+B | zen-beta | same |
+| Mod+Y | mpv on the clipboard URL | same |
 | Mod+T | Telegram scratchpad | same key, native scratchpad |
 | Mod+Shift+T | toggle scratchpad pile | `toggle_scratchpad` |
 | Mod+Q | close window | `killclient` |
