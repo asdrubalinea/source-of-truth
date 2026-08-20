@@ -88,5 +88,27 @@
         (ADR 0012), so nothing there consults this.
       '';
     };
+
+    ddcSleepMonitors = lib.mkOption {
+      type = lib.types.listOf lib.types.str;
+      default = [];
+      description = ''
+        Panels whose panels-off power cycling must go through DDC/CI (VCP D6)
+        instead of compositor DPMS, identified by the MFG:model:serial id that
+        `ddcutil detect --brief` prints on its Monitor line (e.g.
+        "BOE:Display:" — a trailing empty serial is part of the id).
+
+        A bus-powered panel can't be DPMS-slept: cutting its DP signal
+        power-cycles it off the bus and it reconnects a second later, lit — it
+        never stays off, and the hotplug churn re-applies kanshi profiles
+        mid-sleep. VCP D6 turns the panel dark while the DP link stays up: no
+        hotplug, and the panel keeps answering DDC so the same channel wakes it.
+
+        Machine policy — set from homes/<host>/monitors.nix, next to the kanshi
+        profiles that know these panels' serials. Consumed by ./swayidle.nix's
+        monitorPower dispatcher, mango branch only (niri's power-off-monitors is
+        not routed through this list).
+      '';
+    };
   };
 }

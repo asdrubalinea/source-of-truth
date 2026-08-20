@@ -143,21 +143,57 @@
   # swayidle restart mid-sleep can't strand the session with black panels, and
   # `on` can't light up a panel kanshi deliberately turned off. (`active` is not
   # the flag to test: in mmsg it means "is the selected monitor".)
+  # Panels on rices.ember.ddcSleepMonitors are powered through their own scaler
+  # (DDC/CI, VCP D6) instead of the compositor. DPMS-off cuts the DP signal, and
+  # a bus-powered panel then drops off the bus entirely and reconnects a second
+  # later, lit — it never stays off, and the hotplug churn re-applies kanshi
+  # profiles mid-sleep (the churn that used to strand the slept QD-OLED; see the
+  # layout-model comment above). VCP D6 keeps the DP link up: the panel goes
+  # dark, stays enumerated, keeps answering DDC, and wakes on d6=1.
+  #
+  # --noverify because the BOE's scaler NAKs the read-back while entering
+  # standby (DDCRC_VERIFY) even though the write took; the retry covers i2c
+  # flock collisions with noctalia's brightness polling. Connector names are
+  # incidental (see homes/<host>/monitors.nix), so the policy matches ddcutil's
+  # MFG:model:serial id and the connector is resolved through `detect --brief`
+  # at runtime (~1s, once per off/on, skipped entirely when the list is empty).
+  ddcMonitors = config.rices.ember.ddcSleepMonitors;
+  ddcutil = "${pkgs.ddcutil}/bin/ddcutil";
+  awk = "${pkgs.gawk}/bin/awk";
   monitorPower = pkgs.writeShellScript "ember-monitor-power" ''
     set -u
     case "''${1:-off}" in
-      off) niri_action=power-off-monitors; mango_action=sleep_monitor ;;
-      on)  niri_action=power-on-monitors;  mango_action=wakeup_monitor ;;
+      off) niri_action=power-off-monitors; mango_action=sleep_monitor; ddc_value=4 ;;
+      on)  niri_action=power-on-monitors;  mango_action=wakeup_monitor; ddc_value=1 ;;
       *) exit 2 ;;
     esac
 
     if [ -n "''${NIRI_SOCKET:-}" ]; then
       exec ${pkgs.niri-unstable}/bin/niri msg action "$niri_action"
     elif [ -n "''${MANGO_INSTANCE_SIGNATURE:-}" ]; then
+      # Lines of "<connector>\t<i2c bus>\t<MFG:model:serial>", one per panel
+      # ddcutil can talk to. `-F': +'` keeps the colons inside the id intact.
+      ddc_table=""
+      ${lib.optionalString (ddcMonitors != []) ''
+        ddc_table=$(${ddcutil} detect --brief 2>/dev/null \
+          | ${awk} -F': +' '
+              $1 ~ /I2C bus/       { bus = $2 }
+              $1 ~ /DRM connector/ { conn = $2; sub(/^card[0-9]+-/, "", conn) }
+              $1 ~ /Monitor/       { printf "%s\t%s\t%s\n", conn, bus, $2 }')
+      ''}
       ${pkgs.mango}/bin/mmsg get all-monitors \
         | ${pkgs.jq}/bin/jq -r '.monitors[] | select(.width > 0) | .name' \
         | while read -r mon; do
-            ${pkgs.mango}/bin/mmsg dispatch "$mango_action,$mon" || true
+            ddc_id=$(printf '%s\n' "$ddc_table" | ${awk} -F'\t' -v m="$mon" '$1 == m {print $3}')
+            if [ -n "$ddc_id" ] && printf '%s\n' ${lib.escapeShellArgs ddcMonitors} \
+                | ${pkgs.gnugrep}/bin/grep -Fxq "$ddc_id"; then
+              bus=$(printf '%s\n' "$ddc_table" | ${awk} -F'\t' -v m="$mon" '$1 == m {print $2}')
+              bus="''${bus#/dev/i2c-}"
+              ${ddcutil} --bus "$bus" --noverify setvcp d6 "$ddc_value" \
+                || ${ddcutil} --bus "$bus" --noverify setvcp d6 "$ddc_value" || true
+            else
+              ${pkgs.mango}/bin/mmsg dispatch "$mango_action,$mon" || true
+            fi
           done
     fi
   '';

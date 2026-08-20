@@ -121,6 +121,14 @@ in {
     }
     else null;
 
+  # The bus-powered portable BOE cannot be DPMS-slept: cutting its DP signal
+  # power-cycles it off the bus and it reconnects a second later, lit. Its
+  # Realtek scaler does honour VCP D6 over DDC (verified 2026-08-20: panel goes
+  # dark, stays enumerated, keeps answering DDC, wakes on d6=1), so panels-off
+  # drives it through ddcutil instead. The id is ddcutil's MFG:model:serial —
+  # this panel reports no serial, so the trailing colon is part of the id.
+  rices.ember.ddcSleepMonitors = ["BOE:Display:"];
+
   services.kanshi = {
     enable = true;
     systemdTarget = "graphical-session.target";
