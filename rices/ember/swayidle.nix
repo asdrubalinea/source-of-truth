@@ -129,6 +129,15 @@
   #   kanshi-disabled → out of the layout → mmsg reports width/height 0
   #   slept by us     → stays in the layout → mmsg reports its real geometry
   #
+  # "Stays in the layout" only holds with the only_sleep patch applied in
+  # flake.nix (packages/patches/mango-outputmgr-keeps-only-sleep.patch).
+  # Unpatched, any kanshi profile re-apply — and sleeping the bus-powered
+  # portable panel CAUSES one, because DPMS-off drops it off the bus and it
+  # reconnects a second later — cleared only_sleep on every head kanshi
+  # re-committed as disabled; updatemons then ejected the slept QD-OLED from
+  # the layout and this filter hid it from `on` forever (the 2026-08-19
+  # black-OLED-until-mango-dies bug).
+  #
   # `select(.width > 0)` is therefore exactly "monitors this session is allowed to
   # drive", for both directions, with no state to keep between the two calls — a
   # swayidle restart mid-sleep can't strand the session with black panels, and

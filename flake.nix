@@ -349,6 +349,23 @@
       # (rices/ember/compositors/mango/system.nix), the HM config validator, and
       # the `mmsg` call in rices/ember/swayidle.nix.
       inputs.mangowm.overlays.default
+      # Local fix on top (unfixed upstream as of 2026-08-19): mango's
+      # output-management handler cleared only_sleep on EVERY head of EVERY
+      # client config — including heads the config leaves disabled, and
+      # including side-effect-free test passes. kanshi re-applies a profile
+      # whenever the head set changes (the bus-powered portable panel drops off
+      # the bus when slept and reconnects a second later), re-committing a
+      # slept monitor's CURRENT state — disabled — and the clear plus
+      # updatemons() then ejected the slept QD-OLED from the layout. mmsg
+      # reports width 0 for it, so the swayidle wake path
+      # (`select(.width > 0)`, rices/ember/swayidle.nix) could never wake it
+      # again: black panel until the compositor died. The patch clears
+      # only_sleep only on a real commit that enables the head.
+      (final: prev: {
+        mango = prev.mango.overrideAttrs (old: {
+          patches = (old.patches or []) ++ [./packages/patches/mango-outputmgr-keeps-only-sleep.patch];
+        });
+      })
       claude-code.overlays.default
       # `default` builds against our nixpkgs; `pinned` would use upstream's own
       # revision to guarantee attic cache hits. See the input's comment above

@@ -1,0 +1,21 @@
+--- a/src/mango.c
++++ b/src/mango.c
+@@ -5734,9 +5734,15 @@
+ 		Monitor *m = wlr_output->data;
+ 		struct wlr_output_state state;
+ 
+-		/* Ensure displays previously disabled by
+-		 * wlr-output-power-management-v1 are properly handled*/
+-		m->only_sleep = 0;
++		/* An explicit enable from an output-management client overrides a
++		 * wlr-output-power-management-v1 sleep. A config that leaves the
++		 * head disabled (e.g. kanshi re-committing a slept monitor's
++		 * current state because another head hotplugged) must NOT clear
++		 * only_sleep, or the updatemons() below drops the slept output
++		 * from the layout and it can never be woken per-monitor again.
++		 * Test passes stay side-effect free. */
++		if (!test && config_head->state.enabled)
++			m->only_sleep = 0;
+ 
+ 		wlr_output_state_init(&state);
+ 		wlr_output_state_set_enabled(&state, config_head->state.enabled);
