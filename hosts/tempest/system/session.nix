@@ -41,6 +41,11 @@ in {
   # `security.pam.services.greetd.enableGnomeKeyring` line in security.nix do
   # anything — logging in through tuigreet unlocks the login keyring as part of
   # the greetd PAM session.
+  # Unlocks the login keyring from the greetd PAM session. Lives here rather
+  # than in a security.nix because it is meaningless without greetd below;
+  # the rest of the doas/sudo posture is modules/security.nix.
+  security.pam.services.greetd.enableGnomeKeyring = true;
+
   services.greetd = {
     enable = true;
     settings = {

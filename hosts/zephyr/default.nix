@@ -18,6 +18,7 @@
     ./users/irene.nix
 
     ../../modules/nix.nix
+    ../../modules/security.nix
   ];
 
   system.stateVersion = "25.11";

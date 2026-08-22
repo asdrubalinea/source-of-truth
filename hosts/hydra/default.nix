@@ -14,6 +14,7 @@
     ./users/irene.nix
 
     ../../modules/nix.nix
+    ../../modules/security.nix
     ../../services/caddy
   ];
 

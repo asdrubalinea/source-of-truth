@@ -12,7 +12,6 @@
       ./system/localization.nix
       ./system/networking.nix
       ./system/environment.nix
-      ./system/security.nix
       ./system/services.nix
       ./system/backup-notify.nix
       ./system/session.nix
@@ -33,6 +32,7 @@
 
       # System modules
       ../../modules/nix.nix
+      ../../modules/security.nix
 
       # Services
       ../../services/borg-backup.nix
