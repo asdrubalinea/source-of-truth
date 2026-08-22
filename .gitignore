@@ -2,9 +2,13 @@
 desktop/emacs/var/
 desktop/emacs/etc/
 
-# tempest-vm (nix build .#…build.vmWithDisko / run-*-vm) runtime artifacts:
-# OVMF EFI NVRAM varstore + nix build result symlink + any stray disk images.
+# Disko VM (nix build .#…build.vmWithDisko / run-*-vm) runtime artifacts, for
+# tempest-vm and orchid-vm alike: OVMF EFI NVRAM varstore, the nix build result
+# symlink, any stray disk images, and — since orchid-vm enables
+# virtualisation.tpm — the swtpm state directory the runner drops in $PWD
+# (lock, log, and the emulated TPM's persistent blob).
 result
 result-*
 *-efi-vars.fd
 *.qcow2
+*-swtpm/

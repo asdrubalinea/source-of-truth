@@ -11,19 +11,14 @@
 
   nix-size = (
     pkgs.writeShellScriptBin "nix-size" ''
-      zfs list -o name,used -t filesystem,volume -Hp | awk -v dataset='zroot/local/nix' '$1 == dataset { printf "%.0f GiB", $2/1024/1024/1024 }'
+      zfs list -o name,used -t filesystem,volume -Hp | awk -v dataset='rpool/nix' '$1 == dataset { printf "%.0f GiB", $2/1024/1024/1024 }'
     ''
   );
 in {
   imports = [
-    inputs.hyprland.homeManagerModules.default
-    # inputs.stylix.homeManagerModules.stylix
-
-    ../rices/estradiol
-
-    # ../desktop/zed-editor
+    # No WM for now, so no ../rices/estradiol (hyprland/waybar/stylix/kitty…)
+    # and no hyprland HM module. Both come back together.
     ../desktop/helix.nix
-    # ../desktop/emacs
 
     # Applying and cleaning is `nh` (enabled in hosts/orchid/default.nix):
     # `nh os switch`, `nh home switch -b backup`, `nh clean all`.
@@ -32,12 +27,11 @@ in {
     ../misc/fish.nix
     ../desktop/tmux.nix
     ../desktop/zellij.nix
-    ../desktop/warp.nix
 
     ../desktop/home-packages.nix
-    ../desktop/hn-tui.nix
     ../desktop/yt-dlp.nix
-    # ../desktop/orchid-gaming-packages.nix
+    # ../desktop/hn-tui.nix reads config.lib.stylix.colors to theme itself, and
+    # stylix is not wired in without a rice — it comes back with the WM.
   ];
 
   # Let Home Manager install and manage itself.
@@ -51,19 +45,6 @@ in {
 
   home.sessionVariables = {
     EDITOR = "${pkgs.helix}/bin/hx";
-  };
-
-  # programs.nushell.enable = true;
-  # services.vscode-server.enable = true;
-  # services.vscode-server.enableFHS = true;
-
-  services.gnome-keyring = {
-    enable = true;
-    components = [
-      "pkcs11"
-      "secrets"
-      "ssh"
-    ];
   };
 
   programs.emacs = {
@@ -85,36 +66,6 @@ in {
     nix-size
   ];
 
-  # programs.neovim = {
-  #   enable = true;
-
-  #   plugins = with pkgs.vimPlugins; [
-  #     telescope-nvim
-  #     telescope-fzf-native-nvim
-  #   ];
-
-  #   extraPackages = with pkgs; [
-  #     lua-language-server
-  #   ];
-  # };
-
-  # programs.vscode = {
-  #   enable = true;
-  #   package = pkgs.vscode.fhsWithPackages
-  #   (ps: with ps; [ rustup zlib openssl.dev pkg-config ]);
-  # };
-
-  programs.vscode = {
-    enable = true;
-    package = pkgs.vscode.fhsWithPackages (ps:
-      with ps; [
-        rustup
-        zlib
-        openssl.dev
-        pkg-config
-      ]);
-  };
-
   programs.nix-index = {
     enable = true;
     enableFishIntegration = true;
@@ -124,4 +75,8 @@ in {
   # than a manual `starship init` in misc/fish.nix, which double-initialised it
   # on hosts that also enabled programs.starship.
   programs.starship.enable = true;
+
+  # Dropped with the desktop: ../desktop/warp.nix (GUI terminal, and a long
+  # from-source Rust build), programs.vscode's FHS wrapper, and
+  # services.gnome-keyring — there is no graphical session to unlock it.
 }

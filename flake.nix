@@ -467,20 +467,17 @@
           ./hosts/tempest/default.nix
         ];
       };
-  in {
-    # Expose the locked home-manager CLI so it can be bootstrapped without
-    # relying on whatever's in PATH — useful right after an `nh os switch` that
-    # tears down /etc/profiles/per-user/irene before the first standalone HM
-    # activation:
-    #   nix run /persist/source-of-truth#home-manager -- switch \
-    #     --flake '.#irene@tempest' -b backup
-    packages.${defaultSystem}.home-manager =
-      home-manager.packages.${defaultSystem}.default;
 
-    nixosConfigurations = {
-      "orchid" = lib.nixosSystem {
+    # Same trick for orchid: the real tower (virtual = false) and an ephemeral
+    # QEMU clone (virtual = true), from one host definition. ./hosts/orchid/
+    # default.nix consumes the `virtual` specialArg and imports ./vm.nix only when
+    # it is true; there is no physical-hardware layer to gate off, because orchid
+    # has no lanzaboote/ucodenix/nixos-hardware and its hardware.nix is inert in a
+    # guest. Build with `./build-vm orchid`, then run ./result/bin/disko-vm.
+    mkOrchid = virtual:
+      lib.nixosSystem {
         specialArgs = {
-          inherit inputs;
+          inherit inputs virtual;
           hostname = "orchid";
         };
 
@@ -492,11 +489,31 @@
               overlays = overlays;
             };
           }
-          niri.nixosModules.niri
 
+          # No compositor module here: orchid runs headless for now. disko +
+          # impermanence + ./disks/orchid.nix are imported inside the host
+          # (hosts/orchid/default.nix), the same way tempest does it.
           ./hosts/orchid/default.nix
         ];
       };
+  in {
+    # Expose the locked home-manager CLI so it can be bootstrapped without
+    # relying on whatever's in PATH — useful right after an `nh os switch` that
+    # tears down /etc/profiles/per-user/irene before the first standalone HM
+    # activation:
+    #   nix run /persist/source-of-truth#home-manager -- switch \
+    #     --flake '.#irene@tempest' -b backup
+    packages.${defaultSystem}.home-manager =
+      home-manager.packages.${defaultSystem}.default;
+
+    nixosConfigurations = {
+      # Real tower.
+      orchid = mkOrchid false;
+
+      # Ephemeral QEMU clone of orchid — same config, guest-sized, with the
+      # credential-dependent units off. Build with `./build-vm orchid`, run
+      # ./result/bin/disko-vm. See mkOrchid above.
+      orchid-vm = mkOrchid true;
 
       # Real Framework laptop. Physical-machine modules (disko/impermanence/
       # lanzaboote/framework/ucodenix + ./disks/tempest.nix) are imported inside
@@ -565,11 +582,10 @@
         };
 
         modules = [
-          hyprland.homeManagerModules.default
-          vscode-server.homeModules.default
-          niri.homeModules.config
-          stylix.homeModules.stylix
-
+          # No compositor/theming modules: orchid has no WM for now, so the
+          # hyprland + niri + stylix HM modules (and vscode-server, which
+          # homes/orchid.nix never enabled) are not wired in. Re-add them
+          # alongside the rice import in homes/orchid.nix.
           ./homes/orchid.nix
 
           {

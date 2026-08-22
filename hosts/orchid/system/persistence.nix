@@ -1,33 +1,25 @@
 {...}: {
-  fileSystems."/" = {
-    device = "zroot/local/root";
-    fsType = "zfs";
-  };
+  # Host-specific state only; the tmpfs-root core is
+  # modules/impermanence-root.nix, shared with tempest. /nix, /persist,
+  # /var/lib/docker and /var/lib/ncps are owned by disko (disks/orchid.nix).
+  #
+  # Everything else stateful on this host already writes straight into /persist
+  # by config (gitea, syncthing, diapee-bot, auxologico-check, the borg
+  # passphrases, caddy's env file, the vaultwarden export) — these are the ones
+  # that insist on /var/lib.
+  environment.persistence."/persist".directories = [
+    "/var/lib/bluetooth"
+    "/var/lib/tailscale"
 
-  fileSystems."/boot" = {
-    device = "/dev/disk/by-uuid/726C-CCD8";
-    fsType = "vfat";
-  };
+    # Vaultwarden's live store. orchid is the PRIMARY vault (tempest and hydra
+    # run read-only mirrors of it via services/vaultwarden-mirror.nix), so
+    # losing this is losing the vault.
+    "/var/lib/vaultwarden"
 
-  fileSystems."/nix" = {
-    device = "zroot/local/nix";
-    fsType = "zfs";
-  };
+    # Caddy's ACME account key and issued certificates. Without this every boot
+    # re-requests certs and will hit Let's Encrypt rate limits.
+    "/var/lib/caddy"
 
-  fileSystems."/home" = {
-    device = "zroot/safe/home";
-    fsType = "zfs";
-  };
-
-  fileSystems."/persist" = {
-    device = "zroot/safe/persist";
-    fsType = "zfs";
-  };
-
-  fileSystems."/mnt/docker" = {
-    device = "zroot/local/docker";
-    fsType = "zfs";
-  };
-
-  swapDevices = [];
+    "/var/lib/libvirt"
+  ];
 }
