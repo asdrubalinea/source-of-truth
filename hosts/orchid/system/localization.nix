@@ -1,5 +1,5 @@
 {pkgs, ...}: {
-  time.timeZone = "Europe/Rome";
+  time.timeZone = "Atlantic/Canary";
 
   i18n.defaultLocale = "en_US.UTF-8";
 
