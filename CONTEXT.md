@@ -83,7 +83,7 @@ modes fused into one complaint. The glossary keeps them apart.
   notifications, lockscreen, terminals, theming, idle handling, wallpaper —
   together with one or more compositors that can run underneath it. A rice
   defines *what the desktop is and how it behaves*; it is meant to be
-  independent of the machine it runs on. tempest's rice is **ember**; orchid's is
+  independent of the machine it runs on. tempest's rice is **ember**; orchid's was
   **estradiol**.
   A rice is **not** named after its compositor. ember runs on either niri or
   mango and is recognisably the same desktop on both, which is the whole reason

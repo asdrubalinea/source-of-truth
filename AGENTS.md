@@ -8,15 +8,15 @@
 - `disks/` contains Disko layouts; `packages/` contains custom package definitions.
 - `rices/` holds whole desktop environments — shell furniture, theming, fonts,
   wallpaper, plus the compositor(s) that run under them. `ember` (tempest) and
-  `estradiol` (orchid). ember is one rice with two *compositor layers*,
+  `estradiol` (was orchid's; imported by nothing while orchid is headless). ember is one rice with two *compositor layers*,
   `rices/ember/compositors/{niri,mango}/`: both are installed and the session is
   picked at the greeter per login (ADR 0012). No waybar: tempest's shell is
   Noctalia, and the one remaining waybar process is the marquee's strut.
 - `docs/` holds long-form notes and `docs/adr/` the decision records — read the
   relevant ADR before changing anything it covers.
 - `scripts/` holds the `writeScriptBin` / `writeShellApplication` helpers. The
-  top-level executables have no extension: `build-vm`, `tempest-format`,
-  `tempest-install`.
+  top-level executables have no extension: `build-vm`, `disk-format`,
+  `disk-install`.
 - `misc/` (fish + shell aliases, imported by both home configs) and `passwords/`
   also exist. Helix's config lives in `desktop/helix.nix` + `desktop/helix/`
   (Steel cogs) — there is no top-level `helix/`.
@@ -24,9 +24,9 @@
 ## Build, Test, and Development Commands
 - `nh os switch` / `nh home switch -b backup` (or `apply` for both): activate the current host's NixOS and Home Manager configs. `nh` is enabled per host via `programs.nh.flake`, which sets `NH_FLAKE`.
 - `nix flake update`: update flake inputs (the old `./update-flakes.sh` wrapper was removed).
-- `./build-vm`: build the non-destructive `tempest-vm` QEMU clone (`system.build.vmWithDisko`); run `./result/bin/disko-vm`.
-- `./tempest-format`: format/mount disks for the `tempest` layout (destructive).
-- `./tempest-install`: install NixOS using the `tempest` Disko layout.
+- `./build-vm <tempest|orchid>`: build that host's non-destructive QEMU clone (`system.build.vmWithDisko`); run `./result/bin/disko-vm`.
+- `./disk-format <host> <device>`: format/mount disks per `disks/<host>.nix` (destructive).
+- `./disk-install <host> <device>`: install NixOS using that host's Disko layout.
 
 ## Coding Style & Naming Conventions
 - Nix files use two-space indentation; keep attribute sets aligned and readable.
@@ -46,7 +46,7 @@
   and stop. (`nixos-rebuild` is not the tool here in any case; `nh` is.)
 - Cheap checks an agent *may* run: `nix-instantiate --parse <file>` for syntax,
   `nix flake check --no-build`, and `shellcheck` on `scripts/*.sh`.
-- For anything needing a real build, `./build-vm` produces the non-destructive
+- For anything needing a real build, `./build-vm <host>` produces the non-destructive
   `tempest-vm` — but it is still a build, so it is the author's to run too.
 
 ## Commit & Pull Request Guidelines
@@ -61,6 +61,6 @@
 - Include screenshots for UI changes under `rices/` or `desktop/` when applicable.
 
 ## Security & Configuration Tips
-- Disk operations (`tempest-format`, `tempest-install`) are destructive; double-check target disks.
+- Disk operations (`disk-format`, `disk-install`) are destructive; double-check target disks.
 - Host secrets may be managed via `sops-nix`; avoid committing raw secrets.
-- Review `hosts/<name>/system/security.nix` before changing security-sensitive settings.
+- Review `modules/security.nix` (shared doas/sudo posture) before changing security-sensitive settings.

@@ -43,7 +43,7 @@ server and a Pi — plus Home Manager for `irene` — from a single declarative 
 | Host | What it is | Highlights |
 |------|------------|------------|
 | **`tempest`** ⛈️ | Framework AMD AI 300 laptop | `disko` + `impermanence` + `lanzaboote` (secure boot) + `ucodenix`, CachyOS kernel, ZFS-on-LUKS, [niri](https://github.com/YaLTeR/niri) or [mango](https://github.com/mangowm/mango), chosen at the greeter |
-| **`orchid`** 🌸 | Desktop workstation | standalone Home Manager, `estradiol` rice |
+| **`orchid`** 🌸 | Tower (7800X3D, 64 GiB) | disko ZFS-on-LUKS + impermanence, headless, standalone Home Manager |
 | **`hydra`** 🐍 | QEMU guest server | Caddy, Grafana, Glance — the always-on box |
 | **`zephyr`** 🍃 | Raspberry Pi 3B+ (aarch64) | headless; cross-built on tempest under binfmt, flashed as an SD image |
 | **`tempest-vm`** 📦 | tempest, minus the hardware | same config with the physical layer dropped — disko + impermanence + niri in QEMU, via `./build-vm` |
@@ -98,8 +98,8 @@ sitrep             # one-screen health readout (sudo for SMART)
 > Only run them when actually installing.
 >
 > ```sh
-> ./tempest-format  /dev/disk/by-id/<target>   # disko destroy,format,mount
-> ./tempest-install /dev/disk/by-id/<target>   # disko-install .#tempest
+> ./disk-format tempest  /dev/disk/by-id/<target>   # disko destroy,format,mount
+> ./disk-install tempest /dev/disk/by-id/<target>   # disko-install .#tempest
 > # target device is a required arg (no default) — a bare run won't wipe a disk
 > ```
 
@@ -134,11 +134,11 @@ flowchart TD
 flake.nix              # inputs, multi-channel overlay, nixosConfigurations + homeConfigurations
 ├── hosts/             # per-machine composition roots (tempest, orchid, hydra, zephyr)
 ├── homes/             # Home Manager configs (irene@orchid, irene@tempest)
-├── modules/           # cross-cutting system modules (nix, secure-boot)
+├── modules/           # cross-cutting system modules (nix, security, zfs-on-luks, impermanence-root, secure-boot)
 ├── hardware/          # opt-in hardware (audio, bluetooth, framework, zfs, tlp)
 ├── services/          # à-la-carte NixOS services (borg, caddy, grafana, syncthing, vaultwarden-mirror…)
 ├── desktop/           # editor/terminal/app configs (helix, neovim, emacs, zed, tmux, fonts…)
-├── rices/             # desktop environments — estradiol · ember (niri + mango layers)
+├── rices/             # desktop environments — ember (niri + mango layers) · estradiol (unused)
 ├── packages/          # custom derivations (pkgs.callPackage)
 ├── scripts/           # writeScriptBin / writeShellApplication wrappers
 └── disks/             # disko layouts
