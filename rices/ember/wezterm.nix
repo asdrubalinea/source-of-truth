@@ -19,11 +19,12 @@ lib.mkIf config.rices.ember.enable {
       -- host that lacks it wants TERM=xterm-256color for that ssh session.
       config.term = "wezterm"
 
-      -- Disambiguated key reporting (CSI u), so helix can tell Shift+Enter,
-      -- Ctrl+Enter and Ctrl+; apart instead of seeing them collapse onto the
-      -- legacy encodings. tmux forwards it via extended-keys — see
-      -- desktop/tmux.nix.
-      config.enable_kitty_keyboard = true
+      -- Disambiguated key reporting (CSI u) off: any program that asks for the
+      -- kitty protocol and exits without resetting it leaves the shell — most
+      -- painfully a plain ssh session on a host whose readline doesn't parse
+      -- CSI u — echoing raw sequences instead of editing the line. Helix loses
+      -- Shift+Enter / Ctrl+Enter / Ctrl+; disambiguation; that is the trade.
+      config.enable_kitty_keyboard = false
 
       -- Nix owns this install, so the built-in update check is pure noise.
       config.check_for_updates = false
