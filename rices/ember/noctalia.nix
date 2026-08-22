@@ -99,22 +99,20 @@
           # ../wallpaper/default.nix seeds oled/ and records the measurements.
           directory = "~/Pictures/Wallpapers/oled";
 
-          # Rotate rather than burn one image in. A static image is the OLED
-          # failure mode: the same subpixels driven at the same level for hours.
-          # Cycling the pool at the default 1800s spreads the wear, and every
-          # image in the pool is low-APL on true black, so it stays cheap in
-          # panel-hours either way. `order` is already "random" by default.
-          automation.enabled = true;
+          # Rotation off by request — synthwave-grid stays put. The OLED
+          # argument for cycling still holds in principle (same subpixels, same
+          # level, all day), but this image is 3% mean on a true-#000 field, so
+          # the lit fraction is small and mostly thin lines; burn-in risk is
+          # about as low as a static image gets in this pool.
+          automation.enabled = false;
 
           # The stylix target also pins wallpaper.default.path (to its own
-          # `image`) at normal priority, so mkForce the rice's seeded starter
-          # image to win. This is only the cold-start fallback now — the
-          # automation timer writes each pick into the state settings.toml,
-          # which deep-merges over this. shinobu-kocho-dark is the lowest-APL
-          # image in the pool (5% mean, 1% of pixels above 80%, black field
-          # *actually* #000 so those subpixels stay off), so it is the right
-          # thing to show before the first rotation lands.
-          default.path = lib.mkForce "~/Pictures/Wallpapers/oled/shinobu-kocho-dark.png";
+          # `image`) at normal priority, so mkForce the rice's chosen image to
+          # win. With automation off nothing rewrites this at runtime any more,
+          # but the state settings.toml still deep-merges over it, so the
+          # picker remains the way to change wallpaper live — this is what a
+          # fresh state store comes up with.
+          default.path = lib.mkForce "~/Pictures/Wallpapers/oled/synthwave-grid-ml3jm8.jpg";
         };
 
         brightness.enable_ddcutil = true;
