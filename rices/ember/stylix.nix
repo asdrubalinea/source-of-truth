@@ -19,6 +19,18 @@ lib.mkIf config.rices.ember.enable {
     # oxocarbon-dark's blues/magentas collapse into each other once warmed.
     base16Scheme = ./ember-3400k-dark.yaml;
 
+    # The scheme is dark, but stylix's `polarity` defaults to "either" — and
+    # every target that branches on it picks the *light* side of the branch when
+    # it isn't "dark". That silently declared a light desktop underneath a dark
+    # palette: noctalia's `theme.mode = "light"` (modules/noctalia/hm.nix in the
+    # stylix store path), Qt's icon theme = breeze instead of breeze-dark, and
+    # `org/gnome/desktop/interface color-scheme = "default"` instead of
+    # "prefer-dark" — which is what GTK apps and both browsers read through the
+    # portal to decide whether to render dark. It went unnoticed for noctalia
+    # because its own settings.toml carried `mode = "dark"` on top; the moment
+    # that file was rejected (config_version drift) the light fallback showed.
+    polarity = "dark";
+
     # Icon theme for Qt/KDE apps (Dolphin, Okular, …). Off by default; without
     # it only `hicolor` is present and Dolphin's toolbar/file icons fall back
     # to blanks. Stylix wires this into both gtk.iconTheme and the qtct config.
