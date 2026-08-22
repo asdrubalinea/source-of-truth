@@ -20,10 +20,12 @@
 {
   inputs,
   lib,
-  pkgs,
   ...
 }: {
-  imports = [inputs.home-manager.nixosModules.home-manager];
+  imports = [
+    inputs.home-manager.nixosModules.home-manager
+    ../../modules/vm-first-boot.nix
+  ];
 
   # Guest sizing. disko's interactive-vm maps disko.memSize -> memorySize; the
   # default (1024 MB) is far too small for a niri desktop. (memSize is a real
@@ -126,55 +128,6 @@
     # up instead. Otherwise the very first activation can fail on a collision and
     # leave the home unconfigured.
     backupFileExtension = "hm-bak";
-  };
-
-  # home-manager activates via home-manager-irene.service, but the NixOS module
-  # only orders it `after nix-daemon.socket` — NOT after impermanence binds
-  # /persist/home/irene over /home/irene (a systemd `home-irene.mount` unit). So
-  # on first boot HM writes into the pre-bind directory and the bind then masks
-  # everything, which is why the home looks empty until a manual `home-manager
-  # switch` (by then the mount is up). RequiresMountsFor makes systemd pull in
-  # and order after the bind mount, so activation lands in the persisted home and
-  # the desktop comes up fully configured on first boot.
-  systemd.services.home-manager-irene = {
-    unitConfig.RequiresMountsFor = "/home/irene";
-    # /home/irene lives on the persist ZFS dataset; make sure it's mounted.
-    after = ["home-irene.mount"];
-    requires = ["home-irene.mount"];
-  };
-
-  # Declaratively seed the (public) flake into /persist (a real ZFS dataset in
-  # this VM) so `nh` / config-apply paths resolve exactly like the real host.
-  # Idempotent: ConditionPathExists skips the clone if the tree already exists.
-  # This module is only imported when virtual = true, so it can never touch the
-  # real laptop's /persist.
-  systemd.services.seed-source-of-truth = {
-    description = "Clone source-of-truth into /persist";
-    wantedBy = ["multi-user.target"];
-    after = ["network-online.target"];
-    wants = ["network-online.target"];
-    path = [pkgs.git];
-    unitConfig = {
-      ConditionPathExists = "!/persist/source-of-truth/.git";
-      # Retry a handful of times: network-online.target can fire before DNS/egress
-      # is actually usable, and without this a single early failure would leave
-      # /persist/source-of-truth absent for the whole boot (programs.nh.flake then
-      # has no flake). Stop after StartLimitBurst tries so a genuinely offline VM
-      # doesn't loop forever.
-      StartLimitIntervalSec = 300;
-      StartLimitBurst = 5;
-    };
-    serviceConfig = {
-      Type = "oneshot";
-      Restart = "on-failure";
-      RestartSec = 15;
-      # Clean up a half-finished clone so the retry starts from a clean slate
-      # (git clone refuses a non-empty target).
-      ExecStartPre = "${pkgs.coreutils}/bin/rm -rf /persist/source-of-truth";
-      ExecStart =
-        "${pkgs.git}/bin/git clone "
-        + "https://github.com/asdrubalinea/source-of-truth /persist/source-of-truth";
-    };
   };
 
   # Rule: only override services that CANNOT work in the VM and would otherwise
