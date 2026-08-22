@@ -366,6 +366,37 @@
           patches = (old.patches or []) ++ [./packages/patches/mango-outputmgr-keeps-only-sleep.patch];
         });
       })
+      # disko's VM builders (system.build.vmWithDisko, i.e. ./build-vm) call
+      # pkgs.vmTools.override with `kernel = pkgs.aggregateModules [...]` — a
+      # symlink tree of the kernel plus the out-of-tree ZFS modules. nixpkgs'
+      # vmTools has since grown a guard that throws when its `kernel` argument
+      # carries no `target` attribute, and aggregateModules produces none, so
+      # every disko VM eval dies with "the `kernel` argument (kernel-modules) has
+      # no `target` attribute, so the kernel image filename cannot be determined".
+      # disko upstream has not caught up (HEAD ff8702b4, 2026-06-11 — the rev this
+      # flake already locks), so the fix has to live here.
+      #
+      # Supply exactly what the guard asks for, and only when the caller hands
+      # over a targetless kernel: the bootable image's filename for this platform
+      # (bzImage on x86_64, Image on aarch64). Everything else about vmTools is
+      # untouched, and a caller passing a real kernel derivation still gets its own
+      # `target`. Delete this once disko passes kernelImage — or splits
+      # kernel/kernelModules — itself.
+      (final: prev: {
+        vmTools =
+          prev.vmTools
+          // {
+            override = args:
+              prev.vmTools.override (
+                args
+                // nixpkgs.lib.optionalAttrs (args ? kernel && !(args.kernel ? target)) {
+                  # The platform's default kernel carries the right filename for
+                  # this architecture; the aggregate symlink tree does not.
+                  kernelImage = final.linuxPackages.kernel.target;
+                }
+              );
+          };
+      })
       claude-code.overlays.default
       # `default` builds against our nixpkgs; `pinned` would use upstream's own
       # revision to guarantee attic cache hits. See the input's comment above
