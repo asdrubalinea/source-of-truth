@@ -33,6 +33,8 @@
       # System modules
       ../../modules/nix.nix
       ../../modules/security.nix
+      ../../modules/zfs-on-luks.nix
+      ../../modules/impermanence-root.nix
 
       # Services
       ../../services/borg-backup.nix

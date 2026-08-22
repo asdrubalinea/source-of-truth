@@ -1,101 +1,28 @@
-{
-  lib,
-  config,
-  ...
-}: let
-  persistedFiles =
-    map
-    (
-      f:
-        if builtins.isString f
-        then f
-        else f.file
-    )
-    config.environment.persistence."/persist".files;
-in {
-  # Filesystem configuration for impermanence setup.
-  # The tmpfs root, plus /persist, /nix and /var/lib/sbctl, are all owned by
-  # disko (disks/tempest.nix — the root via disko.devices.nodev."/", which also
-  # emits fileSystems."/"). Here we only re-assert that /persist must be mounted
-  # early for impermanence's bind-mounts.
-  fileSystems = {
-    # device + fsType come from disko's rpool/persist datasets. Both must be
-    # mounted before impermanence binds /home/irene from /persist/home/irene.
-    "/persist".neededForBoot = true;
-    "/persist/home".neededForBoot = true;
-  };
+{...}: {
+  # Host-specific state only. The tmpfs-root core — /persist mounted early, the
+  # machine-id + SSH host keys, /var/log, /home/irene's ownership, the nix build
+  # dir redirect and the soft-reboot fixup — is modules/impermanence-root.nix,
+  # shared with orchid. /nix, /persist and /var/lib/sbctl are owned by disko
+  # (disks/tempest.nix).
+  environment.persistence."/persist".directories = [
+    # Network configuration
+    "/etc/NetworkManager/system-connections"
 
-  # Impermanence configuration - what to persist across reboots
-  environment.persistence."/persist" = {
-    enable = true;
-    hideMounts = true;
+    "/var/lib/bluetooth"
 
-    # Directories that need to be persistent
-    directories = [
-      # System logs
-      "/var/log"
+    # System-wide flatpak installs (services.flatpak / nix-flatpak). Without
+    # this the repo + apps live on tmpfs root and are wiped every reboot, so
+    # nix-flatpak re-adds the remote and re-downloads declared packages from
+    # scratch on each boot (and any manual installs are simply lost).
+    "/var/lib/flatpak"
+    "/var/lib/tailscale"
+    "/var/lib/grafana"
+    "/var/lib/prometheus2"
+    "/var/lib/prometheus-node-exporter"
 
-      # System state
-      "/var/lib/bluetooth"
-      "/var/lib/nixos"
-      "/var/lib/systemd/coredump"
-      "/var/lib/coredump"
-
-      # Network configuration
-      "/etc/NetworkManager/system-connections"
-
-      # Services
-      # System-wide flatpak installs (services.flatpak / nix-flatpak). Without
-      # this the repo + apps live on tmpfs root and are wiped every reboot, so
-      # nix-flatpak re-adds the remote and re-downloads declared packages from
-      # scratch on each boot (and any manual installs are simply lost).
-      "/var/lib/flatpak"
-      "/var/lib/tailscale"
-      "/var/lib/grafana"
-      "/var/lib/prometheus2"
-      "/var/lib/prometheus-node-exporter"
-      "/var/lib/vaultwarden"
-
-      # Own the home explicitly. As a bare string, impermanence creates the
-      # /persist source dir as root:root and never enforces ownership — so on a
-      # FRESH dataset (a clean install, or the tempest-vm image) /home/irene
-      # comes up root-owned, the user can't write their own home, and the
-      # first-boot home-manager activation fails ("could not find suitable
-      # profile directory"). It only "works" on this laptop because the dir was
-      # fixed once and persists. Setting user/group/mode makes impermanence
-      # create AND enforce irene:users 0700, so first boot is correct everywhere.
-      {
-        directory = "/home/irene";
-        user = "irene";
-        group = "users";
-        mode = "0700";
-      }
-    ];
-
-    # Individual files that need persistence
-    files = [
-      "/etc/machine-id"
-
-      # SSH host keys
-      "/etc/ssh/ssh_host_ed25519_key"
-      "/etc/ssh/ssh_host_ed25519_key.pub"
-      "/etc/ssh/ssh_host_rsa_key"
-      "/etc/ssh/ssh_host_rsa_key.pub"
-    ];
-  };
-
-  # After `systemctl soft-reboot` the tmpfs root persists but impermanence's
-  # bind mounts are torn down; systemd then regenerates /etc/machine-id and the
-  # SSH host keys directly on tmpfs before activation runs, which trips
-  # mount-file's "A file already exists" guard. Drop any persisted file that
-  # isn't currently bind-mounted so persist-files can re-establish the mount.
-  system.activationScripts.persist-files.text = lib.mkBefore ''
-    for _imperm_f in ${lib.escapeShellArgs persistedFiles}; do
-      if ! findmnt -- "$_imperm_f" >/dev/null 2>&1; then
-        rm -f -- "$_imperm_f"
-      fi
-    done
-  '';
+    # The read-only vault mirror's store (services/vaultwarden-mirror.nix).
+    "/var/lib/vaultwarden"
+  ];
 
   # programs.fuse.userAllowOther = true;
 }
