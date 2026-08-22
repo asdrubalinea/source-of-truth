@@ -1,6 +1,4 @@
-{ pkgs, ... }:
-
-let
+{pkgs, ...}: let
   # Hold off automatic idle/suspend (and lid-close suspend) via a logind
   # inhibitor lock. With no args it blocks until interrupted (Ctrl-C releases
   # the lock); with args it holds the lock only while the given command runs.
@@ -18,5 +16,4 @@ let
         "$@"
     fi
   '';
-in
-{ home.packages = [ keep-awake ]; }
+in {home.packages = [keep-awake];}

@@ -1,5 +1,4 @@
-{ ... }:
-{
+{...}: {
   systemd.services.vaultwarden = {
     serviceConfig = {
       Restart = "always";
@@ -22,7 +21,7 @@
       openFirewall = true;
       useRoutingFeatures = "server";
       permitCertUid = "caddy";
-      extraSetFlags = [ "--advertise-exit-node" ];
+      extraSetFlags = ["--advertise-exit-node"];
     };
 
     vaultwarden = {
@@ -39,5 +38,9 @@
         ROCKET_LOG = "critical";
       };
     };
+
+    # Read-only mirror of orchid's vault (services/vaultwarden-mirror.nix).
+    # Keeps the module's default key path under /var/lib/vaultwarden-mirror/ssh.
+    vaultwarden-mirror.enable = true;
   };
 }

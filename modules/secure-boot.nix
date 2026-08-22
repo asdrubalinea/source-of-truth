@@ -1,8 +1,4 @@
-{ lib
-, ...
-}:
-
-{
+{lib, ...}: {
   # Boot Configuration
   boot = {
     initrd = {

@@ -1,19 +1,8 @@
-{ pkgs, inputs, ... }:
-let
-  user-apply = pkgs.writeScriptBin "user-apply" ''
-    #!${pkgs.stdenv.shell}
-    pushd /persist/source-of-truth/
-
-    home-manager switch --flake '.#irene@orchid' "$@"
-
-    popd
-  '';
-
-  system-apply =
-    (pkgs.callPackage ../scripts/system-apply.nix {
-      configPath = "/persist/source-of-truth";
-    }).systemApply;
-
+{
+  pkgs,
+  inputs,
+  ...
+}: let
   arc-size = (
     pkgs.writeShellScriptBin "arc-size" ''
       cat /proc/spl/kstat/zfs/arcstats | grep '^size ' | awk '{ print $3 }' | awk '{ print $1 / (1024 * 1024 * 1024) " GiB" }'
@@ -22,29 +11,27 @@ let
 
   nix-size = (
     pkgs.writeShellScriptBin "nix-size" ''
-      zfs list -o name,used -t filesystem,volume -Hp | awk -v dataset='zroot/local/nix' '$1 == dataset { printf "%.0f GiB", $2/1024/1024/1024 }'
+      zfs list -o name,used -t filesystem,volume -Hp | awk -v dataset='rpool/nix' '$1 == dataset { printf "%.0f GiB", $2/1024/1024/1024 }'
     ''
   );
-in
-{
+in {
   imports = [
-    inputs.hyprland.homeManagerModules.default
-    # inputs.stylix.homeManagerModules.stylix
-
-    ../rices/estradiol
-
-    # ../desktop/zed-editor
+    # No WM for now, so no ../rices/estradiol (hyprland/waybar/stylix/kitty…)
+    # and no hyprland HM module. Both come back together.
     ../desktop/helix.nix
-    # ../desktop/emacs
 
-    ../scripts/system-clean.nix
+    # Applying and cleaning is `nh` (enabled in hosts/orchid/default.nix):
+    # `nh os switch`, `nh home switch -b backup`, `nh clean all`.
     ../scripts/port-forward.nix
 
     ../misc/fish.nix
     ../desktop/tmux.nix
+    ../desktop/zellij.nix
 
     ../desktop/home-packages.nix
-    # ../desktop/orchid-gaming-packages.nix
+    ../desktop/yt-dlp.nix
+    # ../desktop/hn-tui.nix reads config.lib.stylix.colors to theme itself, and
+    # stylix is not wired in without a rice — it comes back with the WM.
   ];
 
   # Let Home Manager install and manage itself.
@@ -58,19 +45,6 @@ in
 
   home.sessionVariables = {
     EDITOR = "${pkgs.helix}/bin/hx";
-  };
-
-  # programs.nushell.enable = true;
-  # services.vscode-server.enable = true;
-  # services.vscode-server.enableFHS = true;
-
-  services.gnome-keyring = {
-    enable = true;
-    components = [
-      "pkcs11"
-      "secrets"
-      "ssh"
-    ];
   };
 
   programs.emacs = {
@@ -88,42 +62,9 @@ in
   };
 
   home.packages = [
-    user-apply
-    system-apply
     arc-size
     nix-size
-
-    inputs.codex.packages.${pkgs.stdenv.hostPlatform.system}.default
   ];
-
-  # programs.neovim = {
-  #   enable = true;
-
-  #   plugins = with pkgs.vimPlugins; [
-  #     telescope-nvim
-  #     telescope-fzf-native-nvim
-  #   ];
-
-  #   extraPackages = with pkgs; [
-  #     lua-language-server
-  #   ];
-  # };
-
-  # programs.vscode = {
-  #   enable = true;
-  #   package = pkgs.vscode.fhsWithPackages
-  #   (ps: with ps; [ rustup zlib openssl.dev pkg-config ]);
-  # };
-
-  programs.vscode = {
-    enable = true;
-    package = pkgs.vscode.fhsWithPackages (ps: with ps; [
-      rustup
-      zlib
-      openssl.dev
-      pkg-config
-    ]);
-  };
 
   programs.nix-index = {
     enable = true;
@@ -135,4 +76,7 @@ in
   # on hosts that also enabled programs.starship.
   programs.starship.enable = true;
 
+  # Dropped with the desktop: ../desktop/warp.nix (GUI terminal, and a long
+  # from-source Rust build), programs.vscode's FHS wrapper, and
+  # services.gnome-keyring — there is no graphical session to unlock it.
 }

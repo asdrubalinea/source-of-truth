@@ -1,5 +1,4 @@
-{ pkgs, ... }:
-{
+{pkgs, ...}: {
   home.packages = with pkgs; [
     # --- Gaming & Wine ---
     protonup-qt # Proton version manager

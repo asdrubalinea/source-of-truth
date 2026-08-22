@@ -49,13 +49,19 @@ ways, so the layout is deliberate, not incidental.
   mandatory because turning SB on changes PCR 7.
 - **CachyOS LTS** because ZFS is an out-of-tree module; nixpkgs hard-fails to
   evaluate when the kernel outruns OpenZFS support, which the bleeding-edge
-  `-latest` CachyOS kernel routinely does. LTS keeps the CachyOS/BORE patches +
-  scx scheduler on a base ZFS supports.
+  `-latest` CachyOS kernel routinely does. LTS keeps the CachyOS patches + scx
+  scheduler on a base ZFS supports. (The variant in use is
+  `linuxPackages-cachyos-lts-lto-zen4` — *not* a `-bore` one; it runs EEVDF
+  underneath scx. See `hosts/tempest/system/boot.nix`.)
 
 ## Consequences
 
-- Kernel bumps on tempest are constrained to what `zfs_unstable` supports; stay
-  on the `-lts` CachyOS variant.
+- Kernel bumps on tempest are constrained to what nixpkgs' ZFS supports (every
+  ZFS attribute caps at `kernelMaxSupportedMajorMinor = "7.0"`, so this is not a
+  choice between attributes); stay on the `-lts` CachyOS variant.
+  `boot.zfs.package` is deliberately left at the module default — `pkgs.zfs`,
+  currently `zfs_2_4` — rather than pinned to `zfs_unstable`; see the comment in
+  `hosts/tempest/system/zfs.nix`.
 - Re-enrolling TPM2 (`systemd-cryptenroll --wipe-slot=tpm2` + re-add) is needed
   after any change to Secure Boot keys/state; the LUKS passphrase is the
   permanent fallback.

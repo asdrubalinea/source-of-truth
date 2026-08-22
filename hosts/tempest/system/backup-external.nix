@@ -1,4 +1,8 @@
-{ pkgs, lib, ... }:
+{
+  pkgs,
+  lib,
+  ...
+}:
 #
 # Time-Machine-style local backup for tempest: ZFS replication of the
 # irreplaceable datasets onto an encrypted ZFS pool living on an external USB
@@ -55,8 +59,14 @@ let
   # wired via systemd OnFailure= below so a crash anywhere in the run is caught;
   # success is emitted inline at the end of the orchestrator so the no-op skip
   # paths (drive absent / already imported) stay silent.
-  backup-notify = pkgs.callPackage ../../../packages/backup-notify.nix { };
-  usbUnit = "tempest-backup-external.service";
+  backup-notify = pkgs.callPackage ../../../packages/backup-notify.nix {};
+
+  # The one place this unit is named. It is referenced from the systemd unit
+  # attribute, the udev rule that triggers it, the fail-notification argument,
+  # and backup-verify.sh — which is a plain .sh file that cannot see this
+  # binding, so it receives the name through the prelude below.
+  usbUnitName = "tempest-backup-external";
+  usbUnit = "${usbUnitName}.service";
 
   # Integrity-scrub cadence for the backup pool. The pool is only importable
   # during a run, so a periodic scrub has to ride along with the backup
@@ -142,14 +152,25 @@ let
         zfs create -o canmount=off -o mountpoint=none ${parent}
       fi
 
-      # Replicate. Default syncoid creates a sync snapshot + bookmark (so
-      # incrementals survive even if a source snapshot is later pruned) and
-      # sends with -I, carrying every sanoid snapshot in between onto the
-      # backup = the browsable history. recvOptions=u: never mount on receive.
+      # Replicate. syncoid takes its own `syncoid_<host>_<ts>` sync snapshot on
+      # the source and sends with -I, carrying every sanoid snapshot in between
+      # onto the backup = the browsable history. recvOptions=u: never mount on
+      # receive.
+      #
+      # That sync snapshot is what makes the NEXT run incremental, and it
+      # survives arbitrary gaps: sanoid's autoprune only expires its own
+      # `autosnap_*` snapshots, so it never removes the common base. Exactly one
+      # is kept — syncoid deletes the previous one after each successful run.
+      #
+      # Note it is a snapshot and NOT a bookmark: `--create-bookmark` is opt-in
+      # in syncoid and is not passed here, so `zfs list -t bookmark` is empty.
+      # If that sync snapshot is ever destroyed by hand, the next run has no
+      # common base and must reseed the whole pool.
       ${lib.concatMapStringsSep "\n" (p: ''
-        log "replicating ${p.src} -> ${p.dst}"
-        syncoid --recvOptions=u --quiet ${p.src} ${p.dst}
-      '') pairs}
+          log "replicating ${p.src} -> ${p.dst}"
+          syncoid --recvOptions=u --quiet ${p.src} ${p.dst}
+        '')
+        pairs}
 
       # Expire old snapshots on the backup per the deep-retention policy above.
       sanoid --configdir=${pruneConfDir} --prune-snapshots --verbose
@@ -177,7 +198,7 @@ let
       # Surface external-SSD health while the pool is still imported (the only
       # chance). A pool can read ONLINE yet carry checksum/read/write or
       # scrub-found errors; `status -x` catches those. A non-zero exit here fails
-      # the unit, which lights the waybar backup badge red.
+      # the unit, which latches the syncoid leg as **failed** (CONTEXT.md).
       if ! zpool status -x ${pool} | grep -q "is healthy"; then
         log "POOL '${pool}' UNHEALTHY:"
         zpool status -v ${pool} || true
@@ -218,26 +239,57 @@ let
 
   ejectBin = pkgs.writeShellApplication {
     name = "tempest-backup-eject";
-    runtimeInputs = [ pkgs.zfs ];
+    runtimeInputs = [pkgs.zfs];
     text = ''
       zpool export ${pool} && echo "'${pool}' exported — safe to unplug."
     '';
   };
-in
-{
+
+  # On-demand "is my backup actually good?" check. The orchestrator's own
+  # `zpool status -x` gate only looks at the pool during a backup run; this
+  # answers the question at any time, and — unlike the run — imports READ-ONLY
+  # and never loads the encryption key. The body is a plain .sh file rather than
+  # an inline string because it is long and full of ''${...} shell expansions
+  # that would need escaping in a Nix indented string. The config values are
+  # injected as a prelude instead, so PAIRS is derived from the same `pairs`
+  # list the orchestrator replicates: adding a dataset there extends the
+  # verification automatically, with no second place to update.
+  verifyBin = pkgs.writeShellApplication {
+    name = "tempest-backup-verify";
+    runtimeInputs = [
+      pkgs.zfs
+      pkgs.coreutils
+      pkgs.gawk
+      pkgs.gnugrep
+      pkgs.gnused
+      pkgs.systemd
+    ];
+    text =
+      ''
+        POOL=${pool}
+        PARENT=${parent}
+        ALTROOT=${altroot}
+        USB_UNIT=${usbUnit}
+        SCRUB_MAX_AGE=${toString scrubMaxAgeSec}
+        PAIRS=(${lib.concatMapStringsSep " " (p: "${p.src}:${p.dst}") pairs})
+      ''
+      + builtins.readFile ./backup-verify.sh;
+  };
+in {
   environment.systemPackages = [
     backupBin
     browseBin
     ejectBin
+    verifyBin
   ];
 
   # Fire a backup the moment the drive is plugged in. ZFS labels the member
   # partition with the pool name, so this matches our drive on any USB port.
   services.udev.extraRules = ''
-    ACTION=="add", SUBSYSTEM=="block", ENV{ID_FS_TYPE}=="zfs_member", ENV{ID_FS_LABEL}=="${pool}", TAG+="systemd", ENV{SYSTEMD_WANTS}="tempest-backup-external.service"
+    ACTION=="add", SUBSYSTEM=="block", ENV{ID_FS_TYPE}=="zfs_member", ENV{ID_FS_LABEL}=="${pool}", TAG+="systemd", ENV{SYSTEMD_WANTS}="${usbUnit}"
   '';
 
-  systemd.services.tempest-backup-external = {
+  systemd.services.${usbUnitName} = {
     description = "Replicate ZFS snapshots to the external USB backup pool";
     # No wantedBy: started only on plug-in (udev, above) or by the timer below.
     serviceConfig = {
@@ -247,7 +299,7 @@ in
     # Any failure (mid-run crash or the explicit unhealthy-pool exit 1) raises a
     # desktop notification. Success is notified inline by the orchestrator so a
     # plug-less timer tick (which no-ops, exiting 0) stays silent.
-    onFailure = [ "backup-notify-usb-fail.service" ];
+    onFailure = ["backup-notify-usb-fail.service"];
   };
 
   systemd.services.backup-notify-usb-fail = {
@@ -265,8 +317,8 @@ in
 
   # Daily fallback for "left it plugged in" — no-ops cleanly when the drive is
   # absent. Persistent catches a missed run after the laptop was off/asleep.
-  systemd.timers.tempest-backup-external = {
-    wantedBy = [ "timers.target" ];
+  systemd.timers.${usbUnitName} = {
+    wantedBy = ["timers.target"];
     timerConfig = {
       OnCalendar = "daily";
       Persistent = true;

@@ -1,11 +1,10 @@
-{ lib
-, pkgs
-, config
-, ...
+{
+  lib,
+  pkgs,
+  config,
+  ...
 }:
-
-with lib;
-let
+with lib; let
   cfg = config.services.borg-backup;
   defaultExclude = [
     "**/Cache"
@@ -29,8 +28,7 @@ let
     "*.vdi"
     "*.vmdk"
   ];
-in
-{
+in {
   options.services.borg-backup = {
     enable = mkEnableOption "borg-backup";
 
@@ -42,19 +40,18 @@ in
           repo = "ssh://user@host:23/./backups/my-host-home";
           ssh_key_file = "/home/irene/.ssh/id_ed25519";
           password_file = "/persist/borg-home-backup/passphrase";
-          paths = [ "/home/irene" ];
+          paths = ["/home/irene"];
         };
       };
-      default = { };
+      default = {};
       type = types.attrsOf (types.submodule (
-        { name, ... }:
-        {
+        {name, ...}: {
           options = {
-            password_file = mkOption { type = types.str; };
-            paths = mkOption { type = types.listOf types.path; };
-            repo = mkOption { type = types.str; };
-            ssh_key_file = mkOption { type = types.str; };
-            user = mkOption { type = types.str; };
+            password_file = mkOption {type = types.str;};
+            paths = mkOption {type = types.listOf types.path;};
+            repo = mkOption {type = types.str;};
+            ssh_key_file = mkOption {type = types.str;};
+            user = mkOption {type = types.str;};
           };
         }
       ));
@@ -64,12 +61,13 @@ in
   config = mkIf cfg.enable {
     assertions = [
       {
-        assertion = cfg.jobs != { };
+        assertion = cfg.jobs != {};
         message = "services.borg-backup: set at least one job under `services.borg-backup.jobs`.";
       }
     ];
 
-    services.borgbackup.jobs = mapAttrs
+    services.borgbackup.jobs =
+      mapAttrs
       (_jobName: jobCfg: {
         inherit (jobCfg) paths;
         inherit (jobCfg) repo;

@@ -1,8 +1,10 @@
-{ config, lib, pkgs, ... }:
-
-with lib;
-
-let
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}:
+with lib; let
   cfg = config.services.monitoring;
 
   # node-exporter has no inotify collector, so we publish the counts ourselves
@@ -12,7 +14,7 @@ let
 
   inotifyExporter = pkgs.writeShellScriptBin "node-inotify-textfile" ''
     set -euo pipefail
-    export PATH=${makeBinPath [ pkgs.coreutils pkgs.gnugrep pkgs.findutils ]}
+    export PATH=${makeBinPath [pkgs.coreutils pkgs.gnugrep pkgs.findutils]}
 
     dir=${textfileDir}
     tmp=$(mktemp "$dir/inotify.prom.XXXXXX")
@@ -46,8 +48,7 @@ let
     # never reads a half-written file.
     mv "$tmp" "$dir/inotify.prom"
   '';
-in
-{
+in {
   options.services.monitoring = {
     enable = mkEnableOption "monitoring stack (Grafana + Prometheus)";
 
@@ -116,20 +117,24 @@ in
       # bundled dashboards reference it deterministically.
       provision = {
         enable = true;
-        datasources.settings.datasources = [{
-          name = "Prometheus";
-          type = "prometheus";
-          access = "proxy";
-          url = "http://localhost:${toString config.services.prometheus.port}";
-          uid = "prometheus";
-          isDefault = true;
-        }];
+        datasources.settings.datasources = [
+          {
+            name = "Prometheus";
+            type = "prometheus";
+            access = "proxy";
+            url = "http://localhost:${toString config.services.prometheus.port}";
+            uid = "prometheus";
+            isDefault = true;
+          }
+        ];
 
         # Bundled dashboards
-        dashboards.settings.providers = [{
-          name = "default";
-          options.path = ./dashboards;
-        }];
+        dashboards.settings.providers = [
+          {
+            name = "default";
+            options.path = ./dashboards;
+          }
+        ];
       };
     };
 
@@ -143,17 +148,30 @@ in
 
       # Global configuration
       globalConfig = {
-        scrape_interval = if cfg.powerEfficient then "60s" else cfg.scrapeInterval;
-        evaluation_interval = if cfg.powerEfficient then "60s" else "15s";
+        scrape_interval =
+          if cfg.powerEfficient
+          then "60s"
+          else cfg.scrapeInterval;
+        evaluation_interval =
+          if cfg.powerEfficient
+          then "60s"
+          else "15s";
       };
 
-      scrapeConfigs = [{
-        job_name = "node";
-        static_configs = [{
-          targets = [ "localhost:9902" ];
-        }];
-        scrape_interval = if cfg.powerEfficient then "120s" else null;
-      }];
+      scrapeConfigs = [
+        {
+          job_name = "node";
+          static_configs = [
+            {
+              targets = ["localhost:9902"];
+            }
+          ];
+          scrape_interval =
+            if cfg.powerEfficient
+            then "120s"
+            else null;
+        }
+      ];
 
       # Node exporter with optimized collectors
       exporters.node = {
@@ -161,53 +179,59 @@ in
         port = 9902;
         enabledCollectors =
           # wifi (signal strength) is off by default; enable it in both modes.
-          [ "wifi" ]
-          ++ (if cfg.powerEfficient then [
-            # Essential collectors only
-            "cpu"
-            "cpufreq"
-            "loadavg"
-            "meminfo"
-            "filesystem"
-            "diskstats"
-            "netstat"
-            "netclass"
-            "powersupplyclass" # Battery monitoring
-            "thermal_zone" # Temperature monitoring
-            "time"
-            "uname"
-            "vmstat"
-          ] else [
-            # Full set of collectors
-            "cpu"
-            "cpufreq"
-            "diskstats"
-            "filesystem"
-            "hwmon"
-            "interrupts"
-            "loadavg"
-            "meminfo"
-            "netclass"
-            "netstat"
-            "powersupplyclass"
-            "pressure"
-            "processes"
-            "rapl"
-            "schedstat"
-            "softirqs"
-            "stat"
-            "systemd"
-            "textfile"
-            "thermal_zone"
-            "time"
-            "uname"
-            "vmstat"
-          ]);
+          ["wifi"]
+          ++ (
+            if cfg.powerEfficient
+            then [
+              # Essential collectors only
+              "cpu"
+              "cpufreq"
+              "loadavg"
+              "meminfo"
+              "filesystem"
+              "diskstats"
+              "netstat"
+              "netclass"
+              "powersupplyclass" # Battery monitoring
+              "thermal_zone" # Temperature monitoring
+              "time"
+              "uname"
+              "vmstat"
+            ]
+            else [
+              # Full set of collectors
+              "cpu"
+              "cpufreq"
+              "diskstats"
+              "filesystem"
+              "hwmon"
+              "interrupts"
+              "loadavg"
+              "meminfo"
+              "netclass"
+              "netstat"
+              "powersupplyclass"
+              "pressure"
+              "processes"
+              "rapl"
+              "schedstat"
+              "softirqs"
+              "stat"
+              "systemd"
+              "textfile"
+              "thermal_zone"
+              "time"
+              "uname"
+              "vmstat"
+            ]
+          );
 
-        extraFlags = [
-          "--collector.cpu.info.bugs-include=^(meltdown|spectre|tsx_async_abort)$"
-          "--collector.textfile.directory=${textfileDir}"
-        ] ++ optional cfg.powerEfficient "--collector.cpu.info";
+        extraFlags =
+          [
+            "--collector.cpu.info.bugs-include=^(meltdown|spectre|tsx_async_abort)$"
+            "--collector.textfile.directory=${textfileDir}"
+          ]
+          ++ optional cfg.powerEfficient "--collector.cpu.info";
       };
     };
 
@@ -249,7 +273,7 @@ in
 
     systemd.timers.node-inotify-textfile = {
       description = "Periodically collect inotify watch counts";
-      wantedBy = [ "timers.target" ];
+      wantedBy = ["timers.target"];
       timerConfig = {
         OnBootSec = "2min";
         OnUnitActiveSec = "1min";

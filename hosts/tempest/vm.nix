@@ -3,8 +3,8 @@
 # This VM reproduces tempest's EXACT filesystem: it is built with disko's
 # `vmWithDisko`, which formats a throwaway virtual disk from the same
 # disks/tempest.nix spec (GPT + LUKS + LVM + swap + ZFS rpool/{nix,persist,
-# persist/home,sbctl,reserved} + tmpfs root + impermanence) and then boots an
-# ephemeral overlay on top. The host nix store is shared in (copyNixStore=false,
+# persist/home,sbctl,docker,reserved} + tmpfs root + impermanence) and then boots
+# an ephemeral overlay on top. The host nix store is shared in (copyNixStore=false,
 # mountHostNixStore=true), so the layout is real but the build stays fast.
 #
 # Build & run:
@@ -17,9 +17,15 @@
 # Everything under the ZFS datasets starts empty, so it's a fresh tempest with no
 # personal files; home-manager populates /home/irene (a bind-mount of the empty
 # rpool/persist/home dataset) on first boot.
-{ inputs, lib, pkgs, ... }:
 {
-  imports = [ inputs.home-manager.nixosModules.home-manager ];
+  inputs,
+  lib,
+  ...
+}: {
+  imports = [
+    inputs.home-manager.nixosModules.home-manager
+    ../../modules/vm-first-boot.nix
+  ];
 
   # Guest sizing. disko's interactive-vm maps disko.memSize -> memorySize; the
   # default (1024 MB) is far too small for a niri desktop. (memSize is a real
@@ -43,8 +49,8 @@
   # Setting them at top level errors ("virtualisation.cores does not exist"), so
   # route guest tuning through disko.tests.extraConfig.
   disko.tests.extraConfig = {
-    # Host has 16 threads; a niri desktop + xwayland + noctalia + emacs daemon +
-    # the virgl render thread is cramped on 4. 8 keeps the host responsive too.
+    # Host has 16 threads; a niri desktop + xwayland + noctalia + the virgl
+    # render thread is cramped on 4. 8 keeps the host responsive too.
     virtualisation.cores = 8;
 
     # impermanence requires every filesystem backing /persist to be
@@ -74,10 +80,14 @@
     # the thing to revert (drop back to a bare `-device virtio-vga-gl`).
     virtualisation.qemu.options = [
       "-vga none"
-      "-object" "memory-backend-memfd,id=mem0,size=8G,share=on"
-      "-machine" "memory-backend=mem0"
-      "-device" "virtio-vga-gl,blob=true,hostmem=4G"
-      "-display" "gtk,gl=on"
+      "-object"
+      "memory-backend-memfd,id=mem0,size=8G,share=on"
+      "-machine"
+      "memory-backend=mem0"
+      "-device"
+      "virtio-vga-gl,blob=true,hostmem=4G"
+      "-display"
+      "gtk,gl=on"
     ];
   };
 
@@ -95,7 +105,7 @@
       hostname = "tempest";
     };
     users.irene = {
-      imports = [ ../../homes/tempest ];
+      imports = [../../homes/tempest];
 
       # stylix enables `stylix.overlays.enable` by default, which sets
       # nixpkgs.overlays inside the HM config. Combined with useGlobalPkgs that
@@ -118,55 +128,6 @@
     # up instead. Otherwise the very first activation can fail on a collision and
     # leave the home unconfigured.
     backupFileExtension = "hm-bak";
-  };
-
-  # home-manager activates via home-manager-irene.service, but the NixOS module
-  # only orders it `after nix-daemon.socket` — NOT after impermanence binds
-  # /persist/home/irene over /home/irene (a systemd `home-irene.mount` unit). So
-  # on first boot HM writes into the pre-bind directory and the bind then masks
-  # everything, which is why the home looks empty until a manual `home-manager
-  # switch` (by then the mount is up). RequiresMountsFor makes systemd pull in
-  # and order after the bind mount, so activation lands in the persisted home and
-  # the desktop comes up fully configured on first boot.
-  systemd.services.home-manager-irene = {
-    unitConfig.RequiresMountsFor = "/home/irene";
-    # /home/irene lives on the persist ZFS dataset; make sure it's mounted.
-    after = [ "home-irene.mount" ];
-    requires = [ "home-irene.mount" ];
-  };
-
-  # Declaratively seed the (public) flake into /persist (a real ZFS dataset in
-  # this VM) so `nh` / config-apply paths resolve exactly like the real host.
-  # Idempotent: ConditionPathExists skips the clone if the tree already exists.
-  # This module is only imported when virtual = true, so it can never touch the
-  # real laptop's /persist.
-  systemd.services.seed-source-of-truth = {
-    description = "Clone source-of-truth into /persist";
-    wantedBy = [ "multi-user.target" ];
-    after = [ "network-online.target" ];
-    wants = [ "network-online.target" ];
-    path = [ pkgs.git ];
-    unitConfig = {
-      ConditionPathExists = "!/persist/source-of-truth/.git";
-      # Retry a handful of times: network-online.target can fire before DNS/egress
-      # is actually usable, and without this a single early failure would leave
-      # /persist/source-of-truth absent for the whole boot (programs.nh.flake then
-      # has no flake). Stop after StartLimitBurst tries so a genuinely offline VM
-      # doesn't loop forever.
-      StartLimitIntervalSec = 300;
-      StartLimitBurst = 5;
-    };
-    serviceConfig = {
-      Type = "oneshot";
-      Restart = "on-failure";
-      RestartSec = 15;
-      # Clean up a half-finished clone so the retry starts from a clean slate
-      # (git clone refuses a non-empty target).
-      ExecStartPre = "${pkgs.coreutils}/bin/rm -rf /persist/source-of-truth";
-      ExecStart =
-        "${pkgs.git}/bin/git clone "
-        + "https://github.com/asdrubalinea/source-of-truth /persist/source-of-truth";
-    };
   };
 
   # Rule: only override services that CANNOT work in the VM and would otherwise

@@ -1,10 +1,9 @@
-{ appimageTools
-, lib
-, requireFile
-, makeWrapper
-,
+{
+  appimageTools,
+  lib,
+  requireFile,
+  makeWrapper,
 }:
-
 appimageTools.wrapType2 rec {
   pname = "cider-2";
   version = "2.6.1";
@@ -15,33 +14,31 @@ appimageTools.wrapType2 rec {
     sha256 = "d6cc85400bf1e0e74cdb2d379cfdf5afe61aa47ebd8a377c5e1129e16c4dc4ea";
   };
 
-  nativeBuildInputs = [ makeWrapper ];
+  nativeBuildInputs = [makeWrapper];
 
-  extraInstallCommands =
-    let
-      contents = appimageTools.extract {
-        inherit version src;
-        # HACK: this looks for a ${pname}.desktop, where `cider-2.desktop` doesn't exist
-        pname = "Cider";
-      };
-    in
-    ''
-      wrapProgram $out/bin/${pname} \
-         --add-flags "\''${NIXOS_OZONE_WL:+\''${WAYLAND_DISPLAY:+--ozone-platform-hint=auto --enable-features=WaylandWindowDecorations --enable-wayland-ime=true}}" \
-         --add-flags "--no-sandbox --disable-gpu-sandbox" # Cider 2 does not start up properly without these from my preliminary testing
+  extraInstallCommands = let
+    contents = appimageTools.extract {
+      inherit version src;
+      # HACK: this looks for a ${pname}.desktop, where `cider-2.desktop` doesn't exist
+      pname = "Cider";
+    };
+  in ''
+    wrapProgram $out/bin/${pname} \
+       --add-flags "\''${NIXOS_OZONE_WL:+\''${WAYLAND_DISPLAY:+--ozone-platform-hint=auto --enable-features=WaylandWindowDecorations --enable-wayland-ime=true}}" \
+       --add-flags "--no-sandbox --disable-gpu-sandbox" # Cider 2 does not start up properly without these from my preliminary testing
 
-      install -m 444 -D ${contents}/Cider.desktop $out/share/applications/${pname}.desktop
-      substituteInPlace $out/share/applications/${pname}.desktop \
-        --replace-warn 'Exec=Cider' 'Exec=${pname}'
-      cp -r ${contents}/usr/share/icons $out/share
-    '';
+    install -m 444 -D ${contents}/Cider.desktop $out/share/applications/${pname}.desktop
+    substituteInPlace $out/share/applications/${pname}.desktop \
+      --replace-warn 'Exec=Cider' 'Exec=${pname}'
+    cp -r ${contents}/usr/share/icons $out/share
+  '';
 
   meta = {
     description = "Powerful music player that allows you listen to your favorite tracks with style";
     homepage = "https://cider.sh";
     license = lib.licenses.unfree;
     mainProgram = "cider-2";
-    maintainers = with lib.maintainers; [ itsvic-dev ];
-    platforms = [ "x86_64-linux" ];
+    maintainers = with lib.maintainers; [itsvic-dev];
+    platforms = ["x86_64-linux"];
   };
 }

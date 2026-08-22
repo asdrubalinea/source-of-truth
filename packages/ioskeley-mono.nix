@@ -1,8 +1,8 @@
-{ lib
-, stdenvNoCC
-, fetchurl
-, unzip
-,
+{
+  lib,
+  stdenvNoCC,
+  fetchurl,
+  unzip,
 }:
 stdenvNoCC.mkDerivation {
   pname = "ioskeley-mono";
@@ -13,7 +13,7 @@ stdenvNoCC.mkDerivation {
     hash = "sha256-3Dd2P7uCy7mWEZVe4xlsd0wWTHFsD2WbS92+PTcMMgQ=";
   };
 
-  nativeBuildInputs = [ unzip ];
+  nativeBuildInputs = [unzip];
 
   unpackPhase = ''
     runHook preUnpack

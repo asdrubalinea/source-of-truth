@@ -2,34 +2,31 @@
 # format/install time, so accidentally running a destructive disko command (or
 # running it on the wrong machine) targets the bogus placeholder below and fails
 # fast instead of wiping a real disk:
-#   ./tempest-format  /dev/disk/by-id/<target>   # disko --argstr device <target>
-#   ./tempest-install /dev/disk/by-id/<target>   # disko-install --disk main <target>
+#   ./disk-format tempest  /dev/disk/by-id/<target>   # disko --argstr device <target>
+#   ./disk-install tempest /dev/disk/by-id/<target>   # disko-install --disk main <target>
 # tempest's own NVMe is /dev/disk/by-id/nvme-Corsair_MP700_PRO_SE_A8WFB416001JKK.
 #
 # For the booted system this value is inert: disko derives `fileSystems` from GPT
 # partlabels (disk-main-ESP, disk-main-luks), never from this device path, so the
 # placeholder default is fine for the NixOS module eval (flake.nix → tempest).
-{ device ? "/dev/disk/by-id/REPLACE-WITH-TARGET-DEVICE-AT-INSTALL-TIME"
-, ...
-}:
-{
+{device ? "/dev/disk/by-id/REPLACE-WITH-TARGET-DEVICE-AT-INSTALL-TIME", ...}: {
   # tempest disk layout: ZFS-on-LUKS.
   #
   #   GPT
   #   ├── ESP    (4G, vfat)            → /boot   (lanzaboote signed UKIs)
   #   └── luks   (100%, LUKS2)         → "crypt"  (--sector-size 4096)
   #         └── LVM PV → VG "pool"
-  #               ├── swap (40G)       plain LV, hibernation/resume
+  #               ├── swap (40G)       plain LV (see the note on it below)
   #               ├── root (95%)       → zpool "rpool"
   #               └── (~5% unallocated VG headroom — see root below)
   #
   # Everything in this file is fixed at install time and cannot be changed
   # without reformatting. LUKS is kept (not ZFS-native encryption) so the
   # existing TPM2 auto-unlock carries over; LVM is kept so swap stays a plain LV
-  # (never a zvol) for safe hibernation under a single LUKS container.
+  # (never a zvol) under a single LUKS container.
   # See docs/adr/0001-zfs-on-luks-tempest.md.
   #
-  # 4K alignment (do this on the NEW drive BEFORE running tempest-format):
+  # 4K alignment (do this on the NEW drive BEFORE running disk-format tempest):
   #   nvme id-ns /dev/nvme0n1 | grep lbaf      # find a 4096-byte LBA format
   #   nvme format /dev/nvme0n1 --lbaf=<index>  # DESTRUCTIVE — fresh drive only
   # then ashift=12 and --sector-size 4096 below align natively.
@@ -71,10 +68,10 @@
               content = {
                 type = "luks";
                 name = "crypt";
-                extraOpenArgs = [ ];
+                extraOpenArgs = [];
                 # 4K sector size: align crypto to NAND pages / a 4K-LBA drive.
                 # Format-time only — cannot change without reformatting.
-                extraFormatArgs = [ "--sector-size 4096" ];
+                extraFormatArgs = ["--sector-size 4096"];
                 settings = {
                   allowDiscards = true;
                 };
@@ -111,9 +108,15 @@
       pool = {
         type = "lvm_vg";
         lvs = {
-          # Plain swap LV (not a zvol) so hibernation is safe under ZFS.
-          # boot.resumeDevice = /dev/mapper/pool-swap is set in system/boot.nix.
-          # 40G > 32G RAM (hibernation needs swap >= RAM).
+          # Plain swap LV, never a zvol: swapping onto a zvol deadlocks under
+          # memory pressure, and a hibernation image on one is unrecoverable.
+          # Sized 40G > 32G RAM to the "swap >= RAM" hibernation rule — but
+          # hibernation does NOT work on this machine and is not expected to
+          # (ZFS root forces `nohibernate`, and the firmware exposes no S3; see
+          # system/boot.nix and hardware/framework.nix). The size is headroom
+          # kept against a future where it becomes possible, since this layout
+          # can't be changed without reformatting. boot.resumeDevice is set in
+          # system/boot.nix for the same reason and never actually resumes.
           swap = {
             size = "40G";
             content = {
@@ -190,6 +193,32 @@
           sbctl = {
             type = "zfs_fs";
             mountpoint = "/var/lib/sbctl";
+          };
+
+          # Docker's data root (virtualisation.docker with storageDriver =
+          # "zfs"; see hosts/tempest/system/virtualization.nix). Own dataset so
+          # the zfs graph driver can clone one child dataset per layer, and so
+          # image churn stays outside /persist — which is snapshotted hourly and
+          # replicated to the external USB pool. Inherits
+          # com.sun:auto-snapshot=false from rootFsOptions: images are
+          # re-pullable, snapshotting them would just pin deleted layers.
+          docker = {
+            type = "zfs_fs";
+            mountpoint = "/var/lib/docker";
+          };
+
+          # podman's storage — rootful graphroot (storage/) and the rootless
+          # per-user roots (rootless/<user>/), which are pointed here instead of
+          # ~/.local/share/containers by virtualisation.containers.storage in
+          # hosts/tempest/system/virtualization.nix. Same reasoning as the docker
+          # dataset above: keeps distrobox image churn out of the /persist
+          # snapshot + USB replication scope, and inherits
+          # com.sun:auto-snapshot=false. Unlike docker this is plain overlay on
+          # one dataset, not the zfs graph driver — podman has no zfs driver in
+          # rootless mode.
+          containers = {
+            type = "zfs_fs";
+            mountpoint = "/var/lib/containers";
           };
 
           # Never mounted. A refreservation we can shrink to recover from a

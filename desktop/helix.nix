@@ -1,6 +1,4 @@
-{ pkgs, ... }:
-
-{
+{pkgs, ...}: {
   # Steel scheme config + cogs. These are code, so they're pointed at rather
   # than derived from Nix. recentf.scm is a local fork of mattwparas/helix-
   # config's recentf (see its header for what was changed and why); scratch.scm
@@ -62,7 +60,7 @@
         auto-save.focus-lost = true;
 
         gutters = {
-          layout = [ "diagnostics" "spacer" "line-numbers" "spacer" "diff" ];
+          layout = ["diagnostics" "spacer" "line-numbers" "spacer" "diff"];
         };
 
         inline-diagnostics = {
@@ -70,9 +68,9 @@
         };
 
         statusline = {
-          left = [ "mode" "spinner" "version-control" ];
-          center = [ "file-name" ];
-          right = [ "diagnostics" "selections" "position" "file-encoding" "file-line-ending" "file-type" ];
+          left = ["mode" "spinner" "version-control"];
+          center = ["file-name"];
+          right = ["diagnostics" "selections" "position" "file-encoding" "file-line-ending" "file-type"];
           separator = "│";
           mode.normal = "NORMAL";
           mode.insert = "INSERT";
@@ -81,142 +79,155 @@
       };
     };
 
-    languages =
-      let
-        tsServers = [ "typescript-language-server" "vscode-eslint-language-server" ];
-        # typescript / tsx / javascript / jsx all share the same servers + auto-format.
-        tsLangs = map
-          (name: {
-            inherit name;
-            auto-format = true;
-            language-servers = tsServers;
-          }) [ "typescript" "tsx" "javascript" "jsx" ];
-      in
-      {
-        language-server.rust-analyzer = {
-          command = "rust-analyzer";
-          config = {
-            check.command = "clippy";
-            cargo.features = "all";
-          };
+    languages = let
+      tsServers = ["typescript-language-server" "vscode-eslint-language-server"];
+      # typescript / tsx / javascript / jsx all share the same servers + auto-format.
+      tsLangs =
+        map
+        (name: {
+          inherit name;
+          auto-format = true;
+          language-servers = tsServers;
+        }) ["typescript" "tsx" "javascript" "jsx"];
+    in {
+      language-server.rust-analyzer = {
+        command = "rust-analyzer";
+        config = {
+          check.command = "clippy";
+          cargo.features = "all";
         };
+      };
 
-        language-server.typescript-language-server = {
-          command = "typescript-language-server";
-          args = [ "--stdio" ];
-        };
+      language-server.typescript-language-server = {
+        command = "typescript-language-server";
+        args = ["--stdio"];
+      };
 
-        language-server.phpactor = {
-          command = "phpactor";
-          args = [ "language-server" ];
-        };
+      language-server.phpactor = {
+        command = "phpactor";
+        args = ["language-server"];
+      };
 
-        language-server.vuels = {
-          command = "vue-language-server";
-          args = [ "--stdio" ];
-          config.typescript.tsdk = "${pkgs.typescript}/lib/node_modules/typescript/lib";
-        };
+      language-server.vuels = {
+        command = "vue-language-server";
+        args = ["--stdio"];
+        config.typescript.tsdk = "${pkgs.typescript}/lib/node_modules/typescript/lib";
+      };
 
-        language-server.vscode-eslint-language-server = {
-          command = "vscode-eslint-language-server";
-          args = [ "--stdio" ];
-        };
+      language-server.vscode-eslint-language-server = {
+        command = "vscode-eslint-language-server";
+        args = ["--stdio"];
+      };
 
-        language-server.nil = {
-          command = "nil";
-          config.nil.formatting.command = [ "alejandra" "--quiet" "-" ];
-          # Auto-fetch missing flake inputs instead of prompting on every open.
-          config.nil.nix.flake.autoArchive = true;
-        };
+      language-server.nil = {
+        command = "nil";
+        config.nil.formatting.command = ["alejandra" "--quiet" "-"];
+        # Auto-fetch missing flake inputs instead of prompting on every open.
+        config.nil.nix.flake.autoArchive = true;
+      };
 
-        language-server.marksman = {
-          command = "marksman";
-          args = [ "server" ];
-        };
+      language-server.marksman = {
+        command = "marksman";
+        args = ["server"];
+      };
 
-        language-server.tinymist = {
-          command = "tinymist";
-        };
+      language-server.tinymist = {
+        command = "tinymist";
+      };
 
-        language-server.jdtls = {
-          command = "jdtls";
-        };
+      language-server.jdtls = {
+        command = "jdtls";
+      };
 
-        language-server.harper-ls = {
-          command = "harper-ls";
-          args = [ "--stdio" ];
-        };
+      language-server.harper-ls = {
+        command = "harper-ls";
+        args = ["--stdio"];
+      };
 
-        language-server.taplo = {
-          command = "taplo";
-          args = [ "lsp" "stdio" ];
-        };
+      language-server.taplo = {
+        command = "taplo";
+        args = ["lsp" "stdio"];
+      };
 
-        language-server.yaml-language-server = {
-          command = "yaml-language-server";
-          args = [ "--stdio" ];
-        };
+      language-server.yaml-language-server = {
+        command = "yaml-language-server";
+        args = ["--stdio"];
+      };
 
-        language = [
+      language =
+        [
           {
             name = "rust";
-            language-servers = [ "rust-analyzer" ];
+            language-servers = ["rust-analyzer"];
           }
-        ] ++ tsLangs ++ [
+        ]
+        ++ tsLangs
+        ++ [
           {
             name = "php";
-            language-servers = [ "phpactor" ];
+            language-servers = ["phpactor"];
           }
           {
             name = "vue";
-            language-servers = [ "vuels" ];
+            language-servers = ["vuels"];
           }
           {
             name = "nix";
             auto-format = true;
-            language-servers = [ "nil" ];
-            formatter = { command = "alejandra"; args = [ "--quiet" "-" ]; };
+            language-servers = ["nil"];
+            formatter = {
+              command = "alejandra";
+              args = ["--quiet" "-"];
+            };
           }
           {
             name = "markdown";
-            language-servers = [ "marksman" "harper-ls" ];
+            language-servers = ["marksman" "harper-ls"];
           }
           {
             name = "typst";
-            language-servers = [ "tinymist" "harper-ls" ];
+            language-servers = ["tinymist" "harper-ls"];
           }
           {
             name = "toml";
             auto-format = true;
-            language-servers = [ "taplo" ];
-            formatter = { command = "taplo"; args = [ "fmt" "-" ]; };
+            language-servers = ["taplo"];
+            formatter = {
+              command = "taplo";
+              args = ["fmt" "-"];
+            };
           }
           {
             name = "yaml";
-            language-servers = [ "yaml-language-server" ];
+            language-servers = ["yaml-language-server"];
           }
           {
             name = "java";
-            language-servers = [ "jdtls" ];
+            language-servers = ["jdtls"];
           }
           {
             name = "org";
             scope = "source.org";
-            file-types = [ "org" ];
-            roots = [ ];
+            file-types = ["org"];
+            roots = [];
             comment-token = "#";
-            indent = { tab-width = 2; unit = "  "; };
+            indent = {
+              tab-width = 2;
+              unit = "  ";
+            };
             grammar = "org";
           }
         ];
 
-        grammar = [{
+      grammar = [
+        {
           name = "org";
           source = {
             git = "https://github.com/milisims/tree-sitter-org";
             rev = "698bb1a34331e68f83fc24bdd1b6f97016bb30de";
           };
-        }];
-      };
+        }
+      ];
+    };
   };
 }

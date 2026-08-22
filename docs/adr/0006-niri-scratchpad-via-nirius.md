@@ -1,6 +1,12 @@
 # niri scratchpad via the nirius daemon, not a hand-rolled `niri msg` script
 
-Status: accepted (2026-06-10)
+Status: accepted (2026-06-10), scoped to the niri layer by
+[0012](0012-one-rice-two-compositors.md)
+
+> **Scope.** This describes a workaround for something niri lacks, and is true of
+> the niri compositor layer only. The mango layer has first-class named
+> scratchpads (`toggle_named_scratchpad`), so it runs no daemon and spawns
+> nothing at startup — see `rices/ember/compositors/mango/window-rules.nix`.
 
 ## Context
 
@@ -9,7 +15,7 @@ workspace with Mod+T" — i.e. an i3/sway-style scratchpad. niri has no hidden
 workspace, so a scratchpad has to be *emulated*: a window is parked on the
 bottom-most workspace and flipped onto the focused workspace on demand. niri's
 IPC is rich enough to build this by hand — the existing `Mod+G` bind
-(`rices/niri/niri.nix`) proves the `niri msg action … | jq` pattern works, and
+(`rices/ember/compositors/niri/niri.nix`) proves the `niri msg action … | jq` pattern works, and
 `move-window-to-workspace --window-id … --focus` + `focus-window --id …` cover
 the needed primitives.
 
@@ -19,14 +25,17 @@ Use **`nirius` + `niriusd`** (nixpkgs, 0.7.1) rather than a hand-rolled script.
 `niriusd` runs from `spawn-at-startup`; `nirius scratchpad-toggle` marks a
 window as a scratchpad member and `nirius scratchpad-show --app-id REGEX` flips
 it in/out of the focused workspace. The infrastructure is generic — a
-`mkScratchpad { name; appId; spawn; }` helper (`rices/niri/niri.nix`) builds the
+`mkScratchpad { name; appId; spawn; }` helper (`rices/ember/compositors/niri/niri.nix`) builds the
 launch/park (`init`) and summon/dismiss (`toggle`) scripts for any app — with
 two tenants:
 
 - **Telegram** — always-open, parked at login by `init`, summoned with `Mod+T`.
-- **Floating terminal** — a `kitty --class scratchpad-terminal`, spawned lazily
-  on first use and summoned with `Mod+Shift+Return` (which previously opened an
-  Emacs frame; that bind and the Emacs server are disabled for now).
+- **Floating terminal** — a `wezterm start --always-new-process --class
+  scratchpad-terminal` (it was `kitty --class scratchpad-terminal` until the
+  rice's terminal moved to wezterm; `--always-new-process` is what keeps the
+  app-id ours rather than a serving instance's), spawned lazily on first use and
+  summoned with `Mod+Shift+Return` (which previously opened an Emacs frame; that
+  bind and the Emacs server are disabled for now).
 
 `Mod+Shift+T` toggles the *focused* window in/out of the scratchpad as general
 infrastructure. Geometry (float + centered, sized as a proportion of the working

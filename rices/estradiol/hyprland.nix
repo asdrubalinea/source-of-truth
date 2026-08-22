@@ -1,10 +1,9 @@
-{ pkgs
-, inputs
-, hostname
-, ...
-}:
-
-let
+{
+  pkgs,
+  inputs,
+  hostname,
+  ...
+}: let
   handleClamshell = pkgs.writeScriptBin "hypr-handle-clamshell" ''
     #!${pkgs.stdenv.shell}
 
@@ -20,10 +19,10 @@ let
 
     # Check lid state from ACPI
     LID_STATE_FILE="/proc/acpi/button/lid/LID0/state"
-    
+
     if [[ -f "$LID_STATE_FILE" ]]; then
       LID_STATE=$(cat "$LID_STATE_FILE" | grep -o "open\|closed")
-      
+
       if [[ "$LID_STATE" == "closed" ]]; then
         ${handleClamshell}/bin/hypr-handle-clamshell close
       else
@@ -34,10 +33,8 @@ let
       ${handleClamshell}/bin/hypr-handle-clamshell open
     fi
   '';
-
-in
-{
-  home.packages = [ handleClamshell detectLidState ];
+in {
+  home.packages = [handleClamshell detectLidState];
 
   wayland.windowManager.hyprland = {
     enable = true;
@@ -54,22 +51,21 @@ in
       debug.disable_logs = false;
 
       monitor = (
-        if hostname == "orchid" then
-          [
-            "HDMI-A-1, 3440x1440@75, 0x0, 1" # Samsung
-            "DP-2, 2560x1440@60, 3440x0, 1" # Benq
-          ]
-        else if hostname == "tempest" then
-          [
-            "eDP-1, 2880x1920@120, 0x0, 2"
-            # "DP-1, 3440x1440@100, 0x0, 1"
+        if hostname == "orchid"
+        then [
+          "HDMI-A-1, 3440x1440@75, 0x0, 1" # Samsung
+          "DP-2, 2560x1440@60, 3440x0, 1" # Benq
+        ]
+        else if hostname == "tempest"
+        then [
+          "eDP-1, 2880x1920@120, 0x0, 2"
+          # "DP-1, 3440x1440@100, 0x0, 1"
 
-            "desc:Samsung Electric Company S34J55x H4LT300008, 3440x1440@75, 0x0, 1" # Samsung center
-            "desc:BNQ BenQ GW2765 W6H00193019, 2560x1440@60, 3440x0, 1" # BenQ right of Samsung
-            "desc:BOE Display, 2560x1440@144, 440x1440, 1" # BOE portable centered below Samsung
-          ]
-        else
-          null
+          "desc:Samsung Electric Company S34J55x H4LT300008, 3440x1440@75, 0x0, 1" # Samsung center
+          "desc:BNQ BenQ GW2765 W6H00193019, 2560x1440@60, 3440x0, 1" # BenQ right of Samsung
+          "desc:BOE Display, 2560x1440@144, 440x1440, 1" # BOE portable centered below Samsung
+        ]
+        else null
       );
 
       # Variables
@@ -133,7 +129,8 @@ in
       };
 
       animations =
-        if hostname == "orchid" then {
+        if hostname == "orchid"
+        then {
           enabled = true;
           bezier = "myBezier, 0.05, 0.9, 0.1, 1.05";
           animation = [
@@ -144,7 +141,8 @@ in
             "workspaces, 1, 3, default"
             "borderangle, 1, 100, linear, loop"
           ];
-        } else {
+        }
+        else {
           enabled = false;
         };
 

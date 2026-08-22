@@ -16,7 +16,7 @@ tempest keeps a 3-2-1 backup. Three legs, each with its own meaning of "ran":
 ### Backup states
 
 - **failed** — a backup leg *ran and errored*. This is the only condition that
-  raises an alarm (the **health indicator** in the bar goes red). It is a latched state: it persists
+  raises an **alarm**. It is a latched state: it persists
   until the next successful run of that leg clears it. The syncoid (USB) leg
   also counts as failed if, after replicating, the backup pool reports
   unhealthy (see *integrity scrub* — the run can only inspect the SSD while the
@@ -27,11 +27,20 @@ tempest keeps a 3-2-1 backup. Three legs, each with its own meaning of "ran":
   silently — that staleness is intentionally *not* surfaced.)
 - **healthy** — every leg's last run either succeeded or was a clean no-op.
 
+- **alarm** — how a failure reaches the user. It is *not* the bar: the
+  backup-health readout described in `docs/adr/0003` was dropped in the Noctalia
+  v5 migration, because v5's `custom_button` cannot poll a script (see
+  `rices/ember/noctalia-widgets.nix`). The two surviving channels are a desktop
+  notification fired by the unit itself (`system/backup-notify.nix`) and the
+  alert block at the top of `sitrep`, which is pulled rather than pushed. The
+  latching described above therefore lives in the units and in what `sitrep`
+  reads, not in a widget.
+
 ### Pool health
 
 - **integrity scrub** — a full ZFS scrub of a pool to detect/repair silent
-  corruption. `rpool` (internal) is scrubbed weekly and its health is shown
-  always (the health indicator in the bar). The external **backup** pool can only be scrubbed while the
+  corruption. `rpool` (internal) is scrubbed weekly and its health is reported
+  unconditionally by `sitrep`, healthy or not. The external **backup** pool can only be scrubbed while the
   drive is attached, so its scrub rides along with a backup run on a *stale*
   cadence (skipped if scrubbed recently), and an unhealthy result fails that
   run rather than showing as its own always-on indicator.
@@ -57,32 +66,170 @@ modes fused into one complaint. The glossary keeps them apart.
   _Flagged ambiguity_: "the resume is broken" has meant **the hang** and
   **redock** interchangeably. They are different — one is a dead box, the other
   a live box with a dead dock — with different causes and different fixes.
-- **keep-awake** — a deliberate utility to hold off idle/lid/sleep while a
-  long-running task finishes. A convenience tool, _not_ a workaround for **the
-  hang**.
+- **keep-awake** — holding off idle/lid/sleep while something that needs the
+  machine awake is unfinished. A convenience, _not_ a workaround for **the
+  hang**. Held two ways: *deliberately*, as a utility invoked for a long-running
+  task, and *implicitly*, for exactly as long as a **marquee** tenant is
+  *playing* — because nothing about watching registers as activity. Playing, not
+  merely present: pausing a tenant releases it, which is deliberate, since a
+  paused tenant is a static frame in a strip no window can cover and the idle
+  chain is what eventually covers and unlights it. A tenant that ends on its own
+  also releases it; a live or looping one does not, and is an open-ended
+  keep-awake until it is paused or the marquee is sent **dark**.
 
 ## Desktop (rices)
 
-- **rice** — a self-contained desktop environment: the Wayland compositor
-  (niri / hyprland) plus its shell furniture — bar, launcher, notifications,
-  lockscreen, terminals, theming, idle handling, wallpaper, window rules. A
-  rice defines *what the desktop is and how it behaves*; it is meant to be
-  independent of the machine it runs on. tempest's rice is niri; orchid's is
-  estradiol.
+- **rice** — a desktop environment: the shell furniture — bar, launcher,
+  notifications, lockscreen, terminals, theming, idle handling, wallpaper —
+  together with one or more compositors that can run underneath it. A rice
+  defines *what the desktop is and how it behaves*; it is meant to be
+  independent of the machine it runs on. tempest's rice is **ember**; orchid's was
+  **estradiol**.
+  A rice is **not** named after its compositor. ember runs on either niri or
+  mango and is recognisably the same desktop on both, which is the whole reason
+  the word stopped meaning "the compositor plus its trimmings".
+  _Avoid_: theme (that's colours only), desktop environment (implies one
+  compositor), setup.
+- **compositor layer** — one compositor under a rice: the window manager itself
+  plus the bindings, layout and window rules only its own config language can
+  express (`rices/ember/compositors/<name>/`). A rice may carry several. They are
+  **not** alternatives you choose at rebuild time — on tempest both are installed
+  in one generation and the session is picked at the greeter, per login.
+  The boundary is load-bearing in both directions. Because every enabled layer is
+  evaluated in the same generation, no option may be *defined* by two of them; an
+  option only one layer needs may live inside it (the **marquee** does), but
+  anything shared belongs to the rice. And the furniture must never name a
+  compositor: where it genuinely needs something only a compositor can do —
+  powering panels off at idle is the one case — it branches at *runtime* on which
+  session is live, rather than being duplicated per layer. See `docs/adr/0012-one-rice-two-compositors.md`.
+  _Flagged ambiguity_: "compositor" alone means the program (niri, mango); a
+  **compositor layer** is the directory of config that drives it. Enabling a
+  layer installs a session; it does not select one.
 - **machine policy** — per-host facts a rice must not bake in: monitor
-  identities and layout (the kanshi profiles), the systemd units a bar
-  readout watches (e.g. the backup-health indicator), and per-host audio
-  correction (a speaker DSP/EQ profile tuned to a specific laptop's drivers).
+  identities and layout (the kanshi profiles), the systemd units a health
+  readout watches (e.g. which backup legs exist on this machine), per-host audio
+  correction (a speaker DSP/EQ profile tuned to a specific laptop's drivers),
+  a readable terminal font size (a function of the panel it is read on), and
+  where the machine physically is (sunset times, weather).
   These belong with the
   host, not the rice. A rice consumes them as inputs, and degrades cleanly
   (a readout collapses to nothing) when the thing it would describe is absent
   on a given machine.
+  The tell for a leak is a **hostname** appearing inside a rice: a rice that
+  branches on which machine it is running on has stopped describing a desktop.
+  `rices/ember` holds to this; `rices/estradiol` does not yet — its
+  `hyprland.nix` still carries whole per-host monitor layouts behind
+  `hostname == …`, which is exactly what `homes/tempest/monitors.nix` extracted
+  for niri.
+  Machine policy reaching the rice takes whichever of two forms is smaller —
+  the host *defines* the value directly into a module the rice also configures
+  (no rice option at all, when the rice never reads it back), or the rice
+  *declares* an option for it (when rice logic depends on the value, as with
+  `rices.ember.marquee` and `rices.ember.internalOutput`).
+- **workspace** — the canonical word for "one of the ten things Mod+1..0
+  switches between". It is the *user-facing* concept and it survives a change of
+  compositor; the mechanism underneath does not.
+  _Flagged ambiguity_: niri workspaces are dynamic and per-output — they are
+  created and destroyed as you use them, and a window is on exactly one. mango
+  has **tags** instead (a dwl inheritance): a fixed set that always exists, a
+  bitmask, so one window can be on several at once and an empty tag never
+  disappears. ember pins mango to ten tags so the same ten keys land in the same
+  ten places, but "the workspace list" is a niri idea with no mango counterpart,
+  and a *sticky* window is a mango idea (`isglobal`) that niri has to fake. When
+  precision matters, say **tag** for mango and **workspace** for niri; say
+  *workspace* when you mean the thing the user switches.
+- **bar** — the rice's single status strip: workspaces, live readouts, clock,
+  indicators. There is exactly one per rice, and on tempest it **hides itself**,
+  reappearing only while the pointer is at the screen edge — an OLED lives longer
+  without a permanent lit strip. Being summoned by intent is the whole design, so
+  any *other* thing that makes it appear is a defect, not a feature.
+  _Flagged ambiguity_: on tempest the bar is Noctalia's, and the only surviving
+  **waybar** is a module-less black rectangle that exists purely to reserve the
+  **marquee** — a bar in name and process only, with nothing on it. "The bar"
+  never means that one. Which units a bar readout watches is **machine policy**.
 - **scratchpad** — a window kept running but parked out of view, summoned by a
   keybind as a floating overlay onto whatever workspace is focused and
-  dismissed with the same key. On tempest (niri) the canonical tenant is
-  Telegram (Mod+T). _Avoid_: special workspace, drop-down, quake terminal.
-  _Flagged ambiguity_: niri has no native scratchpad and no hidden workspace,
-  so unlike Hyprland's `togglespecialworkspace` this is **emulated** — the
-  parked window still lives on a real (bottom-most) workspace and remains
-  visible in the overview. "Scratchpad" here names that emulated behaviour, not
-  a first-class compositor feature.
+  dismissed with the same key. On tempest the canonical tenant is Telegram
+  (Mod+T). _Avoid_: special workspace, drop-down, quake terminal.
+  _Flagged ambiguity_: the word names a **behaviour**, and the two compositor
+  layers deliver it by different means. Under niri it is **emulated** — niri has
+  no native scratchpad and no hidden workspace, so unlike Hyprland's
+  `togglespecialworkspace` the parked window still lives on a real (bottom-most)
+  workspace and stays visible in the overview; a daemon flips it in and out (ADR
+  0006). Under mango it is a first-class compositor feature
+  (`toggle_named_scratchpad`), so there is no daemon and nothing to spawn and
+  hide at startup. Statements about "how the scratchpad works" are therefore
+  only true of one layer — say which.
+- **marquee** — a strip along one edge of a single output, permanently removed
+  from the tiling area and impossible for any window to cover, whose tenant is
+  moving content. On tempest it is the top of the portrait OLED, the panel's full
+  width and the matching 16:9 height, and its tenant is a video. The strip exists
+  whether or not it is tenanted — it is a fixed property of that panel, not a
+  mode you turn on — so no window ever moves when a tenant arrives or leaves, and
+  windows tile below it with no intervention. Its purpose is as much ergonomic as
+  it is playback: it starts the desktop below the panel's uncomfortable top edge.
+  _Avoid_: overlay, banner, top bar, PiP.
+- **dark** (of a marquee) — untenanted, showing nothing: not the wallpaper, not a
+  paused frame. On an OLED an unlit strip is the only safe resting state for a
+  region no window can ever cover, so "empty" and "dark" mean the same thing
+  here.
+  _Flagged ambiguity_: both the **scratchpad** and the browser **PiP** are
+  windows that get relocated onto the focused workspace behind your back. A
+  marquee is not a window and belongs to no workspace, so it survives a workspace
+  switch with nothing chasing it. Do not describe the marquee as "a PiP that
+  stays put". Which panel carries a marquee, and how deep it is, is **machine
+  policy** — on tempest it follows the OLED's mount (`oledMount` in
+  `homes/tempest/monitors.nix`), so running that panel landscape means the machine
+  has no marquee at all. That is a property of how the panel stands, decided at
+  rebuild time; it does not make the marquee a mode.
+
+## Media automation (tempest)
+
+**Opportunistic media service**:
+A personal service whose availability follows tempest's awake time. Sleep,
+travel, shutdown, and reboot are normal unavailability, not outages.
+_Avoid_: Always-on media server
+
+**Media request**:
+A selection made through the discovery interface asking the automation system
+to acquire a movie. It is fulfilled when a playable file is ready in the
+**media library**.
+_Avoid_: Treating addition to a streaming catalogue as fulfillment
+
+**Media library**:
+A bounded collection of replaceable movies. Losing the library is an
+inconvenience, not a loss of irreplaceable data.
+_Avoid_: Personal media, archive
+
+**Personal media**:
+Irreplaceable user-created material such as home videos. It is user data, not
+part of the **media library**.
+_Avoid_: Treating personal media as replaceable library content
+
+**Playback client**:
+The application that opens a media file for viewing. For this system the
+playback client is mpv.
+_Avoid_: Media server
+
+**Media server**:
+A service that catalogues a library and exposes playback, availability, and
+watch-state information to other applications. This system has no media server.
+_Avoid_: Calling mpv a media server
+
+### Example dialogue
+
+> **Developer:** Should the family videos be added to the media library?
+>
+> **Domain expert:** No. The media library contains only replaceable movies;
+> family videos are personal media and must retain the protections of ordinary
+> user data.
+>
+> **Developer:** Is playback being unavailable while tempest sleeps an outage?
+>
+> **Domain expert:** No. This is an opportunistic media service; availability
+> follows the laptop's awake time.
+>
+> **Developer:** Which media server does mpv provide?
+>
+> **Domain expert:** None. mpv is the playback client and opens library files
+> directly.

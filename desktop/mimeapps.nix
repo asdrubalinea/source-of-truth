@@ -1,5 +1,4 @@
-{ ... }:
-let
+{...}: let
   gwenview = "org.kde.gwenview.desktop";
 
   # Image types Gwenview advertises in its .desktop MimeType field. Mapping
@@ -30,8 +29,7 @@ let
     "image/x-xpixmap"
     "image/openraster"
   ];
-in
-{
+in {
   # Default-application map. Migrated from the previously app-generated
   # ~/.config/mimeapps.list so defaults live in source control. Home Manager
   # writes this file read-only, so GUI "set as default" no longer sticks —

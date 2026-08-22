@@ -23,8 +23,14 @@
     # cut (and thus unclean-shutdown lost writes). Decide on RAM alone: the 40G
     # swap is sized for hibernation (>= RAM, see disks/tempest.nix), not a
     # runtime cushion to thrash into, so don't wait for it to fill. SIGTERM at
-    # <5% available RAM, SIGKILL at half that. Raise freeMemThreshold if it ever
-    # fires too eagerly.
+    # <5% available RAM, SIGKILL at half that. LOWER freeMemThreshold if it ever
+    # fires too eagerly — earlyoom kills once available drops BELOW the
+    # threshold, so raising it makes it fire sooner, not later.
+    #
+    # This reads MemAvailable, so anything that changes how the kernel computes
+    # MemAvailable retunes it silently. vm.watermark_scale_factor is the trap
+    # (si_mem_available() subtracts totalreserve_pages and two wmark_low terms);
+    # see the "Deliberately NOT set" note in system/memory.nix before adding it.
     earlyoom = {
       enable = true;
       freeMemThreshold = 5;
@@ -104,6 +110,14 @@
         ROCKET_LOG = "critical";
       };
     };
+
+    # Read-only mirror of orchid's vault (services/vaultwarden-mirror.nix).
+    # The key path is overridden because tempest's root is tmpfs — the module's
+    # default lives under /var/lib and would be wiped on every boot.
+    vaultwarden-mirror = {
+      enable = true;
+      sshKeyPath = "/persist/secrets/vaultwarden-backup/id_ed25519";
+    };
   };
 
   # Cap the monitoring stack's resource use on this laptop. The shared module
@@ -135,7 +149,7 @@
   # environmentFile holds PHP_SESSION_ID + BEARER_TOKEN — created out-of-band, not
   # in the repo (see .env.example upstream); the unit fails to start until it exists.
   services.auxologico-check = {
-    enable = false;
+    enable = true;
     startDate = "01/07/2026";
     environmentFile = "/persist/auxologico-check/env";
     dataDir = "/persist/auxologico-check";

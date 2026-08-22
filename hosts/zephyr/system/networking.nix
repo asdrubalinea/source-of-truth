@@ -1,5 +1,4 @@
-{ ... }:
-{
+{...}: {
   networking = {
     hostName = "zephyr";
     networkmanager.enable = false;
@@ -17,8 +16,8 @@
       # stays closed here and is opened per-interface on tailscale0 as services
       # land, mirroring hydra. Optionally tighten SSH to tailscale0-only once the
       # tailnet is joined.
-      allowedTCPPorts = [ ];
-      allowedUDPPorts = [ ];
+      allowedTCPPorts = [];
+      allowedUDPPorts = [];
       checkReversePath = "loose";
     };
   };

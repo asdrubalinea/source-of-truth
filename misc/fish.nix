@@ -1,4 +1,16 @@
-{ pkgs, inputs, ... }: {
+{pkgs, ...}: {
+  # Frecency-ranked directory jumping. Enabled as a program rather than
+  # dropped into desktop/home-packages.nix because the binary does nothing
+  # without the shell hook that records every visit — same reasoning as the
+  # nix-index and starship integrations in homes/tempest/default.nix.
+  programs.zoxide = {
+    enable = true;
+    enableFishIntegration = true;
+    # Shadow cd with zoxide: plain `cd <fragment>` jumps by frecency, `cdi`
+    # picks interactively. `builtin cd` still reaches the real one.
+    options = ["--cmd" "cd"];
+  };
+
   programs.fish = {
     enable = true;
 
@@ -10,9 +22,9 @@
     # (drop this line) once home-manager guards the missing script.
     generateCompletions = false;
 
-    shellAliases = import ./aliases.nix { inherit pkgs inputs; };
+    shellAliases = import ./aliases.nix {inherit pkgs;};
 
-    shellAbbrs = { };
+    shellAbbrs = {};
 
     interactiveShellInit = ''
       set fish_greeting # Disable greeting
@@ -24,7 +36,10 @@
     '';
 
     plugins = [
-      { name = "grc"; src = pkgs.fishPlugins.grc.src; }
+      {
+        name = "grc";
+        src = pkgs.fishPlugins.grc.src;
+      }
     ];
   };
 }

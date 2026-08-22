@@ -1,5 +1,4 @@
-{ pkgs, ... }:
-{
+{pkgs, ...}: {
   users = {
     mutableUsers = false;
     extraUsers.root.hashedPassword = (import ../../../passwords).password;
@@ -13,6 +12,9 @@
         "jackaudio"
         "render"
         "video"
+        # Read system-unit journals unprivileged, e.g. `journalctl -xeu
+        # borgbackup-job-…` after a failed backup.
+        "systemd-journal"
       ];
       hashedPassword = (import ../../../passwords).password;
       shell = pkgs.fish;

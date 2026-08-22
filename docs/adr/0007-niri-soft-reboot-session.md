@@ -48,7 +48,7 @@ setuid wrapper — soft-reboot is a systemd-manager op, not a logind verb, so it
 needs privilege) bound to `Mod+Shift+R`.
 
 The session policy (autologin + lock gate + keybind) lives in `homes/tempest`
-and `hosts/tempest`, NOT in the niri rice: it depends on tempest's TPM
+and `hosts/tempest`, NOT in the rice: it depends on tempest's TPM
 auto-unlock, so it is machine policy, keeping the rice portable (cf. ADR 0004
 and monitors.nix).
 
@@ -93,7 +93,7 @@ annoyance (logout → tuigreet → login no longer triggers a second lock).
 ## Amendment (2026-06-25): runtime lock moves off Noctalia to swaylock
 
 The cold-boot move above left the *runtime* lock (idle / `Mod+L` / before-sleep,
-all in `rices/niri/swayidle.nix`) still driven by `noctalia msg session lock`.
+all in `rices/ember/swayidle.nix`) still driven by `noctalia msg session lock`.
 That kept the red screen alive **when docked**: Noctalia v5's ext-session-lock
 client segfaults deterministically on output hotplug (same fault offset every
 time), and docking *is* output hotplug (eDP-1 off, externals on). So any lock
@@ -106,7 +106,7 @@ So the runtime lock now uses **swaylock** — a tiny wlroots locker that survive
 output hotplug and draws its prompt on every connected output. swayidle's `lock`
 and `before-sleep` call swaylock by absolute path (guarded against double-launch,
 since only one ext-session-lock client may exist); a `swaylock` PAM service is
-added in `rices/niri/system.nix`. Noctalia stays the shell (bar / launcher /
+added in `rices/ember/system.nix`. Noctalia stays the shell (bar / launcher /
 notifications / wallpaper); it just no longer owns the lock surface. This is the
 same reasoning as the cold-boot move — get auth off the flaky v5 locker — applied
 to the one path the first amendment didn't cover.

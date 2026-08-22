@@ -1,0 +1,27 @@
+#!/bin/sh
+# DESTRUCTIVE: destroys, formats and mounts the target disk per disks/<host>.nix.
+# Both arguments are required — no default host, no default device — so an
+# accidental bare run can't wipe the wrong disk. Pair: ./disk-install.
+set -eu
+
+usage() {
+  echo "usage: $0 <host> /dev/disk/by-id/<target>" >&2
+  echo "refusing to run without an explicit host and target device (DESTROYS it)." >&2
+  echo >&2
+  echo "hosts with a parameterised layout: tempest, orchid." >&2
+  echo "  (hydra hard-codes its device in disks/hydra.nix and takes no argument)" >&2
+  echo "list candidates with: ls -l /dev/disk/by-id/" >&2
+  echo "tempest's NVMe is /dev/disk/by-id/nvme-Corsair_MP700_PRO_SE_A8WFB416001JKK" >&2
+  exit 1
+}
+
+[ "$#" -eq 2 ] || usage
+[ -f "./disks/$1.nix" ] || {
+  echo "no such layout: ./disks/$1.nix" >&2
+  usage
+}
+
+sudo nix --experimental-features "nix-command flakes" run github:nix-community/disko/latest -- \
+  --mode destroy,format,mount \
+  --argstr device "$2" \
+  "./disks/$1.nix"

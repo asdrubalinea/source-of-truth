@@ -1,4 +1,8 @@
-{ pkgs, lib, ... }:
+{
+  pkgs,
+  lib,
+  ...
+}:
 #
 # Desktop notifications for the backup/scrub units that exist on both the real
 # laptop AND the VM: the weekly rpool integrity scrub (services.zfs.autoScrub →
@@ -7,17 +11,21 @@
 # every run, so a notification on each outcome is wanted.
 #
 # These replace the old always-on bar health readout, which Noctalia v5 can no
-# longer drive (see packages/backup-notify.nix and rices/niri/noctalia-widgets.nix).
+# longer drive (see packages/backup-notify.nix and rices/ember/noctalia-widgets.nix).
 #
 # The third backup leg — the external USB pool — only exists on the physical
 # host, so its failure wiring and its (skip-aware) success notification live in
 # the physical-only system/backup-external.nix instead.
 let
-  backup-notify = pkgs.callPackage ../../../packages/backup-notify.nix { };
+  backup-notify = pkgs.callPackage ../../../packages/backup-notify.nix {};
 
   # A oneshot that fires exactly one notification. `result` is ok|fail, `label`
   # the human name, `unit` the monitored unit (named in the failure body).
-  notifier = { result, label, unit }: {
+  notifier = {
+    result,
+    label,
+    unit,
+  }: {
     description = "Desktop ${result} notification: ${label}";
     serviceConfig = {
       Type = "oneshot";
@@ -39,7 +47,7 @@ let
   # own run (which carries its own scrub + health check).
   scrubNotify = pkgs.writeShellApplication {
     name = "backup-notify-scrub";
-    runtimeInputs = [ backup-notify pkgs.zfs pkgs.gnugrep ];
+    runtimeInputs = [backup-notify pkgs.zfs pkgs.gnugrep];
     text = ''
       pool=rpool
       if zpool status -x "$pool" 2>/dev/null | grep -q "is healthy"; then
@@ -49,8 +57,7 @@ let
       fi
     '';
   };
-in
-{
+in {
   systemd.services = {
     backup-notify-scrub = {
       description = "Desktop notification: ZFS scrub result";
@@ -80,10 +87,10 @@ in
 
     # Merge OnSuccess=/OnFailure= into the units the zfs / borgbackup modules
     # generate.
-    zfs-scrub.onSuccess = [ "backup-notify-scrub.service" ];
-    zfs-scrub.onFailure = [ "backup-notify-scrub-fail.service" ];
+    zfs-scrub.onSuccess = ["backup-notify-scrub.service"];
+    zfs-scrub.onFailure = ["backup-notify-scrub-fail.service"];
 
-    borgbackup-job-home-irene.onSuccess = [ "backup-notify-borg-ok.service" ];
-    borgbackup-job-home-irene.onFailure = [ "backup-notify-borg-fail.service" ];
+    borgbackup-job-home-irene.onSuccess = ["backup-notify-borg-ok.service"];
+    borgbackup-job-home-irene.onFailure = ["backup-notify-borg-fail.service"];
   };
 }

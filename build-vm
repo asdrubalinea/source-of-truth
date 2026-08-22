@@ -1,2 +1,20 @@
 #!/bin/sh
-nix build '.#nixosConfigurations.tempest-vm.config.system.build.vmWithDisko'
+# Build a host's disko VM clone: formats a throwaway virtual disk from
+# disks/<host>.nix and boots an ephemeral overlay on it. Run the result with
+# ./result/bin/disko-vm.
+#
+# NOT `nixos-rebuild build-vm`, which builds the generic system.build.vm — that
+# ignores the disko layout AND the guest tuning in hosts/<host>/vm.nix.
+set -eu
+
+host=${1:-}
+case "$host" in
+  tempest | orchid) ;;
+  *)
+    echo "usage: $0 <tempest|orchid>" >&2
+    echo "(these are the hosts with a vm.nix and a virtual = true instantiation)" >&2
+    exit 1
+    ;;
+esac
+
+nix build ".#nixosConfigurations.$host-vm.config.system.build.vmWithDisko"

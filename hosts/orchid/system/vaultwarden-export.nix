@@ -1,16 +1,18 @@
-{ config, lib, pkgs, ... }:
-let
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}: let
   vwData =
-    if lib.versionOlder config.system.stateVersion "24.11" then
-      "/var/lib/bitwarden_rs"
-    else
-      "/var/lib/vaultwarden";
+    if lib.versionOlder config.system.stateVersion "24.11"
+    then "/var/lib/bitwarden_rs"
+    else "/var/lib/vaultwarden";
   exportRoot = "/persist/vaultwarden-export";
   exportCurrent = "${exportRoot}/current";
   exportNext = "${exportRoot}/next";
-in
-{
-  users.groups.vwbackup = { };
+in {
+  users.groups.vwbackup = {};
 
   users.users.vwbackup = {
     isSystemUser = true;
@@ -40,8 +42,8 @@ in
 
   systemd.services.vaultwarden-export-snapshot = {
     description = "Create consistent Vaultwarden export snapshot for rsync pulls";
-    wantedBy = [ "multi-user.target" ];
-    unitConfig.RequiresMountsFor = [ "/persist" ];
+    wantedBy = ["multi-user.target"];
+    unitConfig.RequiresMountsFor = ["/persist"];
 
     serviceConfig = {
       Type = "oneshot";
@@ -83,7 +85,7 @@ in
   };
 
   systemd.timers.vaultwarden-export-snapshot = {
-    wantedBy = [ "timers.target" ];
+    wantedBy = ["timers.target"];
     timerConfig = {
       OnBootSec = "2m";
       OnUnitActiveSec = "5m";

@@ -1,4 +1,4 @@
-{ ... }: {
+{...}: {
   security.rtkit.enable = true;
   services.pipewire = {
     enable = true;
@@ -11,7 +11,7 @@
         "bluetooth.autoswitch-to-headset-profile" = false;
       };
       "monitor.bluez.properties" = {
-        "bluez5.codecs" = [ "sbc" "sbc_xq" "aac" "aptx" "aptx_hd" ];
+        "bluez5.codecs" = ["sbc" "sbc_xq" "aac" "aptx" "aptx_hd"];
       };
     };
   };

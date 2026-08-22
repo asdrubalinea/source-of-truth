@@ -1,5 +1,4 @@
-{ modulesPath, ... }:
-{
+{modulesPath, ...}: {
   imports = [
     # Bootable, auto-expanding aarch64 SD image: generic-extlinux + U-Boot +
     # Raspberry Pi firmware and Pi 3/4 device trees, booting the *mainline*
@@ -19,6 +18,7 @@
     ./users/irene.nix
 
     ../../modules/nix.nix
+    ../../modules/security.nix
   ];
 
   system.stateVersion = "25.11";

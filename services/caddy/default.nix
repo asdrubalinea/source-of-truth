@@ -1,14 +1,21 @@
-{ hostname ? null, pkgs, ... }:
-let
-  hostConfigFile = if hostname != null then ./. + "/${hostname}.Caddyfile" else null;
-  config =
-    if hostConfigFile != null && builtins.pathExists hostConfigFile then
-      builtins.readFile hostConfigFile
-    else
-      builtins.readFile ./Caddyfile;
-  environmentFile = if hostname == "hydra" then "/var/lib/caddy/env" else "/persist/caddy/env";
-in
 {
+  hostname ? null,
+  pkgs,
+  ...
+}: let
+  hostConfigFile =
+    if hostname != null
+    then ./. + "/${hostname}.Caddyfile"
+    else null;
+  config =
+    if hostConfigFile != null && builtins.pathExists hostConfigFile
+    then builtins.readFile hostConfigFile
+    else builtins.readFile ./Caddyfile;
+  environmentFile =
+    if hostname == "hydra"
+    then "/var/lib/caddy/env"
+    else "/persist/caddy/env";
+in {
   services.caddy = {
     enable = true;
 
@@ -26,5 +33,5 @@ in
     extraConfig = config;
   };
 
-  systemd.services.caddy.serviceConfig.EnvironmentFile = [ environmentFile ];
+  systemd.services.caddy.serviceConfig.EnvironmentFile = [environmentFile];
 }
