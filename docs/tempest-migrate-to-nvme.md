@@ -40,8 +40,8 @@ Entrambi i dischi 2 TB. Il Corsair espone **LBA Format 1 = 4096 byte** ("Best").
 > La USB resta comunque bootabile (generazione attuale) come fallback finché non
 > la svuoti — utile se l'NVMe non parte.
 
-> ⚠️ Per la migrazione si usa **`tempest-install <device>`** (fa anche
-> `nixos-install`), non `tempest-format <device>`. Entrambi ora richiedono il
+> ⚠️ Per la migrazione si usa **`disk-install tempest <device>`** (fa anche
+> `nixos-install`), non `disk-format tempest <device>`. Entrambi ora richiedono il
 > device esplicito come argomento — nessun device di default, così un lancio
 > accidentale non formatta il disco sbagliato.
 
@@ -54,7 +54,7 @@ cd /persist/source-of-truth
 borg list ssh://u518612@u518612.your-storagebox.de:23/./backups/tempest-home-irene | tail
 ```
 
-Il device si passa come argomento a `tempest-install` (i nomi sono già
+Il device si passa come argomento a `disk-install tempest` (i nomi sono già
 `main`/`crypt`/`pool`/`rpool`); non c'è più nessun campo `device` da editare in
 `disks/tempest.nix`. Il target è il Corsair:
 
@@ -91,7 +91,7 @@ sudo nvme format /dev/nvme0n1 --lbaf=1 --force   # 4Kn, DESTRUCTIVE: cancella la
 lsblk -o NAME,LOG-SEC,PHY-SEC /dev/nvme0n1       # atteso 4096/4096
 
 cd /persist/source-of-truth
-./tempest-install /dev/disk/by-id/nvme-Corsair_MP700_PRO_SE_A8WFB416001JKK
+./disk-install tempest /dev/disk/by-id/nvme-Corsair_MP700_PRO_SE_A8WFB416001JKK
 # disko fa destroy→format→mount del Corsair + nixos-install. Crea il pool `rpool`
 # (nessuna collisione con lo `zroot` vivo). Prompt LUKS → passphrase FORTE:
 # è il fallback permanente una volta arruolato il TPM. Non perderla.

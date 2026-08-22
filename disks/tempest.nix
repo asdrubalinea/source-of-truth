@@ -2,8 +2,8 @@
 # format/install time, so accidentally running a destructive disko command (or
 # running it on the wrong machine) targets the bogus placeholder below and fails
 # fast instead of wiping a real disk:
-#   ./tempest-format  /dev/disk/by-id/<target>   # disko --argstr device <target>
-#   ./tempest-install /dev/disk/by-id/<target>   # disko-install --disk main <target>
+#   ./disk-format tempest  /dev/disk/by-id/<target>   # disko --argstr device <target>
+#   ./disk-install tempest /dev/disk/by-id/<target>   # disko-install --disk main <target>
 # tempest's own NVMe is /dev/disk/by-id/nvme-Corsair_MP700_PRO_SE_A8WFB416001JKK.
 #
 # For the booted system this value is inert: disko derives `fileSystems` from GPT
@@ -26,7 +26,7 @@
   # (never a zvol) under a single LUKS container.
   # See docs/adr/0001-zfs-on-luks-tempest.md.
   #
-  # 4K alignment (do this on the NEW drive BEFORE running tempest-format):
+  # 4K alignment (do this on the NEW drive BEFORE running disk-format tempest):
   #   nvme id-ns /dev/nvme0n1 | grep lbaf      # find a 4096-byte LBA format
   #   nvme format /dev/nvme0n1 --lbaf=<index>  # DESTRUCTIVE — fresh drive only
   # then ashift=12 and --sector-size 4096 below align natively.
