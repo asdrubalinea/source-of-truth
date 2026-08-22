@@ -138,6 +138,7 @@ in {
     nethogs # per-process bandwidth (root)
     nmap
     postman
+    proxyman # HTTP(S) intercepting proxy / inspector
     socat # the everything-relay (also used by rices/ember/compositors/niri/marquee.nix)
     tcpdump # packet capture (root)
     traceroute
