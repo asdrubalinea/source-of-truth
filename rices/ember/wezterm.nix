@@ -124,6 +124,13 @@ lib.mkIf config.rices.ember.enable {
         -- map to backward_kill_word.
         { key = "Backspace", mods = "CTRL", action = act.SendString "\x1b\x08" },
         { key = "Backspace", mods = "SUPER", action = act.SendString "\x1b\x08" },
+
+        -- Shift+Enter → newline instead of submit in claude-code / codex.
+        -- With enable_kitty_keyboard = false there is no CSI u to tell
+        -- Shift+Enter apart from Enter, so both TUIs see a bare CR and send
+        -- the message. ESC+CR is the meta-Enter sequence they already accept
+        -- as "insert newline", and tmux forwards it untouched.
+        { key = "Enter", mods = "SHIFT", action = act.SendString "\x1b\r" },
         -- Name the current tab (pins the title against shell OSC updates).
         {
           key = ",",
