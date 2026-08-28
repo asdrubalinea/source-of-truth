@@ -52,6 +52,7 @@ in {
     ../../scripts/cage.nix
     ../../scripts/keep-awake.nix
     ../../scripts/ps5-audio.nix
+    ../../scripts/due-cuffie.nix
     ../../scripts/sitrep.nix
 
     # Shell and configuration
