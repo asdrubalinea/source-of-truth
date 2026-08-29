@@ -287,6 +287,7 @@ in {
     google-chrome
     tor-browser
     inputs.zen-browser.packages.x86_64-linux.default # Zen Browser
+    inputs.helium-browser.packages.x86_64-linux.default # Helium Browser
 
     # --- Communication & productivity ---
     # IRC. Wayland-native (iced), SASL/SCRAM and TLS out of the box, no

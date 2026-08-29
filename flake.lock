@@ -779,6 +779,26 @@
         "type": "gitlab"
       }
     },
+    "helium-browser": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1787946871,
+        "narHash": "sha256-3z28UlKh02RAkyLKsUOxD+l20WG6Qo+vzg1FCs6OkEw=",
+        "owner": "oxcl",
+        "repo": "nix-flake-helium-browser",
+        "rev": "ef8847b8907e95335afa529daa6a71fc0e9ff107",
+        "type": "github"
+      },
+      "original": {
+        "owner": "oxcl",
+        "repo": "nix-flake-helium-browser",
+        "type": "github"
+      }
+    },
     "helix": {
       "inputs": {
         "nixpkgs": [
@@ -1853,6 +1873,7 @@
         "drift": "drift",
         "emacs-overlay": "emacs-overlay",
         "flights": "flights",
+        "helium-browser": "helium-browser",
         "helix": "helix",
         "home-manager": "home-manager",
         "hyprland": "hyprland",
