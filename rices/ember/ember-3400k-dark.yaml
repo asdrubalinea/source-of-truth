@@ -1,26 +1,42 @@
-# Ember 3400K Dark — https://github.com/carpdiem/ember (MIT)
-# Redshift-safe palette: colors stay distinguishable under warm-screen filtering.
-# Hand-mapped from palettes/ember.json (surfaces bg_0..bg_5/fg_0..fg_2, terminal,
-# categorical) onto base16 slots. Ember ships only 3 foreground roles, so
-# base06/base07 both reuse fg_0.
+# Ember 3400K Dark — derived from https://github.com/carpdiem/ember (MIT).
+# Structure, slot mapping and the warm-neutral surfaces are Ember's; the accent
+# values are NOT, so this no longer credits carpdiem as author. Ember's accents
+# are pastels (base08 F5AD9A, base0B 7EB798, base0D B4C6F7 …) — desaturated
+# enough that a 2px border or a syntax token reads as tinted grey rather than as
+# a colour, which is what the "sharpen in place" pass was for.
+#
+# CONSTRAINT, unchanged: colours must stay distinguishable under warm-screen
+# filtering (wlsunset, homes/tempest/default.nix, night 4000K). That filter
+# crushes the blue channel, so the blue and magenta slots keep the most
+# saturation headroom and the cyan stays green-leaning rather than blue-leaning
+# — oxocarbon-dark's blues/magentas collapse into each other once warmed, which
+# is why this palette exists at all.
+#
+# Surfaces are also a burn-in decision, not only a taste one: base00 is a true
+# near-black so the OLED's lit fraction stays low (see docs/adr/0009), and
+# base01/base02 sit close above it so a selection or a bar fill is a *step*
+# rather than a lit panel. base03 is the one value moved DOWN — the old 908472
+# was bright enough that comments competed with code.
+#
+# Ember ships only 3 foreground roles, so base06/base07 both reuse base05.
 system: "base16"
 name: "Ember 3400K Dark"
-author: "carpdiem"
+author: "irene, after carpdiem's Ember"
 variant: "dark"
 palette:
-  base00: "090807" # bg_0  default background
-  base01: "181612" # bg_2  lighter background
-  base02: "201D19" # bg_3  selection background
-  base03: "908472" # fg_2  comments
-  base04: "BDAE93" # fg_1  dark foreground
-  base05: "DDD0B2" # fg_0  default foreground
-  base06: "DDD0B2" # fg_0
-  base07: "DDD0B2" # fg_0
-  base08: "F5AD9A" # terminal red
-  base09: "DDAA69" # categorical two (orange)
-  base0A: "CA9246" # terminal yellow
-  base0B: "7EB798" # terminal green
-  base0C: "70DBD8" # terminal cyan
-  base0D: "B4C6F7" # terminal blue
-  base0E: "D895C2" # terminal magenta
-  base0F: "945D48" # categorical five (brown)
+  base00: "090807" # default background — true near-black, OLED ground
+  base01: "0F0D0B" # lighter background (status, line highlight)
+  base02: "1A1712" # selection background / inactive window border
+  base03: "6E6355" # comments, invisibles — dimmed from Ember's 908472
+  base04: "BDAE93" # dark foreground
+  base05: "E8DCC4" # default foreground — warm cream, not white
+  base06: "E8DCC4"
+  base07: "E8DCC4"
+  base08: "E5563F" # red — errors, deletions
+  base09: "FF8C2B" # orange — the ember; also the focused window border
+  base0A: "E8B33D" # yellow — warnings, matches
+  base0B: "4FBF7B" # green — additions, strings
+  base0C: "3FC7C4" # cyan — green-leaning so wlsunset can't merge it into blue
+  base0D: "6E9BF5" # blue — functions; most saturation headroom under 4000K
+  base0E: "D65FA8" # magenta — keywords
+  base0F: "945D48" # brown — deprecated, embedded
