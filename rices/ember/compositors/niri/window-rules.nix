@@ -1,14 +1,22 @@
 [
   {
-    # Rounded window corners (all windows — no `matches` ⇒ catch-all) to match
-    # the floating Noctalia bar's rounded corners (bar frameRadius = 12).
-    # clip-to-geometry rounds the window surface itself, not just niri's border,
-    # so app content doesn't square off the corners.
+    # Square window corners (all windows — no `matches` ⇒ catch-all), DERIVED
+    # from the bar's edge treatment: this used to be 12.0 on all four to match
+    # the floating Noctalia bar's radius, and the bar is now flush and square
+    # (rices/ember/noctalia-widgets.nix). See "bar" in CONTEXT.md — the bar is
+    # the one place that value is decided; this follows it.
+    #
+    # Deliberately still stated rather than deleted. Without the rule niri falls
+    # back to its own default, and this file should say what the corners are —
+    # the pairing with clip-to-geometry below is the whole point: 0 corners with
+    # clipping on means an app that draws its own rounded corners (GTK4 dialogs,
+    # Electron) gets squared off with the rest instead of being the one window on
+    # screen with a curve.
     geometry-corner-radius = {
-      top-left = 12.0;
-      top-right = 12.0;
-      bottom-right = 12.0;
-      bottom-left = 12.0;
+      top-left = 0.0;
+      top-right = 0.0;
+      bottom-right = 0.0;
+      bottom-left = 0.0;
     };
     clip-to-geometry = true;
   }

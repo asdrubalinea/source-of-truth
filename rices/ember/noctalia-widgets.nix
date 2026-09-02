@@ -48,9 +48,50 @@ in
         # on-screen time for the panel this bar hides itself to protect.
         show_on_workspace_switch = false;
 
-        margin_edge = 8;
-        margin_ends = 8;
-        radius = 12;
+        # EDGE TREATMENT. This is the desktop's edge treatment, not just the
+        # bar's — see "bar" in CONTEXT.md. Window corner rounding
+        # (./compositors/niri/window-rules.nix, and mango's border_radius) and
+        # niri's top strut are all derived from these four values, so this is the
+        # one place to change the desktop's geometric register; the derived ones
+        # follow.
+        #
+        # Flush and square. A floating rounded strip is a *card* laid on the
+        # wallpaper — it belongs to the wallpaper, and it forced two things to
+        # match it: every window got a 12px radius, and niri had to leave an 8px
+        # gap at the top so a square window corner wouldn't clash with the bar's
+        # curve (a dead wallpaper strip, since the bar is an overlay and reserves
+        # no space). At margin 0 / radius 0 the bar is part of the display edge
+        # instead, both of those follow to 0/-8, and nothing has a corner that
+        # can disagree with its neighbour.
+        margin_edge = 0;
+        margin_ends = 0;
+
+        # All five radius keys, not just `radius`: `noctalia config export full`
+        # reports radius_top_left/top_right/bottom_left/bottom_right as their own
+        # values alongside it, and this config can't tell whether they derive
+        # from `radius` or default independently. Setting all five costs four
+        # lines and removes the question.
+        radius = 0;
+        radius_top_left = 0;
+        radius_top_right = 0;
+        radius_bottom_left = 0;
+        radius_bottom_right = 0;
+
+        # Concave corners are the flourish that makes a floating bar look joined
+        # to the screen corner. With the bar already flush there is nothing to
+        # join, and the notch reads as a rendering artefact.
+        concave_edge_corners = false;
+
+        # `border = "outline"` is the default but `border_width` defaults to 0.0,
+        # so the outline was enabled and invisible. 1px at the bar's own outline
+        # colour is the hairline that separates the strip from the window
+        # underneath now that no margin does it.
+        border_width = 1.0;
+
+        # 14 → 8: padding was sized for a card with its own margin around it.
+        # Flush against the edge, the same figure reads as slack.
+        padding = 8;
+
         shadow = false;
         thickness = 32;
 

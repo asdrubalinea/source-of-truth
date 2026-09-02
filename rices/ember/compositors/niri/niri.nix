@@ -430,6 +430,13 @@ in
             # Same palette entries, just alpha-dimmed: on OLED the borders blend
             # against near-black, so alpha darkens them without shifting hue.
             # Turn the suffixes up/down to taste (ff = undimmed).
+            #
+            # TRIED AND REJECTED: base09 at ff for the active border, to make
+            # focus obvious once the corners went square. Looked wrong on the
+            # panel — a bright ring around the focused window reads as an alert,
+            # not as focus — and it is exactly the always-lit static content
+            # docs/adr/0009 exists to avoid. The ADR stands unamended; don't
+            # redo this.
             active.color = c.base03 + "73"; # 45%
             inactive.color = c.base01 + "26"; # 15%
           };
@@ -445,13 +452,18 @@ in
           # toggling maximize-window-to-edges.
           gaps = 8;
 
+          # -8 on all four now. `top` was 0 for one reason: the Noctalia bar
+          # floated with its own 8px margin and a 12px radius, so pulling windows
+          # flush against it left a square window corner clashing with the bar's
+          # curve. Since the bar reserves no space (auto_hide with
+          # reserve_space = false), that 0 bought nothing but an 8px strip of
+          # wallpaper across the top of every tiled window. The bar is flush and
+          # square now (rices/ember/noctalia-widgets.nix), so there is no curve to
+          # dodge and the strip goes away.
           struts = {
             left = -8;
             right = -8;
-            # Not -8: the Noctalia bar floats with its own 8px margin and rounded
-            # corners, so pulling windows flush against it leaves the window's
-            # square corner clashing with the bar's radius. Leave the top gap.
-            top = 0;
+            top = -8;
             bottom = -8;
           };
         };

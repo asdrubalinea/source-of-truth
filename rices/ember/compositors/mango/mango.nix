@@ -140,7 +140,9 @@ in {
         gappiv = 8;
         gappoh = 0;
         gappov = 0;
-        border_radius = 12; # matches the bar's frameRadius, as niri's does
+        # Square, derived from the bar's edge treatment exactly as niri's
+        # geometry-corner-radius is — see "bar" in CONTEXT.md.
+        border_radius = 0;
         smartgaps = 0;
 
         # --- Effects -------------------------------------------------------
@@ -166,6 +168,8 @@ in {
         # so they get the same 73 the focused border does. At ff they were the
         # one thing on an OLED panel glowing at full brightness against
         # near-black. rootcolor/shadowscolor aren't borders and stay opaque.
+        # (These went to ff briefly alongside a bright base09 focus border; both
+        # were reverted — see the TRIED AND REJECTED note in ../niri/niri.nix.)
         focuscolor = colour "73" c.base03;
         bordercolor = colour "26" c.base01;
         rootcolor = colour "ff" c.base00;

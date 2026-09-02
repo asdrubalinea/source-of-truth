@@ -147,6 +147,12 @@ modes fused into one complaint. The glossary keeps them apart.
   **waybar** is a module-less black rectangle that exists purely to reserve the
   **marquee** — a bar in name and process only, with nothing on it. "The bar"
   never means that one. Which units a bar readout watches is **machine policy**.
+  The bar's *edge treatment* — whether it floats with a margin or sits flush,
+  and whether its corners are square or rounded — is the desktop's edge
+  treatment: window corner rounding and the outer struts are both derived from
+  it, so a window's corner never disagrees with the corner it sits beside. It is
+  therefore the one value to change when the desktop's geometric register
+  changes, and the two derived ones follow rather than being set independently.
 - **scratchpad** — a window kept running but parked out of view, summoned by a
   keybind as a floating overlay onto whatever workspace is focused and
   dismissed with the same key. On tempest the canonical tenant is Telegram
