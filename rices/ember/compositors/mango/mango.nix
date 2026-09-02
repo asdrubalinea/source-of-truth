@@ -26,7 +26,23 @@
     ${pkgs.coreutils}/bin/mkdir -p "$dir"
     file="$dir/$(${pkgs.coreutils}/bin/date +%Y%m%d-%H%M%S).png"
     case "''${1:-region}" in
-      region) ${pkgs.grim}/bin/grim -g "$(${pkgs.slurp}/bin/slurp)" "$file" ;;
+      region)
+        # Freeze the screen first. slurp waits for the user, so without this
+        # grim captures whatever the screen has drifted to by the time the
+        # region is drawn — a menu that closed, a tooltip that timed out, an
+        # animation that finished. wayfreeze paints a screencopy of every
+        # output as an overlay layer surface; slurp maps above it, and grim
+        # then re-captures the same, now static, pixels. Only `region` needs
+        # this: `screen` grabs at keypress and has nothing to wait for.
+        ${pkgs.wayfreeze}/bin/wayfreeze &
+        freeze=$!
+        trap 'kill "$freeze" 2>/dev/null || true' EXIT
+        # ponytail: fixed wait for the overlay to map. wayfreeze signals ready
+        # only via --after-freeze-cmd, which would mean nesting the whole
+        # slurp/grim pipeline in a quoted string. Raise if it ever races.
+        sleep 0.15
+        ${pkgs.grim}/bin/grim -g "$(${pkgs.slurp}/bin/slurp)" "$file"
+        ;;
       screen) ${pkgs.grim}/bin/grim "$file" ;;
       *) exit 2 ;;
     esac
