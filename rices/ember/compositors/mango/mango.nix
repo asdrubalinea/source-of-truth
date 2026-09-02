@@ -201,8 +201,8 @@ in {
         # (which themes the client-drawn ones) or the pointer changes appearance
         # depending on which surface it is over. Unset, wlroots falls back to the
         # X11 core cursor.
-        cursor_theme = "Bibata-Modern-Classic";
-        cursor_size = 20;
+        cursor_theme = "capitaine-cursors-white";
+        cursor_size = 24;
 
         # --- Input ----------------------------------------------------------
         xkb_rules_layout = "us";

@@ -48,12 +48,21 @@ lib.mkIf config.rices.ember.enable {
     # exports XCURSOR_THEME/XCURSOR_SIZE; the two compositors draw their own
     # cursor from their own config, so the same name is repeated in
     # compositors/{niri,mango} — keep the three in sync.
-    # -Classic is the black variant; -Ice (white) and -Amber (orange) are the
-    # other two.
+    #
+    # capitaine-cursors, not Bibata: Bibata's Modern cut is a rounded, glossy
+    # pointer, which is the same soft register the bar's radius used to be in
+    # and now isn't. Capitaine is flat and hard-edged and its hotspot tip is
+    # an actual point. `-white` is the light-on-dark variant — the bare
+    # `capitaine-cursors` theme in the same package is the dark one, which on
+    # a base00 ground is an outline with nothing inside it.
     cursor = {
-      package = pkgs.bibata-cursors;
-      name = "Bibata-Modern-Classic";
-      size = 20;
+      # 24, not Bibata's 20: capitaine's left_ptr embeds 24/30/36/48/60/72 and
+      # nothing smaller, so 20 would have XCursor resample the 24px bitmap and
+      # hand back a soft pointer. 24 is a design size — see "legible size
+      # range" in CONTEXT.md.
+      package = pkgs.capitaine-cursors;
+      name = "capitaine-cursors-white";
+      size = 24;
     };
 
     targets = {
