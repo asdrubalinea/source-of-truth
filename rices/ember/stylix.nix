@@ -119,10 +119,12 @@ in
         #
         # sansSerif is the slot with reach — noctalia, GTK3, GTK4, Obsidian's
         # interface and Zed's chrome all resolve through it. Web page body text
-        # does NOT: stylix writes no fontconfig generic aliases on this host
-        # (~/.config/fontconfig/conf.d is empty; /etc/fonts/conf.d/52-nixos-
-        # default-fonts.conf still says DejaVu), so a page asking for
-        # `font-family: sans-serif` is unaffected by this.
+        # does too, now: stylix writes no fontconfig generic aliases, but
+        # `fonts.fontconfig.defaultFonts` in ./fonts.nix restates these three
+        # roles where fontconfig can act on them, so `font-family: sans-serif`
+        # on a page also lands on Ioskeley Mono. That alias exists because the
+        # NixOS default named DejaVu, which this host does not install — see the
+        # comment there.
         #
         # serif has exactly one consumer, Obsidian's `textFontFamily`. There is
         # no proportional text left on the desktop to justify a second face, so

@@ -45,6 +45,35 @@
 
     fontconfig = {
       enable = true;
+
+      # The generic families, pointed at faces this host actually installs.
+      # NixOS' default `defaultFonts` names DejaVu for sans-serif/serif/monospace,
+      # and DejaVu is NOT in the list above — the only copy fontconfig can see is
+      # `dejavu-fonts-minimal` (one file, DejaVuSans.ttf) pulled in by fontconfig
+      # itself. So anything asking for a generic got a family whose file does not
+      # exist, and how that failed depended on the toolkit: Qt/Pango silently fell
+      # back, cairo did not. Noctalia (cairo) logged
+      #
+      #   failed to create cairo scaled font, expect ugly output.
+      #   the offending font is 'DejaVu Sans Mono 9.75'
+      #   font_face status is: file not found
+      #
+      # and rendered tofu boxes — visible as the sysmon tooltip's *values*, whose
+      # family Noctalia hardcodes to "monospace" (the labels use the display face
+      # from ./noctalia.nix and were fine). 'DejaVu Sans Bold' failed the same way,
+      # since minimal ships no bold.
+      #
+      # ./stylix.nix already declares these three roles as Ioskeley Mono, but
+      # stylix writes no fontconfig aliases — it only fills per-app font settings.
+      # This is the same decision stated where fontconfig can act on it, so a
+      # generic resolves to the body face instead of to a missing one.
+      defaultFonts = {
+        monospace = ["Ioskeley Mono"];
+        sansSerif = ["Ioskeley Mono"];
+        serif = ["Ioskeley Mono"];
+        emoji = ["Noto Color Emoji"];
+      };
+
       hinting.style = "slight";
       # Grayscale antialiasing, not RGB subpixel. tempest's external is a QD-OLED
       # (MSI MAG 272UP E16) whose triangular subpixel layout fringes text under
