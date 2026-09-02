@@ -8,8 +8,8 @@
 
   # The ground: a HUD bezel generated from the base16 scheme at build time. It
   # exists because a downloaded image can't track the palette and a photograph
-  # is the worst thing to leave on an OLED all day — measured, 0.13% of pixels
-  # sit above the ground colour (about 10.6k of 8.3M), all of them thin lines,
+  # is the worst thing to leave on an OLED all day — measured, 0.14% of pixels
+  # sit above the ground colour (about 11.6k of 8.3M), all of them thin lines,
   # and it re-renders itself whenever ../ember-3400k-dark.yaml changes.
   #
   # Note which number that is. The pool table below measures mean gray against
@@ -37,7 +37,8 @@
   # between the two, so the ticks are subordinated by being short (10px against a
   # 200px arm) and thin (3px against 4px) instead. That is the more robust axis
   # anyway: it survives the 0.5x downscale and the wlsunset warm filter, neither
-  # of which preserves a 16-step value difference.
+  # of which preserves a 16-step value difference. The edge ticks are graduated
+  # on that same axis — every fifth is long (see `majorEvery` below).
   #
   # PNG, not JPEG: thin light lines on near-black are exactly what JPEG's chroma
   # subsampling rings around, and a flat black field costs almost nothing to
@@ -47,41 +48,71 @@
     h = 2160;
     inset = 64; # distance from the panel edge to the bracket
     arm = 200; # bracket arm length
-    tick = 10; # edge tick length
+    tick = 10; # edge tick length, minor graduation
+    majorTick = 24; # every fifth tick, counted out from the centre one
+    majorEvery = 5;
     step = 160; # edge tick spacing
     reticle = 28; # centre crosshair arm
 
     # Ticks along one edge, laid out from the centre outwards so the run stays
     # symmetric on any width and no half-tick lands at the corner.
+    #
+    # GRADUATED, and for the same reason the ticks are short in the first place:
+    # hierarchy is spent in size, never in value (there is no usable step
+    # between base02 and base03 on this panel — see the note above). Every fifth
+    # tick counted out from the centre is drawn long, so each edge reads as a
+    # scale with a marked axis rather than as a row of identical dashes: the
+    # centre major sits on the reticle's axis, and the ones either side of it
+    # fall on the 800px marks that bracket the middle third of the screen. Same
+    # stroke, same colour, same lit budget to within a rounding error — the only
+    # thing that changed is length, which is the axis that survives both the
+    # 0.5x downscale and wlsunset.
     ticksAlong = {
       count,
       lineAt,
     }:
-      lib.concatMapStringsSep " " lineAt
-      (lib.genList (i:
-        (i - (count - 1) / 2)
-        * step
-        + (
-          if lib.mod count 2 == 0
-          then step / 2
-          else 0
-        ))
-      count);
+      lib.concatStringsSep " "
+      (lib.genList (
+          i: let
+            fromCentre = i - (count - 1) / 2;
+          in
+            lineAt {
+              offset =
+                fromCentre
+                * step
+                + (
+                  if lib.mod count 2 == 0
+                  then step / 2
+                  else 0
+                );
+              len =
+                if lib.mod fromCentre majorEvery == 0
+                then majorTick
+                else tick;
+            }
+        )
+        count);
 
     hTicks = count: y: dir:
       ticksAlong {
         inherit count;
-        lineAt = dx: let
-          x = w / 2 + dx;
-        in "line ${toString x},${toString y} ${toString x},${toString (y + dir * tick)}";
+        lineAt = {
+          offset,
+          len,
+        }: let
+          x = w / 2 + offset;
+        in "line ${toString x},${toString y} ${toString x},${toString (y + dir * len)}";
       };
 
     vTicks = count: x: dir:
       ticksAlong {
         inherit count;
-        lineAt = dy: let
-          y = h / 2 + dy;
-        in "line ${toString x},${toString y} ${toString (x + dir * tick)},${toString y}";
+        lineAt = {
+          offset,
+          len,
+        }: let
+          y = h / 2 + offset;
+        in "line ${toString x},${toString y} ${toString (x + dir * len)},${toString y}";
       };
 
     # One bracket: two arms meeting at (x,y), running `sx`/`sy` pixels inward.
@@ -138,7 +169,7 @@ in
   # 2%-threshold near-black share:
   #
   #   hud-ground (generated)  mean 0.03  — see the note above: that is base00,
-  #                                        not content. 0.13% lit above ground.
+  #                                        not content. 0.14% lit above ground.
   #   red-eyes-void           mean 0.01  near-black 97%
   #   ghost-girl-smoke        mean 0.01  near-black 90%
   #   spiderverse-glitch      mean 0.02  near-black 91%
