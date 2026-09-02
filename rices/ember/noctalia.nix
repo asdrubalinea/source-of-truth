@@ -99,11 +99,12 @@
           # ../wallpaper/default.nix seeds oled/ and records the measurements.
           directory = "~/Pictures/Wallpapers/oled";
 
-          # Rotation off by request — synthwave-grid stays put. The OLED
-          # argument for cycling still holds in principle (same subpixels, same
-          # level, all day), but this image is 3% mean on a true-#000 field, so
-          # the lit fraction is small and mostly thin lines; burn-in risk is
-          # about as low as a static image gets in this pool.
+          # Rotation off by request — the ground stays put. The OLED argument for
+          # cycling still holds in principle (same subpixels, same level, all
+          # day), but the generated ground puts 0.13% of its pixels above the
+          # base00 ground and they are all thin lines. There is less static
+          # content here than in any photograph the pool holds, so cycling would
+          # raise the risk it exists to lower.
           automation.enabled = false;
 
           # The stylix target also pins wallpaper.default.path (to its own
@@ -112,12 +113,38 @@
           # but the state settings.toml still deep-merges over it, so the
           # picker remains the way to change wallpaper live — this is what a
           # fresh state store comes up with.
-          default.path = lib.mkForce "~/Pictures/Wallpapers/oled/synthwave-grid-ml3jm8.jpg";
+          #
+          # The ground is generated from the base16 scheme at build time
+          # (../wallpaper/default.nix) rather than being a downloaded image: it
+          # cannot drift out of palette, and with 0.13% of its pixels above the
+          # ground colour it is the safest thing in the pool for the OLED. It is
+          # seeded into oled/ alongside the photographs so the picker can get
+          # back to it.
+          default.path = lib.mkForce "~/Pictures/Wallpapers/oled/hud-ground.png";
+
+          # `fit`, not the default `crop`: the ground carries marks at its edges,
+          # and crop scales to cover and then discards the overflow — on any
+          # panel that isn't 16:9 that throws the marks away. fit keeps the whole
+          # image and letterboxes, and the letterbox is invisible because
+          # fill_color is the same near-black the image's ground is.
+          #
+          # The cost, measured against homes/tempest/monitors.nix: the frame ends
+          # up inset by the letterbox on panels that aren't 16:9 — nothing on the
+          # OLED (3840x2160) or the two 16:9 externals, ~150px top and bottom on
+          # eDP-1 (2880x1920), ~440px left and right on the 21:9 ultrawide. It
+          # stays centred and symmetric, and every line keeps its weight. If you
+          # would rather the frame always hug the physical edge, `stretch` does
+          # that in one word, at the cost of anisotropic line weight (up to
+          # 1.34:1 on the ultrawide — a 4px bracket arm becoming 3.6 by 2.7).
+          fill_mode = "fit";
+          fill_color = config.lib.stylix.colors.withHashtag.base00;
         };
 
         brightness.enable_ddcutil = true;
 
-        backdrop.blur_intensity = 0.1;
+        # (`backdrop.blur_intensity = 0.1` was here and did nothing:
+        # `noctalia config export full` shows `backdrop.enabled = false`, so
+        # there is no backdrop surface to blur.)
 
         # wezterm asks for toasts that never go away. Captured from its live
         # Notify call: app_name="wezterm", urgency=critical, expire_timeout=0 —
