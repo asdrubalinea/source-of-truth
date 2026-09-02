@@ -1,4 +1,8 @@
-{pkgs, ...}: {
+{
+  pkgs,
+  config,
+  ...
+}: {
   programs.vscode = {
     enable = true;
     package = pkgs.vscode.fhsWithPackages (ps:
@@ -10,7 +14,11 @@
       ]);
     profiles.default = {
       userSettings = {
-        "editor.fontFamily" = "Maple Mono, monospace";
+        # stylix's vscode target is off (rices/ember/stylix.nix), so the font
+        # doesn't arrive on its own — but it should still be the rice's body face
+        # rather than a name copied in by hand. This said "Maple Mono" and went
+        # stale the moment the rice moved off it.
+        "editor.fontFamily" = "${config.stylix.fonts.monospace.name}, monospace";
         "editor.fontSize" = 18;
         "editor.mouseWheelScrollSensitivity" = 3;
         "nix.enableLanguageServer" = true;

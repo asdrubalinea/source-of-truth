@@ -42,14 +42,20 @@
       # ember-3400k-dark along with the terminals, GTK, Qt and noctalia — so
       # they are deliberately absent here rather than fought with mkForce.
       #
-      # Fonts are the exception. stylix derives them from `fonts.sansSerif`
-      # (DejaVu Sans) and `fonts.sizes.{applications,terminal} * 4/3`, which
-      # lands on 16pt UI / 21.3pt buffer — but Zed's UI is read as densely as
-      # its buffer, so it keeps the monospace face, and the sizes below are
-      # hand-tuned for this panel. `sizes.applications` is a GTK-app default
-      # and has no business sizing an editor chrome. mkForce because stylix
-      # defines all of these at normal priority, not mkDefault.
-      ui_font_family = lib.mkForce "Maple Mono";
+      # Font SIZES are the exception. stylix derives them from
+      # `fonts.sizes.{applications,terminal} * 4/3`, which lands on 16pt UI /
+      # 21.3pt buffer; `sizes.applications` is a GTK-app default and has no
+      # business sizing an editor chrome, so the two below are hand-tuned for
+      # this panel. mkForce because stylix defines them at normal priority, not
+      # mkDefault.
+      #
+      # ui_font_family is NOT overridden any more. It used to be forced to the
+      # monospace face because Zed's UI is read as densely as its buffer and
+      # stylix pointed it at `fonts.sansSerif` (then DejaVu Sans). That slot is
+      # now the same mono face for the whole desktop (rices/ember/stylix.nix), so
+      # the override would only restate what stylix already sets — and would go
+      # stale the next time the body face changes, which is exactly how it came
+      # to say "Maple Mono" after the rice had stopped using it.
       ui_font_size = lib.mkForce 22;
       buffer_font_size = lib.mkForce 20;
       buffer_font_weight = 400;

@@ -139,7 +139,24 @@
         };
 
         shell = {
-          # font_family is set by the stylix noctalia target (fonts.sansSerif.name).
+          # THE DISPLAY FACE, and the only surface that gets it — see "body face
+          # / display face" in CONTEXT.md. Departure Mono is a pixel font: a
+          # readout you glance at can afford to be conspicuous, a buffer you read
+          # for an hour cannot, so this is pointed at the one surface that wants
+          # it instead of being put in a stylix slot (which would drag GTK,
+          # Obsidian's chrome and Zed's chrome along with it).
+          #
+          # mkForce because the stylix noctalia target sets font_family from
+          # fonts.sansSerif.name at normal priority — and that slot is now
+          # Ioskeley Mono, the body face, which is exactly what the bar should
+          # NOT be. Installed system-wide in ./fonts.nix; named by string
+          # because it occupies no stylix slot to read it back from.
+          #
+          # Pixel fonts are crisp at their design size and integer multiples and
+          # soft in between. If the bar text looks fuzzy, the knob is
+          # `bar.default.font_scale` in ./noctalia-widgets.nix, not this.
+          font_family = lib.mkForce "Departure Mono";
+
           # Off since the negative struts in compositors/niri/niri.nix: windows now reach the
           # display edges and already round themselves at radius 12
           # (window-rules.nix geometry-corner-radius). Noctalia's screen-corner

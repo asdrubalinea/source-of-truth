@@ -153,6 +153,29 @@ modes fused into one complaint. The glossary keeps them apart.
   it, so a window's corner never disagrees with the corner it sits beside. It is
   therefore the one value to change when the desktop's geometric register
   changes, and the two derived ones follow rather than being set independently.
+- **body face** / **display face** — the rice's two typographic roles, split by
+  how the text is *used* rather than by what the text is. The **body face** is
+  what is read continuously: terminals, editor buffers, and every application's
+  own interface chrome. It must be unremarkable — character in a face read for
+  eight hours is fatigue. The **display face** is what is only ever *glanced*
+  at: the bar's readouts and clock, notification titles, the lockscreen. Strings
+  there are a handful of characters long and are never read as prose, so the
+  display face is allowed to be conspicuous, and is the one place the desktop
+  gets to have a voice.
+  _Flagged ambiguity_: the roles do **not** line up with the serif /
+  sans-serif / monospace slots that theming exposes. Those slots name letterform
+  classes; the roles name jobs. ember's body face occupies the *sans-serif* slot
+  as well as the monospace one — a deliberate consequence of the desktop having
+  no proportional text anywhere — so "the sans-serif font" in this repo means
+  "what non-terminal UI renders in", and is not a claim that it is proportional.
+  A display face is therefore never chosen by putting it in a slot; it is
+  pointed at the one surface that wants it.
+  _Avoid_: "the UI font" (ambiguous between the two), "the theme font".
+  A display face carries a **legible size range** — pixel-grid designs are crisp
+  at their design size and integer multiples and soft elsewhere — so it is only
+  ever placed on a surface whose text size is known and fixed. Which sizes a
+  given panel needs is **machine policy**.
+
 - **scratchpad** — a window kept running but parked out of view, summoned by a
   keybind as a floating overlay onto whatever workspace is focused and
   dismissed with the same key. On tempest the canonical tenant is Telegram
