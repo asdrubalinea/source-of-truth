@@ -222,6 +222,30 @@
     done
     exec ${pkgs.systemd}/bin/systemctl suspend
   '';
+
+  # ps5-audio's pw-loopback is a Stream/Output/Audio that is *always* running,
+  # signal or not, so the inhibitor below reads "audio is playing" for as long as
+  # that unit is up and the panels never sleep again. That is the "idle randomly
+  # stops working until I reboot" bug: on 2026-08-29 the last idle event was
+  # 22:29:41, the loopback started at 22:35:14, and swayidle fired nothing for
+  # the next three days — a reboot only ever "fixed" it by taking the loopback
+  # with it (`ps5-audio off` does the same thing, live).
+  #
+  # Blacklisting that node is the whole fix: real players still inhibit, the
+  # loopback doesn't. `name` is a regex, but NOT over node.name — the filter
+  # matches whatever Helvum would show, i.e. node.description ?? node.nick ??
+  # node.name (get_name() in the upstream object.rs), and pw-loopback puts its
+  # `-n` argument in the description. So the pattern is the unit name, and
+  # "^output\\.ps5-audio$" — the node.name pw-dump reports, and the obvious thing
+  # to write — silently matches nothing. due-cuffie's combine sink is the same
+  # shape; add it here if it ever strands idle too.
+  #
+  # Ceiling: PS5 audio on *battery* now reaches the 1200s idle suspend, which
+  # kills the loopback. The dock carrying the line-in also charges the laptop, so
+  # that combination isn't reachable in practice.
+  inhibitConfig = (pkgs.formats.toml {}).generate "wayland-pipewire-idle-inhibit.toml" {
+    node_blacklist = [{name = "^ps5-audio$";}];
+  };
 in
   lib.mkIf config.rices.ember.enable {
     # Lock is handled by swaylock (NOT Noctalia's lockscreen — see the let block for
@@ -342,7 +366,7 @@ in
         After = ["graphical-session.target"];
       };
       Service = {
-        ExecStart = "${pkgs.wayland-pipewire-idle-inhibit}/bin/wayland-pipewire-idle-inhibit -w";
+        ExecStart = "${pkgs.wayland-pipewire-idle-inhibit}/bin/wayland-pipewire-idle-inhibit -w -c ${inhibitConfig}";
         Restart = "always";
       };
       Install.WantedBy = ["graphical-session.target"];
