@@ -52,8 +52,9 @@ in
       # smithay ships a nicer built-in fallback. stylix.cursor drives
       # home.pointerCursor, which is what themes the cursor *clients* draw and
       # exports XCURSOR_THEME/XCURSOR_SIZE; the two compositors draw their own
-      # cursor from their own config, so the same name is repeated in
-      # compositors/{niri,mango} — keep the three in sync.
+      # cursor from their own config, and both READ THIS OPTION for it
+      # (compositors/{niri,mango}), so this is the one place the pointer is
+      # decided — change it here and all three follow.
       #
       # capitaine-cursors, not Bibata: Bibata's Modern cut is a rounded, glossy
       # pointer, which is the same soft register the bar's radius used to be in

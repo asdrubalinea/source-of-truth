@@ -197,12 +197,14 @@ in {
         enable_hotarea = 0; # niri: gestures.hot-corners.enable = false
 
         # --- Cursor ----------------------------------------------------------
-        # The compositor-drawn cursor. Must match stylix.cursor in ../../stylix.nix
-        # (which themes the client-drawn ones) or the pointer changes appearance
-        # depending on which surface it is over. Unset, wlroots falls back to the
-        # X11 core cursor.
-        cursor_theme = "capitaine-cursors-white";
-        cursor_size = 24;
+        # The compositor-drawn cursor, READ FROM stylix.cursor in ../../stylix.nix
+        # (which themes the client-drawn ones). It has to match that one or the
+        # pointer changes appearance depending on which surface it is over, so
+        # it is derived rather than restated — stylix.cursor is the root, this
+        # and the niri layer follow it. Unset, wlroots falls back to the X11
+        # core cursor.
+        cursor_theme = config.stylix.cursor.name;
+        cursor_size = config.stylix.cursor.size;
 
         # --- Input ----------------------------------------------------------
         xkb_rules_layout = "us";

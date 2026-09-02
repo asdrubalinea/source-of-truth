@@ -471,13 +471,14 @@ in
         # Prefer no client-side decorations
         prefer-no-csd = true;
 
-        # Compositor-drawn cursor. Same theme as the mango layer and as
-        # stylix.cursor in ../../stylix.nix (which themes the client-drawn ones) —
-        # niri's own default is "default", so without this the pointer would change
-        # appearance as it moved between niri's surfaces and an app's.
+        # Compositor-drawn cursor, READ FROM stylix.cursor in ../../stylix.nix
+        # (which themes the client-drawn ones); the mango layer reads the same
+        # root. niri's own default is "default", so without this the pointer
+        # would change appearance as it moved between niri's surfaces and an
+        # app's — hence derived, not restated.
         cursor = {
-          theme = "capitaine-cursors-white";
-          size = 24;
+          theme = config.stylix.cursor.name;
+          size = config.stylix.cursor.size;
         };
 
         # Animations. Force-disabled in the VM only (hosts/tempest/vm.nix) — every
