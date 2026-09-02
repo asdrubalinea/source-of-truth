@@ -1,7 +1,9 @@
 # Redraw flicker under niri: linux-cachyos-lts 6.18.42 (tempest)
 
-**Status: `nix-cachyos-kernel` pinned in `flake.nix`. Unpin when `release`
-publishes `linux-cachyos-lts` >= 6.18.44.**
+**Status: resolved 2026-09-02. `nix-cachyos-kernel` tracks `release` again
+(`cec0952`, lts 6.18.48 — past the 6.18.44 amdgpu fix). Both niri-wm/niri#4433
+and #4443 are closed as fixed by the kernel. Kept for the bisect lesson at the
+bottom and so the symptom is searchable if it ever returns.**
 
 ## Symptom
 

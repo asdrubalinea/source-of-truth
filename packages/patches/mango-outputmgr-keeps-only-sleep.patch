@@ -1,6 +1,6 @@
---- a/src/mango.c
-+++ b/src/mango.c
-@@ -5734,9 +5734,15 @@
+--- a/src/manage/monitor.h
++++ b/src/manage/monitor.h
+@@ -984,9 +984,15 @@
  		Monitor *m = wlr_output->data;
  		struct wlr_output_state state;
  
