@@ -108,27 +108,38 @@ in
       # The three readouts that map to a built-in: v4 SystemMonitor → v5 `sysmon`,
       # one instance per stat. v5 bakes percent-vs-value into the stat name
       # (`ram_pct`, not a showMemoryAsPercent flag) and dropped the per-widget
-      # monospace/compact toggles. `display = "text"` shows the numeric value;
-      # `show_label = false` keeps it bare (no leading glyph), matching the old
-      # numeric pills. Poll intervals are global, under [system.monitor] (defaults:
-      # cpu/memory 2s).
+      # monospace/compact toggles. Poll intervals are global, under
+      # [system.monitor] (defaults: cpu/memory 2s).
+      #
+      # `visualization = "none"` + `show_value = true` is the bare numeric pill:
+      # no gauge, no graph, just the figure. These two keys used to be
+      # `display = "text"` and `show_label = false`, which noctalia renamed and
+      # which `noctalia config validate` had been warning about on every build:
+      #
+      #   WARN widget.cpu.display: display is now visualization and show_value
+      #   WARN widget.cpu.show_label: show_label is now show_value
+      #
+      # A deprecated key is a WARNING, not an error, so all six were being parsed
+      # and discarded — the pills only looked right because "bare numeric" is also
+      # what the defaults produce. Stating the current keys makes the config mean
+      # what it says, and takes the build from six warnings to none.
       widget.cpu = {
         type = "sysmon";
         stat = "cpu_usage";
-        display = "text";
-        show_label = false;
+        visualization = "none";
+        show_value = true;
       };
       widget.ram = {
         type = "sysmon";
         stat = "ram_pct";
-        display = "text";
-        show_label = false;
+        visualization = "none";
+        show_value = true;
       };
       widget.temp = {
         type = "sysmon";
         stat = "cpu_temp";
-        display = "text";
-        show_label = false;
+        visualization = "none";
+        show_value = true;
       };
     };
   }
