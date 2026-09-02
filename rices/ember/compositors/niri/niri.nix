@@ -5,7 +5,7 @@
   lib,
   ...
 }: let
-  windowRules = import ./window-rules.nix;
+  windowRules = import ./window-rules.nix c;
   playClipboard = import ../../play-clipboard.nix {inherit pkgs;};
   c = config.lib.stylix.colors.withHashtag;
 

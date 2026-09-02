@@ -1,4 +1,8 @@
-[
+# Called with `c` = config.lib.stylix.colors.withHashtag (see ./niri.nix). The
+# file is a function rather than a plain list only so the screencast-target rule
+# below can take its colours from the palette instead of restating hexes — see
+# principle 4 in docs/ember-visual-language.md.
+c: [
   {
     # Square window corners (all windows — no `matches` ⇒ catch-all), DERIVED
     # from the bar's edge treatment: this used to be 12.0 on all four to match
@@ -32,16 +36,23 @@
         is-window-cast-target = true;
       }
     ];
+    # A window being screencast is the one state that has earned a colour: it
+    # is transient, it is a fact you want answered at a glance, and base08 is
+    # what the mango layer already uses for its urgent border (see
+    # ../mango/mango.nix). These used to be four hand-typed catppuccin-ish
+    # hexes, which is the bug principle 4 describes — they belonged to no
+    # palette and could not follow the scheme. Alphas match the layout borders
+    # in ./niri.nix: 73 for the lit half of a pair, 26 for the unlit one.
     border = {
-      active.color = "#ff4466";
-      inactive.color = "#7d0d2d";
+      active.color = c.base08 + "73";
+      inactive.color = c.base01 + "26";
     };
     shadow = {
-      color = "#7d0d2d70";
+      color = c.base08 + "40";
     };
     tab-indicator = {
-      active.color = "#f38ba8";
-      inactive.color = "#7d0d2d";
+      active.color = c.base08 + "73";
+      inactive.color = c.base01 + "26";
     };
   }
   {
