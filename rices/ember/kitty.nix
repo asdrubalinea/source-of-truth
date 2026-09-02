@@ -20,10 +20,13 @@ lib.mkIf config.rices.ember.enable {
 
       dynamic_title = true;
       term = "xterm-256color";
-      cursor_shape = "beam";
+      # Block, not beam. A beam is the GUI-text-field cursor; a block is the one
+      # a terminal has always had, and it is the only shape that shows you which
+      # CELL you are on rather than which gap between cells. Blinking stays off
+      # (interval 0). cursor_beam_thickness went with the beam.
+      cursor_shape = "block";
       cursor_blink_interval = 0;
       cursor_stop_blinking_after = 0;
-      cursor_beam_thickness = 1.5;
       cursor_unfocused_hollow = true;
       window_padding_width = 4;
       initial_window_width = "160c";

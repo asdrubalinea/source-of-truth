@@ -29,12 +29,13 @@ lib.mkIf config.rices.ember.enable {
         multiplier = 10;
       };
 
+      # Block, not beam — see ./kitty.nix for why. `thickness` went with the
+      # beam: alacritty only applies it to Beam and Underline.
       cursor = {
         style = {
-          shape = "Beam";
+          shape = "Block";
           blinking = "Off";
         };
-        thickness = 0.15;
         unfocused_hollow = true;
       };
 

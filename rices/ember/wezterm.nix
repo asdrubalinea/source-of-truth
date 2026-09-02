@@ -67,8 +67,9 @@ lib.mkIf config.rices.ember.enable {
         "${config.stylix.fonts.emoji.name}",
       }
 
-      -- Cursor
-      config.default_cursor_style = "SteadyBar"
+      -- Cursor. Block, not bar — see ./kitty.nix for why. "Steady" is the
+      -- non-blinking half of the name and stays.
+      config.default_cursor_style = "SteadyBlock"
 
       -- Tabs.
       --
