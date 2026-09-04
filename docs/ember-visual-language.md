@@ -153,9 +153,10 @@ face, silently, because a string can't be wrong at build time.
 | Bar | flush, square, 1px outline, 32px | `rices/ember/noctalia-widgets.nix` |
 | Windows | square, 2px dim border, 8px inner gaps | `compositors/{niri,mango}` |
 | Cast marker | `base08` border while screencast | `compositors/niri/window-rules.nix` |
+| Instrument panel | Mod+I, floating transient `sitrep` | `rices/ember/sitrep-hud.nix` |
 | Ground | generated HUD bezel | `rices/ember/wallpaper/default.nix` |
 | Pointer | capitaine-cursors-white @ 24 | three places — see gotchas |
-| Terminal cursor | steady block, all three terminals | `{kitty,alacritty,wezterm}.nix` |
+| Terminal cursor | steady block, all four terminals | `{kitty,alacritty,wezterm,konsole}.nix` |
 | Font packages | 5 families, each one referenced | `rices/ember/fonts.nix` |
 
 The **ground** is worth describing since it's the one thing built from scratch:
@@ -203,10 +204,13 @@ let it propagate. Do not round one surface. Note that mango's scenefx backend
 *can* do blur and per-window opacity and deliberately doesn't: the brief for the
 second compositor was "the same desktop, different engine".
 
-**A terminal.** All three are configured and themed and stay that way, even
-though wezterm is the only one any binding spawns — they're the fallback when
-one of them breaks. A behavioural change to one (cursor shape, padding) goes to
-all three or it is a divergence, not a change.
+**A terminal.** All four are configured and themed and stay that way, even
+though wezterm is the only one any binding spawns — kitty and alacritty are the
+fallback when it breaks, and konsole is there because Dolphin's F4 panel embeds
+the KPart and reads the default profile. A behavioural change to one (cursor
+shape, padding) goes to all four or it is a divergence, not a change. konsole is
+also the one that is not a stylix target, so its palette is written out from
+base16 by hand in `konsole.nix` — a fifth terminal would need the same.
 
 **A rice-wide value that differs per machine.** It isn't a rice value. Panel
 identities, terminal sizes, monitor layout and geography are **machine policy**
@@ -241,6 +245,13 @@ independent facts: the bar auto-hides for burn-in (ADR 0009), so a persistent
 readout contradicts the rice's own mitigation; and noctalia v5's `custom_button`
 can no longer poll a script and render its stdout (ADR 0003), so the five
 bespoke readouts have no v5 equivalent without writing a plugin.
+
+Answered instead by inverting the lifetime: **Mod+I** spawns `sitrep` in a
+floating terminal (`rices/ember/sitrep-hud.nix`), respawned per invocation so
+the numbers are read at the moment you look rather than a poll interval stale,
+and lit only while you are looking. Same question, and it costs zero permanently
+lit pixels — which is principle 3 rather than an exception to it. If a future
+readout wants to be always visible, this is the shape the answer takes.
 
 ---
 
