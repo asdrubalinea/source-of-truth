@@ -70,7 +70,38 @@ in {
         #
         # This is the ONLY place a session is chosen interactively; the
         # soft-reboot path above deliberately does not consult it.
-        command = "${pkgs.tuigreet}/bin/tuigreet --time --remember --remember-session --sessions ${config.services.displayManager.sessionData.desktops}/share/wayland-sessions";
+        #
+        # The greeter is the one always-seen surface the brightness budget does
+        # not constrain: it lives for seconds, on a TTY, before any compositor
+        # exists, so nothing here can burn a panel (ADR 0009). It is themed
+        # anyway rather than left stock because it is also the first thing the
+        # machine says.
+        #
+        # --theme takes ANSI colour NAMES, and stylix themes the console
+        # palette from the ember scheme, so these resolve to the rice's own
+        # colours without a hex appearing here (principle 4 in
+        # docs/ember-visual-language.md): black is base00, darkgray base03,
+        # white base05, yellow base0A. Unknown keys and unknown colour names are
+        # silently ignored by tuigreet, not rejected — a typo here degrades to
+        # the stock colour rather than failing to start, which also means the
+        # only way to know a key landed is to look at the greeter.
+        #
+        # --battery and --time are readouts, not decoration: on a laptop that
+        # cold-boots after an unknown time on the shelf, charge and clock are
+        # exactly the two facts wanted before logging in. --asterisks makes the
+        # password field show its length, so a stuck key or a dead keyboard is
+        # visible instead of being indistinguishable from typing.
+        command = builtins.concatStringsSep " " [
+          "${pkgs.tuigreet}/bin/tuigreet"
+          "--time"
+          "--battery"
+          "--asterisks"
+          "--remember"
+          "--remember-session"
+          "--greeting 'tempest // authenticate'"
+          "--theme 'container=black;border=darkgray;title=white;greet=darkgray;prompt=white;input=white;action=darkgray;button=yellow;time=darkgray;text=white'"
+          "--sessions ${config.services.displayManager.sessionData.desktops}/share/wayland-sessions"
+        ];
         user = "greeter";
       };
     };
