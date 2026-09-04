@@ -30,9 +30,6 @@
       set fish_greeting # Disable greeting
 
       # ${pkgs.blahaj}/bin/blahaj -s
-
-      function fish_right_prompt
-      end
     '';
 
     plugins = [

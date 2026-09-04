@@ -228,6 +228,37 @@ in {
           format = "[$hostname]($style) ";
           style = "bold green";
         };
+
+        # The right prompt is a readout column: flush-right, glanced at, never
+        # read as prose — the same job the bar does, in the one surface that is
+        # already lit. It carries what the left prompt does not, and nothing
+        # else. (misc/fish.nix used to define an empty `fish_right_prompt`,
+        # which shadowed starship's; it is gone, so this is what renders.)
+        #
+        # Both modules are off by default in starship and so are absent from
+        # `$all` above:
+        #   status — the exit code of the last command. Prints only when
+        #            non-zero, which is the whole point: a failure that scrolled
+        #            off the top is otherwise invisible.
+        #   time   — a per-command timestamp. Not redundant with the bar's
+        #            clock: the bar auto-hides for burn-in (ADR 0009), so the
+        #            scrollback is where "when did this run" is actually
+        #            answerable, and it stays answerable in a log paste.
+        # Styles are ANSI names, never hexes — the terminal palette is ember's
+        # (principle 4). bright-black is base03, the same value the wallpaper
+        # subordinates its brackets to.
+        right_format = "$status$time";
+        status = {
+          disabled = false;
+          format = "[$status]($style) ";
+          style = "bold red";
+        };
+        time = {
+          disabled = false;
+          format = "[$time]($style)";
+          time_format = "%H:%M:%S";
+          style = "bright-black";
+        };
       };
     };
   };
