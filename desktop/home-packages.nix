@@ -71,6 +71,7 @@ in {
     eza
     fd
     kdePackages.dolphin # KDE file manager
+    kdePackages.konsole # KPart behind Dolphin's F4 terminal panel
     nautilus
     ncdu
     nemo

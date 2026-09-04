@@ -92,6 +92,15 @@ in
         # OSC — that relay is gone.)
         fish.enable = true;
 
+        # KDE apps are handled in kde.nix, not by stylix's kde target: that
+        # target only writes a .colors file and a UiSettings.ColorScheme pointer,
+        # then leaves `plasma-apply-lookandfeel` to copy the palette into
+        # kdeglobals. There is no Plasma session here to run it, so the colours
+        # never landed and Dolphin fell back to Breeze light. All the target
+        # contributed was an autostart entry looking for a binary that isn't
+        # installed. kde.nix writes the [Colors:*] groups itself.
+        kde.enable = false;
+
         # Qt is handled in qt.nix, not by stylix's qt target: that target is
         # Kvantum-only (warns if you change the style) and its `autoEnable` is gated
         # on `nixosConfig != null`, so it doesn't even apply under standalone HM —

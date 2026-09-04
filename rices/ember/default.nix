@@ -2,6 +2,8 @@
   imports = [
     ./alacritty.nix
     ./kitty.nix
+    ./konsole.nix
+    ./kde.nix
     ./wezterm.nix
     ./tofi.nix
     ./flights.nix
