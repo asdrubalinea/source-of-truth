@@ -15,6 +15,7 @@
 
   windowRules = import ./window-rules.nix;
   playClipboard = import ../../play-clipboard.nix {inherit pkgs;};
+  sitrepHud = import ../../sitrep-hud.nix {inherit pkgs;};
 
   # niri has a built-in `screenshot` action; mango has none, so the two screenshot
   # binds go through grim/slurp. A script rather than an inline command because
@@ -234,6 +235,8 @@ in {
             "SUPER,l,spawn,${pkgs.systemd}/bin/loginctl lock-session"
             "SUPER+SHIFT,b,spawn,${inputs.zen-browser.packages.x86_64-linux.beta}/bin/zen-beta"
             "SUPER,y,spawn,${playClipboard}"
+            # Instrument panel — see ../../sitrep-hud.nix.
+            "SUPER,i,spawn,${sitrepHud}"
 
             # Scratchpads. Format: appid,title,command — `none` for whichever field
             # is not being matched on. mango launches the command itself on first

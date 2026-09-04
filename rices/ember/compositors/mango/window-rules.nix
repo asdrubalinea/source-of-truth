@@ -29,6 +29,12 @@
   "appid:^org\\.telegram\\.desktop$,isnamedscratchpad:1,width:0.55,height:0.85"
   "appid:^scratchpad-terminal$,isnamedscratchpad:1,width:0.9,height:0.9"
 
+  # --- Instrument panel ----------------------------------------------------
+  # Mod+I, a floating and transient `sitrep` (rices/ember/sitrep-hud.nix). Not a
+  # scratchpad in either layer: it is respawned per invocation so the numbers are
+  # never stale. Geometry mirrors the niri rule.
+  "appid:^sitrep-hud$,isfloating:1,width:0.6,height:0.85"
+
   # --- Picture-in-Picture --------------------------------------------------
   # isglobal is the whole reason the niri layer's pip-follow.nix has no
   # counterpart here: mango can genuinely show one window on every tag, so the PiP

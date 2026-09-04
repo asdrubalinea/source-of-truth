@@ -7,6 +7,7 @@
 }: let
   windowRules = import ./window-rules.nix c;
   playClipboard = import ../../play-clipboard.nix {inherit pkgs;};
+  sitrepHud = import ../../sitrep-hud.nix {inherit pkgs;};
   c = config.lib.stylix.colors.withHashtag;
 
   # --- Scratchpads (nirius-backed) -----------------------------------------
@@ -543,6 +544,9 @@ in
           "Mod+O".action.spawn = ["${audioOutputSwitcher}"];
           "Mod+N".action.spawn = ["${pkgs.kdePackages.dolphin}/bin/dolphin"];
           "Mod+L".action.spawn = ["${pkgs.systemd}/bin/loginctl" "lock-session"];
+          # Instrument panel: a floating, transient `sitrep`. See
+          # ../../sitrep-hud.nix for why this is a keybind and not a bar widget.
+          "Mod+I".action.spawn = ["${sitrepHud}"];
 
           # Telegram scratchpad: summon/dismiss on the focused workspace.
           "Mod+T".action.spawn = ["${telegramScratchpad.toggle}"];

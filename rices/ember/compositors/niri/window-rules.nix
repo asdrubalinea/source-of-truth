@@ -92,6 +92,22 @@ c: [
     };
   }
   {
+    # Instrument panel (Mod+I): a floating, transient `sitrep`. Sized as a
+    # proportion so it adapts to any output; open-focused because the readout is
+    # dismissed by a keypress, and an unfocused window would send it elsewhere.
+    # The app-id comes from wezterm's `--class sitrep-hud`; see
+    # rices/ember/sitrep-hud.nix.
+    matches = [{app-id = "sitrep-hud";}];
+    open-floating = true;
+    open-focused = true;
+    default-column-width = {
+      proportion = 0.6;
+    };
+    default-window-height = {
+      proportion = 0.85;
+    };
+  }
+  {
     matches = [{app-id = "app.drey.PaperPlane";}];
     block-out-from = "screencast";
   }
