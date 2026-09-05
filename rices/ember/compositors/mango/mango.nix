@@ -52,6 +52,100 @@
 
   wezterm = "${pkgs.wezterm}/bin/wezterm";
 
+  # --- Even split (Mod+G) ---------------------------------------------------
+  # The niri layer's evenSplit, ported to mango's scroller — same intent ("halve
+  # the screen between the focused window and its neighbour"), same
+  # orientation-awareness, different vocabulary. A scroller column is one or more
+  # stacked windows, so on a landscape output an even split is two half-width
+  # columns side by side, and on a portrait one (the QD-OLED at transform 270 —
+  # see homes/tempest/monitors.nix) it is ONE full-width column holding both
+  # windows, halved top and bottom. See ../niri/niri.nix for the longer version of
+  # the reasoning; only the mango-specific parts are noted here.
+  #
+  # `scroller_stack` is mango's consume *and* expel in one action: it pulls the
+  # neighbour in the given direction into the focused window's stack, unless the
+  # window is already stacked, in which case it moves out into its own column. So
+  # each branch undoes the other's shape, as the niri script does.
+  #
+  # Heights inside a stack need no setting: mango normalises a stack node's
+  # proportion to an equal share whenever it is outside (0,1), so a freshly built
+  # stack is already even.
+  #
+  # Portrait is read off the active monitor's logical geometry rather than a
+  # transform name, for the reason spelled out in the niri layer. Floating windows
+  # are excluded — they are not in the scroller and have nothing to split against.
+  evenSplit = pkgs.writeShellScript "mango-even-split" ''
+    set -u
+    mmsg=${pkgs.mango}/bin/mmsg
+    jq=${pkgs.jq}/bin/jq
+
+    # Sets: portrait, id (focused), mine (windows sharing its column), right/left
+    # (the id of the nearest column that way, or 0). Columns are keyed on x —
+    # every window in one shares it.
+    query() {
+      mon=$("$mmsg" get all-monitors | "$jq" -r '
+        [.monitors[] | select(.active)] | first
+        | if . == null then empty
+          else "\(.name) \(if .height > .width then 1 else 0 end)" end')
+      [ -n "$mon" ] || return 1
+      # shellcheck disable=SC2086
+      set -- $mon
+      name=$1
+      portrait=$2
+
+      facts=$("$mmsg" get all-clients | "$jq" -r --arg m "$name" '
+        [.clients[] | select(.monitor == $m and .is_visible and (.is_floating | not))] as $t
+        | ([$t[] | select(.is_focused)] | first) as $f
+        | if $f == null then empty
+          else
+            "\($f.id)"
+            + " \([$t[] | select(.x == $f.x)] | length)"
+            + " \(([$t[] | select(.x > $f.x)] | sort_by(.x) | first | .id) // 0)"
+            + " \(([$t[] | select(.x < $f.x)] | sort_by(-.x) | first | .id) // 0)"
+          end')
+      [ -n "$facts" ] || return 1
+      # shellcheck disable=SC2086
+      set -- $facts
+      id=$1
+      mine=$2
+      right=$3
+      left=$4
+    }
+
+    query || exit 0
+
+    if [ "$portrait" = 1 ]; then
+      if [ "$mine" -lt 2 ]; then
+        if [ "$right" != 0 ]; then
+          "$mmsg" dispatch scroller_stack,right
+        elif [ "$left" != 0 ]; then
+          "$mmsg" dispatch scroller_stack,left
+        else
+          exit 0 # sole window on the tag — nothing to split with
+        fi
+      fi
+      "$mmsg" dispatch set_proportion,1.0
+      exit 0
+    fi
+
+    # Landscape. A stacked window comes out into its own column first, which
+    # changes the layout under us, so re-read it.
+    if [ "$mine" -gt 1 ]; then
+      "$mmsg" dispatch scroller_stack,right
+      query || exit 0
+    fi
+
+    if [ "$right" != 0 ]; then
+      neighbour=$right
+    elif [ "$left" != 0 ]; then
+      neighbour=$left
+    else
+      exit 0
+    fi
+    "$mmsg" dispatch set_proportion,0.5 client,"$id"
+    "$mmsg" dispatch set_proportion,0.5 client,"$neighbour"
+  '';
+
   # Every tag gets the scroller layout. mango is tag-based (a dwl inheritance):
   # unlike niri's dynamic per-output workspaces, the ten tags always exist, a
   # window can be on several at once, and an empty tag does not disappear. Ten of
@@ -221,9 +315,9 @@ in {
 
         # --- Keybindings ----------------------------------------------------
         # Same keys as the niri layer wherever the action exists on both sides;
-        # see docs/mango-vs-niri.md for the full mapping and the four binds that
-        # have no mango counterpart (Mod+G even-split, Mod+O audio switcher, and
-        # the two brightness keys).
+        # see docs/mango-vs-niri.md for the full mapping and the three binds that
+        # have no mango counterpart (Mod+O audio switcher and the two brightness
+        # keys).
         bind =
           [
             # Terminal, launcher, apps
@@ -237,6 +331,7 @@ in {
             "SUPER,y,spawn,${playClipboard}"
             # Instrument panel — see ../../sitrep-hud.nix.
             "SUPER,i,spawn,${sitrepHud}"
+            "SUPER,g,spawn,${evenSplit}"
 
             # Scratchpads. Format: appid,title,command — `none` for whichever field
             # is not being matched on. mango launches the command itself on first

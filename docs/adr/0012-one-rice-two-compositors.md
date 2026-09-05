@@ -122,7 +122,9 @@ What we accepted losing under mango:
   is an active output and falls back to DDC/CI when clamshell-docked (ADR 0009).
   Deliberately not ported, and not replaced with a plain `brightnessctl` bind
   either: mango sessions have dead brightness keys. It is a test rice.
-- **The Mod+O audio-output switcher and Mod+G even-split.**
+- **The Mod+O audio-output switcher.** (Mod+G's even split *was* ported —
+  `mango-even-split` in `rices/ember/compositors/mango/mango.nix` does the same
+  orientation-aware halving via `scroller_stack` + `set_proportion`.)
 - **Dynamic workspaces.** Ten tags stand in for them so the keys match, but a
   tag is a bitmask that always exists — see the **workspace** entry in
   `CONTEXT.md`.

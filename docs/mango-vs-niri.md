@@ -36,7 +36,7 @@ Identical unless the right column says otherwise.
 | Mod+Shift+R | soft-reboot | same |
 | Mod+Shift+E | quit | `quit` |
 | Volume / media keys | pamixer, playerctl | same |
-| **Mod+G** | even split | **nothing** |
+| Mod+G | even split | `mango-even-split` script — `scroller_stack` + `set_proportion` |
 | **Mod+O** | audio-output switcher | **nothing** |
 | **Brightness keys** | backlight, or DDC/CI when clamshelled | **nothing** — use the Noctalia panel or `brightnessctl` |
 
