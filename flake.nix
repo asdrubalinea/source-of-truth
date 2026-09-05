@@ -178,6 +178,13 @@
       url = "github:phlx0/drift";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    lights = {
+      url = "github:asdrubalinea/lights";
+      # No flake of its own, just the package.nix sitting beside its Cargo.lock,
+      # which is all we need — see homes/tempest/lights.nix. HM-only, so
+      # update-home bumps it.
+      flake = false;
+    };
     warp = {
       url = "github:warpdotdev/warp";
       # Warp's client is AGPL/MIT open source and the repo ships its own flake,

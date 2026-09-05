@@ -24,6 +24,7 @@ in {
     # ../../rices/estradiol
     ../../rices/ember # the ember rice (declares rices.ember.*; enabled below)
     ./monitors.nix # machine policy: monitor identities + layout (kanshi)
+    ./lights.nix # machine policy: the desk strip follows the idle timers
     ./soft-reboot.nix # machine policy: Mod+Shift+R soft-reboot trigger (autologin gate lives in hosts/tempest/system/session.nix)
     # ./speakers.nix # machine policy: built-in speaker DSP correction (EasyEffects) — disabled: leaks onto AirPods
 

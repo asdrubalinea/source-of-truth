@@ -15,6 +15,7 @@
       claude-code \
       llm-agents \
       zen-browser \
+      lights \
       emacs-overlay \
       stylix \
       hyprland
