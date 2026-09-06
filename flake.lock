@@ -1273,11 +1273,11 @@
     "lights": {
       "flake": false,
       "locked": {
-        "lastModified": 1788614063,
-        "narHash": "sha256-rxx20T4nZX71IxOy/CJMHdOlZlqUtJqPQlmTKaWjFeo=",
+        "lastModified": 1788695809,
+        "narHash": "sha256-58Q/dbAUVMXP4rboLAuHlz2YWqvGwCJubZx/S/MZBQ0=",
         "owner": "asdrubalinea",
         "repo": "lights",
-        "rev": "64089d79922a23ddc6114fbe3010a642484fab2b",
+        "rev": "1c2027b8a487643039186c148bd1f3420cf38449",
         "type": "github"
       },
       "original": {
