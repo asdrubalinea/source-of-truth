@@ -32,9 +32,11 @@
   # Ceiling: resuming from suspend races wifi association, so the strip may stay
   # dark until the next manual `lights`. Not worth a retry loop for a desk lamp.
   #
-  # Takes the whole `<binary> <arg>`, because the package ships more than one:
-  # `lights` for the plain warm levels, `flag` for the pride stripes.
-  lights-cmd = cmd: "${pkgs.coreutils}/bin/timeout 15 ${lights}/bin/${cmd} || true";
+  # Takes the bound and the whole `<binary> <arg>`, because the package ships
+  # more than one: `lights` for the plain warm levels, `flag` for the pride
+  # stripes. The bound is per caller — the before-sleep hook below gets a tighter
+  # one than the idle timers, since it is holding up a suspend.
+  lights-cmd = seconds: cmd: "${pkgs.coreutils}/bin/timeout ${toString seconds} ${lights}/bin/${cmd} || true";
 in {
   home.packages = [lights];
 
@@ -49,15 +51,32 @@ in {
       # from the same depth mask, so the near edge is still the dimmest thing
       # on the desk — it just isn't the house near-white any more.
       timeout = 120;
-      command = lights-cmd "lights dim";
-      resumeCommand = lights-cmd "flag lesbian";
+      command = lights-cmd 15 "lights dim";
+      resumeCommand = lights-cmd 15 "flag lesbian";
     }
     {
       # A quarter of an hour dim and the desk is genuinely unoccupied: go dark.
-      # Sits between the idle lock (600s) and the on-battery suspend (1200s),
-      # so on battery the strip is already off before the box drops to s2idle.
+      # This is the *awake* path only — on AC the box never suspends itself, so
+      # this is what darkens the desk overnight while it's plugged in. It cannot
+      # be the sleep path: suspend stops the idle clock, so a lid close at 130s
+      # idle left the strip sitting at the near-white dim level all night, with
+      # the remaining 770s of this timer never counted down. Sleep is an event,
+      # and it's hooked as one below.
       timeout = 900;
-      command = lights-cmd "lights off";
+      command = lights-cmd 15 "lights off";
     }
   ];
+
+  # Off on the way into suspend, whatever the idle timers had reached. Runs
+  # inside swayidle's sleep inhibitor (rices/ember/swayidle.nix), so 5s: past
+  # logind's InhibitDelayMaxSec it suspends regardless and the call would be
+  # frozen mid-TCP anyway.
+  #
+  # Coming back is left to the 120s timer's resumeCommand, i.e. to real user
+  # activity, NOT to logind's resume — with the lid closed this machine wakes on
+  # a spurious GPE every ~41s and re-suspends (see the s2idle wake loop), and
+  # lighting the desk on each of those would be a strip on all night. The cost
+  # is that a lid closed while genuinely active (no timer fired, so none to
+  # resume) reopens onto a dark desk until the next idle cycle.
+  rices.ember.beforeSleepCommands = [(lights-cmd 5 "lights off")];
 }

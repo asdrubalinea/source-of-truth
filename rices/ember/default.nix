@@ -112,5 +112,23 @@
         not routed through this list).
       '';
     };
+
+    beforeSleepCommands = lib.mkOption {
+      type = lib.types.listOf lib.types.str;
+      default = [];
+      description = ''
+        Commands to run on the way into suspend, after the lock surface is up and
+        while swayidle still holds the logind sleep inhibitor — so they finish
+        before the machine freezes. Keep them short and bounded: logind waits at
+        most InhibitDelayMaxSec (5s) for the inhibitor to come back.
+
+        Machine policy, set from homes/<host>/; the rice runs them without
+        knowing what they are. This is an option rather than a second definition
+        of `services.swayidle.events.before-sleep` because that option is a
+        single string, claimed here by the locker — a machine with furniture to
+        put away before the box freezes has nowhere else to hook. Consumed by
+        ./swayidle.nix's lockBeforeSleep.
+      '';
+    };
   };
 }

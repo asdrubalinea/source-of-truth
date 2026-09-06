@@ -88,6 +88,11 @@
   # an already-running swaylock from the idle path.
   lockBeforeSleep = pkgs.writeShellScript "ember-lock-before-sleep" ''
     ${pkgs.procps}/bin/pidof swaylock > /dev/null 2>&1 || ${swaylock}
+    # Machine furniture that has to be put away before the box freezes (the desk
+    # lamp on tempest). Runs here, inside the inhibitor, rather than off an idle
+    # timeout: suspend stops the idle clock, so a timer far enough out to mean
+    # "nobody is here" never arrives once the machine is asleep.
+    ${lib.concatStringsSep "\n" config.rices.ember.beforeSleepCommands}
     # Small settle before the screen is frozen for s2idle.
     ${pkgs.coreutils}/bin/sleep 0.3
   '';
