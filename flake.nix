@@ -533,6 +533,45 @@
       # ./result/bin/disko-vm. See mkTempest above for why not `nixos-rebuild build-vm`.
       tempest-vm = mkTempest true;
 
+      # The per-project dev VM (docs/adr/0013). NOT a host clone: one image
+      # serves every ocelot, and the project path, state disk, ssh port and the
+      # individual's own name are runtime parameters handed over by `ocelot`
+      # (scripts/ocelot.sh), which is also the only thing that builds this. Home
+      # Manager is attached as a NixOS module rather than standalone — a guest
+      # rebuilt on every boot has no second activation step to run.
+      ocelot = lib.nixosSystem {
+        specialArgs = {
+          inherit inputs;
+          hostname = "ocelot";
+        };
+
+        modules = [
+          {
+            nixpkgs = {
+              hostPlatform = defaultSystem;
+              config = nixpkgsConfig;
+              overlays = overlays;
+            };
+          }
+          impermanence.nixosModules.impermanence
+          home-manager.nixosModules.home-manager
+          {
+            home-manager = {
+              useGlobalPkgs = true;
+              useUserPackages = true;
+              extraSpecialArgs = {
+                inherit inputs;
+                hostname = "ocelot";
+              };
+              users.irene.imports = [./homes/ocelot.nix];
+              backupFileExtension = "hm-bak";
+            };
+          }
+
+          ./hosts/ocelot/default.nix
+        ];
+      };
+
       hydra = lib.nixosSystem {
         specialArgs = {
           inherit inputs;

@@ -33,7 +33,13 @@
     #    solid cream block with an invisible glyph. Point emphasis_1 at base02
     #    so the button reads as the same raised chip as any unselected ribbon.
     #    emphasis_1 has no other use in the tab or status bars.
-    themes = lib.mkIf config.stylix.enable (
+    # `or false`, not a bare `config.stylix.enable`: this module is imported by
+    # homes without a rice (homes/orchid.nix, homes/ocelot.nix) and those do not
+    # import the stylix HM module at all, so the option does not merely evaluate
+    # false — the whole `config.stylix` attribute is missing and selecting into
+    # it throws. That took homeConfigurations."irene@orchid" down as soon as
+    # anything forced home.file.
+    themes = lib.mkIf (config.stylix.enable or false) (
       let
         inherit (config.lib.stylix.colors.withHashtag) base00 base02;
         ink = {base = lib.mkForce base00;};

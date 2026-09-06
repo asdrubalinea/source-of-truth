@@ -221,6 +221,25 @@
             mountpoint = "/var/lib/containers";
           };
 
+          # ocelot state disks (docs/adr/0013), one sparse raw image per
+          # per-project dev VM, each holding that guest's home and its docker
+          # layer cache. Same reasoning as the two datasets above: a layer cache
+          # must not be pinned in every hourly sanoid snapshot and shipped to the
+          # USB pool, and com.sun:auto-snapshot=false is inherited from
+          # rootFsOptions. `ocelot destroy` is the only thing that deletes from
+          # here, which is what makes the blast-radius claim in CONTEXT.md real.
+          #
+          # NOTE: disko only runs at format time, so this documents the layout
+          # for the next install; on a live tempest the dataset has to be created
+          # once by hand:
+          #   sudo zfs create -o mountpoint=/var/lib/vms rpool/vms
+          # The per-user subdirectory under it comes from the tmpfiles rule in
+          # hosts/tempest/system/virtualization.nix.
+          vms = {
+            type = "zfs_fs";
+            mountpoint = "/var/lib/vms";
+          };
+
           # Never mounted. A refreservation we can shrink to recover from a
           # 100%-full, write-wedged pool (ZFS is copy-on-write).
           reserved = {

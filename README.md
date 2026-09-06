@@ -47,6 +47,7 @@ server and a Pi — plus Home Manager for `irene` — from a single declarative 
 | **`hydra`** 🐍 | QEMU guest server | Caddy, Grafana, Glance — the always-on box |
 | **`zephyr`** 🍃 | Raspberry Pi 3B+ (aarch64) | headless; cross-built on tempest under binfmt, flashed as an SD image |
 | **`tempest-vm`** 📦 | tempest, minus the hardware | same config with the physical layer dropped — disko + impermanence + niri in QEMU, via `./build-vm` |
+| **`ocelot`** 🐆 | Per-project dev VM | not a host clone — one guest, many individuals, each of one project directory, entered over ssh with its own docker. `ocelot` builds and runs it; spec in [`docs/ocelot.md`](docs/ocelot.md) |
 
 <details>
 <summary><b>What "impermanent" actually means here</b> 🫥</summary>
@@ -132,8 +133,8 @@ flowchart TD
 
 ```
 flake.nix              # inputs, multi-channel overlay, nixosConfigurations + homeConfigurations
-├── hosts/             # per-machine composition roots (tempest, orchid, hydra, zephyr)
-├── homes/             # Home Manager configs (irene@orchid, irene@tempest)
+├── hosts/             # per-machine composition roots (tempest, orchid, hydra, zephyr, ocelot)
+├── homes/             # Home Manager configs (irene@orchid, irene@tempest, the ocelot guest)
 ├── modules/           # cross-cutting system modules (nix, security, zfs-on-luks, impermanence-root, secure-boot)
 ├── hardware/          # opt-in hardware (audio, bluetooth, framework, zfs, tlp)
 ├── services/          # à-la-carte NixOS services (borg, caddy, grafana, syncthing, vaultwarden-mirror…)
@@ -173,6 +174,7 @@ Things in here that aren't just "package from nixpkgs, enabled":
 |---|---|
 | 🩺 **`sitrep`** | One-screen health readout: alerts first, then load/PSI, memory, ZFS, SMART, filesystems, backup units, failed services, network, thermals, and this boot's log errors grouped by shape. Feature-detects everything — degrades instead of failing on hosts with no ZFS or no battery. |
 | 🧰 **`cage`** | bubblewrap + zellij persistent sandbox — confines a process tree in a namespace you can attach to and leave running. Spec in [`docs/cage.md`](docs/cage.md). |
+| 🐆 **`ocelot`** | cage's sibling one layer down: a per-project QEMU guest you enter over ssh, with its own container runtime, that outlives the connection. Unprivileged virtiofsd + passt + a transient user unit; no libvirt. [`docs/ocelot.md`](docs/ocelot.md), [ADR 0013](docs/adr/0013-ocelot-per-project-dev-vm.md). |
 | 🤖 **`claude-sandboxed`** | The same idea pointed at an agent: `/persist` blacklisted, Wayland socket forwarded so image paste still works. |
 | 🔔 **`backup-notify`** | Pushes one desktop notification from a root systemd unit into the graphical session — replaced the bar's polled backup readout when Noctalia v5 dropped script polling. |
 | 🎞️ **the marquee** | A permanently reserved 16:9 band on the portrait QD-OLED, derived from the monitor's mount ([ADR 0011](docs/adr/0011-marquee-on-the-portrait-oled.md)). |

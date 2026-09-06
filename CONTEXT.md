@@ -262,3 +262,54 @@ _Avoid_: Calling mpv a media server
 >
 > **Domain expert:** None. mpv is the playback client and opens library files
 > directly.
+
+## Isolation (tempest)
+
+Two layers for running work away from the machine itself. They are not two
+strengths of the same thing — they bound different quantities and end in
+different ways.
+
+- **sandbox** — cage: a confined *process tree* on tempest's own kernel. The
+  home is empty, only the launch directory is writable, and the session ends
+  when you detach, leaving nothing behind. It bounds what a program can
+  *reach*; it does not bound what a program can do to the machine, and its own
+  documentation says so in as many words.
+  _Avoid_: "the VM", container.
+- **ocelot** — a virtual machine, one per project, that you enter and work
+  inside. It has its own kernel, so what runs in it cannot touch tempest's
+  system state; it runs its own container runtime, so the containers started in
+  it are *its* containers and appear in no listing on the host; and it outlives
+  your connection, so whatever you left running is still running when you come
+  back. The word is the species: each individual is named for the project
+  directory it belongs to, and `ocelot` is also the command that manages them.
+  _Avoid_: sandbox (that is cage), container, "the dev VM".
+- **the project** — the single host directory an ocelot works on, present
+  inside at the same path it has on tempest, so a path copied between the two
+  means the same file. An ocelot is *of* a project the way a **sandbox** session
+  is of a directory.
+- **blast radius** — what an ocelot is for, and the limit of the claim. It
+  bounds **mess**: a runaway build, a container that fills the disk, a daemon
+  that rewrites its own `/etc`, a toolchain that wants to own the machine.
+  It does **not** bound malice. Agent credentials are deliberately carried
+  inside so that the tools you use are already logged in, which means anything
+  running in an ocelot can read them — exactly as in a **sandbox**. Protection
+  from hostile code is a different request, and would mean a different set of
+  things crossing the boundary.
+  _Flagged ambiguity_: "isolated" has been used for both properties. An ocelot
+  is isolated from tempest's *state*, not from your *secrets*.
+- **stop** / **destroy** — the two ways an ocelot ends. Not degrees of one
+  action. **stop** ends the *machine*: it shuts down, and everything it
+  accumulated — container images, its home, its shell history — is there when it
+  next starts. **destroy** ends the *state*: that accumulation is deleted and
+  the next start is a machine that has never been used. destroy is what makes
+  **blast radius** a claim rather than a hope, because it is the guaranteed
+  route back to a known machine.
+  _Flagged ambiguity_: "kill the VM" has meant both. Say which.
+- **host clone** — the *other* virtual machine in this tree: `tempest-vm` and
+  `orchid-vm`, built by `./build-vm`, which reproduce a whole machine's disk
+  layout and configuration in order to test *the configuration*. A host clone
+  holds no project, mounts nothing of yours, and is discarded once it has
+  answered the question it was built for. An **ocelot** inverts every one of
+  those.
+  _Flagged ambiguity_: "the VM" is ambiguous in this repo and should not be
+  used unqualified.

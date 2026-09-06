@@ -51,6 +51,7 @@ in {
     ../../scripts/port-forward.nix
     ../../scripts/claude-sandboxed.nix
     ../../scripts/cage.nix
+    ../../scripts/ocelot.nix
     ../../scripts/keep-awake.nix
     ../../scripts/ps5-audio.nix
     ../../scripts/due-cuffie.nix
@@ -183,6 +184,15 @@ in {
       # Opt out of HM's soon-to-be-removed default `Host *` block; its values
       # just mirror ssh's own built-in defaults, so there's nothing to keep.
       enableDefaultConfig = false;
+
+      # `ocelot` writes one stanza per dev VM into ~/.ssh/config.d/ (name, its
+      # allocated port, its own known_hosts, ForwardAgent) — see
+      # docs/adr/0013 and scripts/ocelot.sh. This is what makes everything that
+      # speaks ssh work by name, `port-forward ocelot-<name> 3000` included.
+      # It has to be declared here because HM owns ~/.ssh/config as a store
+      # symlink, so nothing can append to it at runtime. A glob matching
+      # nothing is not an error, so this is inert until the first ocelot exists.
+      includes = ["config.d/*"];
       settings = {
         # Locally wezterm sets TERM=wezterm; remote hosts that lack the wezterm
         # terminfo entry (anything not running hydra/orchid's wezterm.terminfo)

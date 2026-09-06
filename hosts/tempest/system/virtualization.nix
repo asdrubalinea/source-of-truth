@@ -110,9 +110,17 @@
 
   # rootless_storage_path is created by podman, but only if the parent is
   # writable — /var/lib/containers is root-owned, so hand irene its own subdir.
+  #
+  # /var/lib/vms/irene is the same shape for the same reason: `ocelot`
+  # (docs/adr/0013) runs entirely unprivileged and keeps each dev VM's state
+  # disk there, so it needs a directory it owns under the root-owned rpool/vms
+  # mountpoint (disks/tempest.nix). Nothing here creates the dataset — disko
+  # only runs at format time; see the note in that file.
   systemd.tmpfiles.rules = [
     "d /var/lib/containers 0711 root root -"
     "d /var/lib/containers/rootless 0711 root root -"
     "d /var/lib/containers/rootless/irene 0700 irene users -"
+    "d /var/lib/vms 0711 root root -"
+    "d /var/lib/vms/irene 0700 irene users -"
   ];
 }
