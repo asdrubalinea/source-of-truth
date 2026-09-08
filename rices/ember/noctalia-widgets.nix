@@ -129,9 +129,19 @@ in
         visualization = "none";
         show_value = true;
       };
+      # `ram_used` rather than `ram_pct`: a percentage of an unstated total is
+      # unreadable on this machine, because the total isn't what's installed and
+      # "used" isn't what's in use — ZFS's ARC, amdgpu's GTT allocation and the
+      # zswap pool all count against it. The absolute figure at least says how
+      # many GiB are gone. Noctalia computes it as
+      # `MemTotal - MemAvailable` and renders it through `formatBinaryMib`:
+      # binary GiB to one decimal ("12.4 GiB"), whole MiB below 1 GiB. The unit
+      # is not configurable — there is no GB/GiB switch, only the stat name. The
+      # used/total pair ("12.4 / 31.0 GiB", MemTotal being the ~31 GiB the
+      # firmware leaves of 32) is control-center-only; no bar stat carries it.
       widget.ram = {
         type = "sysmon";
-        stat = "ram_pct";
+        stat = "ram_used";
         visualization = "none";
         show_value = true;
       };
