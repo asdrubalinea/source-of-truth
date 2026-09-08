@@ -121,6 +121,54 @@ would spend the one accent that still reads as a signal. The one other coloured
 border is `base08` on a window that is being screencast: transient, and a fact
 you want answered at a glance, which is the whole bar a colour has to clear.
 
+**And it means something inside a buffer too**, which took a second pass to
+notice. The 2026-09-02 pass reached every surface the desktop draws itself and
+stopped at the edge of the two windows actually being looked at all day: the
+terminal and the editor. Both were still running base16's slot convention —
+one hue per syntax category, variables red, types yellow, strings green,
+functions blue, keywords magenta — which is six colours in a ranking that
+doesn't exist. Nothing there is more urgent than anything else, so the only
+thing the colour reports is "different kind of token", and the shape of the
+code already reported that.
+
+The replacement is NANO emacs' face model (`desktop/helix-theme.nix`): faces
+chosen by *what the reader is being told* rather than by token category —
+`faded` for prose, `default` for your own names, `strong` (same colour, more
+weight) for definitions, `salient` for the language itself, `literal` for
+values written out in the source, `popout` for look-here-now, `critical` for
+wrong. `base09` stays spent on the reticle and nowhere else, which is why
+popout is `base0A` — the slot the scheme already annotates "warnings, matches".
+
+**The foreground ramp has two levels, not three**, and finding that out cost a
+revision. Against the ground: `base03` is 3.41:1, `base04` 9.19:1, `base05`
+14.74:1 — so `base04`→`base05` is **1.60:1**, under the threshold where the eye
+reads two values as different at all. The first cut spent `base04` as a text
+colour on punctuation, justified in the file as "a real step (43/255)": a raw
+channel delta, which is the identical error to the tick marks below. It read as
+code with a smudge on it, and its one real effect was to fill in the middle of
+the comment→code gap and flatten the buffer. `base04` is a *fill*, not a
+foreground.
+
+Two levels means `faded` is single-tenant — prose only. NANO fades strings too
+and on its own white ground can afford to (its faded/default separation is ~7x;
+ember's dark end gives 4.3x), but here it made string literals read as
+commented-out code. And since every hue in this palette sits 1.4–2.7:1 from
+`base05`, hues never separate from code by *value*, only by hue — which is both
+why the base16 rainbow "worked" and why collapsing all of it onto a two-level
+ramp lost the separation. So the buffer keeps exactly the distinctions the ramp
+cannot carry, and no more: language, literal, your names, prose. Four roles,
+three hues.
+
+The same pass took the terminal's own chrome down: stylix fills every inactive
+wezterm tab with solid `base03`, which put a row of lit warm-grey blocks along
+the top of the window, so the tab bar is now text on the buffer's ground with
+focus carried by value. That is the gutter argument in miniature — a fill at
+`base01` or `base02` is *under the discrimination floor* on this panel, so an
+invisible background is the worst available trade: it lights pixels for the
+panel's lifetime and answers nothing. Where a surface genuinely needs a
+boundary (a popup floating over live text) it gets a 1px outline, which is the
+bar's answer, not a second one.
+
 Related constraint, and it is a real one: the palette must stay distinguishable
 under **wlsunset** (night 4000K), which crushes the blue channel. That is why
 this scheme exists at all rather than oxocarbon-dark, whose blues and magentas
@@ -157,6 +205,9 @@ face, silently, because a string can't be wrong at build time.
 | Ground | generated HUD bezel | `rices/ember/wallpaper/default.nix` |
 | Pointer | capitaine-cursors-white @ 24 | three places — see gotchas |
 | Terminal cursor | steady block, all four terminals | `{kitty,alacritty,wezterm,konsole}.nix` |
+| Terminal inset | 12px padding, all four terminals | `{kitty,alacritty,wezterm,konsole}.nix` |
+| Terminal tabs | text on `base00`, no fills, no `+` | `rices/ember/wezterm.nix` |
+| Buffer | NANO face model over base16 | `desktop/helix-theme.nix` |
 | Font packages | 5 families, each one referenced | `rices/ember/fonts.nix` |
 
 The **ground** is worth describing since it's the one thing built from scratch:
@@ -211,6 +262,19 @@ the KPart and reads the default profile. A behavioural change to one (cursor
 shape, padding) goes to all four or it is a divergence, not a change. konsole is
 also the one that is not a stylix target, so its palette is written out from
 base16 by hand in `konsole.nix` — a fifth terminal would need the same.
+
+**A syntax colour.** Almost certainly no. Ask which of the faces the token
+belongs to — `faded` / `default` / `strong` / `salient` / `literal` / `popout`
+/ `critical` — and use that; a new hue means you are claiming a distinction
+those faces cannot express, and there is room for about one of those. Do not
+reach for `base04` to make something recede: measure the ratio first. Note that
+`desktop/helix-theme.nix` deliberately contradicts two slot comments in
+`ember-3400k-dark.yaml` (`base0D` "functions", `base0E` "keywords"): those
+describe the base16 convention the theme departs from and stay true for the
+ANSI palette and fish's highlighting, so the yaml is not edited to match.
+The theme lives in `desktop/`, not here, because it maps *slots to roles* and
+holds for any scheme — which is also what keeps an ocelot looking like the
+machine it runs on.
 
 **A rice-wide value that differs per machine.** It isn't a rice value. Panel
 identities, terminal sizes, monitor layout and geography are **machine policy**
