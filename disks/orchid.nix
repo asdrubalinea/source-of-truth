@@ -1,14 +1,12 @@
-# The target device is NOT hard-coded — same rule as disks/tempest.nix. It must
-# be passed explicitly at format/install time, so an accidental (or wrong-machine)
-# run targets the bogus placeholder below and fails fast instead of wiping a disk:
-#   ./disk-format orchid  /dev/disk/by-id/<target>   # disko --argstr device <target>
-#   ./disk-install orchid /dev/disk/by-id/<target>   # disko-install --disk main <target>
+# The target device is NOT hard-coded — same rule as disks/tempest.nix: it must
+# be passed explicitly, so an accidental run hits the placeholder and fails fast.
+#   ./disk-format orchid  /dev/disk/by-id/<target>
+#   ./disk-install orchid /dev/disk/by-id/<target>
 #
-# For the booted system this value is inert: disko derives `fileSystems` from GPT
-# partlabels (disk-main-ESP, disk-main-luks), never from this device path, so the
-# placeholder default is fine for the NixOS module eval (flake.nix → orchid).
+# Inert for the booted system: disko derives `fileSystems` from GPT partlabels,
+# never from this path.
 {device ? "/dev/disk/by-id/REPLACE-WITH-TARGET-DEVICE-AT-INSTALL-TIME", ...}: {
-  # orchid disk layout: ZFS-on-LUKS, same shape as tempest (docs/adr/0001).
+  # orchid disk layout: ZFS-on-LUKS, same shape as tempest (ADR 0001).
   #
   #   GPT
   #   ├── ESP    (4G, vfat)            → /boot   (systemd-boot; UKI headroom)
@@ -17,13 +15,12 @@
   #               ├── root (95%)       → zpool "rpool"
   #               └── swap (16G)       plain LV, overflow only
   #
-  # Everything here is fixed at install time and cannot be changed without
-  # reformatting. LUKS (not ZFS-native encryption) so TPM2 auto-unlock via
-  # systemd-cryptenroll works the same way it does on tempest — which matters
-  # more here, since orchid is headless and nobody wants to type a passphrase at
-  # a console. LVM so swap stays a plain LV (never a zvol) inside one container.
+  # Fixed at install time; none of it can change without reformatting. LUKS
+  # rather than ZFS-native encryption so TPM2 auto-unlock works as on tempest —
+  # which matters more here, orchid being headless with no one at the console to
+  # type a passphrase. LVM so swap stays a plain LV inside one container.
   #
-  # 4K alignment (do this on the NEW drive BEFORE running disk-format orchid):
+  # 4K alignment, on the NEW drive BEFORE disk-format:
   #   nvme id-ns /dev/nvme0n1 | grep lbaf      # find a 4096-byte LBA format
   #   nvme format /dev/nvme0n1 --lbaf=<index>  # DESTRUCTIVE — fresh drive only
   # then ashift=12 and --sector-size 4096 below align natively.
@@ -80,16 +77,14 @@
       };
     };
 
-    # tmpfs root for impermanence — MUST be declared here, not only as a
-    # hand-written fileSystems."/". `disko-install` mounts *only* what lives
-    # under disko.devices, so without this entry the install tree has no mounted
-    # root and nixos-install's systemd-boot step aborts with "efiSysMountPoint =
-    # '/boot' is not a mounted partition". disko emits the matching
-    # fileSystems."/" from this, so system/persistence.nix doesn't declare it.
+    # MUST be declared here, not just as a hand-written fileSystems."/":
+    # `disko-install` mounts only what lives under disko.devices, so without
+    # this the install tree has no mounted root and nixos-install's systemd-boot
+    # step aborts. disko emits the matching fileSystems."/" from this.
     #
-    # 32G of 64G RAM. Only pages actually used are charged, so this is a ceiling,
-    # not an allocation — but note /tmp lives here too, which is why the nix
-    # build directory is pointed off it (system/persistence.nix).
+    # 32G of 64G RAM, and a ceiling rather than an allocation (only used pages
+    # are charged) — but /tmp lives here too, which is why the nix build
+    # directory is pointed off it in system/persistence.nix.
     nodev."/" = {
       fsType = "tmpfs";
       mountOptions = [
@@ -103,14 +98,12 @@
       pool = {
         type = "lvm_vg";
         lvs = {
-          # ZFS pool vdev. Deliberately NOT 100%: ~5% of the VG is left
-          # unallocated so swap can be grown later (ZFS can't shrink, so once
-          # root claims the space it is gone).
+          # Deliberately NOT 100%: ZFS can't shrink, so the ~5% gap is what
+          # lets swap grow later.
           #
-          # COUPLING: root (95%FREE) is created before swap (alphabetical LV
-          # order), so swap must fit in the remaining ~5% — i.e. this layout
-          # needs a target drive of at least ~320G. Format fails loudly with
-          # "insufficient free space" otherwise.
+          # COUPLING: root is created before swap (alphabetical LV order), so
+          # swap must fit in that ~5% — this layout needs a drive of at least
+          # ~320G, and fails loudly with "insufficient free space" otherwise.
           root = {
             size = "95%";
             content = {
@@ -119,12 +112,11 @@
             };
           };
 
-          # Plain swap LV, never a zvol (swapping onto a zvol deadlocks under
-          # memory pressure). Overflow only, NOT sized for hibernation: a ZFS
-          # root forces `nohibernate`, so resume-from-disk never runs, and with
-          # 64 GiB of RAM the "swap >= RAM" rule buys nothing. 16G is a cushion
-          # for a runaway build; grow it into the VG headroom above if it is ever
-          # actually consumed.
+          # Plain LV, NEVER a zvol (that deadlocks under memory pressure).
+          # Overflow only, NOT sized for hibernation: a ZFS root forces
+          # `nohibernate`, and with 64 GiB of RAM "swap >= RAM" buys nothing.
+          # 16G is a cushion for a runaway build; grow it into the VG headroom
+          # above if it is ever actually consumed.
           swap = {
             size = "16G";
             content = {
@@ -175,20 +167,18 @@
             options."com.sun:auto-snapshot" = "true";
           };
 
-          # Docker's data root (virtualisation.docker with storageDriver =
-          # "zfs"; see system/virtualization.nix). Own dataset so the zfs graph
-          # driver can clone one child dataset per layer, and so image churn
-          # stays outside the snapshotted /persist. Inherits
-          # com.sun:auto-snapshot=false — images are re-pullable.
+          # Docker's data root. Its own dataset so the zfs graph driver can
+          # clone one child per layer, and so image churn stays outside the
+          # snapshotted /persist. Inherits com.sun:auto-snapshot=false —
+          # images are re-pullable.
           docker = {
             type = "zfs_fs";
             mountpoint = "/var/lib/docker";
           };
 
-          # ncps binary-cache store (services.ncps, system/services.nix). Half a
-          # terabyte of re-fetchable NARs: own dataset so it never lands on the
-          # tmpfs root, never enters a snapshot, and cannot starve the rest of
-          # the pool — the quota is the hard stop behind ncps' own LRU maxSize.
+          # Half a terabyte of re-fetchable NARs, so its own dataset: never on
+          # the tmpfs root, never in a snapshot, and unable to starve the pool —
+          # the quota is the hard stop behind ncps' own LRU maxSize.
           ncps = {
             type = "zfs_fs";
             mountpoint = "/var/lib/ncps";

@@ -1,10 +1,7 @@
-# What survives a `stop`. The root filesystem is tmpfs and is rebuilt from the
-# image on every boot, so this list is the whole difference between stop (ends
-# the machine, keeps this) and destroy (deletes the state disk). See CONTEXT.md,
-# *Isolation (tempest)*.
-#
-# Same idiom as ../../../modules/impermanence-root.nix, and short for the same
-# reason it is short there: state that is re-derivable does not belong here.
+# What survives a `stop`. The root is tmpfs and rebuilt from the image every
+# boot, so this list IS the difference between stop (keeps this) and destroy
+# (deletes the state disk). See CONTEXT.md, *Isolation (tempest)*. Short for the
+# same reason modules/impermanence-root.nix is: re-derivable state stays out.
 {...}: {
   environment.persistence."/state" = {
     enable = true;
@@ -15,11 +12,10 @@
       # and the reason /var/lib/docker is not simply left on the tmpfs root.
       "/var/lib/docker"
 
-      # The guest's own home. Explicitly owned: as a bare string impermanence
-      # creates the source dir root:root and never enforces ownership, so on a
-      # freshly formatted state disk /home/irene comes up unwritable and the
-      # first home-manager activation fails. (The same trap is documented at
-      # length in modules/impermanence-root.nix.)
+      # Explicitly owned: as a bare string, impermanence creates the source
+      # dir root:root and never enforces ownership, so on a freshly formatted
+      # state disk /home/irene comes up unwritable and the first home-manager
+      # activation fails. Same trap as in modules/impermanence-root.nix.
       {
         directory = "/home/irene";
         user = "irene";
@@ -27,22 +23,19 @@
         mode = "0700";
       }
 
-      # The Nix database, and the profiles and gcroots beside it. This is the
-      # other half of the store overlay's upper being on this disk (../default.nix):
-      # the upper holds the paths, this holds the record of them being valid, and
-      # a pair that does not move together is the orphan drift microvm.nix warns
+      # The other half of the store overlay's upper being on this disk: the
+      # upper holds the paths, this holds the record of them being valid, and a
+      # pair that doesn't move together is the orphan drift microvm.nix warns
       # about. Without it every boot re-downloads a devshell it already has.
       #
-      # Ordering is not incidental: qemu-vm's `register-nix-paths` loads the
-      # guest's own closure into the DB and is `after = local-fs.target`, which
-      # is what impermanence's bind is wanted by — so regInfo lands in the
-      # persisted DB, not under it.
+      # Ordering is not incidental: qemu-vm's `register-nix-paths` runs after
+      # local-fs.target, which is what impermanence's bind is wanted by — so
+      # regInfo lands in the persisted DB, not under it.
       "/nix/var/nix"
 
-      # The system users' uid/gid allocations. irene's uid is pinned in
-      # ../users/irene.nix, so this is only about sshd, dhcpcd and friends — but
-      # without it impermanence warns on every single build of this guest, and
-      # the launcher builds on every start.
+      # System uid/gid allocations. irene's uid is pinned in ../users/irene.nix,
+      # so this is only sshd/dhcpcd and friends — but without it impermanence
+      # warns on every build, and the launcher builds on every start.
       "/var/lib/nixos"
     ];
 

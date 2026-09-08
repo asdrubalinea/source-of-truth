@@ -1,21 +1,20 @@
-# Play the URL on the clipboard in mpv. Bound to Mod+Y by both compositor layers,
-# which is why it lives up here rather than inside one of them (ADR 0012).
+# Play the URL on the clipboard in mpv, bound to Mod+Y by both compositor layers
+# — hence up here rather than inside one of them (ADR 0012).
 #
-# The point is to keep video out of the browser: Chrome's VAAPI/VCN decode paints
-# blocky artifacts on this machine (docs/av1-vaapi-decode-artifacts.md), while mpv
-# decodes in software by default. Copy a YouTube link, hit the key.
+# The point is keeping video out of the browser: Chrome's VAAPI/VCN decode paints
+# blocky artifacts on this machine (docs/av1-vaapi-decode-artifacts.md) while mpv
+# decodes in software by default.
 #
-# A script rather than an inline bind because neither compositor runs its spawn
-# through a shell — niri's takes an argv list, mango's splits the line on commas —
-# so `mpv "$(wl-paste)"` has nothing to expand it. Not a module and not in
-# ./default.nix's imports: it is a plain function, imported for its value the way
-# ./compositors/*/window-rules.nix are.
+# A script rather than an inline bind because neither compositor spawns through a
+# shell — niri takes an argv list, mango splits on commas — so `mpv "$(wl-paste)"`
+# has nothing to expand it. Not a module and not in ./default.nix's imports: a
+# plain function, imported for its value like ./compositors/*/window-rules.nix.
 #
-# Both failure paths notify. A keybind that spawns a window-less process has no
-# other channel: mpv dying during startup looks exactly like the bind not firing,
-# and mpv does die on some videos — YouTube serves a few only over SABR, which
-# yt-dlp cannot fetch (the stream URLs it gets back carry `rqh=1` and 403), so the
-# right diagnosis has to reach the screen rather than a discarded stderr.
+# Both failure paths notify, because a keybind that spawns a window-less process
+# has no other channel: mpv dying at startup looks exactly like the bind not
+# firing, and it does die on some videos (YouTube serves a few only over SABR,
+# which yt-dlp cannot fetch). The diagnosis has to reach the screen rather than
+# a discarded stderr.
 {pkgs}: let
   ytDlp = pkgs.callPackage ../../packages/yt-dlp-pot.nix {};
 in
@@ -36,19 +35,18 @@ in
         ;;
     esac
 
-    # Startup is not instant — yt-dlp has to mint a PO token and probe formats, so
-    # several seconds pass with nothing on screen. -p returns the notification's id
-    # so the failure path can replace this toast in place rather than stack a second
-    # one under it; on success mpv's own window is the signal and the toast expires.
+    # Startup is not instant — minting a PO token and probing formats takes
+    # several seconds with nothing on screen. -p returns the notification id so
+    # the failure path replaces this toast rather than stacking one under it; on
+    # success mpv's window is the signal and the toast expires.
     id=$($notify -p -t 30000 "mpv" "Loading video…" || true)
 
     log=$(${pkgs.coreutils}/bin/mktemp)
     trap '${pkgs.coreutils}/bin/rm -f "$log"' EXIT
 
-    # …and take it down again the moment mpv initialises an output, which is when
-    # the window appears and the toast has nothing left to say. mpv prints those
-    # two lines at default verbosity, so watching the log beats asking mpv over an
-    # IPC socket. The 30s expiry above is only the backstop for this loop giving up.
+    # …and take it down when mpv initialises an output, i.e. when the window
+    # appears. mpv prints those lines at default verbosity, so watching the log
+    # beats an IPC socket. The 30s expiry above is the backstop for this loop.
     if [ -n "$id" ]; then
       (
         for _ in $(${pkgs.coreutils}/bin/seq 60); do
@@ -65,12 +63,10 @@ in
       ) &
     fi
 
-    # yt-dlp is named explicitly instead of being left to PATH: mpv's ytdl_hook
-    # shells out to it, and a compositor-spawned process inherits the session
-    # environment, not an interactive shell's. Same reason
-    # ./compositors/niri/marquee.nix passes this option. It has to be the wrapped
-    # one — plain pkgs.yt-dlp 403s on almost every video now, see
-    # ../../packages/yt-dlp-pot.nix.
+    # Named explicitly rather than left to PATH: mpv's ytdl_hook shells out to
+    # it, and a compositor-spawned process inherits the session environment, not
+    # an interactive shell's. Same reason marquee.nix passes this option. It must
+    # be the WRAPPED one — plain pkgs.yt-dlp 403s on almost every video.
     if ! ${pkgs.mpv}/bin/mpv \
       --script-opts=ytdl_hook-ytdl_path=${ytDlp}/bin/yt-dlp \
       -- "$url" > "$log" 2>&1; then

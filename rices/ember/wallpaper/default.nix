@@ -6,43 +6,22 @@
 }: let
   c = config.lib.stylix.colors.withHashtag;
 
-  # The ground: a HUD bezel generated from the base16 scheme at build time. It
-  # exists because a downloaded image can't track the palette and a photograph
-  # is the worst thing to leave on an OLED all day — measured, 0.14% of pixels
-  # sit above the ground colour (about 11.6k of 8.3M), all of them thin lines,
-  # and it re-renders itself whenever ../ember-3400k-dark.yaml changes.
+  # The ground: a HUD bezel generated from the base16 scheme at build time,
+  # because a downloaded image can't track the palette and a photograph is the
+  # worst thing to leave on an OLED all day. Corner brackets, graduated edge
+  # ticks and a centre reticle — mostly void, on purpose: instrument bezel, not
+  # a picture. Measured, 0.14% of pixels sit above the ground colour.
   #
-  # Note which number that is. The pool table below measures mean gray against
-  # true black, and by that yardstick this image reads 0.032 — the same as a
-  # blank base00 canvas, because base00 IS 0.032 and the marks are too sparse to
-  # move it. The pool's photographs are on true #000 grounds, so their means
-  # describe content; this one's describes the palette. "Lit fraction above the
-  # ground" is the only figure that compares the marks to anything.
+  # 3840x2160 is the largest panel this config drives; noctalia fits it down for
+  # the others, and that 0.5x downscale is why no line is thinner than 3px.
   #
-  # WHAT IT IS: corner brackets, tick marks down the four edges, and a small
-  # centre reticle. Mostly void, on purpose — the brief was a workstation
-  # backdrop, not a picture, so it should read as instrument bezel and then stop
-  # asking for attention.
-  #
-  # 3840x2160 because that is the largest panel this config drives; noctalia
-  # scales it down for the others with fill_mode = "fit" (../noctalia.nix
-  # explains the aspect-ratio trade). That downscale is why no line is thinner
-  # than 3px: the smallest panel is 1920x1080, i.e. 0.5x, and a 2px line lands
-  # there as a 1px line at half opacity, which is a smudge rather than a mark.
-  #
-  # HIERARCHY BY SIZE, NOT BY VALUE. Brackets and ticks are both base03. The
-  # first cut drew the ticks a step down at base02 to subordinate them, and they
-  # came out invisible — base02 is 16/255 above base00 in every channel, which is
-  # under the discrimination floor on a panel this dark. There is no usable value
-  # between the two, so the ticks are subordinated by being short (10px against a
-  # 200px arm) and thin (3px against 4px) instead. That is the more robust axis
-  # anyway: it survives the 0.5x downscale and the wlsunset warm filter, neither
-  # of which preserves a 16-step value difference. The edge ticks are graduated
-  # on that same axis — every fifth is long (see `majorEvery` below).
-  #
-  # PNG, not JPEG: thin light lines on near-black are exactly what JPEG's chroma
-  # subsampling rings around, and a flat black field costs almost nothing to
-  # store losslessly.
+  # HIERARCHY BY SIZE, NOT VALUE. Ticks and brackets are both base03. Drawing
+  # ticks a step down at base02 made them invisible — base02 is 16/255 above
+  # base00, under the discrimination floor on a panel this dark, and there is no
+  # usable value between the two. So ticks are subordinated by being short and
+  # thin instead, which is the axis that survives both the downscale and the
+  # wlsunset warm filter. PNG, not JPEG: thin light lines on near-black are what
+  # chroma subsampling rings around.
   hudGround = let
     w = 3840;
     h = 2160;
@@ -55,18 +34,9 @@
     reticle = 28; # centre crosshair arm
 
     # Ticks along one edge, laid out from the centre outwards so the run stays
-    # symmetric on any width and no half-tick lands at the corner.
-    #
-    # GRADUATED, and for the same reason the ticks are short in the first place:
-    # hierarchy is spent in size, never in value (there is no usable step
-    # between base02 and base03 on this panel — see the note above). Every fifth
-    # tick counted out from the centre is drawn long, so each edge reads as a
-    # scale with a marked axis rather than as a row of identical dashes: the
-    # centre major sits on the reticle's axis, and the ones either side of it
-    # fall on the 800px marks that bracket the middle third of the screen. Same
-    # stroke, same colour, same lit budget to within a rounding error — the only
-    # thing that changed is length, which is the axis that survives both the
-    # 0.5x downscale and wlsunset.
+    # symmetric on any width and no half-tick lands at the corner. Every fifth
+    # is drawn long, so each edge reads as a marked scale rather than a row of
+    # identical dashes.
     ticksAlong = {
       count,
       lineAt,
@@ -155,56 +125,30 @@
         -define png:color-type=2 "$out"
     '';
 in
-  # Wallpaper is drawn by Noctalia (see ../noctalia.nix), not awww. This module
-  # seeds images into Noctalia's picker directory so a fresh machine comes up with
-  # a wallpaper instead of Noctalia's bundled default. The directory itself stays
-  # writable — drop more images in or switch via Noctalia's picker; only these
-  # files are HM-managed symlinks (`recursive = true` links the files, not the
-  # directory, so `oled/` accepts hand-dropped images too).
+  # Wallpaper is drawn by Noctalia (../noctalia.nix), not awww. This module only
+  # seeds images into its picker directory so a fresh machine comes up with one.
+  # The directory stays writable: `recursive = true` links the files, not the
+  # directory, so oled/ accepts hand-dropped images too.
   #
-  # The `oled/` subdirectory is the rotation pool: Noctalia's automation timer
-  # points at it (../noctalia.nix) and cycles everything inside, so nothing lands
-  # there that would sit at high average picture level on an OLED panel. Measured
-  # with `magick <f> -colorspace Gray -resize 400x400 -format "%[fx:mean]"` and a
-  # 2%-threshold near-black share:
-  #
-  #   hud-ground (generated)  mean 0.03  — see the note above: that is base00,
-  #                                        not content. 0.14% lit above ground.
-  #   red-eyes-void           mean 0.01  near-black 97%
-  #   ghost-girl-smoke        mean 0.01  near-black 90%
-  #   spiderverse-glitch      mean 0.02  near-black 91%
-  #   defender-in-the-dark    mean 0.02  near-black 94%
-  #   liquid-metal            mean 0.02  near-black 78%
-  #   samurai-red-sun         mean 0.03  near-black 91%
-  #   hooded-monochrome       mean 0.03  near-black 88%
-  #   violet-choker           mean 0.04  near-black 84%
-  #   powder-burst            mean 0.04  near-black 82%
-  #   synthwave-grid          mean 0.05  near-black 68%
-  #   shinobu-kocho-dark      mean 0.05  near-black 78%
-  #   batman-monochrome       mean 0.06  near-black 83%
-  #   mitsuri-kanroji         mean 0.06  near-black 83%
-  #   black-hole              mean 0.08  near-black 80%
-  #   kawaii-cat-girl         mean 0.24  near-black 59%
-  #
-  # The photographs came off wallhaven filtered `colors=000000 atleast=3840x2160`
-  # and then measured — the colour filter alone only means "black is in the
-  # palette", so roughly 1 in 10 hits actually cleared the bar above. The id
-  # suffix in each filename is the wallhaven id, so a file traces back to
-  # https://wallhaven.cc/w/<id>. The pool is kept for manual picking; the
-  # generated ground is what ../noctalia.nix boots into.
-  #
-  # The flat directory keeps the bright ones (mean 0.47–0.66) for manual picking —
-  # they are fine for an hour, not for an unattended all-day rotation.
+  # oled/ is the rotation pool, so nothing lands there that would sit at high
+  # average picture level. Everything in it measured under 0.08 mean gray (via
+  # `magick <f> -colorspace Gray -resize 400x400 -format "%[fx:mean]"`) except
+  # kawaii-cat-girl at 0.24 — they came off wallhaven filtered
+  # `colors=000000 atleast=3840x2160` and then measured, since the colour filter
+  # alone only means "black is in the palette" (~1 in 10 hits cleared the bar).
+  # Each filename's id suffix is the wallhaven id, so a file traces back to
+  # https://wallhaven.cc/w/<id>. The generated ground is what noctalia boots
+  # into; the flat directory keeps the bright ones (mean 0.47–0.66) for manual
+  # picking, which is fine for an hour and not for an all-day rotation.
   lib.mkIf config.rices.ember.enable {
     home.file."Pictures/Wallpapers/oled" = {
       source = ./oled;
       recursive = true;
     };
 
-    # Sits inside the pool rather than beside it so Noctalia's picker (whose
-    # directory is oled/) can select it again after you switch away. Not a
-    # conflict with the recursive link above: that links each file in ./oled
-    # individually, and this name is not one of them.
+    # Inside the pool rather than beside it so noctalia's picker can select it
+    # again after you switch away. Not a conflict with the recursive link above:
+    # that links each file in ./oled individually, and this name is not one.
     home.file."Pictures/Wallpapers/oled/hud-ground.png".source = hudGround;
 
     home.file."Pictures/Wallpapers/boeing-747.jpg".source = ./boeing-747.jpg;

@@ -1,19 +1,14 @@
 # Machine policy: the desk light strip follows the idle timers.
 #
-# `lights` (github:asdrubalinea/lights) drives a Tapo L930 taped around the
-# perimeter of this desk — near edge dim, far edge bright, `dim` for an idle
-# level and `off` to kill it. That is a fact about one desk, not about the
-# desktop, so it lives here rather than in rices/ember: the rice knows no
-# hostnames and owns no furniture that only exists in this room.
+# `lights` drives a Tapo L930 taped around this desk's perimeter. That is a fact
+# about one desk, not about the desktop, so it lives here rather than in
+# rices/ember — the rice knows no hostnames and owns no furniture that only
+# exists in this room. `services.swayidle.timeouts` is a list option, so these
+# entries MERGE with the rice's own and it stays unaware a light is listening.
 #
-# `services.swayidle.timeouts` is a list option, so these entries MERGE with the
-# rice's own (rices/ember/swayidle.nix) instead of replacing them — no rice
-# option needed, and the rice stays unaware a light is listening to its timers.
-#
-# Credentials are out of band, per the repo's secrets convention: put
-# TAPO_USERNAME / TAPO_PASSWORD / TAPO_IP in ~/.config/lights/env (the fixed
-# path connect() reads, since a user service has no working directory to find a
-# .env in). Home is persisted, so that file survives a reboot.
+# Credentials are out of band per the repo's convention: TAPO_USERNAME /
+# TAPO_PASSWORD / TAPO_IP in ~/.config/lights/env, the fixed path connect()
+# reads (a user service has no working directory to find a .env in).
 {
   inputs,
   pkgs,
@@ -21,21 +16,17 @@
 }: let
   lights = pkgs.callPackage "${inputs.lights}/package.nix" {};
 
-  # Same rules as every other swayidle command in this config: an absolute store
-  # path, because swayidle inherits the systemd user-manager PATH and has no
-  # coreutils on it. Plus a bound, which the compositor-local commands don't
-  # need — the strip is a wifi device on the far side of a router, and swayidle
-  # runs each command synchronously, so an unplugged or unreachable plug would
-  # otherwise wedge the idle daemon for as long as the TCP handshake takes.
-  # `|| true` so a strip that's off at the wall is not an error every 120s.
+  # Absolute store path, as every swayidle command here must be. The bound is
+  # the part the compositor-local commands don't need: the strip is a wifi
+  # device across a router and swayidle runs commands synchronously, so an
+  # unreachable plug would wedge the idle daemon for the whole TCP handshake.
+  # `|| true` so a strip off at the wall isn't an error every 120s. The bound is
+  # per caller — the before-sleep hook gets a tighter one, since it holds up a
+  # suspend. Takes the whole `<binary> <arg>` because the package ships both
+  # `lights` and `flag`.
   #
-  # Ceiling: resuming from suspend races wifi association, so the strip may stay
-  # dark until the next manual `lights`. Not worth a retry loop for a desk lamp.
-  #
-  # Takes the bound and the whole `<binary> <arg>`, because the package ships
-  # more than one: `lights` for the plain warm levels, `flag` for the pride
-  # stripes. The bound is per caller — the before-sleep hook below gets a tighter
-  # one than the idle timers, since it is holding up a suspend.
+  # Ceiling: resume races wifi association, so the strip may stay dark until the
+  # next manual `lights`. Not worth a retry loop for a desk lamp.
   lights-cmd = seconds: cmd: "${pkgs.coreutils}/bin/timeout ${toString seconds} ${lights}/bin/${cmd} || true";
 in {
   home.packages = [lights];
@@ -43,40 +34,32 @@ in {
   services.swayidle.timeouts = [
     {
       # The same 120s as the rice's panels-off timer, so the room dims with the
-      # screens rather than a beat after them. Resume brings it straight back
-      # up — that resume also covers the `off` below, since swayidle runs the
-      # resume command of every timeout that had fired.
-      #
-      # Coming back is the lesbian flag rather than `lights on`: `flag` starts
-      # from the same depth mask, so the near edge is still the dimmest thing
-      # on the desk — it just isn't the house near-white any more.
+      # screens rather than a beat after. This resume also covers the `off`
+      # below — swayidle runs the resumeCommand of every timeout that fired.
+      # `flag` rather than `lights on` because it starts from the same depth
+      # mask, so the near edge is still the dimmest thing on the desk.
       timeout = 120;
       command = lights-cmd 15 "lights dim";
       resumeCommand = lights-cmd 15 "flag lesbian";
     }
     {
-      # A quarter of an hour dim and the desk is genuinely unoccupied: go dark.
-      # This is the *awake* path only — on AC the box never suspends itself, so
-      # this is what darkens the desk overnight while it's plugged in. It cannot
-      # be the sleep path: suspend stops the idle clock, so a lid close at 130s
-      # idle left the strip sitting at the near-white dim level all night, with
-      # the remaining 770s of this timer never counted down. Sleep is an event,
-      # and it's hooked as one below.
+      # The *awake* path only: on AC the box never suspends itself, so this is
+      # what darkens the desk overnight while plugged in. It cannot be the sleep
+      # path — suspend stops the idle clock, so a lid close at 130s idle left
+      # the strip at the dim level all night with this timer never counting down.
       timeout = 900;
       command = lights-cmd 15 "lights off";
     }
   ];
 
-  # Off on the way into suspend, whatever the idle timers had reached. Runs
-  # inside swayidle's sleep inhibitor (rices/ember/swayidle.nix), so 5s: past
-  # logind's InhibitDelayMaxSec it suspends regardless and the call would be
-  # frozen mid-TCP anyway.
+  # Off on the way into suspend, whatever the timers had reached. Runs inside
+  # swayidle's sleep inhibitor, so 5s: past logind's InhibitDelayMaxSec it
+  # suspends regardless and the call would be frozen mid-TCP anyway.
   #
-  # Coming back is left to the 120s timer's resumeCommand, i.e. to real user
-  # activity, NOT to logind's resume — with the lid closed this machine wakes on
-  # a spurious GPE every ~41s and re-suspends (see the s2idle wake loop), and
-  # lighting the desk on each of those would be a strip on all night. The cost
-  # is that a lid closed while genuinely active (no timer fired, so none to
-  # resume) reopens onto a dark desk until the next idle cycle.
+  # Coming back is left to the 120s resumeCommand, i.e. real user activity, NOT
+  # logind's resume — with the lid closed this machine wakes on a spurious GPE
+  # every ~41s and re-suspends, and lighting the desk on each would leave the
+  # strip on all night. Cost: a lid closed while genuinely active (no timer
+  # fired, so none to resume) reopens onto a dark desk.
   rices.ember.beforeSleepCommands = [(lights-cmd 5 "lights off")];
 }

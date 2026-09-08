@@ -1,10 +1,7 @@
-# The guest home for an ocelot (docs/adr/0013). Modelled on ./orchid.nix — the
-# same shape as a headless host's home, because that is what a guest entered
-# over ssh is.
-#
+# The guest home for an ocelot (ADR 0013), modelled on ./orchid.nix — the shape
+# of a headless host's home, because that is what a guest entered over ssh is.
 # The package set is ../desktop/cli-packages.nix, shared with tempest, so the
-# shell inside an ocelot is the shell outside it. Anything desktop-only lives in
-# ../desktop/home-packages.nix and deliberately does not reach here.
+# shell inside an ocelot is the shell outside it.
 {
   pkgs,
   inputs,
@@ -21,23 +18,20 @@
 
   programs.home-manager.enable = true;
 
-  # The rice's terminal half, which is the only half an ocelot can show. Without
-  # this the guest was ember-coloured chrome nowhere: desktop/zellij.nix guards
-  # its theme on `config.stylix.enable or false`, so an unthemed guest rendered
-  # zellij's stock palette inside an ember terminal, and helix and fish likewise
-  # fell back to their own defaults.
+  # The rice's terminal half, the only half an ocelot can show. Without it the
+  # guest rendered zellij's stock palette inside an ember terminal (its theme is
+  # guarded on `config.stylix.enable`), and helix and fish fell back to their own
+  # defaults too.
   #
-  # cage never had this problem and could not have had it: cage runs on tempest,
-  # so it bind-mounts the host's already-generated ~/.config/{zellij,fish,helix}
-  # read-only and inherits the theme as a side effect of being the same machine.
-  # An ocelot is a different machine, so the same result has to be *configured*
-  # here rather than smuggled across the boundary — which is also why it stays
-  # correct when the palette changes, instead of drifting until the next bind.
+  # cage could never have had this problem: it runs on tempest and bind-mounts
+  # the host's already-generated configs, inheriting the theme as a side effect
+  # of being the same machine. An ocelot is a different machine, so the result
+  # has to be CONFIGURED here rather than smuggled across the boundary — which
+  # is also why it stays correct when the palette changes.
   #
-  # rices/ember itself is deliberately not imported: it is a desktop
-  # (compositors, Qt, GTK, cursors, fonts, a wallpaper) and none of that has a
-  # display to land on here. Only the palette file is shared, because the
-  # palette is the one thing a terminal and a desktop genuinely have in common.
+  # rices/ember itself is deliberately not imported: it is a desktop, and none
+  # of it has a display to land on here. Only the palette is shared, being the
+  # one thing a terminal and a desktop genuinely have in common.
   stylix = {
     enable = true;
     base16Scheme = ../rices/ember/ember-3400k-dark.yaml;
@@ -46,11 +40,10 @@
     # branches on polarity pick its light side under a dark palette.
     polarity = "dark";
 
-    # Off, and then five targets by name. autoEnable would switch on the
-    # fontconfig target, which puts stylix's font packages in home.packages of a
-    # machine with no display, plus every GUI target for programs this guest
-    # does not install. These five are exactly the HM programs it does enable
-    # (zoxide and git have no stylix target).
+    # Off, then five targets by name. autoEnable would switch on the fontconfig
+    # target — putting font packages in home.packages of a machine with no
+    # display — plus every GUI target for programs this guest doesn't install.
+    # These five are exactly the HM programs it does enable.
     autoEnable = false;
     targets = {
       zellij.enable = true;
@@ -87,16 +80,15 @@
 
   programs.starship.enable = true;
 
-  # Start in the project. An ocelot is *of* one directory, so landing in $HOME
+  # Start in the project: an ocelot is *of* one directory, so landing in $HOME
   # and typing `cd` is a papercut on the only path anyone walks.
   #
-  # Done here, in the guest, rather than by making `ocelot enter` run
-  # `cd <path> && zellij …` over ssh: the remote shell for an ssh command is
-  # irene's login shell, which is fish, and bash's printf %q — the only sane way
-  # to quote a path from the launcher — emits $'…' for anything awkward, which
-  # fish does not understand. The path is already inside, in /host/conf/project.
+  # Done in the guest rather than by having `ocelot enter` run `cd <path> &&
+  # zellij` over ssh, because the remote shell is fish and bash's printf %q —
+  # the only sane way to quote a path from the launcher — emits $'…', which fish
+  # does not understand. The path is already inside, in /host/conf/project.
   #
-  # Guarded on $PWD being $HOME so it only fires on a fresh login: a pane the
+  # Guarded on $PWD being $HOME so it fires only on a fresh login: a pane the
   # user has cd'd elsewhere, and any `ocelot ssh <cmd>`, are left alone.
   programs.fish.interactiveShellInit = ''
     if test -r /host/conf/project; and test "$PWD" = "$HOME"

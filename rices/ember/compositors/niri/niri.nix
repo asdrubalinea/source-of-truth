@@ -11,38 +11,29 @@
   c = config.lib.stylix.colors.withHashtag;
 
   # --- Scratchpads (nirius-backed) -----------------------------------------
-  # A scratchpad pops a window onto the focused workspace and dismisses it with
-  # the same key. niri has no truly hidden workspace, so the "scratchpad" is the
-  # bottom-most workspace; niriusd tracks which windows belong to it and nirius
-  # flips them in/out. See docs/adr/0006-niri-scratchpad-via-nirius.md. Geometry
-  # (float + size) lives in window-rules.nix, matched per app-id.
-  # The `niri` CLI and the running compositor MUST come from the same package.
-  # `niri msg` refuses to talk to a different version: it prints "Running niri
-  # compositor has a different version from the niri CLI" on stdout *instead of*
-  # the JSON, so `--json` consumers silently get a jq parse error and every
-  # script here misreads the session. The compositor is the SYSTEM one —
-  # greetd launches `niri-session` from /run/current-system/sw (see
-  # rices/ember/system.nix `programs.niri.package`, and the niri.service unit
-  # ships inside that same package), which is pinned to pkgs.niri-unstable.
-  # Changing the compositor means changing that option and every
-  # pkgs.niri-unstable in this rice together (niri.nix, marquee.nix,
-  # pip-follow.nix, swayidle.nix).
+  # niri has no truly hidden workspace, so the "scratchpad" is the bottom-most
+  # one; niriusd tracks membership and nirius flips windows in/out. Geometry
+  # lives in window-rules.nix, per app-id. See ADR 0006.
+  #
+  # The `niri` CLI and the running compositor MUST be the same package. On a
+  # mismatch `niri msg` prints a version complaint on stdout *instead of* the
+  # JSON, so every `--json` consumer here silently gets a jq parse error. The
+  # compositor is the system one (greetd runs niri-session from
+  # /run/current-system/sw), so changing it means changing
+  # `programs.niri.package` and every pkgs.niri-unstable in this rice together
+  # (niri.nix, marquee.nix, pip-follow.nix, swayidle.nix).
   niri = "${pkgs.niri-unstable}/bin/niri";
   jq = "${pkgs.jq}/bin/jq";
   nirius = "${pkgs.nirius}/bin/nirius";
   sleep = "${pkgs.coreutils}/bin/sleep";
 
   # --- Brightness (Mod brightness keys) ------------------------------------
-  # One control, two backends. When the internal panel is an active niri output,
-  # adjust its backlight with brightnessctl (laptop use). Which output that is —
-  # `rices.ember.internalOutput`, ./default.nix — is the only host fact this file
-  # reads. When clamshell-docked (that output disabled) there is no backlight, so
-  # brightness on an external (esp. the
-  # emissive QD-OLED) goes over DDC/CI with ddcutil (VCP 0x10). The else-branch
-  # fires for ANY clamshell profile; ddcutil only succeeds on externals that
-  # expose DDC/CI (needs hardware.i2c.enable in hosts/tempest/hardware.nix). Tune
-  # --sleep-multiplier / add --display on arrival via `ddcutil detect`. See
-  # docs/adr/0009.
+  # One control, two backends: brightnessctl on the internal panel's backlight
+  # while it is an active output, DDC/CI (VCP 0x10) otherwise, since a
+  # clamshell-docked external has no backlight to write. `internalOutput`
+  # (./default.nix) is the only host fact this file reads. ddcutil needs
+  # hardware.i2c.enable and only succeeds on externals that expose DDC/CI. See
+  # ADR 0009.
   brightnessAdjust = pkgs.writeShellScript "brightness-adjust" ''
     set -u
     dir="''${1:-up}"
@@ -61,18 +52,14 @@
   '';
 
   # --- Audio output switcher (Mod+O) ---------------------------------------
-  # A name-based picker for the default output device, so switching speakers ↔
-  # AirPods ↔ dock survives reboots (PipeWire node *ids* are reassigned, but wpctl
-  # persists the choice by stable node name). We enumerate live Audio/Sink nodes and
-  # hide EasyEffects' virtual "easyeffects_sink" (picking it as default is meaningless
-  # — apps already feed it). Setting the default to a real device is the trigger
-  # EasyEffects watches: it routes its pipeline there and its per-route autoload swaps
-  # the speaker preset in/out for free (see homes/tempest/speakers.nix). The currently
-  # configured default (PipeWire's default.configured.audio.sink — what the last pick
-  # wrote) is marked with a ● so the menu reflects present state. Sinks with no
-  # node.description are skipped (no usable label); duplicate descriptions get a "(n)"
-  # suffix so each visible row maps back to exactly one id. Portable: shows whatever
-  # sinks the host has, no-ops when there are none.
+  # Name-based, so a pick survives reboots: PipeWire node *ids* are reassigned
+  # but wpctl persists the choice by stable node name. EasyEffects' virtual
+  # "easyeffects_sink" is hidden (picking it is meaningless — apps already feed
+  # it), and setting a real device is the trigger EasyEffects watches to route
+  # its pipeline and swap the speaker preset. The configured default is marked
+  # ● so the menu reflects present state. Sinks with no node.description are
+  # skipped, and duplicate descriptions get a "(n)" suffix, so each row maps to
+  # exactly one id. No-ops when the host has no sinks.
   pwDump = "${pkgs.pipewire}/bin/pw-dump";
   wpctl = "${pkgs.wireplumber}/bin/wpctl";
   tofiBin = "${pkgs.tofi}/bin/tofi";
@@ -107,12 +94,10 @@
     ')
     [ -n "$sinks" ] || exit 0
 
-    # Shared label routine, run twice over the same $sinks so both passes build
-    # identical rows: mode=show prints the menu, mode=resolve prints the id of the
-    # selected row. The configured default gets a ● prefix; duplicate descriptions
-    # get a "(n)" suffix so each row maps to exactly one id. Non-current rows carry
-    # no leading whitespace, so a picker that trims the returned line can't break
-    # the round-trip.
+    # Run twice over the same $sinks so both passes build identical rows:
+    # mode=show prints the menu, mode=resolve prints the selected row's id.
+    # Non-current rows carry no leading whitespace, so a picker that trims the
+    # returned line can't break the round-trip.
     mklabel='
       { seen[$3]++
         label = $3
@@ -137,37 +122,26 @@
   '';
 
   # --- Even split (Mod+G) ---------------------------------------------------
-  # "Halve the screen between the focused window and its neighbour" — resolved
-  # against the ORIENTATION of the output we're on. niri stacks windows only
-  # *inside* a column, so the same intent needs two different layouts: on a
-  # landscape output an even split is two half-width columns side by side, while
-  # on a portrait one (the QD-OLED at transform 270 — see
-  # homes/tempest/monitors.nix) it is ONE full-width column holding both windows,
-  # halved top and bottom. Splitting horizontally on a 1440x2560 panel is what we
-  # do NOT want: two 720-wide slivers.
+  # "Halve the screen between the focused window and its neighbour", resolved
+  # against the output's ORIENTATION. niri stacks windows only inside a column,
+  # so the intent needs two layouts: landscape gets two half-width columns,
+  # portrait gets ONE full-width column halved top and bottom. Splitting
+  # horizontally on a 1440x2560 panel would give two 720-wide slivers.
   #
-  # The vertical halving resets each window's height to *automatic* rather than
-  # pinning 50%: niri divides a column's leftover space equally among auto-height
-  # windows, so "auto everywhere" already IS the even split, and it stays right
-  # for a column that ended up holding three.
+  # The vertical halving resets heights to *automatic* rather than pinning 50%:
+  # niri divides leftover space equally among auto-height windows, so "auto
+  # everywhere" already IS the even split — and stays right for three windows.
   #
-  # Each branch also undoes the other's shape, so the binding still does what it
-  # says after the output is rotated: in portrait it consumes the neighbouring
-  # column into the focused one, in landscape it expels a stacked window back out
-  # into its own column.
-  #
-  # A floating window has no place in the scrolling layout, so there is nothing to
-  # split against and we no-op.
+  # Each branch undoes the other's shape, so the binding still means what it says
+  # after a rotation. A floating window has nothing to split against: no-op.
   evenSplit = pkgs.writeShellScript "niri-even-split" ''
     set -u
 
-    # Portrait = the output is taller than it is wide, which is exactly what a 90°
-    # or −90° `transform` does to a landscape panel (1440x2560 on the rotated
-    # QD-OLED). Deliberately NOT read off `.logical.transform`: its JSON spelling
-    # is not one scheme — an unrotated output reports "Normal" while a rotated one
-    # reports "270" — so matching names is a trap, whereas the geometry is the
-    # thing we actually care about (and it does the right thing for a
-    # natively-portrait panel too).
+    # Portrait = taller than wide. Deliberately NOT read off
+    # `.logical.transform`, whose JSON spelling is not one scheme (unrotated
+    # reports "Normal", rotated reports "270"), so name-matching is a trap.
+    # Geometry is the thing we care about, and it's also right for a natively
+    # portrait panel.
     portrait=$(${niri} msg --json focused-output \
       | ${jq} -r 'if (.logical.height // 0) > (.logical.width // 0) then 1 else 0 end')
 
@@ -256,19 +230,15 @@
     fi
   '';
 
-  # mkScratchpad builds the two scripts that drive one app's scratchpad. `spawn`
-  # is the shell command launched (backgrounded) when the window doesn't exist.
-  #   init   — launch-if-dead, wait for the window, then make it a scratchpad
-  #            *member* (which also parks/hides it). `scratchpad-show` only acts
-  #            on members, so this must succeed for toggling to work. Wire into
-  #            spawn-at-startup for an always-open app; otherwise it runs lazily
-  #            as the toggle's launch path.
-  #   toggle — summon onto / dismiss from the focused workspace. `scratchpad-show`
-  #            self-toggles for a member, so the common path is one call. But
-  #            nirius can't *query* membership, so we verify via niri afterwards:
-  #            if the window didn't move it wasn't a member yet, so we establish
-  #            membership (park it, or pull it here) — making the toggle
-  #            self-heal an un-parked or freshly-respawned window.
+  # The two scripts driving one app's scratchpad. `spawn` is launched
+  # backgrounded when the window doesn't exist.
+  #   init   — launch-if-dead, wait for the window, make it a scratchpad
+  #            *member* (which parks it). `scratchpad-show` only acts on members,
+  #            so this must succeed for toggling to work.
+  #   toggle — `scratchpad-show` self-toggles for a member, so the common path is
+  #            one call. nirius can't *query* membership, so we check via niri
+  #            afterwards: if the window didn't move it wasn't a member, and we
+  #            establish it — which self-heals a freshly-respawned window.
   mkScratchpad = {
     name,
     appId,
@@ -331,16 +301,11 @@
     spawn = "telegram-sandboxed";
   };
 
-  # Floating terminal: spawned on first use, summoned with Mod+Shift+Return. The
-  # distinct --class gives wezterm its own app-id so the window-rule and nirius
-  # target only this instance, not every wezterm window.
-  #
+  # Floating terminal, spawned on first use. The distinct --class gives it its
+  # own app-id so the window-rule and nirius target only this instance.
   # --always-new-process is what makes that class stick: a plain `wezterm start`
-  # asks an already-running GUI instance to spawn the window for it (the
-  # single-instance rendezvous socket in $XDG_RUNTIME_DIR/wezterm is named after
-  # the wayland display *and* the class), and a window spawned that way carries
-  # the serving instance's app-id, not ours. Forcing our own process keeps the
-  # app-id ours regardless.
+  # asks a running instance to spawn the window, and it comes back carrying that
+  # instance's app-id, not ours.
   terminalScratchpad = mkScratchpad {
     name = "terminal";
     appId = "scratchpad-terminal";
@@ -361,23 +326,18 @@ in
           NIXOS_OZONE_WL = "1";
           QT_QPA_PLATFORM = "wayland";
           QT_WAYLAND_DISABLE_WINDOWDECORATION = "1";
-          # Apps launched from niri (binds / tofi-drun) inherit this env, not the
-          # systemd user env (spawn-at-startup only imports 4 vars). Set the Qt
-          # platform theme here so Dolphin et al. pick up qt.nix's qtct config +
-          # Noctalia's dynamic color file. "qt5ct" also loads the qt6ct plugin
-          # (its plugin Keys are ["qt6ct","qt5ct"]). No QT_STYLE_OVERRIDE — style
-          # is selected by qtct.conf (style=Fusion).
+          # Apps launched from niri inherit this env, not the systemd user env
+          # (import-environment only carries 4 vars). "qt5ct" also loads the
+          # qt6ct plugin, so Dolphin et al. pick up qt.nix's qtct config. No
+          # QT_STYLE_OVERRIDE — style is selected by qtct.conf.
           QT_QPA_PLATFORMTHEME = "qt5ct";
           ELECTRON_OZONE_PLATFORM_HINT = "wayland";
           XDG_SESSION_TYPE = "wayland";
           XDG_CURRENT_DESKTOP = "niri";
-          # Noctalia's lockscreen authenticates against this PAM service (read by
-          # its LockContext). Default is "login", which assumes a privileged caller
-          # — an unprivileged locker hits "pam_unix(login:account): setuid failed"
-          # and can never unlock. Point it at a dedicated /etc/pam.d/noctalia
-          # instead (defined in rices/ember/system.nix). niri exports this to the
-          # processes it spawns, including the noctalia spawn-at-startup, so the
-          # already-running shell that handles every lock path picks it up.
+          # Noctalia's lockscreen defaults to PAM "login", which assumes a
+          # privileged caller — an unprivileged locker hits "setuid failed" and
+          # can never unlock. Point it at the dedicated service defined in
+          # rices/ember/system.nix.
           NOCTALIA_PAM_SERVICE = "noctalia";
         };
 
@@ -428,39 +388,30 @@ in
           border = {
             enable = true;
             width = 2;
-            # Same palette entries, just alpha-dimmed: on OLED the borders blend
-            # against near-black, so alpha darkens them without shifting hue.
-            # Turn the suffixes up/down to taste (ff = undimmed).
+            # Same palette entries, alpha-dimmed (ff = undimmed): on OLED the
+            # borders blend against near-black, so alpha darkens without
+            # shifting hue.
             #
-            # TRIED AND REJECTED: base09 at ff for the active border, to make
-            # focus obvious once the corners went square. Looked wrong on the
-            # panel — a bright ring around the focused window reads as an alert,
-            # not as focus — and it is exactly the always-lit static content
-            # docs/adr/0009 exists to avoid. The ADR stands unamended; don't
-            # redo this.
+            # TRIED AND REJECTED: base09 at ff for the active border. A bright
+            # ring reads as an alert, not as focus, and it is exactly the
+            # always-lit static content ADR 0009 exists to avoid. Don't redo it.
             active.color = c.base03 + "73"; # 45%
             inactive.color = c.base01 + "26"; # 15%
           };
 
-          # Inner gaps only. `gaps` applies both between windows and around the
-          # screen edges; matching negative struts cancel just the outer half
-          # (the documented niri idiom for inner-vs-outer gaps). So a lone window
-          # runs edge to edge and reads as fullscreen, while two or more still get
-          # 2*gaps of separation between columns.
-          #
-          # niri has no smart-gaps: window rules can't match on window count, so
-          # this is as close as the config gets without an event-stream daemon
-          # toggling maximize-window-to-edges.
+          # Inner gaps only: `gaps` applies both between windows and around the
+          # screen edges, and matching negative struts cancel the outer half —
+          # the documented niri idiom. A lone window then runs edge to edge while
+          # two or more still get 2*gaps between columns. niri has no
+          # smart-gaps (rules can't match on window count), so this is as close
+          # as it gets without an event-stream daemon.
           gaps = 8;
 
-          # -8 on all four now. `top` was 0 for one reason: the Noctalia bar
-          # floated with its own 8px margin and a 12px radius, so pulling windows
-          # flush against it left a square window corner clashing with the bar's
-          # curve. Since the bar reserves no space (auto_hide with
-          # reserve_space = false), that 0 bought nothing but an 8px strip of
-          # wallpaper across the top of every tiled window. The bar is flush and
-          # square now (rices/ember/noctalia-widgets.nix), so there is no curve to
-          # dodge and the strip goes away.
+          # -8 on all four. `top` used to be 0 to keep a square window corner
+          # from clashing with the floating bar's 12px curve — but the bar
+          # reserves no space, so that 0 bought nothing but an 8px strip of
+          # wallpaper across every tiled window. The bar is flush and square now
+          # (rices/ember/noctalia-widgets.nix), so there is no curve to dodge.
           struts = {
             left = -8;
             right = -8;
@@ -472,11 +423,10 @@ in
         # Prefer no client-side decorations
         prefer-no-csd = true;
 
-        # Compositor-drawn cursor, READ FROM stylix.cursor in ../../stylix.nix
-        # (which themes the client-drawn ones); the mango layer reads the same
-        # root. niri's own default is "default", so without this the pointer
-        # would change appearance as it moved between niri's surfaces and an
-        # app's — hence derived, not restated.
+        # Compositor-drawn cursor, DERIVED from stylix.cursor (which themes the
+        # client-drawn ones); the mango layer reads the same root. niri's own
+        # default is "default", so without this the pointer would change
+        # appearance as it moved between niri's surfaces and an app's.
         cursor = {
           theme = config.stylix.cursor.name;
           size = config.stylix.cursor.size;
@@ -501,27 +451,23 @@ in
               "XAUTHORITY"
             ];
           }
-          # NNN stack: the Noctalia shell (bar + notifications + launcher) is NOT
-          # spawned here anymore. It runs as a supervised systemd user service
-          # (programs.noctalia.systemd.enable, in rices/ember/noctalia.nix) with
-          # Restart=on-failure bound to graphical-session.target, so a segfault in
-          # the v5 dev build self-heals instead of leaving a dead desktop. Spawning
-          # it here too would double-launch a singleton shell.
-          # Scratchpads: the nirius daemon, then launch Telegram and park it hidden
-          # in the scratchpad. Mod+T summons it. The terminal scratchpad
-          # (Mod+Shift+Return) is spawned lazily on first use, so it isn't here.
-          # See the let block above.
+          # Noctalia is deliberately NOT spawned here — it runs as a supervised
+          # user service (rices/ember/noctalia.nix), and spawning it here too
+          # would double-launch a singleton shell.
+          #
+          # Scratchpads: the nirius daemon, then Telegram parked hidden (Mod+T
+          # summons it). The terminal scratchpad is spawned lazily on first use,
+          # so it isn't here. See the let block above.
           {command = ["${pkgs.nirius}/bin/niriusd"];}
           {command = ["${telegramScratchpad.init}"];}
         ];
 
         # Keybindings
         binds = with pkgs; {
-          # Terminal and launcher. Bare `wezterm` defaults to the `start`
-          # subcommand, which hands the request to a running wezterm GUI instance
-          # of the same class when there is one — so extra windows are cheap
-          # (kitty was a fresh process per press). The scratchpad below
-          # deliberately opts out of that; see the let block.
+          # Bare `wezterm` defaults to `start`, which hands the request to a
+          # running instance of the same class, so extra windows are cheap
+          # (kitty was a fresh process per press). The scratchpad above
+          # deliberately opts out of that.
           "Mod+Return".action.spawn = [
             "${pkgs.wezterm}/bin/wezterm"
           ];
@@ -653,11 +599,9 @@ in
         };
         window-rules = windowRules;
         layer-rules = [
-          # Noctalia's wallpaper surface (background layer, ignores exclusive
-          # zones) — reparent it into niri's backdrop so it shows behind
-          # gapped/transparent windows and in the overview. v5 uses a single fixed
-          # layer-shell namespace "noctalia-wallpaper" (v4 carried a per-output
-          # suffix); prefix match keeps it forward-compatible.
+          # Reparent Noctalia's wallpaper surface into niri's backdrop so it
+          # shows behind gapped/transparent windows and in the overview. Prefix
+          # match, since v4 carried a per-output namespace suffix and v5 doesn't.
           {
             matches = [{namespace = "^noctalia-wallpaper";}];
             place-within-backdrop = true;

@@ -1,8 +1,7 @@
-# Everything about an ocelot that is not known when its image is built. One
-# image serves every ocelot (docs/adr/0013), so the individual's name, the
-# project it is of, and its ssh host key all arrive at boot in the launcher's
-# staging directory at /host — not on the kernel command line, which cannot
-# carry a path with a space in it without quoting games.
+# Everything about an ocelot not known when its image is built. One image serves
+# every ocelot (ADR 0013), so the name, the project and the ssh host key all
+# arrive at boot in the launcher's staging directory at /host — not on the kernel
+# command line, which can't carry a path with a space without quoting games.
 #
 # Layout of /host, written by scripts/ocelot.sh:
 #   conf/name                        this ocelot's name
@@ -39,11 +38,10 @@
     script = ''
       set -euo pipefail
 
-      # Identity. The hostname is what the shell prompt and every log line show,
-      # and it is the one place an ocelot says which one it is. Written straight
-      # to the kernel — /etc/hostname is a store symlink (networking.hostName is
-      # set, so it has to be something) and hostnamectl needs a bus this early in
-      # the boot; gethostname(2) is what the prompt and the journal read anyway.
+      # The hostname is the one place an ocelot says which one it is. Written
+      # straight to the kernel: /etc/hostname is a store symlink and hostnamectl
+      # needs a bus this early in the boot, while gethostname(2) is what the
+      # prompt and the journal read anyway.
       if [ -r /host/conf/name ]; then
         printf '%s' "ocelot-$(cat /host/conf/name)" >/proc/sys/kernel/hostname
       fi
@@ -76,16 +74,15 @@
       fi
 
       # Agent credentials, bound into the guest home at their usual names.
-      # Bind-mounted and not symlinked on purpose: a tool that writes its config
-      # by rename(2) would replace a symlink and silently stop writing through to
-      # the host. The list lives in scripts/ocelot.sh — whatever it staged is
-      # what gets bound, so there is one place to add to.
+      # Bind-mounted and NOT symlinked: a tool that writes its config by
+      # rename(2) would replace a symlink and silently stop writing through to
+      # the host. The list lives in scripts/ocelot.sh, so there is one place to
+      # add to.
       #
-      # Read from conf/creds rather than walked out of the share. An entry may be
-      # nested (.config/opencode), and a `find -maxdepth 1` over /host/creds sees
-      # only `.config` — which would bind the staging directory's .config over the
-      # guest's whole ~/.config and bury the home-manager-generated zellij, fish
-      # and helix configs under it.
+      # Read from conf/creds rather than walked out of the share, because an
+      # entry may be nested (.config/opencode) and a `find -maxdepth 1` sees only
+      # `.config` — which would bind the staging .config over the guest's whole
+      # ~/.config and bury the generated zellij, fish and helix configs.
       if [ -r /host/conf/creds ]; then
         while read -r entry; do
           [ -n "$entry" ] || continue

@@ -1,35 +1,29 @@
 # yt-dlp that can still download from YouTube.
 #
-# Plain `pkgs.yt-dlp` currently gets HTTP 403 on nearly every video (5 of 6 in a
-# spot check on 2026-08-19; only a 2005 upload survived). Nothing is wrong with
-# the version — 2026.07.04 is what both nixpkgs-unstable and PyPI ship, and
-# building git master changes nothing. Three separate gates have to be passed:
+# Plain `pkgs.yt-dlp` 403s on nearly every video, and not because of its version
+# (git master changes nothing). Three gates have to be passed:
 #
-#   1. A JavaScript runtime, for YouTube's challenge. Without one yt-dlp silently
-#      falls back to the `android_vr` client, whose stream URLs then 403. `deno`
-#      is on the wrapper's PATH for this ("JS runtimes: deno" in `-v` output).
+#   1. A JS runtime for YouTube's challenge. Without one yt-dlp silently falls
+#      back to `android_vr`, whose stream URLs 403. `deno` is on the wrapper's
+#      PATH for this — confirm with "JS runtimes: deno" in `-v` output.
 #   2. A Proof-of-Origin token. Stock yt-dlp reports "PO Token Providers: none";
-#      the bgutil plugin in the python env below registers the `bgutil:http`
-#      provider, which mints tokens against a small local server — run as a user
-#      service, see ../desktop/yt-dlp.nix.
-#   3. A client that is not SABR-only. Even holding a valid token, `web_safari`
-#      and friends hand back formats "missing a URL. YouTube is forcing SABR
-#      streaming for this client" (yt-dlp#12482), and yt-dlp falls back to the
-#      403ing one. `tv_simply`, `web_embedded` and `mweb` still return real URLs;
-#      no single one of them covers every video, but the three together did cover
-#      all six tested, at 2160p AV1.
+#      the bgutil plugin below registers `bgutil:http`, which mints tokens
+#      against a small local server (a user service, ../desktop/yt-dlp.nix).
+#   3. A client that is not SABR-only. Even with a valid token, `web_safari` and
+#      friends return formats "missing a URL" (yt-dlp#12482) and yt-dlp falls
+#      back to the 403ing one. No single unfenced client covers every video, so
+#      three are listed.
 #
-# The client list is baked in with --add-flags rather than left to a config file
-# so that mpv's ytdl_hook gets it too — it invokes yt-dlp directly, and passing
-# the value through mpv's --ytdl-raw-options is not possible anyway (mpv splits
-# that option's value on commas, and the client list contains them). A caller
-# that wants different clients can still pass its own --extractor-args, since
-# wrapper flags come first and the later value wins.
+# The list is baked in with --add-flags rather than a config file so mpv's
+# ytdl_hook gets it too — it invokes yt-dlp directly, and mpv's
+# --ytdl-raw-options can't carry it anyway (mpv splits that value on commas). A
+# caller can still override with its own --extractor-args, since wrapper flags
+# come first and the later value wins.
 #
-# Expect the client list to rot: it describes which of YouTube's clients are
-# unfenced this month, not anything durable. When 403s come back, re-run the
-# matrix (`yt-dlp --extractor-args youtube:player_client=<one> -f ba -o - <url>`
-# over each client) and update the list.
+# EXPECT THE CLIENT LIST TO ROT — it describes which of YouTube's clients are
+# unfenced this month. When 403s return, re-run the matrix
+# (`yt-dlp --extractor-args youtube:player_client=<one> -f ba -o - <url>` per
+# client) and update it.
 {
   lib,
   runCommand,

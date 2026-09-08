@@ -17,10 +17,9 @@
   playClipboard = import ../../play-clipboard.nix {inherit pkgs;};
   sitrepHud = import ../../sitrep-hud.nix {inherit pkgs;};
 
-  # niri has a built-in `screenshot` action; mango has none, so the two screenshot
-  # binds go through grim/slurp. A script rather than an inline command because
-  # mango's bind parser splits on commas and the save-then-copy pipeline would
-  # have to survive that intact — one store path can't.
+  # mango has no built-in `screenshot` action, so both binds go through
+  # grim/slurp. A script rather than an inline command because mango's bind
+  # parser splits on commas, which a save-then-copy pipeline would not survive.
   screenshot = pkgs.writeShellScript "ember-screenshot" ''
     set -euo pipefail
     dir="''${XDG_PICTURES_DIR:-$HOME/Pictures}/Screenshots"
@@ -28,13 +27,11 @@
     file="$dir/$(${pkgs.coreutils}/bin/date +%Y%m%d-%H%M%S).png"
     case "''${1:-region}" in
       region)
-        # Freeze the screen first. slurp waits for the user, so without this
-        # grim captures whatever the screen has drifted to by the time the
-        # region is drawn — a menu that closed, a tooltip that timed out, an
-        # animation that finished. wayfreeze paints a screencopy of every
-        # output as an overlay layer surface; slurp maps above it, and grim
-        # then re-captures the same, now static, pixels. Only `region` needs
-        # this: `screen` grabs at keypress and has nothing to wait for.
+        # Freeze first: slurp waits for the user, so without this grim captures
+        # whatever the screen drifted to while the region was drawn — a closed
+        # menu, an expired tooltip. wayfreeze overlays a screencopy, slurp maps
+        # above it, grim re-captures the same static pixels. Only `region` needs
+        # it; `screen` grabs at keypress.
         ${pkgs.wayfreeze}/bin/wayfreeze &
         freeze=$!
         trap 'kill "$freeze" 2>/dev/null || true' EXIT
@@ -53,27 +50,17 @@
   wezterm = "${pkgs.wezterm}/bin/wezterm";
 
   # --- Even split (Mod+G) ---------------------------------------------------
-  # The niri layer's evenSplit, ported to mango's scroller — same intent ("halve
-  # the screen between the focused window and its neighbour"), same
-  # orientation-awareness, different vocabulary. A scroller column is one or more
-  # stacked windows, so on a landscape output an even split is two half-width
-  # columns side by side, and on a portrait one (the QD-OLED at transform 270 —
-  # see homes/tempest/monitors.nix) it is ONE full-width column holding both
-  # windows, halved top and bottom. See ../niri/niri.nix for the longer version of
-  # the reasoning; only the mango-specific parts are noted here.
+  # The niri layer's evenSplit ported to mango's scroller: same intent, same
+  # orientation-awareness, different vocabulary. See ../niri/niri.nix for the
+  # reasoning; only the mango-specific parts are noted here.
   #
-  # `scroller_stack` is mango's consume *and* expel in one action: it pulls the
-  # neighbour in the given direction into the focused window's stack, unless the
-  # window is already stacked, in which case it moves out into its own column. So
-  # each branch undoes the other's shape, as the niri script does.
-  #
-  # Heights inside a stack need no setting: mango normalises a stack node's
-  # proportion to an equal share whenever it is outside (0,1), so a freshly built
-  # stack is already even.
-  #
-  # Portrait is read off the active monitor's logical geometry rather than a
-  # transform name, for the reason spelled out in the niri layer. Floating windows
-  # are excluded — they are not in the scroller and have nothing to split against.
+  # `scroller_stack` is consume *and* expel in one action — it pulls the
+  # neighbour into the focused window's stack, or moves an already-stacked
+  # window out into its own column — so each branch undoes the other's shape.
+  # Heights need no setting: mango normalises a stack node's proportion to an
+  # equal share whenever it is outside (0,1), so a fresh stack is already even.
+  # Portrait is read off logical geometry, not a transform name, for the reason
+  # the niri layer spells out. Floating windows have nothing to split against.
   evenSplit = pkgs.writeShellScript "mango-even-split" ''
     set -u
     mmsg=${pkgs.mango}/bin/mmsg
@@ -146,21 +133,18 @@
     "$mmsg" dispatch set_proportion,0.5 client,"$neighbour"
   '';
 
-  # Every tag gets the scroller layout. mango is tag-based (a dwl inheritance):
-  # unlike niri's dynamic per-output workspaces, the ten tags always exist, a
-  # window can be on several at once, and an empty tag does not disappear. Ten of
-  # them so Mod+1..0 lands on the same tag it lands on under niri.
+  # mango is tag-based (a dwl inheritance): unlike niri's dynamic per-output
+  # workspaces the ten tags always exist, a window can be on several at once,
+  # and an empty tag doesn't disappear. Ten, so Mod+1..0 matches niri.
   tagCount = 10;
   tagRules = map (i: "id:${toString i},layout_name:scroller") (lib.range 1 tagCount);
 in {
   config = lib.mkIf (cfg.enable && cfg.mango.enable) {
-    # mango re-reads config.conf only when told to (there is no inotify watch in
-    # its source), and the file it reads is a store symlink — the inode never
-    # changes in place, activation swaps the link. So poke it once the new
-    # generation is linked and `nh home switch` alone is enough to apply a config
-    # edit. `|| true` because this also runs from the niri session, from a TTY,
-    # and on a first activation before any compositor exists, where mmsg has no
-    # socket to talk to and must not fail the switch.
+    # mango re-reads config.conf only when told to, and the file is a store
+    # symlink activation swaps rather than edits in place — so poke it once the
+    # new generation is linked and `nh home switch` alone applies a config edit.
+    # `|| true` because this also runs from the niri session, from a TTY, and on
+    # a first activation with no compositor, where mmsg must not fail the switch.
     home.activation.reloadMango = lib.hm.dag.entryAfter ["linkGeneration"] ''
       run ${pkgs.mango}/bin/mmsg dispatch reload_config > /dev/null 2>&1 || true
     '';
@@ -168,34 +152,29 @@ in {
     wayland.windowManager.mango = {
       enable = true;
 
-      # Pinned to the same derivation the system session runs
-      # (./system.nix, programs.mango.package) and the same one
-      # ../../swayidle.nix calls `mmsg` from. mango's IPC socket is versionless,
-      # so a mismatch here fails at runtime rather than at build — which is
-      # exactly the class of bug the niri layer's package comment describes.
+      # Pinned to the same derivation the system session runs and swayidle calls
+      # `mmsg` from. mango's IPC socket is versionless, so a mismatch fails at
+      # runtime rather than at build — the bug class the niri layer describes.
       package = pkgs.mango;
 
-      # MUST be non-empty. The HM module only writes autostart.sh — and only adds
-      # the `exec-once` line that runs it — when this option is set; and that
-      # script is where `dbus-update-activation-environment` and `systemctl --user
-      # start mango-session.target` live. An empty autostart therefore means
-      # graphical-session.target never starts, and the entire rest of the rice
-      # (Noctalia, swayidle, kanshi) silently never launches.
+      # MUST be non-empty. The HM module writes autostart.sh — and the
+      # `exec-once` that runs it — only when this is set, and that script is
+      # where dbus-update-activation-environment and `systemctl --user start
+      # mango-session.target` live. Empty means graphical-session.target never
+      # starts and the whole rest of the rice silently never launches.
       #
-      # Nothing else belongs here: Noctalia runs as a supervised systemd user
-      # service (../../noctalia.nix), and the scratchpads launch lazily on their
-      # first toggle instead of being spawned and hidden at startup the way the
-      # niri layer has to do it.
+      # Nothing else belongs here: Noctalia is a supervised user service, and
+      # the scratchpads launch lazily on first toggle rather than being
+      # spawned-and-hidden the way the niri layer has to do it.
       autostart_sh = ''
         # (systemd/D-Bus activation is prepended by the module itself)
       '';
 
       settings = {
         # --- Session environment ------------------------------------------
-        # Mirrors the niri layer's environment block. XDG_CURRENT_DESKTOP is the
-        # one value that must differ: it is how portals pick a backend, and how
-        # Noctalia identifies the compositor when MANGO_INSTANCE_SIGNATURE is not
-        # visible to it.
+        # Mirrors the niri layer's block. XDG_CURRENT_DESKTOP is the one value
+        # that must differ: portals pick a backend by it, and Noctalia
+        # identifies the compositor by it when the signature isn't visible.
         env = [
           "CLUTTER_BACKEND,wayland"
           "GDK_BACKEND,wayland,x11"
@@ -207,10 +186,8 @@ in {
           "ELECTRON_OZONE_PLATFORM_HINT,wayland"
           "XDG_SESSION_TYPE,wayland"
           "XDG_CURRENT_DESKTOP,mango"
-          # Noctalia's lockscreen authenticates against this PAM service rather
-          # than `login`, which refuses an unprivileged caller. The service is
-          # defined in ../../system.nix; the env var has to be set per session,
-          # which is why it appears in both compositor layers.
+          # Not `login`, which refuses an unprivileged caller. Defined in
+          # ../../system.nix; set per session, hence in both layers.
           "NOCTALIA_PAM_SERVICE,noctalia"
         ];
 
@@ -218,18 +195,16 @@ in {
         tag_num = tagCount;
         tagrule = tagRules;
 
-        # Scroller tuned to match niri's `default-column-width.proportion = 1.0`:
-        # one full-width column at a time, scrolled horizontally. structs is the
-        # sliver mango normally reserves at the sides to reveal the neighbouring
-        # window; niri reveals nothing at proportion 1.0, so it goes to 0.
+        # Tuned to match niri's `default-column-width.proportion = 1.0`: one
+        # full-width column at a time. structs is the sliver mango reserves to
+        # reveal the neighbour; niri reveals nothing at 1.0, so it goes to 0.
         scroller_default_proportion = 1.0;
         scroller_structs = 0;
         scroller_proportion_preset = "0.5,0.8,1.0";
 
         # --- Dimensions ----------------------------------------------------
-        # niri: gaps 8 with struts -8 on left/right/bottom, i.e. 8px between
-        # windows and none at the screen edge. mango splits that into inner and
-        # outer directly, so it needs no negative-strut trick.
+        # 8px between windows, none at the screen edge. mango splits inner and
+        # outer directly, so it needs no negative-strut trick as niri does.
         borderpx = 2;
         gappih = 8;
         gappiv = 8;
@@ -241,10 +216,8 @@ in {
         smartgaps = 0;
 
         # --- Effects -------------------------------------------------------
-        # scenefx can do considerably more than niri can (blur, per-window
-        # opacity); deliberately not used. The brief was "the same desktop,
-        # different engine", and niri draws no blur and shadows floating windows
-        # only — which is exactly this.
+        # scenefx can do more than niri (blur, per-window opacity), deliberately
+        # unused: the brief was "the same desktop, different engine".
         blur = 0;
         shadows = 1;
         shadow_only_floating = 1;
@@ -252,19 +225,16 @@ in {
         unfocused_opacity = 1.0;
 
         # --- Colours -------------------------------------------------------
-        # Derived from the stylix scheme (ember-3400k-dark), same two values the
-        # niri layer uses for its borders: active base03 at 45%, inactive base01
-        # at 15%. Noctalia ships its own mango colour template — leave it OFF, it
-        # would try to write into ~/.config/mango, which Home Manager owns as a
-        # read-only store symlink.
+        # Derived from the stylix scheme, same two values the niri layer uses:
+        # active base03 at 45%, inactive base01 at 15%. Noctalia ships its own
+        # mango colour template — leave it OFF, it would write into
+        # ~/.config/mango, which HM owns as a read-only store symlink.
         #
-        # Everything from urgentcolor down to splitcolor is *also* a border
-        # colour — mango swaps the border to it while a window is in that state —
-        # so they get the same 73 the focused border does. At ff they were the
-        # one thing on an OLED panel glowing at full brightness against
-        # near-black. rootcolor/shadowscolor aren't borders and stay opaque.
-        # (These went to ff briefly alongside a bright base09 focus border; both
-        # were reverted — see the TRIED AND REJECTED note in ../niri/niri.nix.)
+        # urgentcolor through splitcolor are ALSO border colours (mango swaps the
+        # border while a window is in that state), so they take the same alpha as
+        # the focused border. At ff they were the one thing glowing at full
+        # brightness against near-black. rootcolor/shadowscolor aren't borders
+        # and stay opaque. (See the TRIED AND REJECTED note in ../niri/niri.nix.)
         focuscolor = colour "73" c.base03;
         bordercolor = colour "26" c.base01;
         rootcolor = colour "ff" c.base00;
@@ -292,12 +262,9 @@ in {
         enable_hotarea = 0; # niri: gestures.hot-corners.enable = false
 
         # --- Cursor ----------------------------------------------------------
-        # The compositor-drawn cursor, READ FROM stylix.cursor in ../../stylix.nix
-        # (which themes the client-drawn ones). It has to match that one or the
-        # pointer changes appearance depending on which surface it is over, so
-        # it is derived rather than restated — stylix.cursor is the root, this
-        # and the niri layer follow it. Unset, wlroots falls back to the X11
-        # core cursor.
+        # DERIVED from stylix.cursor, the root both layers follow: it has to
+        # match or the pointer changes appearance depending on which surface it
+        # is over. Unset, wlroots falls back to the X11 core cursor.
         cursor_theme = config.stylix.cursor.name;
         cursor_size = config.stylix.cursor.size;
 
@@ -314,10 +281,9 @@ in {
         windowrule = windowRules;
 
         # --- Keybindings ----------------------------------------------------
-        # Same keys as the niri layer wherever the action exists on both sides;
-        # see docs/mango-vs-niri.md for the full mapping and the three binds that
-        # have no mango counterpart (Mod+O audio switcher and the two brightness
-        # keys).
+        # Same keys as the niri layer wherever the action exists on both sides.
+        # docs/mango-vs-niri.md has the full mapping and the three binds with no
+        # mango counterpart (Mod+O and the two brightness keys).
         bind =
           [
             # Terminal, launcher, apps
@@ -333,10 +299,9 @@ in {
             "SUPER,i,spawn,${sitrepHud}"
             "SUPER,g,spawn,${evenSplit}"
 
-            # Scratchpads. Format: appid,title,command — `none` for whichever field
-            # is not being matched on. mango launches the command itself on first
-            # use and toggles visibility thereafter, so unlike the niri layer there
-            # is nothing to spawn-and-hide at startup.
+            # Format: appid,title,command — `none` for whichever field isn't
+            # matched on. mango launches the command itself on first use and
+            # toggles thereafter, so nothing is spawned-and-hidden at startup.
             "SUPER,t,toggle_named_scratchpad,org.telegram.desktop,none,telegram-sandboxed"
             "SUPER+SHIFT,Return,toggle_named_scratchpad,scratchpad-terminal,none,${wezterm} start --always-new-process --class scratchpad-terminal"
             "SUPER+SHIFT,t,toggle_scratchpad"
@@ -360,10 +325,10 @@ in {
             "SUPER+SHIFT,Up,exchange_client,up"
             "SUPER+SHIFT,Down,exchange_client,down"
 
-            # Monitors. Same convention as the tag keys: CTRL picks the monitor
-            # axis, SHIFT carries the focused window along. focusdir/exchange_client
-            # above stop at the output edge, so without these a window can never
-            # leave the display it opened on.
+            # Same convention as the tag keys: CTRL picks the monitor axis,
+            # SHIFT carries the window along. focusdir/exchange_client stop at
+            # the output edge, so without these a window can never leave the
+            # display it opened on.
             "SUPER+CTRL,Left,focusmon,left"
             "SUPER+CTRL,Right,focusmon,right"
             "SUPER+CTRL+SHIFT,Left,tagmon,left"
@@ -397,18 +362,15 @@ in {
           (lib.range 1 tagCount);
 
         # --- Mouse ------------------------------------------------------------
-        # The module only emits what is declared, so with no mousebind lines the
-        # pointer could not move a window at all. Dropping a dragged window is
-        # what actually crosses outputs: on button release mango calls
-        # setmon(grabc, xytomon(cursor)) and re-tags the window if the target
-        # tag changed, so a drag onto the second display lands there. Same
-        # chords as upstream's defaults, minus upstream's bare
-        # `NONE,btn_middle,togglemaximizescreen`: a modifier-less mousebind still
-        # matches for the middle button (buttonpress() only exempts left/right),
-        # and a matched bind returns before wlr_seat_pointer_notify_button, so
-        # the press never reaches the client — no paste, no close-tab, just the
-        # window flipping in and out of maximize. Middle click belongs to the
-        # app; niri binds nothing to it either.
+        # The module emits only what is declared, so with no mousebind lines the
+        # pointer couldn't move a window at all. A dropped drag is what crosses
+        # outputs: on release mango re-homes the window to the monitor under the
+        # cursor. Same chords as upstream's defaults, MINUS its bare
+        # `NONE,btn_middle,togglemaximizescreen` — a modifier-less mousebind
+        # still matches for the middle button, and a matched bind returns before
+        # notifying the client, so the press never arrives: no paste, no
+        # close-tab, just the window flipping maximize. Middle click belongs to
+        # the app, and niri binds nothing to it either.
         mousebind = [
           "SUPER,btn_left,moveresize,curmove"
           "SUPER,btn_right,moveresize,curresize"

@@ -1,22 +1,16 @@
 {pkgs, ...}: {
   boot = {
-    # CachyOS kernel, same choice as tempest: upstream patches + CachyOS tunings
-    # (HZ=1000, full preemption, sched_ext compiled in), clang/ThinLTO.
+    # CachyOS kernel, same choice as tempest. -zen4 is this CPU exactly (Ryzen 7
+    # 7800X3D), with no compromise — unlike tempest, where the same variant is
+    # only the closest target for a Zen5 part.
     #
-    # -zen4 is `-march=znver4`, which is this CPU exactly (Ryzen 7 7800X3D,
-    # Raphael). No compromise here, unlike tempest — where the same variant is
-    # the closest available target for a Zen5 part.
+    # LTS, not -latest, because nixpkgs refuses to EVALUATE when the kernel
+    # outruns OpenZFS support. See hosts/tempest/system/boot.nix for the full
+    # note and the zfs_cachyos escape hatch.
     #
-    # LTS (not -latest) because ZFS is out-of-tree and nixpkgs refuses to
-    # *evaluate* when the kernel outruns OpenZFS support: every ZFS attribute
-    # caps at kernelMaxSupportedMajorMinor = "7.0" and -latest is already past
-    # it, so the zfs-kernel derivation goes meta.broken and the rebuild dies
-    # before compiling anything. See hosts/tempest/system/boot.nix for the full
-    # note, including the boot.zfs.package = zfs_cachyos escape hatch.
-    #
-    # No scx / services.scx here, unlike tempest: scx_lavd --autopower is a
-    # laptop power-vs-latency lever, and this box has neither a battery nor an
-    # interactive session to protect. The in-kernel EEVDF scheduler runs.
+    # No scx here, unlike tempest: scx_lavd --autopower is a laptop
+    # power-vs-latency lever, and this box has neither a battery nor an
+    # interactive session to protect. In-kernel EEVDF runs.
     kernelPackages = pkgs.cachyosKernels.linuxPackages-cachyos-lts-lto-zen4;
 
     kernelModules = [
@@ -57,10 +51,9 @@
       supportedFilesystems = ["vfat"];
     };
 
-    # UEFI, systemd-boot. No lanzaboote/Secure Boot on this host (tempest keeps
-    # a /var/lib/sbctl dataset for it; orchid does not) — adding it later means
-    # `sbctl create-keys`, a dataset for the keys, and importing
-    # modules/secure-boot.nix.
+    # UEFI, systemd-boot. No lanzaboote/Secure Boot here (tempest keeps a
+    # /var/lib/sbctl dataset for it, orchid doesn't) — adding it later means
+    # `sbctl create-keys`, a dataset for the keys, and modules/secure-boot.nix.
     loader = {
       systemd-boot = {
         enable = true;

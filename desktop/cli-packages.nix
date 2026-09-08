@@ -1,12 +1,11 @@
-# The CLI half of the home package set: everything that is useful over ssh on a
-# machine with no display. Extracted from ./home-packages.nix, which now imports
-# this file and adds only the desktop-, GUI- and host-hardware-specific sections
-# on top — so the union tempest and orchid see is unchanged.
+# The CLI half of the home package set: everything useful over ssh on a machine
+# with no display. ./home-packages.nix imports this and adds only the GUI and
+# host-hardware sections on top.
 #
-# It exists so an ocelot (docs/adr/0013, a per-project dev VM entered over ssh)
-# gets the same shell as tempest from one shared file. Adding a package lands
-# here by default and reaches both places; making something desktop-only is the
-# deliberate act of putting it in home-packages.nix instead.
+# It exists so an ocelot (ADR 0013) gets the same shell as tempest from one
+# shared file. A new package lands HERE by default and reaches both; making
+# something desktop-only is the deliberate act of putting it in
+# home-packages.nix instead.
 {
   pkgs,
   inputs,
@@ -103,12 +102,10 @@ in {
     xxd
     yq-go # jq for YAML/TOML/XML
 
-    # --- Networking & HTTP (CLI only; postman and proxyman stay in
-    #     home-packages.nix) ---
-    # mtr is not here on purpose: hosts/tempest/system/environment.nix enables
-    # programs.mtr, which installs it setcap'd so it works without sudo.
-    # wireshark is absent for the same reason — programs.wireshark there
-    # installs the GUI plus a setcap'd dumpcap for the `wireshark` group.
+    # --- Networking & HTTP (postman/proxyman stay in home-packages.nix) ---
+    # mtr and wireshark are absent on purpose: programs.mtr and
+    # programs.wireshark in hosts/tempest/system/environment.nix install them
+    # setcap'd, so they work without sudo.
     aria2 # segmented/multi-connection downloader
     bandwhich # per-process bandwidth (root)
     croc # ad-hoc file transfer between machines, no setup
@@ -173,16 +170,13 @@ in {
     luarocks
     nodejs
     php
-    # The PDF libs share this one interpreter on purpose — a second
-    # python3.withPackages would collide on bin/python3 in the home profile.
-    # pymupdf/pymupdf4llm and markitdown emit LLM-friendly Markdown; pdfplumber
-    # pulls tables; pypdf does structural split/merge. (camelot dropped —
-    # opencv/pandas closure.)
+    # One shared interpreter on purpose: a second python3.withPackages would
+    # collide on bin/python3 in the home profile. pymupdf/markitdown emit
+    # LLM-friendly Markdown, pdfplumber pulls tables, pypdf splits/merges.
     #
-    # pygobject3 (the `gi` module) was here for the v4 Noctalia Screen Toolkit's
-    # webcam-mirror tool, which the v5 migration dropped (rices/ember/noctalia.nix).
-    # Nothing in the tree imports `gi` today; it stays only because a bare python3
-    # can't, so any future GObject script would otherwise need this env rebuilt.
+    # ponytail: pygobject3 (the `gi` module) is unused since the v5 Noctalia
+    # migration dropped the Screen Toolkit. Kept only because a bare python3
+    # can't import it, so a future GObject script would need this env rebuilt.
     # Safe to drop.
     (python3.withPackages (ps:
       with ps; [

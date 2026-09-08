@@ -14,14 +14,14 @@
     config.environment.persistence."/persist".files;
 in {
   # The tmpfs-root half of impermanence, shared by tempest and orchid: the root
-  # filesystem is RAM and is discarded on every boot, so anything that must
-  # survive is either on a ZFS dataset (disks/<host>.nix, which also emits
-  # fileSystems."/") or bind-mounted from /persist.
+  # is RAM and discarded every boot, so anything that must survive is either on a
+  # ZFS dataset (disks/<host>.nix, which also emits fileSystems."/") or
+  # bind-mounted from /persist.
   #
-  # What lives here is the machine-identity core plus the two mechanics that are
-  # easy to forget and expensive to notice missing (the build-dir redirect and the
-  # soft-reboot fixup). Service state stays in each host's system/persistence.nix,
-  # next to the decision to run the service at all.
+  # Here: the machine-identity core plus the two mechanics that are easy to
+  # forget and expensive to notice missing (the build-dir redirect and the
+  # soft-reboot fixup). Service state stays in each host's
+  # system/persistence.nix, next to the decision to run the service at all.
 
   fileSystems = {
     # device + fsType come from disko's rpool/persist datasets. Both must be
@@ -30,13 +30,11 @@ in {
     "/persist/home".neededForBoot = true;
   };
 
-  # Nix builds must not happen in RAM. /tmp is part of the tmpfs root and the
-  # daemon builds there by default, so one big closure can fill the root and take
-  # the machine with it. /nix/tmp instead: it is on the pool, it is the same
-  # dataset as the store (so the build output moves into place instead of being
-  # copied across datasets), and rpool/nix is not snapshotted — unlike /persist,
-  # where hourly sanoid snapshots would pin every build's scratch files. Leftovers
-  # from crashed builds age out after 7 days.
+  # Nix builds must NOT happen in RAM: /tmp is part of the tmpfs root and the
+  # daemon builds there by default, so one big closure can take the machine with
+  # it. /nix/tmp instead — on the pool, the same dataset as the store (so output
+  # moves into place rather than copying across datasets), and not snapshotted,
+  # unlike /persist where hourly snapshots would pin every build's scratch.
   nix.envVars.TMPDIR = "/nix/tmp";
   systemd.tmpfiles.rules = ["d /nix/tmp 1777 root root 7d"];
 
@@ -54,14 +52,12 @@ in {
       "/var/lib/coredump"
 
       # Own the home explicitly. As a bare string, impermanence creates the
-      # /persist source dir as root:root and never enforces ownership — so on a
+      # /persist source dir root:root and never enforces ownership — so on a
       # FRESH dataset (a clean install, or the tempest-vm image) /home/irene
-      # comes up root-owned, the user can't write their own home, and the
-      # first-boot home-manager activation fails ("could not find suitable
-      # profile directory"). It only ever "worked" on tempest because the dir was
-      # fixed by hand once and then persisted. Setting user/group/mode makes
-      # impermanence create AND enforce irene:users 0700, so first boot is
-      # correct everywhere.
+      # comes up root-owned and the first home-manager activation fails. It only
+      # ever "worked" on tempest because the dir was fixed by hand once and then
+      # persisted. Setting user/group/mode makes impermanence create AND enforce
+      # irene:users 0700, so first boot is correct everywhere.
       {
         directory = "/home/irene";
         user = "irene";

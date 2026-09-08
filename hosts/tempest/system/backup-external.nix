@@ -4,19 +4,17 @@
   ...
 }:
 #
-# Time-Machine-style local backup for tempest: ZFS replication of the
-# irreplaceable datasets onto an encrypted ZFS pool living on an external USB
-# SSD. This is the LOCAL leg of a 3-2-1 backup:
+# The LOCAL leg of a 3-2-1 backup: ZFS replication of the irreplaceable datasets
+# onto an encrypted pool on an external USB SSD.
 #
 #   sanoid (system/zfs.nix) ── local instant-rollback snapshots
 #   syncoid (here) ─────────── full versioned history on the USB SSD  ← this file
 #   borg (system/services.nix) ─ offsite /home to the Hetzner storagebox
 #
-# Why ZFS send/recv (syncoid) and not a second borg repo: it is block-level
-# incremental (a daily run after the seed is seconds, not a file re-walk), it
-# preserves every sanoid snapshot so any point in time is browsable
-# (`httm`, or `<mnt>/.zfs/snapshot/<name>/`), and recovery from a dead NVMe is a
-# single `zfs send` of the whole pool state back, not a file-by-file restore.
+# ZFS send/recv rather than a second borg repo because it is block-level
+# incremental (a daily run is seconds, not a file re-walk), it preserves every
+# sanoid snapshot so any point in time stays browsable via `httm` or
+# `.zfs/snapshot/`, and recovery from a dead NVMe is one `zfs send` back.
 #
 # ──────────────────────────────────────────────────────────────────────────
 # ONE-TIME SETUP (destructive — do NOT let a rebuild do this; run by hand):
@@ -43,10 +41,9 @@
 #   # 3. Seed it (also runs automatically on plug-in once this module is built):
 #   sudo systemctl start tempest-backup-external.service
 #
-# KEY SURVIVAL (read this twice): the key file lives on /persist, i.e. on the
-# very NVMe this backup protects. If that disk dies and the passphrase exists
-# *only* in that file, the backup is unrecoverable. Keep the passphrase ALSO in
-# vaultwarden (you self-host it) and/or printed. Disaster recovery then is:
+# KEY SURVIVAL: the key file lives on /persist, i.e. on the very NVMe this
+# backup protects — if that disk dies and the passphrase exists ONLY there, the
+# backup is unrecoverable. Keep it in vaultwarden and/or printed too. Recovery:
 #   zpool import -R /mnt/recover backup && zfs load-key -L prompt backup
 #   (type the passphrase) && zfs send/receive back, or rsync out.
 # ──────────────────────────────────────────────────────────────────────────
@@ -55,16 +52,14 @@ let
   parent = "${pool}/tempest";
   altroot = "/mnt/backup";
 
-  # Desktop result notifications (see packages/backup-notify.nix). Failures are
-  # wired via systemd OnFailure= below so a crash anywhere in the run is caught;
-  # success is emitted inline at the end of the orchestrator so the no-op skip
-  # paths (drive absent / already imported) stay silent.
+  # Failures go through systemd OnFailure= below, so a crash anywhere in the run
+  # is caught; success is emitted inline at the end of the orchestrator, so the
+  # no-op skip paths (drive absent / already imported) stay silent.
   backup-notify = pkgs.callPackage ../../../packages/backup-notify.nix {};
 
-  # The one place this unit is named. It is referenced from the systemd unit
-  # attribute, the udev rule that triggers it, the fail-notification argument,
-  # and backup-verify.sh — which is a plain .sh file that cannot see this
-  # binding, so it receives the name through the prelude below.
+  # The one place this unit is named: the systemd unit, the udev rule that
+  # triggers it, the fail-notification argument, and backup-verify.sh — which is
+  # a plain .sh file and receives the name through the prelude below.
   usbUnitName = "tempest-backup-external";
   usbUnit = "${usbUnitName}.service";
 
@@ -73,10 +68,9 @@ let
   # (scrub-if-stale, see the orchestrator script below).
   scrubMaxAgeSec = 30 * 24 * 3600; # 30 days
 
-  # Replication pairs. /persist and /persist/home carry independent sanoid
-  # retention (system/zfs.nix), so they are sent as separate non-recursive
-  # datasets rather than one recursive stream. /nix is reproducible and
-  # rpool/sbctl is regenerable — neither is backed up.
+  # Separate non-recursive datasets rather than one recursive stream, because
+  # /persist and /persist/home carry independent sanoid retention. /nix is
+  # reproducible and rpool/sbctl regenerable, so neither is backed up.
   pairs = [
     {
       src = "rpool/persist";
@@ -88,11 +82,10 @@ let
     }
   ];
 
-  # Prune-only retention ON THE BACKUP POOL — deliberately deeper than the NVMe
-  # so the external is the long archive (this is the "scroll way back" part).
-  # autosnap=no: syncoid ships the snapshots, sanoid here only expires the old
-  # ones. The configdir needs only sanoid.conf; sanoid locates its bundled
-  # sanoid.defaults.conf relative to its own binary (same as services.sanoid).
+  # Prune-only retention ON THE BACKUP POOL, deliberately deeper than the NVMe
+  # so the external is the long archive. autosnap=no: syncoid ships the
+  # snapshots, sanoid here only expires them. The configdir needs only
+  # sanoid.conf — sanoid finds its bundled defaults relative to its own binary.
   pruneConfDir = pkgs.writeTextDir "sanoid.conf" ''
     [${parent}/persist]
       use_template = backup
@@ -122,9 +115,8 @@ let
     text = ''
       log() { echo "[tempest-backup-external] $*"; }
 
-      # The pool lives on a removable USB SSD: import only for the run, export
-      # after. (It is created with cachefile=none, so it never auto-imports at
-      # boot or blocks boot when the drive is absent.) If it is ALREADY
+      # Removable drive: import only for the run, export after. (cachefile=none,
+      # so it never auto-imports or blocks boot when absent.) If it is ALREADY
       # imported, a human is browsing it — leave it untouched.
       if zpool list -H -o name ${pool} >/dev/null 2>&1; then
         log "pool '${pool}' already imported (manual session?); skipping."
@@ -152,20 +144,17 @@ let
         zfs create -o canmount=off -o mountpoint=none ${parent}
       fi
 
-      # Replicate. syncoid takes its own `syncoid_<host>_<ts>` sync snapshot on
-      # the source and sends with -I, carrying every sanoid snapshot in between
-      # onto the backup = the browsable history. recvOptions=u: never mount on
-      # receive.
+      # syncoid takes its own `syncoid_<host>_<ts>` snapshot on the source and
+      # sends with -I, carrying every sanoid snapshot in between — that is the
+      # browsable history. recvOptions=u: never mount on receive.
       #
       # That sync snapshot is what makes the NEXT run incremental, and it
-      # survives arbitrary gaps: sanoid's autoprune only expires its own
-      # `autosnap_*` snapshots, so it never removes the common base. Exactly one
-      # is kept — syncoid deletes the previous one after each successful run.
+      # survives arbitrary gaps, because sanoid's autoprune only expires its own
+      # `autosnap_*` and so never removes the common base. Exactly one is kept.
       #
-      # Note it is a snapshot and NOT a bookmark: `--create-bookmark` is opt-in
-      # in syncoid and is not passed here, so `zfs list -t bookmark` is empty.
-      # If that sync snapshot is ever destroyed by hand, the next run has no
-      # common base and must reseed the whole pool.
+      # It is a snapshot and NOT a bookmark — `--create-bookmark` is opt-in and
+      # unpassed, so `zfs list -t bookmark` is empty. Destroy that snapshot by
+      # hand and the next run has no common base and must reseed the pool.
       ${lib.concatMapStringsSep "\n" (p: ''
           log "replicating ${p.src} -> ${p.dst}"
           syncoid --recvOptions=u --quiet ${p.src} ${p.dst}
@@ -175,13 +164,12 @@ let
       # Expire old snapshots on the backup per the deep-retention policy above.
       sanoid --configdir=${pruneConfDir} --prune-snapshots --verbose
 
-      # Scrub-if-stale. This run is the only window the pool is imported, so a
-      # periodic integrity scrub has to ride along. -w blocks until the scrub
-      # finishes (the oneshot has no timeout) — so on a scrub run the drive must
-      # stay attached for potentially hours. We stamp the completion time as a
-      # user property on the pool itself (it travels with the drive and is
-      # readable exactly when we need it — while imported), rather than parsing
-      # the free-form `zpool status` scan line.
+      # This run is the only window the pool is imported, so a periodic scrub
+      # has to ride along. -w blocks until it finishes and the oneshot has no
+      # timeout, so on a scrub run the drive must stay attached for hours. The
+      # completion time is stamped as a user property on the pool — it travels
+      # with the drive and is readable exactly when needed — rather than parsed
+      # out of the free-form `zpool status` scan line.
       last_scrub=$(zfs get -H -o value tempest:scrubbed ${pool} 2>/dev/null || echo "")
       now=$(date +%s)
       case "$last_scrub" in
@@ -195,10 +183,10 @@ let
         log "scrub finished."
       fi
 
-      # Surface external-SSD health while the pool is still imported (the only
-      # chance). A pool can read ONLINE yet carry checksum/read/write or
-      # scrub-found errors; `status -x` catches those. A non-zero exit here fails
-      # the unit, which latches the syncoid leg as **failed** (CONTEXT.md).
+      # The only chance to check drive health, while the pool is imported. A
+      # pool can read ONLINE yet carry checksum/read/write or scrub-found
+      # errors, which `status -x` catches. A non-zero exit fails the unit, which
+      # latches the syncoid leg as **failed** (CONTEXT.md).
       if ! zpool status -x ${pool} | grep -q "is healthy"; then
         log "POOL '${pool}' UNHEALTHY:"
         zpool status -v ${pool} || true
@@ -245,15 +233,13 @@ let
     '';
   };
 
-  # On-demand "is my backup actually good?" check. The orchestrator's own
-  # `zpool status -x` gate only looks at the pool during a backup run; this
-  # answers the question at any time, and — unlike the run — imports READ-ONLY
-  # and never loads the encryption key. The body is a plain .sh file rather than
-  # an inline string because it is long and full of ''${...} shell expansions
-  # that would need escaping in a Nix indented string. The config values are
-  # injected as a prelude instead, so PAIRS is derived from the same `pairs`
-  # list the orchestrator replicates: adding a dataset there extends the
-  # verification automatically, with no second place to update.
+  # On-demand "is my backup actually good?". The orchestrator's `zpool status -x`
+  # gate only looks during a run; this answers at any time, and — unlike the run
+  # — imports READ-ONLY and never loads the encryption key. The body is a plain
+  # .sh file because it is long and full of ''${...} expansions that would need
+  # escaping in a Nix indented string; config values are injected as a prelude,
+  # so PAIRS derives from the same `pairs` list the orchestrator replicates and
+  # adding a dataset extends the verification automatically.
   verifyBin = pkgs.writeShellApplication {
     name = "tempest-backup-verify";
     runtimeInputs = [

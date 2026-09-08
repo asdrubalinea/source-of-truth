@@ -4,12 +4,10 @@
   lib,
   ...
 }: let
-  # SDRangel segfaults under Qt's Wayland platform plugin (its OpenGL spectrum/
-  # scope widgets crash on startup); the global QT_QPA_PLATFORM=wayland from the
-  # niri rice (rices/ember/compositors/niri/niri.nix) is what selects that plugin. Pin just this
-  # app to XWayland — niri runs xwayland-satellite, so `xcb` connects fine and
-  # the GL widgets are stable there. (Verified: SIGSEGV on wayland, clean on
-  # xcb.) Must be --set, not --set-default, to override the inherited wayland.
+  # SDRangel's OpenGL widgets segfault under Qt's Wayland plugin, which the
+  # rice's global QT_QPA_PLATFORM=wayland selects. Pin this one app to XWayland
+  # (niri runs xwayland-satellite, so `xcb` connects fine and the GL widgets are
+  # stable). Must be --set, not --set-default, to beat the inherited value.
   sdrangel-xwayland = pkgs.symlinkJoin {
     name = "sdrangel-xwayland";
     paths = [pkgs.sdrangel];
@@ -17,26 +15,25 @@
     postBuild = "wrapProgram $out/bin/sdrangel --set QT_QPA_PLATFORM xcb";
   };
 in {
+  # Deliberately NOT imported, though still in the tree: rices/estradiol,
+  # desktop/emacs, desktop/warp.nix, packages/cider-2.nix.
   imports = [
     # Desktop environment and theming
     inputs.stylix.homeModules.stylix
 
-    # ../../rices/estradiol
     ../../rices/ember # the ember rice (declares rices.ember.*; enabled below)
     ./monitors.nix # machine policy: monitor identities + layout (kanshi)
     ./lights.nix # machine policy: the desk strip follows the idle timers
     ./soft-reboot.nix # machine policy: Mod+Shift+R soft-reboot trigger (autologin gate lives in hosts/tempest/system/session.nix)
-    # ./speakers.nix # machine policy: built-in speaker DSP correction (EasyEffects) — disabled: leaks onto AirPods
+    # ./speakers.nix — built-in speaker DSP correction, off: leaks onto AirPods
 
     # Applications and tools
     ../../desktop/zed-editor
     ../../desktop/vscode.nix
     ../../desktop/helix.nix
-    # ../../desktop/emacs
     ../../desktop/mail
     ../../desktop/tmux.nix
     ../../desktop/zellij.nix
-    # ../../desktop/warp.nix
     ../../desktop/obsidian.nix
     ../../desktop/hn-tui.nix
     ../../desktop/home-packages.nix
@@ -44,9 +41,8 @@ in {
     ../../desktop/mimeapps.nix
     ../../desktop/telegram-sandbox.nix
 
-    # System utilities
-    # Applying and cleaning is `nh` (enabled in hosts/tempest/default.nix):
-    # `nh os switch`, `nh home switch -b backup`, `nh clean all`.
+    # System utilities. Applying and cleaning is `nh` (enabled in
+    # hosts/tempest/default.nix): `nh os switch`, `nh home switch -b backup`.
     ../../scripts/update-home.nix
     ../../scripts/port-forward.nix
     ../../scripts/claude-sandboxed.nix
@@ -61,35 +57,26 @@ in {
     ../../misc/fish.nix
   ];
 
-  # Activate the ember rice. Its machine policy stays out here: monitor layout is
-  # ./monitors.nix. See docs/adr/0004-niri-rice-as-enable-module.md.
-  #
-  # `rices.ember.marquee` (docs/adr/0011) is machine policy too, and it lives in
-  # ./monitors.nix rather than here: the band exists only because the QD-OLED is
-  # mounted portrait, so it is derived from that file's `oledMount` switch
-  # alongside the panel's rotation and logical size, off the one panel-identity
-  # binding both need.
+  # Activate the ember rice; its machine policy stays out here (ADR 0004).
+  # `rices.ember.marquee` (ADR 0011) is machine policy too and lives in
+  # ./monitors.nix rather than here, derived from that file's `oledMount` switch:
+  # the band exists only because the QD-OLED is mounted portrait.
   rices.ember.enable = true;
 
-  # Both compositor layers, installed side by side: the session is picked at the
-  # greeter per login, not at rebuild time (hosts/tempest/system/session.nix).
-  # These are not exclusive and there is no "current" one here — the soft-reboot
-  # autologin is the only thing that names a default, and it names niri.
-  # See docs/adr/0012-one-rice-two-compositors.md.
+  # Both compositor layers side by side — the session is picked at the greeter
+  # per login, not at rebuild time. There is no "current" one here; the
+  # soft-reboot autologin is the only thing that names a default (niri).
+  # See ADR 0012.
   rices.ember.niri.enable = true;
   rices.ember.mango.enable = true;
 
-  # Machine policy: readable terminal size on THIS machine's panels. A font size
-  # is a function of the display it is read on, so the rice deliberately leaves
-  # `stylix.fonts.sizes.terminal` unset (see rices/ember/stylix.nix) rather than
-  # branching on hostname inside itself.
+  # Machine policy: a readable terminal size on THIS machine's panels. The rice
+  # deliberately leaves this unset rather than branching on hostname.
   stylix.fonts.sizes.terminal = 16;
 
-  # Machine policy: where this machine is. Stated once, consumed twice — wlsunset
-  # (below) needs a lat/long to compute sunset; Noctalia geocodes a place name via
-  # api.noctalia.dev for its weather / night-light / auto-theme. The rice owns only
-  # the invariant that Noctalia must not re-locate itself by IP
-  # (`location.auto_locate = false`, rices/ember/noctalia.nix).
+  # Machine policy: where this machine is. Stated once, consumed twice —
+  # wlsunset below needs a lat/long, Noctalia geocodes a place name. The rice
+  # owns only the invariant that Noctalia must not re-locate itself by IP.
   programs.noctalia.settings.location.address = "Las Palmas, Spain";
 
   home = {
@@ -98,14 +85,11 @@ in {
     stateVersion = "23.05";
 
     packages = [
-      sdrangel-xwayland # RTL-SDR Blog V4 frontend, XWayland-wrapped (see let-binding above + hardware/rtl-sdr.nix)
+      sdrangel-xwayland # RTL-SDR Blog V4 frontend, XWayland-wrapped (see above + hardware/rtl-sdr.nix)
       pkgs.sdrpp # SDR++ — runs native Wayland fine (GLFW, no wrapper); links rtl-sdr-osmocom (V4-capable)
-      # (pkgs.callPackage ../../packages/cider-2.nix { })
     ];
 
-    # Pre-configure hyfetch (aliased to "neofetch" and "fetch") for the
-    # lesbian pride flag. The config file is consumed by hyfetch --gen and
-    # on every run; see https://github.com/hyfetch-project/hyfetch.
+    # hyfetch (aliased to neofetch/fetch), preset for the lesbian pride flag.
     file.".config/hyfetch.json" = {
       text = builtins.toJSON {
         preset = "lesbian";
@@ -124,48 +108,21 @@ in {
         palette_type = null;
       };
     };
-
-    # persistence."/persist/home/irene" = {
-    #   directories = [
-    #     "Downloads"
-    #     "Music"
-    #     "Pictures"
-    #     "Documents"
-    #     "Videos"
-    #     ".gnupg"
-    #     ".ssh"
-    #     ".local/share/keyrings"
-    #     ".local/share/direnv"
-    #     {
-    #       directory = ".local/share/Steam";
-    #       method = "symlink";
-    #     }
-    #   ];
-    #   files = [
-    #     ".claude.json"
-    #     ".bash_history"
-    #     ".python_history" ".mysql_history"
-    #   ];
-    #   allowOther = true;
-    # };
   };
 
   home.sessionVariables = {
     EDITOR = "${pkgs.helix}/bin/hx";
 
-    # distrobox autodetects a container manager by probing podman, then docker,
-    # then lilipod. Both podman and docker are enabled on this host
-    # (hosts/tempest/system/virtualization.nix), so leave nothing to the probe:
-    # pin podman, which is the rootless one that shares $HOME under irene's uid.
-    # If podman is broken, distrobox now says so instead of quietly building the
-    # box under the rootful docker daemon.
+    # distrobox probes podman, then docker, then lilipod — and both of the first
+    # two are enabled on this host, so leave nothing to the probe. Pinning
+    # podman (the rootless one that shares $HOME under irene's uid) also means a
+    # broken podman says so instead of quietly using the rootful daemon.
     DBX_CONTAINER_MANAGER = "podman";
   };
 
   programs = {
     home-manager.enable = true;
 
-    # Version control
     git = {
       enable = true;
       signing.format = null;
@@ -175,37 +132,31 @@ in {
       };
     };
 
-    # Reach GitLab.com over its alternate git+ssh port (443 via
-    # altssh.gitlab.com) so pushes still work on networks that firewall
-    # port 22. See:
-    # https://about.gitlab.com/blog/gitlab-dot-com-now-supports-an-alternate-git-plus-ssh-port/
     ssh = {
       enable = true;
       # Opt out of HM's soon-to-be-removed default `Host *` block; its values
-      # just mirror ssh's own built-in defaults, so there's nothing to keep.
+      # just mirror ssh's own built-in defaults.
       enableDefaultConfig = false;
 
-      # `ocelot` writes one stanza per dev VM into ~/.ssh/config.d/ (name, its
-      # allocated port, its own known_hosts, ForwardAgent) — see
-      # docs/adr/0013 and scripts/ocelot.sh. This is what makes everything that
-      # speaks ssh work by name, `port-forward ocelot-<name> 3000` included.
-      # It has to be declared here because HM owns ~/.ssh/config as a store
-      # symlink, so nothing can append to it at runtime. A glob matching
-      # nothing is not an error, so this is inert until the first ocelot exists.
+      # `ocelot` writes one stanza per dev VM into ~/.ssh/config.d/ (ADR 0013),
+      # which is what makes everything that speaks ssh work by name,
+      # `port-forward ocelot-<name> 3000` included. It has to be declared here
+      # because HM owns ~/.ssh/config as a store symlink, so nothing can append
+      # at runtime. A glob matching nothing is not an error, so this is inert
+      # until the first ocelot exists.
       includes = ["config.d/*"];
       settings = {
-        # Locally wezterm sets TERM=wezterm; remote hosts that lack the wezterm
-        # terminfo entry (anything not running hydra/orchid's wezterm.terminfo)
-        # then drop TUI apps like the mysql client to dumb-terminal mode — no
-        # readline, no arrow keys, no tab completion. sshd always honours the
-        # client-sent TERM (no AcceptEnv needed), so override it to a term every
-        # host knows. The gitlab.com/github.com blocks below are more specific
-        # and still win for their hosts.
+        # wezterm sets TERM=wezterm locally, and remote hosts without that
+        # terminfo entry drop TUI apps to dumb-terminal mode — no readline, no
+        # arrow keys. sshd always honours the client-sent TERM, so override it
+        # to something every host knows. The more specific blocks below still
+        # win for their hosts.
         "*" = {
           SetEnv = {
             TERM = "xterm-256color";
           };
         };
+        # Port 443 via altssh, so pushes work on networks that firewall 22.
         "gitlab.com" = {
           HostName = "altssh.gitlab.com";
           User = "git";
@@ -221,13 +172,11 @@ in {
       };
     };
 
-    # Development tools
     nix-index = {
       enable = true;
       enableFishIntegration = true;
     };
 
-    # Enhanced shell prompt
     starship = {
       enable = true;
       enableFishIntegration = true;
@@ -241,23 +190,15 @@ in {
         };
 
         # The right prompt is a readout column: flush-right, glanced at, never
-        # read as prose — the same job the bar does, in the one surface that is
-        # already lit. It carries what the left prompt does not, and nothing
-        # else. (misc/fish.nix used to define an empty `fish_right_prompt`,
-        # which shadowed starship's; it is gone, so this is what renders.)
+        # read as prose. Both modules are off by default in starship and so are
+        # absent from `$all` above — `status` prints only when non-zero, which
+        # is the point (a failure that scrolled off is otherwise invisible), and
+        # `time` isn't redundant with the bar's clock because the bar auto-hides
+        # for burn-in (ADR 0009), leaving scrollback as the only place "when did
+        # this run" is answerable — including in a log paste.
         #
-        # Both modules are off by default in starship and so are absent from
-        # `$all` above:
-        #   status — the exit code of the last command. Prints only when
-        #            non-zero, which is the whole point: a failure that scrolled
-        #            off the top is otherwise invisible.
-        #   time   — a per-command timestamp. Not redundant with the bar's
-        #            clock: the bar auto-hides for burn-in (ADR 0009), so the
-        #            scrollback is where "when did this run" is actually
-        #            answerable, and it stays answerable in a log paste.
-        # Styles are ANSI names, never hexes — the terminal palette is ember's
-        # (principle 4). bright-black is base03, the same value the wallpaper
-        # subordinates its brackets to.
+        # Styles are ANSI names, never hexes: the terminal palette is ember's
+        # (principle 4). bright-black is base03.
         right_format = "$status$time";
         status = {
           disabled = false;
@@ -274,12 +215,9 @@ in {
     };
   };
 
-  # (mako removed — rices/ember/noctalia.nix mkForce-disables it; Noctalia owns
-  # notifications on this host, so the block only looked live.)
-
-  # The only colour-temperature filter on this host. redshift used to be enabled
-  # too (services/redshift.nix) but its `randr` backend has no X display under
-  # niri: it exited 1 on every start and systemd restart-looped it forever.
+  # The only colour-temperature filter on this host. redshift is gone: its
+  # `randr` backend has no X display under niri, so it exited 1 on every start
+  # and systemd restart-looped it forever.
   services.wlsunset = {
     enable = true;
     latitude = 28.1235; # Las Palmas de Gran Canaria, Spain
@@ -288,42 +226,29 @@ in {
 
   # Keep the Wayland client services alive across a compositor restart.
   #
-  # When the compositor goes away — a session switch, or a plain crash, which on
-  # this box is routine — the Wayland socket is pulled out from under every client
-  # service at once. systemd's stock policy is RestartSec=100ms with
-  # StartLimitBurst=5 over StartLimitIntervalSec=10s, so each one burns all five
-  # retries inside half a second, long before a new compositor exists to connect
-  # to. Then it hits the start limit and stops for good: swayidle exited 253
-  # ("Unable to connect to the compositor") five times in 1.2s on 2026-08-19 and
-  # sat dead for the next three hours, so the 120s panel power-off and the 1200s
-  # idle suspend in rices/ember/swayidle.nix simply never ran. Every fix in that
-  # file is about what swayidle *does* on a timer, and none of it matters while
-  # the daemon is not running.
+  # A compositor going away pulls the socket out from under every client service
+  # at once, and systemd's stock policy (RestartSec=100ms, 5 tries in 10s) burns
+  # all five retries inside half a second — long before a new compositor exists.
+  # Then the unit stops for good: swayidle exited 253 five times in 1.2s and sat
+  # dead for three hours, so nothing in rices/ember/swayidle.nix ran at all.
+  # Worse, a start-limit-hit unit ends up `inactive (dead)`, not `failed`, so it
+  # never shows in `systemctl --user --failed` and the list looked clean.
   #
-  # Worse, the end state is `inactive (dead)`, not `failed` — a start-limit-hit
-  # unit does not appear in `systemctl --user --failed`, so the unit list looked
-  # clean the whole time. kanshi hit the identical limit at 10:36:11 the same
-  # morning; wlsunset ships Restart=no and so dies on the first disconnect.
+  # So retry indefinitely and slowly: StartLimitIntervalSec=0 kills the rate
+  # limiter and 2s makes an unbounded retry cheap. PartOf=graphical-session.target
+  # still stops these on a real logout, so nothing spins once the session is
+  # genuinely over.
   #
-  # noctalia is in the list for the limiter only — it fails a different way (a
-  # clean exit 0 that on-failure ignores), handled in rices/ember/noctalia.nix.
-  #
-  # Retry indefinitely and slowly instead: StartLimitIntervalSec=0 disables the
-  # rate limiter, and 2s between attempts makes an unbounded retry cheap.
-  # PartOf=graphical-session.target (set by all three modules) still stops these
-  # on a real logout, so nothing can spin once the session is genuinely over —
-  # the retries only cover the window where the compositor is missing.
+  # wlsunset is the only Restart this block sets — it ships Restart=no, so one
+  # disconnect ends it for the session. swayidle and kanshi already carry
+  # Restart=always, and noctalia gets it in rices/ember/noctalia.nix (it fails a
+  # different way, a clean exit 0 that on-failure ignores); noctalia is listed
+  # here for the limiter only.
   #
   # ponytail: this trades the start limiter's one virtue — giving up loudly on a
-  # permanently broken command — for a log line every 2s. A unit here flapping for
-  # a non-compositor reason (bad flag, missing binary) will now retry forever
-  # rather than stop; `journalctl --user -u <unit>` is where that shows up.
-  #
-  # wlsunset is the one that ships Restart=no, so a single disconnect ends it for
-  # the rest of the session. swayidle and kanshi already carry Restart=always from
-  # their own modules, and noctalia gets it in rices/ember/noctalia.nix (next to
-  # the reasoning about *why* it needs more than on-failure) — so wlsunset is the
-  # only Restart this block has to set.
+  # permanently broken command — for a log line every 2s. A unit flapping for a
+  # non-compositor reason now retries forever; `journalctl --user -u <unit>` is
+  # where that shows up.
   systemd.user.services = lib.mkMerge [
     (lib.genAttrs ["swayidle" "kanshi" "wlsunset" "noctalia" "wayland-pipewire-idle-inhibit"] (_: {
       Unit.StartLimitIntervalSec = 0;

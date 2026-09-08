@@ -8,245 +8,139 @@
   imports = [inputs.noctalia.homeModules.default];
 
   config = lib.mkIf config.rices.ember.enable {
-    # Noctalia is the "shell" leg of the NNN stack — an all-in-one desktop shell
-    # (bar + launcher + notifications + lockscreen). It replaces waybar, dropped
-    # from the rice's default.nix, and takes the launcher role off tofi — which
-    # stays imported (./tofi.nix) as the rice's *menu* widget, for the marquee's
-    # cast picker and the audio-output switcher. It also supersedes mako
-    # (notifications) — force mako off so two notification daemons don't fight
-    # over the same dbus name.
+    # Noctalia is the shell leg of the NNN stack: bar, launcher, notifications,
+    # wallpaper. It replaced waybar and took the launcher role off tofi (which
+    # stays as the rice's *menu* widget). It supersedes mako too, so force mako
+    # off rather than have two daemons fight over the dbus name.
     services.mako.enable = lib.mkForce false;
 
     programs.noctalia = {
       enable = true;
 
-      # Run noctalia as a supervised systemd user service (the module wires up
-      # Restart=on-failure, PartOf/After/WantedBy graphical-session.target) rather
-      # than a bare, unsupervised niri spawn-at-startup. v5.0.0 is an unreleased
-      # dev build of the C++ rewrite (the stable release line is still v4.x) and
-      # segfaults deterministically — same fault offset every time, typically
-      # around output hotplug / session teardown, which this docked+suspend setup
-      # hits constantly. As a service a crash self-heals in ~1s; as a niri child it
-      # just left a dead bar until a manual relaunch (which re-crashed). The
-      # spawn-at-startup entry in compositors/niri/niri.nix is removed so it isn't double-launched.
+      # Supervised, not a bare compositor spawn: v5.0.0 is an unreleased dev
+      # build that segfaults deterministically around output hotplug, which a
+      # docked+suspend setup hits constantly. As a service it self-heals in ~1s.
+      # The spawn-at-startup entry in compositors/niri/niri.nix is removed so it
+      # isn't double-launched.
       systemd.enable = true;
 
-      # ── Theming ────────────────────────────────────────────────────────────
-      # Colors come from stylix. The stylix bump landed the noctalia v5 target
-      # (danth/stylix#2364 — see modules/noctalia/hm.nix in the stylix store
-      # path): it maps the base16 scheme (ember-3400k-dark, set in stylix.nix)
-      # into noctalia's Material-3 tokens as a `custom_palette`, and sets
-      # theme.source = "custom" / theme.mode from stylix polarity. We just consume
-      # that here — no source/mode override — which is the whole reason this rice
-      # used to hand-drive colors (wallpaper-derived) instead.
-      #
-      # stylix also themes the apps themselves directly (its gtk / kitty /
-      # alacritty / wezterm / fish targets, plus the qtct ColorScheme generated in
-      # qt.nix), so noctalia no longer relays colors to other apps — there is no
-      # theme.templates block here anymore, and the per-app `force = true`
-      # workarounds that the runtime templates required are gone.
+      # Colors come from stylix, which since danth/stylix#2364 maps the base16
+      # scheme into noctalia's Material-3 tokens and owns every theme.* key
+      # (source/mode/custom_palette/font_family/wallpaper.default.path). Nothing
+      # to override here — this is why the rice no longer hand-drives colors.
+      # stylix also themes the apps directly, so there is no theme.templates
+      # relay any more, and the per-app `force = true` workarounds it needed are
+      # gone.
 
-      # ── Declarative settings (pins ~/.config/noctalia/config.toml) ───────────
-      # v5 config is TOML, validated at build time by `noctalia config validate`
-      # (programs.noctalia.validateConfig, on by default): a bad VALUE fails the
-      # build, an unknown key is a silent warning. The bar layout (position +
-      # widgets) lives in ./noctalia-widgets.nix and merges into this same
-      # config.toml; this module keeps shell enable, theming, and global shell
-      # settings. Pinning config.toml makes the in-app settings GUI
-      # non-persistent (read-only store symlink).
+      # Declarative config.toml, validated at build time (a bad value fails the
+      # build, an unknown key only warns). Bar layout lives in
+      # ./noctalia-widgets.nix and merges into this same file. Pinning it makes
+      # the in-app settings GUI non-persistent — it's a read-only store symlink.
       settings = {
-        # theme.* (source / mode / custom_palette / customPalettes / shell
-        # .font_family / wallpaper.default.path) is entirely owned by the stylix
-        # noctalia target — see the Theming note above.
-
-        # Weather / Night-Light / auto-theme location. `auto_locate` MUST stay off
-        # or its IP-geolocation timer overwrites whatever address is set — that is
-        # the rice's half of this, and the only half that is about the desktop.
-        #
-        # The address itself is machine policy: where the machine lives is not a
-        # property of the rice, and this host already states it once, as the
-        # wlsunset coordinates in homes/tempest/default.nix. `location.address` is
-        # set right beside them so the two can't drift apart. It is geocoded via
-        # api.noctalia.dev, so it is a place name rather than a lat/long pair.
+        # MUST stay off, or the IP-geolocation timer overwrites the address.
+        # The address itself is machine policy and lives beside the wlsunset
+        # coordinates in homes/tempest/default.nix so the two can't drift.
         location.auto_locate = false;
 
-        # Noctalia owns the wallpaper (replacing the old awww service). It draws a
-        # background-layer surface (namespace "noctalia-wallpaper") that ignores
-        # exclusive zones — niri's layer-rule in compositors/niri/niri.nix reparents it into niri's
+        # Noctalia owns the wallpaper (replacing awww), drawing a
+        # background-layer surface that niri's layer-rule reparents into its
         # backdrop.
-        #
-        # v5 only renders a surface when it has a PERSISTED image path:
-        # createInstance → getWallpaperPath(connector) returns the per-monitor
-        # override else `default.path`, and if that's empty it never loads an
-        # image — there is NO "pick the first/random file from `directory`"
-        # fallback at startup (the directory only feeds the random/automation
-        # feature). The picker writes the live choice into the writable
-        # ~/.local/state/noctalia/settings.toml (as wallpaper.default/monitors/
-        # last .path), which deep-merges OVER this read-only config.toml. So when
-        # that runtime state is reset — which is exactly what the v5 update did,
-        # by relocating the state store — nothing is left to show and the desktop
-        # comes up blank.
-        #
-        # Pin `default.path` to the seeded starter image (./wallpaper) so there's
-        # always a deterministic fallback; the picker still overrides it at
-        # runtime via settings.toml.
         wallpaper = {
           enabled = true;
-          # Point the picker/rotation at the curated OLED pool, not the whole
-          # library — ~/Pictures/Wallpapers also holds hand-dropped images that
-          # were never measured (several sit at 54–93% mean luminance), and
-          # automation would happily park one of those on the panel all day.
-          # ../wallpaper/default.nix seeds oled/ and records the measurements.
+          # The curated OLED pool, not the whole library — ~/Pictures/Wallpapers
+          # also holds unmeasured hand-dropped images (some at 54–93% mean
+          # luminance) that automation would happily park on the panel all day.
           directory = "~/Pictures/Wallpapers/oled";
 
-          # Rotation off by request — the ground stays put. The OLED argument for
-          # cycling still holds in principle (same subpixels, same level, all
-          # day), but the generated ground puts 0.13% of its pixels above the
-          # base00 ground and they are all thin lines. There is less static
-          # content here than in any photograph the pool holds, so cycling would
-          # raise the risk it exists to lower.
+          # Off by request — the ground stays put. Cycling would raise the
+          # burn-in risk it exists to lower: the generated ground has less
+          # static content than any photograph in the pool.
           automation.enabled = false;
 
-          # The stylix target also pins wallpaper.default.path (to its own
-          # `image`) at normal priority, so mkForce the rice's chosen image to
-          # win. With automation off nothing rewrites this at runtime any more,
-          # but the state settings.toml still deep-merges over it, so the
-          # picker remains the way to change wallpaper live — this is what a
-          # fresh state store comes up with.
-          #
-          # The ground is generated from the base16 scheme at build time
-          # (../wallpaper/default.nix) rather than being a downloaded image: it
-          # cannot drift out of palette, and with 0.13% of its pixels above the
-          # ground colour it is the safest thing in the pool for the OLED. It is
-          # seeded into oled/ alongside the photographs so the picker can get
-          # back to it.
+          # v5 renders NOTHING without a persisted image path — there is no
+          # "pick one from `directory`" startup fallback, which is why the
+          # desktop came up blank when the v5 update relocated the state store.
+          # So pin a deterministic fallback. mkForce because the stylix target
+          # also pins this at normal priority. The picker still overrides it
+          # live via ~/.local/state/noctalia/settings.toml, which deep-merges
+          # over this file.
           default.path = lib.mkForce "~/Pictures/Wallpapers/oled/hud-ground.png";
 
-          # `fit`, not the default `crop`: the ground carries marks at its edges,
-          # and crop scales to cover and then discards the overflow — on any
-          # panel that isn't 16:9 that throws the marks away. fit keeps the whole
-          # image and letterboxes, and the letterbox is invisible because
-          # fill_color is the same near-black the image's ground is.
-          #
-          # The cost, measured against homes/tempest/monitors.nix: the frame ends
-          # up inset by the letterbox on panels that aren't 16:9 — nothing on the
-          # OLED (3840x2160) or the two 16:9 externals, ~150px top and bottom on
-          # eDP-1 (2880x1920), ~440px left and right on the 21:9 ultrawide. It
-          # stays centred and symmetric, and every line keeps its weight. If you
-          # would rather the frame always hug the physical edge, `stretch` does
-          # that in one word, at the cost of anisotropic line weight (up to
-          # 1.34:1 on the ultrawide — a 4px bracket arm becoming 3.6 by 2.7).
+          # `fit`, not the default `crop`: the ground carries marks at its edges
+          # and crop scales-to-cover and discards the overflow, throwing them
+          # away on any non-16:9 panel. The letterbox is invisible because
+          # fill_color is the image's own ground. Cost is an inset frame on
+          # non-16:9 panels (~150px on eDP-1, ~440px on the ultrawide);
+          # `stretch` hugs the edge instead, at up to 1.34:1 line weight.
           fill_mode = "fit";
           fill_color = config.lib.stylix.colors.withHashtag.base00;
         };
 
         brightness.enable_ddcutil = true;
 
-        # (`backdrop.blur_intensity = 0.1` was here and did nothing:
-        # `noctalia config export full` shows `backdrop.enabled = false`, so
-        # there is no backdrop surface to blur.)
+        # (`backdrop.blur_intensity` was here and did nothing — backdrop.enabled
+        # is false, so there is no surface to blur.)
 
-        # wezterm asks for toasts that never go away. Captured from its live
-        # Notify call: app_name="wezterm", urgency=critical, expire_timeout=0 —
-        # and 0 is the spec's "never expire" (-1 is "daemon default"), so
-        # noctalia was right to keep them up. wezterm has no knob for this; the
-        # only notification-related field in its config schema is
-        # notification_handling.
-        #
-        # A matched filter with allow_permanent = false rewrites timeout 0 to
-        # noctalia's kDefaultNotificationTimeout (6s); add override_duration
-        # (milliseconds) here to choose a different one. `match` is a
-        # case-insensitive token compared against app name, desktop entry or
-        # category, so "wezterm" hits the app name. Every other filter field
-        # (show_toast / save_history / play_sound) defaults true, so this only
-        # changes the expiry.
+        # wezterm sends urgency=critical with expire_timeout=0, which the spec
+        # defines as "never expire", so noctalia was right to keep the toasts
+        # up; wezterm has no knob for it. allow_permanent = false rewrites the 0
+        # to noctalia's 6s default (add override_duration in ms for another).
+        # `match` is a case-insensitive token against app name / desktop entry /
+        # category, and every other filter field defaults true.
         notification.filter.wezterm = {
           match = "wezterm";
           allow_permanent = false;
         };
 
         shell = {
-          # THE DISPLAY FACE, and the only surface that gets it — see "body face
-          # / display face" in CONTEXT.md. Departure Mono is a pixel font: a
-          # readout you glance at can afford to be conspicuous, a buffer you read
-          # for an hour cannot, so this is pointed at the one surface that wants
-          # it instead of being put in a stylix slot (which would drag GTK,
-          # Obsidian's chrome and Zed's chrome along with it).
-          #
-          # mkForce because the stylix noctalia target sets font_family from
-          # fonts.sansSerif.name at normal priority — and that slot is now
-          # Ioskeley Mono, the body face, which is exactly what the bar should
-          # NOT be. Installed system-wide in ./fonts.nix; named by string
-          # because it occupies no stylix slot to read it back from.
-          #
-          # Pixel fonts are crisp at their design size and integer multiples and
-          # soft in between. If the bar text looks fuzzy, the knob is
+          # THE DISPLAY FACE, and the only surface that gets it (see CONTEXT.md).
+          # A pixel font suits a readout you glance at, not a buffer you read
+          # for an hour — hence pointed here rather than put in a stylix slot,
+          # which would drag GTK and every editor's chrome along. mkForce
+          # because the stylix target sets this from fonts.sansSerif, now the
+          # body face. Installed in ./fonts.nix; named by string as it occupies
+          # no stylix slot. If it looks fuzzy the knob is
           # `bar.default.font_scale` in ./noctalia-widgets.nix, not this.
           font_family = lib.mkForce "Departure Mono";
 
-          # Off since the negative struts in compositors/niri/niri.nix: windows now reach the
-          # display edges and already round themselves at radius 12
-          # (window-rules.nix geometry-corner-radius). Noctalia's screen-corner
-          # overlay masks a second, differently-sized curve on top of that, so
-          # the two radii visibly disagree at every corner. One rounding wins.
+          # Off since the negative struts: windows now reach the display edges
+          # and already round at radius 12, and this overlay masks a second,
+          # differently-sized curve on top. One rounding wins.
           screen_corners.enabled = false;
 
-          # Noctalia's clipboard history is on by default and "adopts orphaned
-          # selections" — it takes Wayland selection ownership so content
-          # survives the source app exiting. That adoption raced every copy:
-          # Gecko/Chromium announce a selection and serve empty data for ~6ms
-          # before filling it in, noctalia read that empty/previous value and
-          # re-offered it as its own, the app re-asserted, and the two ping-ponged
-          # ~6 times per Ctrl+C. Whichever won the last round decided what you
-          # pasted, so the first copy often yielded the PREVIOUS selection.
-          # Verified by removal: with noctalia stopped the ping-pong vanished
-          # entirely; with this false, 49 adoptions/hour dropped to 0 and history
-          # still records. Trade-off kept deliberately: clipboard content now
-          # dies with the source app, which is plain Wayland behaviour.
+          # Noctalia "adopts orphaned selections", which raced every copy:
+          # Gecko/Chromium serve empty data for ~6ms after announcing a
+          # selection, noctalia re-offered that stale value as its own, and the
+          # two ping-ponged ~6x per Ctrl+C — so the first copy often pasted the
+          # PREVIOUS selection. With this false, 49 adoptions/hour went to 0 and
+          # history still records. Deliberate trade: clipboard content now dies
+          # with the source app, which is plain Wayland behaviour.
           clipboard_keep_from_closed_apps = false;
         };
       };
     };
 
-    # A systemd user service only inherits the handful of vars the compositor pushes via
-    # `systemctl --user import-environment` (WAYLAND_DISPLAY, XDG_CURRENT_DESKTOP,
-    # DBUS_SESSION_BUS_ADDRESS, XAUTHORITY) — NOT the compositor’s per-session `env`
-    # block. So re-export the two vars noctalia actually needs that live there:
-    #   - NOCTALIA_PAM_SERVICE: without it the lockscreen falls back to PAM "login"
-    #     → "setuid failed" → can never unlock (see the comment in compositors/niri/niri.nix).
-    #   - QT_QPA_PLATFORM=wayland: keep the Qt platform explicit, as in both layers.
+    # A user service inherits only what the compositor pushes via
+    # `import-environment`, NOT the compositor's per-session `env` block. So
+    # re-export the two vars noctalia needs from there. Without
+    # NOCTALIA_PAM_SERVICE the lockscreen falls back to PAM "login" → "setuid
+    # failed" → can never unlock.
     systemd.user.services.noctalia.Service.Environment = [
       "NOCTALIA_PAM_SERVICE=noctalia"
       "QT_QPA_PLATFORM=wayland"
     ];
 
-    # The module's Restart=on-failure (see the comment above) only covers the
-    # segfault case. It does NOT cover losing the compositor, because noctalia
-    # handles that *gracefully* and exits 0:
-    #
-    #   10:36:49 noctalia[22246]: [main] Wayland display closed during failed to
-    #            read Wayland events; shutting down (display_error=32 (Broken pipe))
-    #
-    # systemd sees a clean exit, on-failure declines to act, and there is not even
-    # a "Scheduled restart job" line in the journal — the bar is simply gone until
-    # a manual `systemctl --user start noctalia`. That is what happened when mango
-    # was restarted on 2026-08-19: noctalia stayed down for the 93 seconds until it
-    # was started by hand.
-    #
-    # Restart=always covers both exits with one word. It does not fight an explicit
-    # `systemctl --user stop` (systemd never restarts after an intentional stop), so
-    # the only behaviour this gives up is letting noctalia quit itself on purpose —
-    # which for the session's bar/shell is not a thing we want anyway. Paired with
-    # StartLimitIntervalSec=0 in homes/tempest/default.nix so a relaunch storm can't
-    # trip the start limiter and make it permanent.
+    # The module's Restart=on-failure covers the segfault but NOT losing the
+    # compositor, which noctalia handles gracefully and exits 0 for — systemd
+    # declines to act and the bar is simply gone until started by hand (93s of
+    # that on 2026-08-19). `always` covers both exits and still won't fight an
+    # explicit `systemctl --user stop`. Paired with StartLimitIntervalSec=0 in
+    # homes/tempest/default.nix so a relaunch storm can't make it permanent.
     systemd.user.services.noctalia.Service.Restart = lib.mkForce "always";
 
-    # Screenshot / annotate / record / OCR tooling. These were the runtime deps
-    # of the v4 "Screen Toolkit" Noctalia plugin. v5 manages plugins differently
-    # — a `[plugins]` table in config.toml plus `noctalia msg plugins …` at
-    # runtime, cloned from the official/community plugin repos — so it's no longer
-    # a home-manager option. The plugin isn't re-declared here yet; the CLI tools
-    # stay because they're generally useful for screenshots/recording.
+    # Runtime deps of the v4 "Screen Toolkit" plugin. v5 manages plugins through
+    # config.toml + `noctalia msg plugins`, so it's no longer an HM option and
+    # the plugin isn't re-declared yet; these stay as generally useful tools.
     home.packages = with pkgs; [
       grim # screenshot grabber (wlroots)
       slurp # region/window selection
