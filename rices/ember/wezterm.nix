@@ -7,6 +7,38 @@
 lib.mkIf config.rices.ember.enable {
   programs.wezterm = {
     enable = true;
+
+    # The tab bar's fills, unpicked. stylix's wezterm target gives every
+    # INACTIVE tab a solid base03 background (and the same to the new-tab
+    # button) — base03 is the comment colour, bright enough that four open tabs
+    # put a row of lit warm-grey blocks across the top of the window. That is
+    # both the loudest thing in the terminal and permanently lit content on an
+    # OLED, which is what principle 3 and ADR 0009 exist to prevent.
+    #
+    # Replaced with a tab bar that is text on the buffer's own ground: the
+    # active tab is `base05`, the inactive ones `base03` as FOREGROUND, and
+    # hovering lifts the text rather than filling the cell. Which tab is
+    # focused is then carried by value, on characters that were going to be
+    # drawn anyway. active_tab already matched and is left alone.
+    #
+    # Nix rather than the Lua below: extraConfig's returned table is merged
+    # SHALLOWLY over these settings (see home-manager's wezterm module), so
+    # setting `config.colors` there would replace stylix's whole `colors` table
+    # instead of this one leaf. `settings` is `attrsOf anything`, which merges
+    # per-attribute, so mkForce lands exactly where it is aimed.
+    settings.colors.tab_bar = with config.lib.stylix.colors.withHashtag; {
+      background = lib.mkForce base00;
+      inactive_tab_edge = lib.mkForce base00;
+      inactive_tab = lib.mkForce {
+        bg_color = base00;
+        fg_color = base03;
+      };
+      inactive_tab_hover = lib.mkForce {
+        bg_color = base00;
+        fg_color = base05;
+      };
+    };
+
     extraConfig = ''
       local wezterm = require 'wezterm'
       local config = wezterm.config_builder()
@@ -79,6 +111,10 @@ lib.mkIf config.rices.ember.enable {
       config.use_fancy_tab_bar = false
       config.hide_tab_bar_if_only_one_tab = true
       config.tab_max_width = 32
+      -- No "+" button. It is a permanently lit cell whose only function is
+      -- already on CTRL+SHIFT+T, and it was the last thing in the strip still
+      -- drawing a fill (see the tab_bar colours above).
+      config.show_new_tab_button_in_tab_bar = false
       -- Closing a tab lands on the last-used tab, not the right-hand neighbour.
       config.switch_to_last_active_tab_when_closing_tab = true
 
