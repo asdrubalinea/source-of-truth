@@ -1,4 +1,9 @@
 {pkgs, ...}: {
+  # The theme is its own file — it is the one part of this config that is a
+  # claim about *colour* rather than about behaviour, and it is generated from
+  # whichever base16 palette the machine has rather than written down here.
+  imports = [./helix-theme.nix];
+
   # Steel scheme config + cogs. These are code, so they're pointed at rather
   # than derived from Nix. recentf.scm is a local fork of mattwparas/helix-
   # config's recentf (see its header for what was changed and why); scratch.scm
@@ -34,9 +39,29 @@
 
       editor = {
         line-number = "relative";
-        bufferline = "always";
-        cursorline = true;
-        color-modes = true;
+
+        # "multiple", not "always". With one file open the bufferline repeats
+        # what the statusline's file-name already says, and a permanent strip of
+        # chrome that answers nothing is exactly what principle 3
+        # (docs/ember-visual-language.md) refuses to light. Same shape as
+        # wezterm's hide_tab_bar_if_only_one_tab.
+        bufferline = "multiple";
+
+        # Both off, and both purely cosmetic. `cursorline` paints a full-width
+        # row at base01 — 6/255 above the ground, under the discrimination floor
+        # on this panel — so it lights a row on every keystroke and shows
+        # nothing; the block cursor and the bold current line-number already
+        # mark the row. `color-modes` floods the statusline with a per-mode hue,
+        # which spends colour on a fact the words NORMAL/INSERT/SELECT state
+        # outright.
+        cursorline = false;
+        color-modes = false;
+
+        # The one box that stays. A popup floats over live text and needs a
+        # boundary, and on a palette whose dark end is this compressed a fill
+        # cannot provide one (see the gutter note in ./helix-theme.nix), so the
+        # boundary is an outline — which is also the bar's own treatment, rather
+        # than a second idea about edges.
         popup-border = "all";
         indent-heuristic = "hybrid";
         end-of-line-diagnostics = "hint";
@@ -70,8 +95,13 @@
         statusline = {
           left = ["mode" "spinner" "version-control"];
           center = ["file-name"];
-          right = ["diagnostics" "selections" "position" "file-encoding" "file-line-ending" "file-type"];
-          separator = "│";
+          right = ["diagnostics" "position"];
+          # A space, not "│". The dropped four — selections, file-encoding,
+          # file-line-ending, file-type — are answers to questions asked a few
+          # times a year, held on screen permanently and read never; and a rule
+          # drawn between two words is a mark that carries nothing, which is the
+          # same reason the statusline no longer has a background.
+          separator = " ";
           mode.normal = "NORMAL";
           mode.insert = "INSERT";
           mode.select = "SELECT";
