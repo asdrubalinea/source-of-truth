@@ -12,9 +12,11 @@ lib.mkIf config.rices.ember.enable {
       env.TERM = "xterm-256color";
 
       window = {
+        # 12, matching wezterm/kitty/konsole — see ./wezterm.nix for why, and
+        # why all four move together.
         padding = {
-          x = 4;
-          y = 4;
+          x = 12;
+          y = 12;
         };
         decorations = "None";
         dimensions = {

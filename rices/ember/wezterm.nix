@@ -276,11 +276,21 @@ lib.mkIf config.rices.ember.enable {
       }
 
       -- Window
+      --
+      -- 12, not 4. Text that begins four pixels from a window edge reads as
+      -- cramped however good the face is, and the inset is the cheap half of
+      -- this look: it buys nothing but UNLIT pixels, which on this panel is a
+      -- saving rather than a cost (docs/adr/0009).
+      --
+      -- Padding is a rice-wide behavioural value, so the same 12 is in
+      -- ./kitty.nix, ./alacritty.nix and ./konsole.nix — changing one of the
+      -- four is a divergence, not a change
+      -- (docs/ember-visual-language.md, "A terminal").
       config.window_padding = {
-        left = 4,
-        right = 4,
-        top = 4,
-        bottom = 4,
+        left = 12,
+        right = 12,
+        top = 12,
+        bottom = 12,
       }
       -- No initial_cols/initial_rows: both compositors tile every window, so the
       -- requested grid is never honoured anyway — and under mango it is actively

@@ -62,7 +62,9 @@ lib.mkIf config.rices.ember.enable (
         [General]
         Name=Ember
         Parent=FALLBACK/
-        TerminalMargin=4
+        # 12, matching wezterm/kitty/alacritty — see ./wezterm.nix for why, and
+        # why all four move together.
+        TerminalMargin=12
 
         [Cursor Options]
         # Steady block, matching kitty/alacritty/wezterm — see ./kitty.nix for

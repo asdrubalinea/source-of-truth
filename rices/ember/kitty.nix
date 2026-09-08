@@ -28,7 +28,9 @@ lib.mkIf config.rices.ember.enable {
       cursor_blink_interval = 0;
       cursor_stop_blinking_after = 0;
       cursor_unfocused_hollow = true;
-      window_padding_width = 4;
+      # 12, matching wezterm/alacritty/konsole — see ./wezterm.nix for
+      # why, and why all four move together.
+      window_padding_width = 12;
       initial_window_width = "160c";
       initial_window_height = "48c";
       scrollback_lines = 100000;
