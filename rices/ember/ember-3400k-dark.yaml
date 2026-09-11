@@ -12,11 +12,15 @@
 # — oxocarbon-dark's blues/magentas collapse into each other once warmed, which
 # is why this palette exists at all.
 #
-# Surfaces are also a burn-in decision, not only a taste one: base00 is a true
-# near-black so the OLED's lit fraction stays low (see docs/adr/0009), and
-# base01/base02 sit close above it so a selection or a bar fill is a *step*
-# rather than a lit panel. base03 is the one value moved DOWN — the old 908472
-# was bright enough that comments competed with code.
+# Surfaces are also a burn-in decision, not only a taste one: base00 is pure
+# black so the OLED's lit fraction goes to zero on the ground (see
+# docs/adr/0009) — the endpoint of what the old warm near-black 090807 was
+# reaching for — and base01/base02 sit close above it so a selection or a bar
+# fill is a *step* rather than a lit panel. The one cost: wlsunset warms by
+# scaling channels, and 0 scales to 0, so the ground is the single surface the
+# night filter cannot tint. Everything above it still warms. base03 is the one
+# value moved DOWN — the old 908472 was bright enough that comments competed
+# with code.
 #
 # Ember ships only 3 foreground roles, so base06/base07 both reuse base05.
 system: "base16"
@@ -24,7 +28,7 @@ name: "Ember 3400K Dark"
 author: "irene, after carpdiem's Ember"
 variant: "dark"
 palette:
-  base00: "090807" # default background — true near-black, OLED ground
+  base00: "000000" # default background — pure black, OLED pixels off
   base01: "0F0D0B" # lighter background (status, line highlight)
   base02: "1A1712" # selection background / inactive window border
   base03: "6E6355" # comments, invisibles — dimmed from Ember's 908472
