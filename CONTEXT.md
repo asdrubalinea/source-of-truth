@@ -176,6 +176,26 @@ modes fused into one complaint. The glossary keeps them apart.
   ever placed on a surface whose text size is known and fixed. Which sizes a
   given panel needs is **machine policy**.
 
+- **glance palette** / **read palette** — the two registers the rice's colours
+  are used in, split by how long the coloured thing is *looked at* — the same
+  split as **body face** / **display face**, applied to colour instead of type.
+  The **glance palette** is the scheme at full strength: all eight accents, as
+  the bar's readouts, window borders, notification titles and diagnostics use
+  them. The **read palette** is what a continuously-read surface gets: a handful
+  of accents over the foreground, everything else flattened to `base05` and
+  comments dropped to `base03`. One scheme, two intensities.
+  _Flagged ambiguity_: "tracking ember" does not mean "using all of ember". An
+  editor buffer on the read palette is still tracking the scheme — it is derived
+  from the same yaml, so it follows a palette change — it simply spends fewer of
+  its accents. A surface belongs to a register because of how it is *used*,
+  never because of what it is: a terminal and an editor buffer are read
+  surfaces, the bar is a glance surface, and all three are ember.
+  The tell for a register error is a colour that carries meaning elsewhere
+  appearing on a token that is merely common — an accent reserved for errors
+  landing on every struct field, say. That is not a palette fault; it is a
+  glance-register mapping applied to a read surface.
+  _Avoid_: "dimmed theme", "muted variant" (both imply a second scheme).
+
 - **scratchpad** — a window kept running but parked out of view, summoned by a
   keybind as a floating overlay onto whatever workspace is focused and
   dismissed with the same key. On tempest the canonical tenant is Telegram
