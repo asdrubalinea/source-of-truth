@@ -5,7 +5,7 @@
   ...
 }: {
   nix = {
-    package = pkgs.nixVersions.stable;
+    package = pkgs.lix;
     nixPath = ["nixpkgs=flake:nixpkgs"];
 
     settings = {
