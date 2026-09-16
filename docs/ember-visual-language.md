@@ -42,8 +42,10 @@ looked at**.
 
 - **Body face** — read continuously. Terminals, editor buffers, and every
   application's own interface chrome. Must be unremarkable, because character in
-  a face you read for eight hours is fatigue. → **Ioskeley Mono** (an Iosevka
-  cut shaped after Berkeley Mono), in *all three* slots.
+  a face you read for eight hours is fatigue. → **JuliaMono**, in *all three* slots.
+  (Was Ioskeley Mono, an Iosevka cut shaped after Berkeley Mono; dropped because
+  Iosevka draws `— → ⇒ … ●` either two cells wide or a third too short, and
+  agent output is built out of exactly those. See `rices/ember/stylix.nix`.)
 - **Display face** — only ever glanced at. Bar readouts and clock. Strings are
   a handful of characters and are never read as prose, so this is the one place
   the desktop gets to have a voice. → **Departure Mono**, a pixel font, pointed
@@ -195,7 +197,7 @@ face, silently, because a string can't be wrong at build time.
 
 | | | |
 |---|---|---|
-| Body face | Ioskeley Mono | `rices/ember/stylix.nix` (all three slots) |
+| Body face | JuliaMono | `rices/ember/stylix.nix` (all three slots) |
 | Display face | Departure Mono | `rices/ember/noctalia.nix` (`shell.font_family`, mkForce) |
 | Palette | Ember 3400K Dark, sharpened | `rices/ember/ember-3400k-dark.yaml` |
 | Bar | flush, square, 1px outline, 32px | `rices/ember/noctalia-widgets.nix` |

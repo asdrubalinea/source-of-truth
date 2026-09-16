@@ -14,7 +14,7 @@
     # on something surprising. (Ten unreferenced families were removed.)
     packages = with pkgs; [
       # Body face — all three stylix text slots. See ./stylix.nix.
-      (callPackage ../../packages/ioskeley-mono.nix {})
+      julia-mono
 
       # Display face — the bar only, pointed at by name in ./noctalia.nix rather
       # than occupying a stylix slot. A pixel font: crisp at its design size and
@@ -24,7 +24,7 @@
 
       # Glyph coverage, no letterforms: fallback #2 in wezterm's
       # font_with_fallback, and the family emacs names for nerd-icons. A full
-      # patched family would put a second set of letterforms ahead of Ioskeley.
+      # patched family would put a second set of letterforms ahead of the body face.
       nerd-fonts.symbols-only
 
       # Script coverage and emoji. twemoji is also in systemPackages above so
@@ -51,9 +51,9 @@
       # aliases — only per-app font settings. This is the same decision restated
       # where fontconfig can act on it.
       defaultFonts = {
-        monospace = ["Ioskeley Mono"];
-        sansSerif = ["Ioskeley Mono"];
-        serif = ["Ioskeley Mono"];
+        monospace = ["JuliaMono"];
+        sansSerif = ["JuliaMono"];
+        serif = ["JuliaMono"];
         emoji = ["Noto Color Emoji"];
       };
 

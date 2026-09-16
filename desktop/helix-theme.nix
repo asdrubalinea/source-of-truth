@@ -104,7 +104,7 @@ lib.mkIf (config.stylix.enable or false) (
         # reading; listing them to say "default" would only make this longer.
 
         # faded — prose, and nothing else; single-tenant for the reason above.
-        # Italic does the rest, and it's a real face (Ioskeley ships Italic, so
+        # Italic does the rest, and it's a real face (JuliaMono ships Italic, so
         # nothing is synthesised).
         comment = {
           fg = "faded";

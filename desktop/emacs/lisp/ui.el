@@ -73,11 +73,11 @@
   :demand t
   :config
   (setq fontaine-presets
-        '((regular :default-family "Ioskeley Mono" :default-height 150
+        '((regular :default-family "JuliaMono" :default-height 150
                    :variable-pitch-family "Inter")
-          (large   :default-family "Ioskeley Mono" :default-height 180
+          (large   :default-family "JuliaMono" :default-height 180
                    :variable-pitch-family "Inter")
-          (presentation :default-family "Ioskeley Mono" :default-height 220
+          (presentation :default-family "JuliaMono" :default-height 220
                         :variable-pitch-family "Inter")))
   (fontaine-mode 1)
   (fontaine-set-preset 'regular))

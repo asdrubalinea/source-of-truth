@@ -178,7 +178,7 @@ Things in here that aren't just "package from nixpkgs, enabled":
 | 🤖 **`claude-sandboxed`** | The same idea pointed at an agent: `/persist` blacklisted, Wayland socket forwarded so image paste still works. |
 | 🔔 **`backup-notify`** | Pushes one desktop notification from a root systemd unit into the graphical session — replaced the bar's polled backup readout when Noctalia v5 dropped script polling. |
 | 🎞️ **the marquee** | A permanently reserved 16:9 band on the portrait QD-OLED, derived from the monitor's mount ([ADR 0011](docs/adr/0011-marquee-on-the-portrait-oled.md)). |
-| 📦 **packages/** | `drift`, `librepods`, `cider-2`, `brave-origin`, `ioskeley-mono`, `sdrplay`. |
+| 📦 **packages/** | `drift`, `librepods`, `cider-2`, `brave-origin`, `sdrplay`. |
 
 ---
 

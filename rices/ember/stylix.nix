@@ -8,7 +8,23 @@
   # ./fonts.nix system-wide; declared here too because stylix puts font packages
   # in home.packages, and standalone HM must not depend on the NixOS layer
   # having been switched first.
-  ioskeley-mono = pkgs.callPackage ../../packages/ioskeley-mono.nix {};
+  #
+  # Not Ioskeley/Iosevka, and the reason is the terminal grid. Iosevka's
+  # `normal` spacing draws — → ⇒ … ● with a two-cell advance, which a terminal
+  # squashes into one; its `term` spacing fixes the advance but redraws the
+  # same symbols ~30% shorter (arrow ink 0.61 of cap height, against 0.85).
+  # Agent output is mostly those five characters, so neither cut was usable —
+  # and Aporetic fails the same way, because it is the family, not the build.
+  #
+  # Of fifteen other faces measured, JuliaMono was the only one that put all
+  # five on the single-cell grid at full size (→ 0.71, ⇒ 0.89, ● 0.77 of cap
+  # height); most of the rest simply have no ⇒ at all. It was drawn for
+  # mathematical notation, so the symbol set is the point of the face rather
+  # than an afterthought — 11k codepoints against CommitMono's 1.2k, which
+  # keeps odd glyphs from falling out to a fallback with foreign metrics. Its
+  # fourteen faces (Light→Black, roman and italic) also give the UI chrome
+  # this slot serves a real medium and semibold instead of synthesised ones.
+  body-face = pkgs.julia-mono;
 in
   lib.mkIf config.rices.ember.enable {
     # gtk4/libadwaita apps are deliberately left unthemed. mkForce because
@@ -100,18 +116,18 @@ in
         # Obsidian's textFontFamily, and there is no proportional text left to
         # justify a second face.
         serif = {
-          package = ioskeley-mono;
-          name = "Ioskeley Mono";
+          package = body-face;
+          name = "JuliaMono";
         };
 
         sansSerif = {
-          package = ioskeley-mono;
-          name = "Ioskeley Mono";
+          package = body-face;
+          name = "JuliaMono";
         };
 
         monospace = {
-          package = ioskeley-mono;
-          name = "Ioskeley Mono";
+          package = body-face;
+          name = "JuliaMono";
         };
 
         emoji = {
