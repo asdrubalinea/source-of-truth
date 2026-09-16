@@ -366,8 +366,12 @@ in {
         # what stranded the docks — `ctrl-b` only existed inside the buffer, so
         # once focus was in the git panel nothing could move it.
         #
-        # `ToggleFocus` per panel rather than `ToggleLeftDock`: a dock toggle
-        # reopens whichever panel was last active, which is not a switcher.
+        # `Toggle{Left,Right}Dock` rather than the panels' own `ToggleFocus`:
+        # ToggleFocus moved focus into the panel but never hid it again, so the
+        # docks were one-way. The dock toggle reopens whichever panel was last
+        # active, which is harmless here — each dock has exactly one reachable
+        # tenant (git owns the right; outline and collaboration also sit left
+        # but `button = false` leaves no way to make either of them active).
         # Keys follow base_keymap = "VSCode" — ctrl-b explorer, ctrl-shift-g
         # source control (and ctrl-shift-g avoids shadowing vim's ctrl-g).
         #
@@ -377,8 +381,8 @@ in {
         context = "Workspace";
         bindings = {
           "ctrl-/" = "workspace::ToggleCenteredLayout";
-          "ctrl-b" = "project_panel::ToggleFocus";
-          "ctrl-shift-g" = "git_panel::ToggleFocus";
+          "ctrl-b" = "workspace::ToggleLeftDock";
+          "ctrl-shift-g" = "workspace::ToggleRightDock";
         };
       }
       {
