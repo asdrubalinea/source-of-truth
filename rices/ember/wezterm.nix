@@ -93,11 +93,43 @@ lib.mkIf config.rices.ember.enable {
       -- same list with nerd-fonts.symbols-only (installed in ./fonts.nix)
       -- wedged in the middle — extraConfig merges after stylix, so this wins.
       -- Family names come from stylix so the two can't drift apart.
-      config.font = wezterm.font_with_fallback {
-        "${config.stylix.fonts.monospace.name}",
-        "Symbols Nerd Font Mono",
-        "${config.stylix.fonts.emoji.name}",
+      local function face(weight, italic)
+        return wezterm.font_with_fallback {
+          { family = "${config.stylix.fonts.monospace.name}", weight = weight, italic = italic },
+          "Symbols Nerd Font Mono",
+          "${config.stylix.fonts.emoji.name}",
+        }
+      end
+      config.font = face("Regular", false)
+
+      -- The intensity ladder, pinned rather than inferred. Left alone, wezterm
+      -- answers SGR 2 (dim) and SGR 1 (bold) by asking fontconfig for a lighter
+      -- or heavier cut of the family. That was harmless while the body face
+      -- shipped two weights and is wrong now that it ships seven: JuliaMono gave
+      -- dim the *Light* cut and bold the *ExtraBold* one. Dim text is already
+      -- blended toward the ground, so drawing it in the thinnest cut in the
+      -- family stacks the two losses — and an agent TUI is mostly dim text.
+      -- Measured off a screenshot of this terminal: 3-11% of the ink on a dim
+      -- line reached full colour, against 56% on a bold one.
+      config.font_rules = {
+        { intensity = "Half", italic = false, font = face("Regular", false) },
+        { intensity = "Half", italic = true, font = face("Regular", true) },
+        { intensity = "Bold", italic = false, font = face("Bold", false) },
+        { intensity = "Bold", italic = true, font = face("Bold", true) },
       }
+
+      -- A readability floor, in WCAG terms, applied at draw time. Anything the
+      -- pane asks for that lands under 4.5:1 against the cell behind it gets
+      -- lifted until it clears — SGR 2 (dim), which wezterm renders by blending
+      -- the foreground toward the ground, and base03 comments, which sit at
+      -- 3.6:1 on a pure-black ground by design.
+      --
+      -- Deliberately here and not in the palette: ./ember-3400k-dark.yaml dims
+      -- base03 on purpose, and helix, emacs and the bar are all reading text on
+      -- surfaces that are not pure black, where it measures fine. This is the
+      -- terminal paying for base00 being 000000 (ADR 0009) rather than the whole
+      -- rice giving up the darkest ground it has.
+      config.text_min_contrast_ratio = 4.5
 
       -- Cursor. Block, not bar — see ./kitty.nix for why. "Steady" is the
       -- non-blinking half of the name and stays.
