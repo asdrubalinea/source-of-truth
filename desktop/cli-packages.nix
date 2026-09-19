@@ -86,6 +86,8 @@ in {
     csvlens
     datamash # group/sum/mean over columns
     difftastic # `difft` — syntax-aware diff
+    # Flow Control, from master — nixpkgs' flow-control is the 0.7.2 release.
+    (callPackage ../packages/flow-git.nix {})
     glow # render Markdown in the terminal
     hexyl # xxd, but colourised and legible
     jc # convert classic CLI output to JSON — pairs with jq

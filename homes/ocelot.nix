@@ -11,6 +11,7 @@
     inputs.stylix.homeModules.stylix
     ../desktop/cli-packages.nix
     ../desktop/helix.nix
+    ../desktop/flow.nix
     ../desktop/tmux.nix
     ../desktop/zellij.nix # `ocelot` attaches to a zellij session, as cage does
     ../misc/fish.nix

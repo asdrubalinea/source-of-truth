@@ -31,6 +31,7 @@ in {
     ../../desktop/zed-editor
     ../../desktop/vscode.nix
     ../../desktop/helix.nix
+    ../../desktop/flow.nix
     ../../desktop/mail
     ../../desktop/tmux.nix
     ../../desktop/zellij.nix
