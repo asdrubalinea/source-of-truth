@@ -71,6 +71,19 @@ in
         size = 24;
       };
 
+      # Off, because it costs an inkscape build on every flake update. Stylix's
+      # only two overlays are nixos-icons (a recolour of the boot snowflake,
+      # which nothing here shows) and gtksourceview — and the latter
+      # overrideAttrs' gtksourceview{,4,5} to drop one XML in, which takes every
+      # consumer out of the binary cache. inkscape links gtksourceview, and
+      # capitaine-cursors above renders its SVGs with inkscape at build time, so
+      # a stock `nix flake update` rebuilt inkscape from source to theme an
+      # editor widget nothing in this rice uses. The gtksourceview *target*
+      # stays on: it writes the same theme to ~/.local/share/gtksourceview-*/,
+      # which is where the apps read it from anyway. Upstream turns this off
+      # itself whenever HM rides on the system pkgs (home-manager-integration.nix).
+      overlays.enable = false;
+
       targets = {
         neovim.enable = false;
         vscode.enable = false;
