@@ -38,6 +38,16 @@
   disko.tests.extraConfig = {
     virtualisation.cores = 4;
 
+    # vhost-user-fs (the virtiofs shares carrying the host store) can only map
+    # guest RAM that lives in a shareable memory object. qemu-vm.nix wires the
+    # shares up unconditionally but gates the backend behind this option, which
+    # `mkEnableOption` defaults to *off* — so without it qemu dies at
+    # "Error starting vhost: 5", /sysroot/nix/store never mounts, and the initrd
+    # drops to an emergency shell. tempest/vm.nix and hosts/ocelot spell the
+    # same thing out by hand; here the option derives the size from memorySize
+    # instead, so it cannot drift out of sync with disko.memSize above.
+    virtualisation.qemu.enableSharedMemory = true;
+
     # Headless, so run on the serial console in the launching terminal — which
     # also sets console=ttyS0, putting the initrd's LUKS prompt and the boot log
     # on stdout. Ctrl-a x kills the VM.
