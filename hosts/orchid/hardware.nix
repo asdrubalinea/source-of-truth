@@ -19,9 +19,8 @@
 
     logitech.wireless.enable = true;
 
-    # No hardware.graphics: no discrete GPU and no display server on this host.
-    # Raphael's small RDNA2 iGPU still drives the console via amdgpu
-    # (system/boot.nix). Turn graphics on when a WM comes back, or if something
-    # headless needs VA-API/OpenCL.
+    # Raphael's small RDNA2 iGPU and the incoming discrete AMD GPU are both
+    # driven by amdgpu; graphics userspace and LACT live in the shared
+    # modules/hardware/gpu-amd.nix module imported by orchid.
   };
 }
