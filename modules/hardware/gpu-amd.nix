@@ -9,6 +9,10 @@
   # LACT daemon + GUI for GPU monitoring and configuration.
   services.lact.enable = true;
 
+  # The GUI writes its profiles to /etc/lact/config.yaml; both importers have a
+  # tmpfs root, so without this every tune is gone at the next boot.
+  environment.persistence."/persist".directories = ["/etc/lact"];
+
   # Vulkan / OpenGL, including support for 32-bit applications.
   hardware.graphics = {
     enable = true;

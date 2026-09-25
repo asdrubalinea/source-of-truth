@@ -73,6 +73,7 @@
 
       ./hardware.nix
       ../../hardware/framework.nix
+      ../../modules/hardware/gpu-amd.nix
       ./system/backup-external.nix
 
       # secure-boot.nix (lanzaboote) is intentionally left disabled for the FIRST
