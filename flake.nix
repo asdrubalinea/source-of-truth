@@ -435,6 +435,15 @@
         ];
       };
 
+      # Installer ISO; see hosts/installer and docs/orchid-install.md.
+      installer = lib.nixosSystem {
+        specialArgs = {inherit inputs;};
+        modules = [
+          {nixpkgs.hostPlatform = defaultSystem;}
+          ./hosts/installer/default.nix
+        ];
+      };
+
       # Raspberry Pi 3B+ (aarch64), headless. Built on tempest under binfmt
       # emulation and flashed as an SD image — no installer, no disko.
       # See docs/adr/0005.

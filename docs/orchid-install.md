@@ -54,12 +54,20 @@ way to log in, since root's hash comes from the git-crypt'd `passwords` file.
 
 ## Phase 1 — Installer
 
-Boot a NixOS installer, get networking up (`nmtui`, or plug in ethernet), then:
+Build the installer ISO on tempest (`hosts/installer`: stock minimal ISO + flakes,
+sshd up with irene's key, this repo baked in at `/etc/source-of-truth`) and
+write it to a USB stick:
 
 ```sh
-sudo -i
-nix-shell -p git --run 'git clone https://github.com/asdrubalinea/source-of-truth /tmp/sot'
-cd /tmp/sot
+nix build .#nixosConfigurations.installer.config.system.build.isoImage -o result-iso
+sudo dd if=result-iso/iso/nixos-*.iso of=/dev/disk/by-id/usb-<stick> bs=4M status=progress oflag=sync
+```
+
+Boot orchid from it with ethernet plugged in, then from tempest
+`ssh root@<orchid-ip>` (or `ip -4 a` at the console to find the IP), and:
+
+```sh
+cd /etc/source-of-truth
 ```
 
 Find the target disk. **Always use the by-id path** (model+serial) — `/dev/sdX`
@@ -140,7 +148,10 @@ sudo systemctl start vaultwarden
 #    /home/irene is irene:users 0700, enforced by impermanence
 rsync -a <backup>/home-irene/ /home/irene/
 
-# 3. home-manager (standalone on this host)
+# 3. the repo (nh's flake path) + home-manager (standalone on this host)
+sudo install -d -o irene -g users /persist/source-of-truth
+git clone git@github.com:asdrubalinea/source-of-truth.git /persist/source-of-truth
+cd /persist/source-of-truth
 nix run /persist/source-of-truth#home-manager -- switch --flake '.#irene@orchid' -b backup
 
 # 4. tailscale
