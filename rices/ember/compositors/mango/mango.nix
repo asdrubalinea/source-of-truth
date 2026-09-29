@@ -47,7 +47,7 @@
     ${pkgs.wl-clipboard}/bin/wl-copy < "$file"
   '';
 
-  wezterm = "${pkgs.wezterm}/bin/wezterm";
+  kitty = "${pkgs.kitty}/bin/kitty";
 
   # --- Even split (Mod+G) ---------------------------------------------------
   # The niri layer's evenSplit ported to mango's scroller: same intent, same
@@ -287,7 +287,7 @@ in {
         bind =
           [
             # Terminal, launcher, apps
-            "SUPER,Return,spawn,${wezterm}"
+            "SUPER,Return,spawn,${kitty}"
             "SUPER,space,spawn,noctalia msg panel-toggle launcher"
             "SUPER,b,spawn,${pkgs.blueman}/bin/blueman-manager"
             "SUPER,p,spawn,${pkgs.pavucontrol}/bin/pavucontrol"
@@ -303,7 +303,7 @@ in {
             # matched on. mango launches the command itself on first use and
             # toggles thereafter, so nothing is spawned-and-hidden at startup.
             "SUPER,t,toggle_named_scratchpad,org.telegram.desktop,none,telegram-sandboxed"
-            "SUPER+SHIFT,Return,toggle_named_scratchpad,scratchpad-terminal,none,${wezterm} start --always-new-process --class scratchpad-terminal"
+            "SUPER+SHIFT,Return,toggle_named_scratchpad,scratchpad-terminal,none,${kitty} --class scratchpad-terminal"
             "SUPER+SHIFT,t,toggle_scratchpad"
 
             # Window management

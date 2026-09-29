@@ -35,6 +35,25 @@ lib.mkIf config.rices.ember.enable {
       initial_window_height = "48c";
       scrollback_lines = 100000;
       wheel_scroll_multiplier = 10;
+      # Touchpad (high-precision) scroll, on top of the compositor's own
+      # scroll factor. Lower = slower.
+      touch_scroll_multiplier = "1.0";
+      # Both compositors tile and draw borders; no client-side titlebar.
+      hide_window_decorations = true;
     };
+    # Carried over from ./wezterm.nix: ALT+<digit> / ALT+Tab for tabs (Super
+    # belongs to the compositor, bare CTRL+letters to tmux), and Ctrl/Super+
+    # Backspace as ESC+^H, which prompt_toolkit TUIs read as delete-word.
+    keybindings =
+      {
+        "alt+tab" = "goto_tab -1";
+        "alt+0" = "goto_tab 999";
+        "ctrl+backspace" = "send_text all \\x1b\\x08";
+        "super+backspace" = "send_text all \\x1b\\x08";
+      }
+      // lib.listToAttrs (map (i: {
+        name = "alt+${toString i}";
+        value = "goto_tab ${toString i}";
+      }) (lib.range 1 9));
   };
 }

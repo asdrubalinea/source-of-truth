@@ -77,10 +77,10 @@ c: [
   }
   {
     # Floating terminal scratchpad (Mod+Shift+Return): a near-fullscreen floating
-    # wezterm, sized as a proportion of the working area so it adapts to any
+    # kitty, sized as a proportion of the working area so it adapts to any
     # output. niri centers new floating windows by default, so
     # default-floating-position is omitted (see the Telegram rule above). The
-    # app-id comes from wezterm's `--class scratchpad-terminal`. See
+    # app-id comes from kitty's `--class scratchpad-terminal`. See
     # rices/ember/compositors/niri/niri.nix (terminalScratchpad).
     matches = [{app-id = "scratchpad-terminal";}];
     open-floating = true;
@@ -95,7 +95,7 @@ c: [
     # Instrument panel (Mod+I): a floating, transient `sitrep`. Sized as a
     # proportion so it adapts to any output; open-focused because the readout is
     # dismissed by a keypress, and an unfocused window would send it elsewhere.
-    # The app-id comes from wezterm's `--class sitrep-hud`; see
+    # The app-id comes from kitty's `--class sitrep-hud`; see
     # rices/ember/sitrep-hud.nix.
     matches = [{app-id = "sitrep-hud";}];
     open-floating = true;

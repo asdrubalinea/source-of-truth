@@ -9,11 +9,10 @@
 
   drift = pkgs.callPackage ../../packages/drift.nix {src = inputs.drift;};
 
-  # --always-new-process twice over: it keeps `--class` ours (an existing
-  # instance would spawn the window with its own app-id and miss the
-  # open-fullscreen rule), and it makes $! the PID that owns the window.
+  # A fresh kitty process per start: `--class` gives the open-fullscreen rule
+  # its app-id, and $! is the PID that owns the window.
   driftStart = pkgs.writeShellScript "drift-screensaver-start" ''
-    ${pkgs.wezterm}/bin/wezterm start --always-new-process --class drift-screensaver -- ${drift}/bin/drift --scene waveform &
+    ${pkgs.kitty}/bin/kitty --class drift-screensaver ${drift}/bin/drift --scene waveform &
     echo $! > "$XDG_RUNTIME_DIR/drift-screensaver.pid"
   '';
 

@@ -303,13 +303,10 @@
 
   # Floating terminal, spawned on first use. The distinct --class gives it its
   # own app-id so the window-rule and nirius target only this instance.
-  # --always-new-process is what makes that class stick: a plain `wezterm start`
-  # asks a running instance to spawn the window, and it comes back carrying that
-  # instance's app-id, not ours.
   terminalScratchpad = mkScratchpad {
     name = "terminal";
     appId = "scratchpad-terminal";
-    spawn = "${pkgs.wezterm}/bin/wezterm start --always-new-process --class scratchpad-terminal";
+    spawn = "${pkgs.kitty}/bin/kitty --class scratchpad-terminal";
   };
 in
   lib.mkIf config.rices.ember.niri.enable {
@@ -464,15 +461,11 @@ in
 
         # Keybindings
         binds = with pkgs; {
-          # Bare `wezterm` defaults to `start`, which hands the request to a
-          # running instance of the same class, so extra windows are cheap
-          # (kitty was a fresh process per press). The scratchpad above
-          # deliberately opts out of that.
           "Mod+Return".action.spawn = [
-            "${pkgs.wezterm}/bin/wezterm"
+            "${pkgs.kitty}/bin/kitty"
           ];
           # Floating terminal scratchpad: summon/dismiss a near-fullscreen floating
-          # wezterm (own app-id "scratchpad-terminal"); see the let block above.
+          # kitty (own app-id "scratchpad-terminal"); see the let block above.
           "Mod+Shift+Return".action.spawn = ["${terminalScratchpad.toggle}"];
           # Same key as before; now drives Noctalia's launcher instead of tofi.
           # v5 IPC: `noctalia msg <command>` replaced `noctalia-shell ipc call …`;

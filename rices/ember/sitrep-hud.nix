@@ -23,9 +23,7 @@
     read -rsn1
   '';
 in
-  # --always-new-process for the same reason the terminal scratchpad uses it: a
-  # plain `wezterm start` hands the window to an already-running instance, which
-  # stamps it with *that* instance's app-id and the window rule never matches.
+  # --class gives the window its own app-id, which the window rules match on.
   pkgs.writeShellScript "ember-sitrep-hud" ''
-    exec ${pkgs.wezterm}/bin/wezterm start --always-new-process --class sitrep-hud -- ${hold}
+    exec ${pkgs.kitty}/bin/kitty --class sitrep-hud ${hold}
   ''
