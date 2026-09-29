@@ -18,6 +18,15 @@
     "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAINvjpybr/+VM1dY75+BkISNz3hzwheDMsr9wiN5Dtsdz irene@orchid"
   ];
 
+  # Reachable as `ssh root@nixos.local` without a display to read `ip a` off.
+  services.avahi = {
+    enable = true;
+    publish = {
+      enable = true;
+      addresses = true;
+    };
+  };
+
   environment.etc."source-of-truth".source = inputs.self;
   environment.systemPackages = [pkgs.git pkgs.nvme-cli];
 }

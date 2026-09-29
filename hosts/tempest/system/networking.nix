@@ -47,6 +47,13 @@ in {
     openFirewall = true;
   };
 
+  # Resolve `*.local` (e.g. the installer ISO at nixos.local). Lookup only:
+  # publishing stays off, so tempest doesn't announce itself on public wifi.
+  services.avahi = {
+    enable = true;
+    nssmdns4 = true;
+  };
+
   networking = {
     hostName = "tempest";
     hostId = "856ff057";
