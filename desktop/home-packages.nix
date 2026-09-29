@@ -47,6 +47,7 @@ in {
     # --- Networking & HTTP (GUI; the CLI ones are in ./cli-packages.nix) ---
     postman
     proxyman # HTTP(S) intercepting proxy / inspector
+    remmina # RDP/VNC/SPICE remote desktop client
     # yt-dlp comes from ./yt-dlp.nix — the plain package cannot download from
     # YouTube without a PO-token provider behind it.
 
