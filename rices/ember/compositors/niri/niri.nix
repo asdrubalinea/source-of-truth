@@ -363,7 +363,7 @@ in
             tap = true;
             natural-scroll = true;
             accel-speed = 0.3;
-            scroll-factor = 0.8;
+            scroll-factor = 0.4;
           };
 
           mouse = {

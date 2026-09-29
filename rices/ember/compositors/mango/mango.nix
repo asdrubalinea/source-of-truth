@@ -274,7 +274,7 @@ in {
         tap_to_click = 1;
         trackpad_natural_scrolling = 1;
         trackpad_accel_speed = 0.3;
-        trackpad_scroll_factor = 0.8;
+        trackpad_scroll_factor = 0.4;
         mouse_natural_scrolling = 0;
         mouse_accel_speed = -0.4;
 
