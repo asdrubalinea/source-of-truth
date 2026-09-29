@@ -1,7 +1,8 @@
 # orchid — ZFS-on-LUKS reinstall runbook
 
-New tower: Ryzen 7 7800X3D, 64 GiB, no discrete GPU, no dedicated NIC. End
-state: **ZFS-on-LUKS** on a single NVMe, **tmpfs root + impermanence**,
+New tower: Ryzen 7 7800X3D, 64 GiB, discrete AMD GPU (amdgpu +
+LACT, `modules/hardware/gpu-amd.nix`), no dedicated NIC. A **clean install** —
+nothing is carried over from the old box. End state: **ZFS-on-LUKS** on a single NVMe, **tmpfs root + impermanence**,
 systemd-boot (no Secure Boot), CachyOS LTS `zen4` kernel, **headless** — no rice,
 no compositor, no greeter.
 
@@ -11,30 +12,7 @@ this file is just the procedure. Layout: [`../disks/orchid.nix`](../disks/orchid
 
 ---
 
-## Phase 0 — Before you wipe anything
-
-**orchid is the primary Vaultwarden.** tempest and hydra only run read-only
-mirrors of it (`services/vaultwarden-mirror.nix`), and the reinstall destroys
-`/persist`. Copy the old pool's `/persist` off-box first — at minimum:
-
-| Path | Why |
-| --- | --- |
-| `/var/lib/bitwarden_rs` (**not** `/var/lib/vaultwarden`) | the live vault. stateVersion was 23.05, so the old data dir is the `bitwarden_rs` one |
-| `/persist/vaultwarden`, `/persist/vaultwarden-export` | vault backups + the snapshot the mirrors pull |
-| `/persist/Vault` | the borg `vault` job's source |
-| `/persist/gitea` | gitea repos and DB |
-| `/persist/syncthing-config` | syncthing device identity — losing it means re-pairing every peer |
-| `/persist/diapee-bot`, `/persist/auxologico-check` | service state + `env` files |
-| `/persist/borg-*-backup/passphrase`, `/persist/caddy/env`, `/persist/secrets/` | credentials that are deliberately not in the repo |
-| `/home/irene/.ssh/` | the key every borg job and the vault mirrors authenticate with |
-
-The vault also exists on tempest and hydra as a mirror, so it is recoverable
-either way — but the mirrors are read-only snapshots, not a restore path you want
-to discover under pressure.
-
----
-
-## Phase 0.5 — Rehearse it in a VM (optional, free)
+## Phase 0 — Rehearse it in a VM (optional, free)
 
 `orchid-vm` is this exact config on a throwaway virtual disk formatted from
 `disks/orchid.nix` — same LUKS/LVM/ZFS layout, same impermanence, no hardware
@@ -64,11 +42,17 @@ sudo dd if=result-iso/iso/nixos-*.iso of=/dev/disk/by-id/usb-<stick> bs=4M statu
 ```
 
 Boot orchid from it with ethernet plugged in, then from tempest
-`ssh root@<orchid-ip>` (or `ip -4 a` at the console to find the IP), and:
+`ssh root@nixos.local` (the ISO publishes itself over mDNS; tempest resolves
+it via avahi), and:
 
 ```sh
-cd /etc/source-of-truth
+cp -rL /etc/source-of-truth ~/source-of-truth && cd ~/source-of-truth
 ```
+
+Work from a copy, not `/etc/source-of-truth` itself: that is a symlink into
+`/nix/store`, and `nix run` refuses to run with its cwd inside the store
+("installable '/nix/store/…-source' does not correspond to a Nix language
+value"), which breaks both `disk-format` and `disk-install`.
 
 Find the target disk. **Always use the by-id path** (model+serial) — `/dev/sdX`
 and `/dev/nvme0n1` re-enumerate:
@@ -129,41 +113,38 @@ to come *after* lanzaboote.
 
 ---
 
-## Phase 4 — Restore and finish
+## Phase 4 — Finish
 
 The root FS is tmpfs: everything below either lands on a ZFS dataset or is
 bind-mounted from `/persist` (`hosts/orchid/system/persistence.nix`).
 
+Push the repo (nh's flake path) from tempest rather than cloning on orchid — a
+fresh box has no GitHub key, and the tree carries the git-crypt'd `passwords`
+file, which only an unlocked checkout can evaluate:
+
 ```sh
-# 1. put Phase 0's data back
-#    NOTE the vaultwarden target changed: stateVersion is now 25.11, so the live
-#    store is /var/lib/vaultwarden (bind-mounted from /persist/var/lib/vaultwarden),
-#    NOT /var/lib/bitwarden_rs. Restore into the former.
-sudo systemctl stop vaultwarden
-sudo rsync -a <backup>/bitwarden_rs/ /var/lib/vaultwarden/
-sudo chown -R vaultwarden:vaultwarden /var/lib/vaultwarden
-sudo systemctl start vaultwarden
-
-# 2. home + secrets
-#    /home/irene is irene:users 0700, enforced by impermanence
-rsync -a <backup>/home-irene/ /home/irene/
-
-# 3. the repo (nh's flake path) + home-manager (standalone on this host)
+# on orchid
 sudo install -d -o irene -g users /persist/source-of-truth
-git clone git@github.com:asdrubalinea/source-of-truth.git /persist/source-of-truth
-cd /persist/source-of-truth
-nix run /persist/source-of-truth#home-manager -- switch --flake '.#irene@orchid' -b backup
 
-# 4. tailscale
+# on tempest
+rsync -a /persist/source-of-truth/ orchid:/persist/source-of-truth/
+```
+
+Then on orchid:
+
+```sh
+nix run /persist/source-of-truth#home-manager -- switch --flake '.#irene@orchid' -b backup
 sudo tailscale up --advertise-exit-node
 ```
 
-Then check: `zpool status`, `systemctl --failed`, `sitrep`, and that the mirrors
-on tempest/hydra can still pull (`systemctl start vaultwarden-mirror-refresh`
-there — it authenticates as `vwbackup@orchid`, so orchid's new **host key** has
-to be accepted; the mirrors use `StrictHostKeyChecking=accept-new`, and their
-stored key for orchid is now stale. Remove orchid's line from
-`/var/lib/vaultwarden-mirror/ssh/known_hosts` on each mirror).
+Then check: `zpool status`, `systemctl --failed`, `sitrep`.
+
+**Leave the vault mirrors alone.** tempest and hydra still hold the old vault
+and pull from orchid as `vwbackup@orchid`; their stored host key for orchid is
+now stale, so the pull fails. That is what keeps them from syncing orchid's
+empty vault over their copy — don't clear orchid's line from
+`/var/lib/vaultwarden-mirror/ssh/known_hosts` until orchid has a vault worth
+mirroring.
 
 Daily driving is `apply` (= `nh os switch && nh home switch -b backup`).
 
@@ -174,15 +155,20 @@ Daily driving is `apply` (= `nh os switch && nh home switch -b backup`).
 - **No NIC config.** `networking.useDHCP` is left at its default, so whatever
   interface appears comes up on DHCP. The old `defaultGateway = 10.0.0.1` and
   the static `enp4s0f0` block are gone.
-- **No `hardware.graphics`** and no fonts — add them with the rice when a WM
-  comes back (`rices/estradiol` is still in the tree, imported by nothing).
+- **No fonts** — add them with the rice when a WM comes back (`rices/estradiol` is still in the tree, imported by nothing).
 - **Secure Boot** is not set up. Adding it means `sbctl create-keys`, a dataset
   for `/var/lib/sbctl`, and importing `modules/secure-boot.nix`.
 - **`/var/lib/ncps`** is its own dataset with a 560G quota behind ncps' 500G LRU
   budget; the LRU sweep now actually runs (nightly 03:00).
 - **`backup-vaultwarden.service` fails on the first boot** and keeps failing
-  until the vault is restored. Not a config problem: nixpkgs' backup script ends
+  while the vault is empty. Not a config problem: nixpkgs' backup script ends
   with `cp -r "$DATA_FOLDER"/!(db.*)`, unguarded, so it exits 1 whenever the data
   dir holds nothing but `db.*` — i.e. a brand-new vault. It clears itself as soon
-  as the directory has any other file (`rsa_key.pem`, attachments), which Phase 4
-  provides. Verified in `orchid-vm`; the sqlite backup itself runs fine.
+  as the directory has any other file (`rsa_key.pem`, attachments). Verified in `orchid-vm`; the sqlite backup itself runs fine.
+- **Credential-backed units fail until their secrets exist.** Nothing is in
+  `/persist` on a clean install, so the borg jobs
+  (`/persist/borg-*-backup/passphrase` + `/home/irene/.ssh/id_ed25519`), caddy
+  (`/persist/caddy/env`), and the bots (`/persist/diapee-bot`,
+  `/persist/auxologico-check` `env` files) stay red in `systemctl --failed`
+  until those files are created. Syncthing gets a new device identity, so every
+  peer has to be re-paired.
