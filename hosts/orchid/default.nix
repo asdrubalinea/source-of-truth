@@ -17,6 +17,7 @@
       ./system/services.nix
       ./system/vaultwarden-export.nix
       ./system/virtualization.nix
+      ./system/memory.nix
       ./system/llm.nix
 
       # User accounts
