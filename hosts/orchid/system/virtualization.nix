@@ -1,6 +1,10 @@
 {...}: {
   users.groups.libvirtd.members = ["irene"];
 
+  # So orchid can build zephyr's SD image and its later generations for a board
+  # that never compiles for itself, as tempest does. See ADR 0005.
+  boot.binfmt.emulatedSystems = ["aarch64-linux"];
+
   virtualisation = {
     # Headless libvirt: guests are driven with virsh (or virt-manager over ssh
     # from tempest). programs.virt-manager and spiceUSBRedirection went with the
