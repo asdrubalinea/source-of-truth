@@ -23,6 +23,8 @@ in {
     # Applying and cleaning is `nh` (enabled in hosts/orchid/default.nix):
     # `nh os switch`, `nh home switch -b backup`, `nh clean all`.
     ../scripts/port-forward.nix
+    # Needs rpool/vms first; see disks/orchid.nix.
+    ../scripts/ocelot.nix
 
     ../misc/fish.nix
     ../desktop/tmux.nix
@@ -48,6 +50,11 @@ in {
 
   home.sessionVariables = {
     EDITOR = "${pkgs.helix}/bin/hx";
+
+    # distrobox probes podman, then docker, and both are enabled on this host
+    # (system/virtualization.nix), so leave nothing to the probe: a broken
+    # podman then says so instead of quietly using the rootful daemon.
+    DBX_CONTAINER_MANAGER = "podman";
   };
 
   programs.emacs = {

@@ -176,6 +176,30 @@
             mountpoint = "/var/lib/docker";
           };
 
+          # podman's rootful graphroot and rootless per-user roots, pointed
+          # here instead of ~/.local/share/containers by
+          # system/virtualization.nix. Same reasoning as the docker dataset.
+          # Unlike docker this is plain overlay on one dataset, since podman
+          # has no zfs driver in rootless mode.
+          #
+          # ocelot state disks (ADR 0013), one sparse raw image per dev VM, go
+          # on vms for the same reason.
+          #
+          # NOTE: disko only runs at format time, so these document the layout
+          # for the next install. On the live orchid, create them once by hand
+          # BEFORE the first switch that enables podman, or both land on the
+          # tmpfs root, i.e. in RAM:
+          #   sudo zfs create -o mountpoint=/var/lib/containers rpool/containers
+          #   sudo zfs create -o mountpoint=/var/lib/vms rpool/vms
+          containers = {
+            type = "zfs_fs";
+            mountpoint = "/var/lib/containers";
+          };
+          vms = {
+            type = "zfs_fs";
+            mountpoint = "/var/lib/vms";
+          };
+
           # Half a terabyte of re-fetchable NARs, so its own dataset: never on
           # the tmpfs root, never in a snapshot, and unable to starve the pool —
           # the quota is the hard stop behind ncps' own LRU maxSize.

@@ -46,8 +46,8 @@
 # unit if it will not.
 set -euo pipefail
 
-# Where state disks live. rpool/vms on tempest, with a tmpfiles rule handing
-# irene a subdir (hosts/tempest/system/virtualization.nix) — the same shape
+# Where state disks live. rpool/vms on tempest and orchid, with a tmpfiles rule
+# handing irene a subdir (hosts/*/system/virtualization.nix) — the same shape
 # /var/lib/containers/rootless/irene already has, and off /persist for the same
 # reason docker's dataset is: a layer cache must not be pinned in every hourly
 # sanoid snapshot and shipped to the backup drive.
@@ -195,8 +195,8 @@ ensure_created() {
 
   if [ ! -d "$OCELOT_ROOT" ]; then
     die "$OCELOT_ROOT does not exist.
-       On tempest it is created by the tmpfiles rule in
-       hosts/tempest/system/virtualization.nix, on the rpool/vms dataset — so
+       On tempest and orchid it is created by the tmpfiles rule in
+       hosts/<host>/system/virtualization.nix, on the rpool/vms dataset — so
        this needs one 'zfs create -o mountpoint=/var/lib/vms rpool/vms' plus a
        rebuild. Override with OCELOT_ROOT= to put state elsewhere."
   fi
