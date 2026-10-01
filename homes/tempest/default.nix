@@ -29,7 +29,7 @@ in {
 
     # Applications and tools
     ../../desktop/zed-editor
-    ../../desktop/vscode.nix
+    # ../../desktop/vscode.nix
     ../../desktop/helix.nix
     ../../desktop/flow.nix
     ../../desktop/mail
