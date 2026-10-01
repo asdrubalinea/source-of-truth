@@ -26,6 +26,9 @@ in {
     cdrtools # optical disc authoring/burning
     ddcutil # DDC/CI — external monitor brightness and inputs
     dmidecode # DMI/SMBIOS: board, firmware and DIMM identity
+    # GPU benchmark (Vulkan/GL/RT). `gravitymark` opens the launcher in the
+    # browser; `gravitymark-cli` takes the flags from the upstream run_*.sh.
+    (callPackage ../packages/gravitymark.nix {})
     inxi # one-shot hardware/system summary
     lm_sensors
     lshw # hardware tree
