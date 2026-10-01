@@ -39,6 +39,8 @@ in {
     ../../desktop/hn-tui.nix
     ../../desktop/home-packages.nix
     ../../desktop/opencode.nix
+    ../../desktop/ssh.nix
+    ../../desktop/starship.nix
     ../../desktop/yt-dlp.nix
     ../../desktop/mimeapps.nix
     ../../desktop/telegram-sandbox.nix
@@ -134,86 +136,9 @@ in {
       };
     };
 
-    ssh = {
-      enable = true;
-      # Opt out of HM's soon-to-be-removed default `Host *` block; its values
-      # just mirror ssh's own built-in defaults.
-      enableDefaultConfig = false;
-
-      # `ocelot` writes one stanza per dev VM into ~/.ssh/config.d/ (ADR 0013),
-      # which is what makes everything that speaks ssh work by name,
-      # `port-forward ocelot-<name> 3000` included. It has to be declared here
-      # because HM owns ~/.ssh/config as a store symlink, so nothing can append
-      # at runtime. A glob matching nothing is not an error, so this is inert
-      # until the first ocelot exists.
-      includes = ["config.d/*"];
-      settings = {
-        # wezterm sets TERM=wezterm locally, and remote hosts without that
-        # terminfo entry drop TUI apps to dumb-terminal mode — no readline, no
-        # arrow keys. sshd always honours the client-sent TERM, so override it
-        # to something every host knows. The more specific blocks below still
-        # win for their hosts.
-        "*" = {
-          SetEnv = {
-            TERM = "xterm-256color";
-          };
-        };
-        # Port 443 via altssh, so pushes work on networks that firewall 22.
-        "gitlab.com" = {
-          HostName = "altssh.gitlab.com";
-          User = "git";
-          Port = 443;
-          IPQoS = "none";
-        };
-        "github.com" = {
-          HostName = "ssh.github.com";
-          User = "git";
-          Port = 443;
-          IPQoS = "none";
-        };
-      };
-    };
-
     nix-index = {
       enable = true;
       enableFishIntegration = true;
-    };
-
-    starship = {
-      enable = true;
-      enableFishIntegration = true;
-      settings = {
-        add_newline = false;
-        format = "$hostname$all";
-        hostname = {
-          ssh_only = false;
-          format = "[$hostname]($style) ";
-          style = "bold green";
-        };
-
-        # The right prompt is a readout column: flush-right, glanced at, never
-        # read as prose. Both modules are off by default in starship and so are
-        # absent from `$all` above — `status` prints only when non-zero, which
-        # is the point (a failure that scrolled off is otherwise invisible), and
-        # `time` isn't redundant with the bar's clock because the bar auto-hides
-        # for burn-in (ADR 0009), leaving scrollback as the only place "when did
-        # this run" is answerable — including in a log paste.
-        #
-        # Styles are ANSI names, never hexes: the terminal palette is ember's
-        # (principle 4). bright-black is base03.
-        right_format = "$status$time";
-        status = {
-          disabled = false;
-          format = "[$status]($style) ";
-          style = "bold red";
-        };
-        time = {
-          disabled = false;
-          format = "[$time]($style)";
-          time_format = "%H:%M:%S";
-          style = "bright-black";
-        };
-      };
     };
   };
 

@@ -30,6 +30,8 @@ in {
 
     ../desktop/home-packages.nix
     ../desktop/opencode.nix
+    ../desktop/ssh.nix
+    ../desktop/starship.nix
     ../desktop/yt-dlp.nix
     # ../desktop/hn-tui.nix reads config.lib.stylix.colors to theme itself, and
     # stylix is not wired in without a rice — it comes back with the WM.
@@ -71,11 +73,6 @@ in {
     enable = true;
     enableFishIntegration = true;
   };
-
-  # Manage starship via HM (enableFishIntegration handles the fish hook) rather
-  # than a manual `starship init` in misc/fish.nix, which double-initialised it
-  # on hosts that also enabled programs.starship.
-  programs.starship.enable = true;
 
   # Dropped with the desktop: ../desktop/warp.nix (GUI terminal, and a long
   # from-source Rust build), programs.vscode's FHS wrapper, and
