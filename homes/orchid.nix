@@ -29,6 +29,7 @@ in {
     ../desktop/zellij.nix
 
     ../desktop/home-packages.nix
+    ../desktop/opencode.nix
     ../desktop/yt-dlp.nix
     # ../desktop/hn-tui.nix reads config.lib.stylix.colors to theme itself, and
     # stylix is not wired in without a rice — it comes back with the WM.

@@ -38,6 +38,7 @@ in {
     ../../desktop/obsidian.nix
     ../../desktop/hn-tui.nix
     ../../desktop/home-packages.nix
+    ../../desktop/opencode.nix
     ../../desktop/yt-dlp.nix
     ../../desktop/mimeapps.nix
     ../../desktop/telegram-sandbox.nix
