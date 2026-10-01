@@ -246,4 +246,7 @@ in {
     llm-agents.rtk
     # antigravity
   ];
+
+  # Claude Code's /commit slash command, so every host and ocelot has it.
+  home.file.".claude/commands/commit.md".source = ./claude/commit.md;
 }
