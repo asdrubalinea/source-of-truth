@@ -1,4 +1,8 @@
-{pkgs, ...}: let
+{
+  lib,
+  pkgs,
+  ...
+}: let
   modelsDir = "/persist/models";
   model = "${modelsDir}/Qwen3.6-35B-A3B-UD-Q4_K_S.gguf";
   port = 8080;
@@ -97,6 +101,9 @@ in {
   };
 
   systemd.services.llama-cpp = {
+    # Not started at boot, so the card is free for other work until wanted:
+    # `systemctl start llama-cpp`. Delete this line to bring it back on boot.
+    wantedBy = lib.mkForce [];
     # Without the model the server would exit 1 and restart-loop every 5 min.
     unitConfig.ConditionPathExists = model;
     # DynamicUser has no home, so RADV can't write its shader cache anywhere
