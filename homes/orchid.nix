@@ -23,8 +23,11 @@ in {
     # Applying and cleaning is `nh` (enabled in hosts/orchid/default.nix):
     # `nh os switch`, `nh home switch -b backup`, `nh clean all`.
     ../scripts/port-forward.nix
+    ../scripts/claude-sandboxed.nix
+    ../scripts/cage.nix
     # Needs rpool/vms first; see disks/orchid.nix.
     ../scripts/ocelot.nix
+    ../scripts/sitrep.nix
 
     ../misc/fish.nix
     ../desktop/tmux.nix
