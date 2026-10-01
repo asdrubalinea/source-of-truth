@@ -17,6 +17,7 @@
       ./system/services.nix
       ./system/vaultwarden-export.nix
       ./system/virtualization.nix
+      ./system/llm.nix
 
       # User accounts
       ./users/irene.nix
