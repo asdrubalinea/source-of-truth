@@ -13,6 +13,28 @@
     # interactive session to protect. In-kernel EEVDF runs.
     kernelPackages = pkgs.cachyosKernels.linuxPackages-cachyos-lts-lto-zen4;
 
+    # Power: performance over idle watts, since this is a tower on mains power.
+    kernelParams = [
+      # Already the CachyOS default; pinned so it can't drift. Same as tempest.
+      "amd_pstate=active"
+      # amd-pstate-epp has no real governors, only two policies, and this picks
+      # the policy at driver init, so no cpupower unit is needed. "performance"
+      # forces EPP to 0 and raises the floor to nominal (4.2 GHz), so a core
+      # reaches boost without first ramping up. Idle cores still drop into
+      # C-states, which is what frees the thermal headroom for boost. The
+      # default was powersave + balance_performance. Runtime check:
+      # /sys/devices/system/cpu/cpu0/cpufreq/{scaling_governor,energy_performance_preference}.
+      "cpufreq.default_governor=performance"
+      # Turns off PCIe link power saving, so the NVMe drives and the 9070 XT
+      # don't pay a link wake-up on the first access after going idle. Costs a
+      # few watts at idle. The default was the BIOS's choice.
+      "pcie_aspm.policy=performance"
+    ];
+    # Deliberately left alone: CPU mitigations, which stay on because ocelot
+    # and cage rely on them for isolation; C-states (disabling them takes away
+    # boost headroom on Zen 4); and the scheduler, preemption and HZ, which the
+    # CachyOS kernel already sets (EEVDF, full preempt, 1000 Hz, LTO, znver4).
+
     kernelModules = [
       "kvm-amd"
       # Raphael's small RDNA2 iGPU — no discrete card in this machine, so this is
