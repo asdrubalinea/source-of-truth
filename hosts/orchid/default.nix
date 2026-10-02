@@ -19,6 +19,7 @@
       ./system/virtualization.nix
       ./system/memory.nix
       ./system/llm.nix
+      ./system/gaming-vm.nix
 
       # User accounts
       ./users/irene.nix

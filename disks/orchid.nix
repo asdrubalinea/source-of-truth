@@ -199,6 +199,15 @@
             type = "zfs_fs";
             mountpoint = "/var/lib/vms";
           };
+          # The Windows gaming VM's raw disk (hosts/orchid/system/gaming-vm.nix).
+          # 64K rather than 128K records: the guest writes in small NTFS
+          # clusters, and a smaller record means less read-modify-write.
+          # Live orchid: sudo zfs create -o recordsize=64K rpool/vms/win11
+          "vms/win11" = {
+            type = "zfs_fs";
+            mountpoint = "/var/lib/vms/win11";
+            options.recordsize = "64K";
+          };
 
           # Half a terabyte of re-fetchable NARs, so its own dataset: never on
           # the tmpfs root, never in a snapshot, and unable to starve the pool —
