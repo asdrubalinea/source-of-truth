@@ -117,6 +117,7 @@
   # left running on purpose — it works against the VM's real ZFS pool, which is
   # what this clone exists to test.
   services.smartd.enable = lib.mkForce false; # monitors /dev/nvme0n1, absent here
+  hardware.cpu.amd.ryzen-smu.enable = lib.mkForce false; # no Raphael SMU in QEMU; modprobe fails
 
   # Everything below needs a credential that only exists on the real host:
   #   borg      → /home/irene/.ssh/id_ed25519 + /persist/borg-*/passphrase
