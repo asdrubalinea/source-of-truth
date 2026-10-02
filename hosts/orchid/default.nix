@@ -15,7 +15,7 @@
       ./system/networking.nix
       ./system/environment.nix
       ./system/services.nix
-      ./system/vaultwarden-export.nix
+      # ./system/vaultwarden-export.nix
       ./system/virtualization.nix
       ./system/memory.nix
       ./system/llm.nix
@@ -36,9 +36,9 @@
       ../../modules/impermanence-root.nix
 
       # Services
-      ../../services/borg-backup.nix
-      ../../services/caddy
-      ../../services/syncthing.nix
+      # ../../services/borg-backup.nix
+      # ../../services/caddy
+      # ../../services/syncthing.nix
 
       # --- Filesystem + boot layer: same shape as tempest (GPT + LUKS + LVM +
       #     swap + ZFS datasets + tmpfs root + impermanence). See disks/orchid.nix
