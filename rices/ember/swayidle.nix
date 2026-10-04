@@ -147,12 +147,16 @@
   # just the screens off. Reads sysfs directly. `BAT*`, not `*` — peripheral
   # batteries live in the same directory and a mouse at Full would veto every
   # suspend. `$(< …)`, not `cat`, per the store-path rule above; the bare `cat`
-  # this used to call meant idle suspend never once fired.
+  # this used to call meant idle suspend never once fired. No battery at all
+  # counts as AC, or a desktop would suspend on every idle.
   suspendOrOnBattery = pkgs.writeShellScript "ember-suspend-or-not" ''
+    on_battery=0
     for s in /sys/class/power_supply/BAT*/status; do
       [ -r "$s" ] || continue
       [ "$(< "$s")" != "Discharging" ] && exit 0
+      on_battery=1
     done
+    [ "$on_battery" = 1 ] || exit 0
     exec ${pkgs.systemd}/bin/systemctl suspend
   '';
 
