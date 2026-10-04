@@ -1,5 +1,6 @@
 {
   pkgs,
+  lib,
   inputs,
   ...
 }: let
@@ -16,8 +17,12 @@
   );
 in {
   imports = [
-    # No WM for now, so no ../rices/estradiol (hyprland/waybar/stylix/kitty…)
-    # and no hyprland HM module. Both come back together.
+    # Desktop environment and theming — the ember rice, as on tempest
+    # (declares rices.ember.*; enabled below).
+    inputs.stylix.homeModules.stylix
+    ../rices/ember
+    ./orchid/monitors.nix # machine policy: monitor identity + mode (kanshi)
+
     ../desktop/helix.nix
 
     # Applying and cleaning is `nh` (enabled in hosts/orchid/default.nix):
@@ -38,9 +43,29 @@ in {
     ../desktop/ssh.nix
     ../desktop/starship.nix
     ../desktop/yt-dlp.nix
-    # ../desktop/hn-tui.nix reads config.lib.stylix.colors to theme itself, and
-    # stylix is not wired in without a rice — it comes back with the WM.
+    ../desktop/hn-tui.nix
   ];
+
+  # Both compositor layers, picked per login at the greeter — same as tempest
+  # (ADR 0012). The monitor layout is kanshi, in ./orchid/monitors.nix.
+  rices.ember = {
+    enable = true;
+    niri.enable = true;
+    mango.enable = true;
+  };
+
+  # Machine policy: where this machine is (rices/ember/noctalia.nix keeps
+  # Noctalia from geolocating by IP, so it needs a place name).
+  programs.noctalia.settings.location.address = "Las Palmas, Spain";
+
+  # Keep the Wayland client services alive across a compositor restart: retry
+  # forever, slowly, instead of burning systemd's 5 tries in half a second and
+  # sitting dead. Same block as homes/tempest/default.nix, which has the full
+  # story; wlsunset is tempest-only, so it is not listed here.
+  systemd.user.services = lib.genAttrs ["swayidle" "noctalia" "wayland-pipewire-idle-inhibit"] (_: {
+    Unit.StartLimitIntervalSec = 0;
+    Service.RestartSec = 2;
+  });
 
   # Let Home Manager install and manage itself.
   programs.home-manager.enable = true;
@@ -84,7 +109,6 @@ in {
     enableFishIntegration = true;
   };
 
-  # Dropped with the desktop: ../desktop/warp.nix (GUI terminal, and a long
-  # from-source Rust build), programs.vscode's FHS wrapper, and
-  # services.gnome-keyring — there is no graphical session to unlock it.
+  # Not brought back with the desktop: ../desktop/warp.nix (GUI terminal, and a
+  # long from-source Rust build) and programs.vscode's FHS wrapper.
 }

@@ -149,7 +149,8 @@ default, a managed save, is impossible with a VFIO device).
 ## When it goes wrong
 
 - **Start refused, "is still open":** the hook found a process holding the card.
-  It prints that process, so stop it and retry.
+  It prints that process, so stop it and retry. If it is niri or mango, the
+  desktop is running on the card: log out to the greeter first.
 - **Card gone from the host after the VM stops** (`lspci -k -s 03:00.0` shows no
   driver, or amdgpu errors in `dmesg`): RDNA reset trouble. A host reboot gets
   it back. If it keeps happening, switch to dedicating the card: add

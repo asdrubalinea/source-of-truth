@@ -8,7 +8,8 @@
 #
 # The initrd prompts for the LUKS passphrase on the console — no enrolled TPM2
 # here, and the test image's password is **disko**, disko's non-interactive
-# default. Console-only, since orchid is headless: no GPU/display tuning.
+# default. Console-only: the real host runs the ember desktop, but the clone
+# boots it to a VT nobody looks at, so no GPU/display tuning.
 {
   inputs,
   lib,
@@ -48,7 +49,7 @@
     # instead, so it cannot drift out of sync with disko.memSize above.
     virtualisation.qemu.enableSharedMemory = true;
 
-    # Headless, so run on the serial console in the launching terminal — which
+    # Console-only, so run on the serial console in the launching terminal — which
     # also sets console=ttyS0, putting the initrd's LUKS prompt and the boot log
     # on stdout. Ctrl-a x kills the VM.
     virtualisation.graphics = false;
@@ -80,7 +81,13 @@
       inherit inputs;
       hostname = "orchid";
     };
-    users.irene.imports = [../../homes/orchid.nix];
+    users.irene = {
+      imports = [../../homes/orchid.nix];
+
+      # Same as tempest-vm: stylix's HM overlays trip HM's deprecation warning
+      # under useGlobalPkgs, and are ignored here anyway.
+      stylix.overlays.enable = false;
+    };
 
     # Don't abort activation if /etc/skel seeded a file HM also manages — back it
     # up instead, or the very first activation can fail on a collision.

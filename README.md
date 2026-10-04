@@ -43,7 +43,7 @@ server and a Pi — plus Home Manager for `irene` — from a single declarative 
 | Host | What it is | Highlights |
 |------|------------|------------|
 | **`tempest`** ⛈️ | Framework AMD AI 300 laptop | `disko` + `impermanence` + `lanzaboote` (secure boot) + `ucodenix`, CachyOS kernel, ZFS-on-LUKS, [niri](https://github.com/YaLTeR/niri) or [mango](https://github.com/mangowm/mango), chosen at the greeter |
-| **`orchid`** 🌸 | Tower (7800X3D, 64 GiB) | disko ZFS-on-LUKS + impermanence, headless, standalone Home Manager |
+| **`orchid`** 🌸 | Tower (7800X3D, 64 GiB) | disko ZFS-on-LUKS + impermanence, ember rice (niri + mango), standalone Home Manager |
 | **`hydra`** 🐍 | QEMU guest server | Caddy, Grafana, Glance — the always-on box |
 | **`zephyr`** 🍃 | Raspberry Pi 3B+ (aarch64) | headless; cross-built on tempest under binfmt, flashed as an SD image |
 | **`tempest-vm`** 📦 | tempest, minus the hardware | same config with the physical layer dropped — disko + impermanence + niri in QEMU, via `./build-vm` |

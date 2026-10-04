@@ -30,9 +30,14 @@
 
     # For VSCode remote / prebuilt language servers.
     nix-ld.enable = true;
-  };
 
-  # Dropped with the desktop: programs.hyprland, programs.steam and the
-  # vulkan-tools/loader/validation-layers packages. Nothing here runs a display
-  # server for now — put them back alongside the rice when a WM returns.
+    # System-level rather than home-manager: the module also turns on 32-bit
+    # graphics (hardware.graphics.enable32Bit) and the controller udev rules.
+    steam = {
+      enable = true;
+      # remotePlay.openFirewall = true;
+      # dedicatedServer.openFirewall = true;
+      # localNetworkGameTransfers.openFirewall = true;
+    };
+  };
 }

@@ -3,8 +3,8 @@
 New tower: Ryzen 7 7800X3D, 64 GiB, discrete AMD GPU (amdgpu +
 LACT, `modules/hardware/gpu-amd.nix`), no dedicated NIC. A **clean install** —
 nothing is carried over from the old box. End state: **ZFS-on-LUKS** on a single NVMe, **tmpfs root + impermanence**,
-systemd-boot (no Secure Boot), CachyOS LTS `zen4` kernel, **headless** — no rice,
-no compositor, no greeter.
+systemd-boot (no Secure Boot), CachyOS LTS `zen4` kernel, the ember rice
+(niri + mango behind tuigreet), as on tempest.
 
 Same shape as tempest, minus lanzaboote and ucodenix. The reasoning behind the
 layout is [`adr/0001-zfs-on-luks-tempest.md`](adr/0001-zfs-on-luks-tempest.md);
@@ -94,8 +94,8 @@ free space".
 
 ## Phase 3 — First boot
 
-Type the LUKS passphrase at the console. Then, because this box is headless,
-enrol the TPM so it never asks again:
+Type the LUKS passphrase at the console. Then, so nobody has to be at the
+console to unlock it, enrol the TPM so it never asks again:
 
 ```sh
 sudo systemd-cryptenroll --tpm2-device=auto --tpm2-pcrs=7 \

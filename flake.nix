@@ -354,9 +354,9 @@
               overlays = overlays;
             };
           }
+          niri.nixosModules.niri
 
-          # Headless for now, so no compositor module. disko + impermanence are
-          # imported inside the host, as tempest does it.
+          # disko + impermanence are imported inside the host, as tempest does it.
           ./hosts/orchid/default.nix
         ];
       };
@@ -478,8 +478,10 @@
         };
 
         modules = [
-          # No compositor/theming modules — orchid has no WM for now. Re-add
-          # them alongside the rice import in homes/orchid.nix.
+          # Same as irene@tempest: standalone HM needs niri's HM module wired
+          # explicitly. stylix is imported inside homes/orchid.nix.
+          niri.homeModules.config
+
           ./homes/orchid.nix
 
           {

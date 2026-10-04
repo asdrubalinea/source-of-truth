@@ -20,6 +20,7 @@
       ./system/memory.nix
       ./system/llm.nix
       ./system/gaming-vm.nix
+      ./system/session.nix
 
       # User accounts
       ./users/irene.nix
@@ -49,10 +50,12 @@
       ./system/zfs.nix
       ./system/persistence.nix
 
-      # No desktop: this host runs headless for now, so no rice is imported and
-      # no compositor/greeter is installed. rices/estradiol (hyprland) is still
-      # in the tree, imported by nothing — wire it back in here and in
-      # homes/orchid.nix when a WM is wanted again.
+      # Desktop environment — the ember rice, same as tempest: its NixOS half,
+      # then one file per compositor layer, picked at the greeter
+      # (./system/session.nix). The HM half is enabled in homes/orchid.nix.
+      ../../rices/ember/system.nix
+      ../../rices/ember/compositors/niri/system.nix
+      ../../rices/ember/compositors/mango/system.nix
     ]
     ++ lib.optionals virtual [
       # --- QEMU clone only: guest sizing, home-manager as a NixOS module, and

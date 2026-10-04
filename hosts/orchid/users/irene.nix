@@ -12,6 +12,7 @@
         "jackaudio"
         "render"
         "video"
+        "i2c"
         # Read system-unit journals unprivileged, e.g. `journalctl -xeu
         # borgbackup-job-…` after a failed backup.
         "systemd-journal"

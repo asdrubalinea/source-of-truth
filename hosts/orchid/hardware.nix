@@ -28,6 +28,11 @@ in {
 
     logitech.wireless.enable = true;
 
+    # DDC/CI for the ember rice's brightness keys and Noctalia's ddcutil
+    # backend — a desktop's panels are all external, so there is no backlight
+    # for brightnessctl. Loads i2c-dev and grants the `i2c` group access.
+    i2c.enable = true;
+
     # Raphael's small RDNA2 iGPU and the RX 9070 XT (Gigabyte, Navi 48) are
     # both driven by amdgpu; graphics userspace and LACT live in the shared
     # modules/hardware/gpu-amd.nix module imported by orchid.
