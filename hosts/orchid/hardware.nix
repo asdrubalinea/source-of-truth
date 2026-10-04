@@ -37,8 +37,10 @@ in {
   # /etc/lact/config.yaml a read-only store link, so the GUI can't change it —
   # retune here. Measured 2026-10-01 with 10 min of vkmark effect2d (headless
   # sway) per step at 297 W: -175 mV passes, -200 mV hangs the gfx ring and
-  # forces a mode1 reset in under 5 min, so -150 keeps 25 mV of margin.
-  # Against stock (330 W, 0 mV): -33 W, junction 100 -> 94 C, +4.9% FPS.
+  # forces a mode1 reset in under 5 min. vkmark is not proof, though: at -150
+  # real games hung the gfx ring twice in one evening (2026-10-04, a java/GL
+  # and a vkd3d title, each recovered only by mode1 reset), so -100 it is.
+  # Against stock (330 W, 0 mV) at -150: -33 W, junction 100 -> 94 C, +4.9% FPS.
   # Junction runs ~31 C over edge either way — a mount/paste limit, not voltage.
   services.lact.settings = {
     version = 7;
@@ -51,7 +53,7 @@ in {
     gpus."1002:7550-1458:2424-0000:03:00.0" = {
       fan_control_enabled = false;
       power_cap = 297.0;
-      voltage_offset = -150;
+      voltage_offset = -100;
     };
     current_profile = null;
     auto_switch_profiles = false;
