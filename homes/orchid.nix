@@ -23,7 +23,14 @@ in {
     ../rices/ember
     ./orchid/monitors.nix # machine policy: monitor identity + mode (kanshi)
 
+    ../desktop/zed-editor
     ../desktop/helix.nix
+    ../desktop/flow.nix
+    ../desktop/mail
+    ../desktop/obsidian.nix
+    ../desktop/mimeapps.nix
+    ../desktop/telegram-sandbox.nix # needs firejail: modules/firejail.nix
+    ../desktop/hyfetch.nix
 
     # Applying and cleaning is `nh` (enabled in hosts/orchid/default.nix):
     # `nh os switch`, `nh home switch -b backup`, `nh clean all`.
@@ -33,6 +40,7 @@ in {
     # Needs rpool/vms first; see disks/orchid.nix.
     ../scripts/ocelot.nix
     ../scripts/sitrep.nix
+    ../scripts/due-cuffie.nix
 
     ../misc/fish.nix
     ../desktop/tmux.nix
@@ -54,18 +62,32 @@ in {
     mango.enable = true;
   };
 
-  # Machine policy: where this machine is (rices/ember/noctalia.nix keeps
-  # Noctalia from geolocating by IP, so it needs a place name).
+  # Machine policy: a readable terminal size on THIS machine's panels — stylix's
+  # default 12 is too small here. Same seam as homes/tempest/default.nix (16).
+  stylix.fonts.sizes.terminal = 14;
+
+  # Machine policy: where this machine is. Stated twice — Noctalia geocodes a
+  # place name (rices/ember/noctalia.nix keeps it from geolocating by IP), and
+  # wlsunset below needs a lat/long.
   programs.noctalia.settings.location.address = "Las Palmas, Spain";
+
+  services.wlsunset = {
+    enable = true;
+    latitude = 28.1235; # Las Palmas de Gran Canaria, Spain
+    longitude = -15.4363;
+  };
 
   # Keep the Wayland client services alive across a compositor restart: retry
   # forever, slowly, instead of burning systemd's 5 tries in half a second and
   # sitting dead. Same block as homes/tempest/default.nix, which has the full
-  # story; wlsunset is tempest-only, so it is not listed here.
-  systemd.user.services = lib.genAttrs ["swayidle" "noctalia" "wayland-pipewire-idle-inhibit"] (_: {
-    Unit.StartLimitIntervalSec = 0;
-    Service.RestartSec = 2;
-  });
+  # story — including why wlsunset alone also needs Restart forced.
+  systemd.user.services = lib.mkMerge [
+    (lib.genAttrs ["swayidle" "kanshi" "wlsunset" "noctalia" "wayland-pipewire-idle-inhibit"] (_: {
+      Unit.StartLimitIntervalSec = 0;
+      Service.RestartSec = 2;
+    }))
+    {wlsunset.Service.Restart = lib.mkForce "always";}
+  ];
 
   # Let Home Manager install and manage itself.
   programs.home-manager.enable = true;
