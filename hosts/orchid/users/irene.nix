@@ -16,6 +16,8 @@
         # Read system-unit journals unprivileged, e.g. `journalctl -xeu
         # borgbackup-job-…` after a failed backup.
         "systemd-journal"
+        # Capture packets without root (programs.wireshark, system/environment.nix).
+        "wireshark"
       ];
       hashedPassword = (import ../../../passwords).password;
       shell = pkgs.fish;

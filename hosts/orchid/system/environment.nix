@@ -22,6 +22,20 @@
   programs = {
     fish.enable = true;
     mosh.enable = true;
+    mtr.enable = true;
+
+    # System-level so the module creates the `wireshark` group and setcap-wraps
+    # dumpcap (irene is a member, users/irene.nix); a home-manager install would
+    # be a GUI that sees no interface. See hosts/tempest/system/environment.nix.
+    wireshark = {
+      enable = true;
+      package = pkgs.wireshark;
+    };
+
+    appimage = {
+      enable = true;
+      binfmt = true;
+    };
 
     gnupg.agent = {
       enable = true;

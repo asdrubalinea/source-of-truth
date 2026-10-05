@@ -26,6 +26,19 @@
     [devDomain]
     ++ map (sub: "${sub}.${devDomain}") (devServices ++ devWorkspaces);
 in {
+  # LocalSend — AirDrop-style LAN file sharing. openFirewall handles TCP+UDP 53317.
+  programs.localsend = {
+    enable = true;
+    openFirewall = true;
+  };
+
+  # Resolve `*.local` (e.g. the installer ISO at nixos.local). Lookup only, as
+  # on tempest.
+  services.avahi = {
+    enable = true;
+    nssmdns4 = true;
+  };
+
   networking = {
     hostName = "orchid";
     # Required by ZFS, and stamped into the pool labels on import — do not change

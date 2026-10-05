@@ -33,6 +33,32 @@ in {
     };
   };
 
+  # earlyoom: SIGTERM the biggest memory hog before the box livelocks. Same
+  # thresholds as tempest (hosts/tempest/system/services.nix has the reasoning,
+  # and system/memory.nix there the MemAvailable trap): decide on RAM alone, at
+  # <5% available — the 16 GiB swap LV is overflow, not a cushion to thrash into.
+  services.earlyoom = {
+    enable = true;
+    freeMemThreshold = 5;
+    freeSwapThreshold = 100;
+  };
+
+  # The G502's thumb button → super+e, as on tempest. 046d:c547 is the Lightspeed
+  # receiver, so this follows the receiver to whichever machine it is plugged in.
+  services.keyd = {
+    enable = true;
+    keyboards.g502 = {
+      ids = ["046d:c547"];
+      settings.main.C-up = "macro(super+e)";
+    };
+  };
+
+  # Mask Speech Dispatcher: GTK/Chromium apps pull in speechd via AT-SPI, and its
+  # socket-activated user units spawn the daemon plus every synthesizer in each
+  # session. Nothing here uses screen-reader TTS. See the tempest note.
+  systemd.user.services.speech-dispatcher.enable = false;
+  systemd.user.sockets.speech-dispatcher.enable = false;
+
   # nix.gc.automatic, which hosts/orchid/default.nix already sets alongside
   # programs.nh.clean.
 }

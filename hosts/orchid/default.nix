@@ -28,6 +28,7 @@
       # Shared hardware modules
       ../../hardware/bluetooth.nix
       ../../hardware/audio.nix
+      ../../hardware/openlogi.nix
       ../../modules/hardware/gpu-amd.nix
 
       # System modules
@@ -35,6 +36,7 @@
       ../../modules/security.nix
       ../../modules/zfs-on-luks.nix
       ../../modules/impermanence-root.nix
+      ../../modules/firejail.nix
 
       # Services
       # ../../services/borg-backup.nix
