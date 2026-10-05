@@ -21,5 +21,11 @@
     "/var/lib/caddy"
 
     "/var/lib/libvirt"
+
+    # The monitoring stack (services/grafana): dashboards state and the
+    # Prometheus TSDB, which is the point — hang history must survive the reboot.
+    "/var/lib/grafana"
+    "/var/lib/prometheus2"
+    "/var/lib/prometheus-node-exporter"
   ];
 }

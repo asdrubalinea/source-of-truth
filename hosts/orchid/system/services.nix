@@ -43,6 +43,12 @@ in {
     freeSwapThreshold = 100;
   };
 
+  # Grafana + Prometheus (services/grafana). Full collector set at the module's
+  # default 15s cadence — no battery to save here, and the history is wanted for
+  # the hangs while the Curve Optimizer is still provisional. Grafana on
+  # 127.0.0.1:3333.
+  services.monitoring.enable = true;
+
   # The G502's thumb button → super+e, as on tempest. 046d:c547 is the Lightspeed
   # receiver, so this follows the receiver to whichever machine it is plugged in.
   services.keyd = {

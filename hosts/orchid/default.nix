@@ -39,6 +39,7 @@
       ../../modules/firejail.nix
 
       # Services
+      ../../services/grafana/default.nix
       # ../../services/borg-backup.nix
       # ../../services/caddy
       # ../../services/syncthing.nix
