@@ -44,6 +44,7 @@ in {
     ../../desktop/yt-dlp.nix
     ../../desktop/mimeapps.nix
     ../../desktop/telegram-sandbox.nix
+    ../../desktop/hyfetch.nix
 
     # System utilities. Applying and cleaning is `nh` (enabled in
     # hosts/tempest/default.nix): `nh os switch`, `nh home switch -b backup`.
@@ -92,26 +93,6 @@ in {
       sdrangel-xwayland # RTL-SDR Blog V4 frontend, XWayland-wrapped (see above + hardware/rtl-sdr.nix)
       pkgs.sdrpp # SDR++ — runs native Wayland fine (GLFW, no wrapper); links rtl-sdr-osmocom (V4-capable)
     ];
-
-    # hyfetch (aliased to neofetch/fetch), preset for the lesbian pride flag.
-    file.".config/hyfetch.json" = {
-      text = builtins.toJSON {
-        preset = "lesbian";
-        mode = "rgb";
-        auto_detect_light_dark = false;
-        light_dark = "dark";
-        lightness = null;
-        color_align.mode = "horizontal";
-        backend = "neofetch";
-        args = null;
-        distro = null;
-        pride_month_disable = false;
-        custom_ascii_path = null;
-        custom_presets = null;
-        palette_glyph = null;
-        palette_type = null;
-      };
-    };
   };
 
   home.sessionVariables = {
