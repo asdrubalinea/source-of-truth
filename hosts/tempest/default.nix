@@ -17,7 +17,7 @@
       ./system/session.nix
       ../../services/vaultwarden-mirror.nix
       ./system/virtualization.nix
-      ./system/firejail.nix
+      ../../modules/firejail.nix
       ./system/memory.nix
 
       # User accounts
