@@ -28,7 +28,7 @@
       ../../hardware/audio.nix
       ../../hardware/openlogi.nix
       ../../hardware/rtl-sdr.nix
-      ../../hardware/sdrplay.nix
+      # ../../hardware/sdrplay.nix # disabled 2026-10-06 (sdrplay_apiService + soapysdrplay)
 
       # System modules
       ../../modules/nix.nix
