@@ -76,8 +76,8 @@ evaluation.
 
 ### Why two window-rule files instead of one abstraction
 
-The dialects overlap only in the middle. mango has `isglobal`,
-`shield_when_capture`, `isnamedscratchpad`, `scroller_proportion`; niri has
+The dialects overlap only in the middle. mango has `is_global`,
+`shield_when_capture`, `is_named_scratchpad`, `scroller_proportion`; niri has
 `block-out-from`, `clip-to-geometry`, `tab-indicator`, pixel column widths. A
 neutral vocabulary could express only the intersection, so every interesting rule
 would need an escape hatch — and we would maintain the abstraction *and* the
@@ -88,11 +88,11 @@ duplicated on purpose.
 
 What mango gives us for free, which the niri layer needs machinery for:
 
-- **Scratchpads are native** (`toggle_named_scratchpad` + `isnamedscratchpad:1`).
+- **Scratchpads are native** (`toggle_named_scratchpad` + `is_named_scratchpad:1`).
   No nirius daemon, no `mkScratchpad` init/toggle scripts, nothing spawned and
   hidden at startup. ADR 0006 describes a workaround for a niri limitation, and
   remains true of niri only.
-- **Sticky windows are native** (`isglobal:1`), so the PiP follows you across
+- **Sticky windows are native** (`is_global:1`), so the PiP follows you across
   tags by itself and `pip-follow.nix` has no mango counterpart.
 - **XWayland is built in**, so no xwayland-satellite.
 

@@ -138,6 +138,14 @@
   # and an empty tag doesn't disappear. Ten, so Mod+1..0 matches niri.
   tagCount = 10;
   tagRules = map (i: "id:${toString i},layout_name:scroller") (lib.range 1 tagCount);
+
+  sessionStart = let
+    s = config.wayland.windowManager.mango.systemd;
+  in
+    pkgs.writeShellScript "mango-session-start" ''
+      ${pkgs.dbus}/bin/dbus-update-activation-environment --systemd ${lib.concatStringsSep " " s.variables}
+      ${lib.concatStringsSep "\n" s.extraCommands}
+    '';
 in {
   config = lib.mkIf (cfg.enable && cfg.mango.enable) {
     # mango re-reads config.conf only when told to, and the file is a store
@@ -157,20 +165,23 @@ in {
       # runtime rather than at build — the bug class the niri layer describes.
       package = pkgs.mango;
 
-      # MUST be non-empty. The HM module writes autostart.sh — and the
-      # `exec-once` that runs it — only when this is set, and that script is
-      # where dbus-update-activation-environment and `systemctl --user start
-      # mango-session.target` live. Empty means graphical-session.target never
-      # starts and the whole rest of the rice silently never launches.
-      #
-      # Nothing else belongs here: Noctalia is a supervised user service, and
-      # the scratchpads launch lazily on first toggle rather than being
-      # spawned-and-hidden the way the niri layer has to do it.
-      autostart_sh = ''
-        # (systemd/D-Bus activation is prepended by the module itself)
-      '';
+      # Deliberately left EMPTY, unlike before: the module appends a hard-coded
+      # `exec-once=` line when this is set, a spelling mango's snake_case parser
+      # now rejects, so `mango -p` fails the build. The activation it used to
+      # carry is `exec_once` below instead. Go back to autostart_sh once
+      # upstream's nix/hm-modules.nix writes `exec_once`.
+      autostart_sh = "";
 
       settings = {
+        # The session's ignition: imports the environment into systemd/D-Bus and
+        # starts mango-session.target. Without it graphical-session.target never
+        # starts and the whole rest of the rice silently never launches. Built
+        # from the module's own `systemd.*` options, which is what it would have
+        # prepended to autostart.sh. Nothing else belongs here: Noctalia is a
+        # supervised user service, and the scratchpads launch lazily on first
+        # toggle rather than being spawned-and-hidden as under niri.
+        exec_once = "${sessionStart}";
+
         # --- Session environment ------------------------------------------
         # Mirrors the niri layer's block. XDG_CURRENT_DESKTOP is the one value
         # that must differ: portals pick a backend by it, and Noctalia
@@ -193,7 +204,7 @@ in {
 
         # --- Tags and layout ----------------------------------------------
         tag_num = tagCount;
-        tagrule = tagRules;
+        tag_rule = tagRules;
 
         # Tuned to match niri's `default-column-width.proportion = 1.0`: one
         # full-width column at a time. structs is the sliver mango reserves to
@@ -205,15 +216,15 @@ in {
         # --- Dimensions ----------------------------------------------------
         # 8px between windows, none at the screen edge. mango splits inner and
         # outer directly, so it needs no negative-strut trick as niri does.
-        borderpx = 2;
-        gappih = 8;
-        gappiv = 8;
-        gappoh = 0;
-        gappov = 0;
+        border_px = 2;
+        gap_inner_horizontal = 8;
+        gap_inner_vertical = 8;
+        gap_outer_horizontal = 0;
+        gap_outer_vertical = 0;
         # Square, derived from the bar's edge treatment exactly as niri's
         # geometry-corner-radius is — see "bar" in CONTEXT.md.
         border_radius = 0;
-        smartgaps = 0;
+        smart_gaps = 0;
 
         # --- Effects -------------------------------------------------------
         # scenefx can do more than niri (blur, per-window opacity), deliberately
@@ -230,22 +241,22 @@ in {
         # mango colour template — leave it OFF, it would write into
         # ~/.config/mango, which HM owns as a read-only store symlink.
         #
-        # urgentcolor through splitcolor are ALSO border colours (mango swaps the
+        # urgent_color through split_color are ALSO border colours (mango swaps the
         # border while a window is in that state), so they take the same alpha as
         # the focused border. At ff they were the one thing glowing at full
-        # brightness against near-black. rootcolor/shadowscolor aren't borders
+        # brightness against near-black. root_color/shadows_color aren't borders
         # and stay opaque. (See the TRIED AND REJECTED note in ../niri/niri.nix.)
-        focuscolor = colour "73" c.base03;
-        bordercolor = colour "26" c.base01;
-        rootcolor = colour "ff" c.base00;
-        urgentcolor = colour "73" c.base08;
-        scratchpadcolor = colour "73" c.base0E;
-        globalcolor = colour "73" c.base0D;
-        overlaycolor = colour "73" c.base0C;
-        maximizescreencolor = colour "73" c.base0B;
-        shadowscolor = colour "ff" c.base00;
-        splitcolor = colour "73" c.base0A;
-        dropcolor = colour "80" c.base0A;
+        focus_color = colour "73" c.base03;
+        border_color = colour "26" c.base01;
+        root_color = colour "ff" c.base00;
+        urgent_color = colour "73" c.base08;
+        scratchpad_color = colour "73" c.base0E;
+        global_color = colour "73" c.base0D;
+        overlay_color = colour "73" c.base0C;
+        maximized_screen_color = colour "73" c.base0B;
+        shadows_color = colour "ff" c.base00;
+        split_color = colour "73" c.base0A;
+        drop_color = colour "80" c.base0A;
 
         # --- Animations ----------------------------------------------------
         # niri runs its own animations at `slowdown = 0.7`; these are mango's
@@ -257,8 +268,8 @@ in {
         animation_duration_tag = 210;
 
         # --- Focus and pointer ---------------------------------------------
-        sloppyfocus = 1; # niri: input.focus-follows-mouse
-        warpcursor = 0; # niri does not warp the pointer on keyboard focus
+        sloppy_focus = 1; # niri: input.focus-follows-mouse
+        warp_cursor = 0; # niri does not warp the pointer on keyboard focus
         enable_hotarea = 0; # niri: gestures.hot-corners.enable = false
 
         # --- Cursor ----------------------------------------------------------
@@ -278,7 +289,7 @@ in {
         mouse_natural_scrolling = 0;
         mouse_accel_speed = -0.4;
 
-        windowrule = windowRules;
+        window_rule = windowRules;
 
         # --- Keybindings ----------------------------------------------------
         # Same keys as the niri layer wherever the action exists on both sides.

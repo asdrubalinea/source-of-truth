@@ -135,7 +135,7 @@ modes fused into one complaint. The glossary keeps them apart.
   bitmask, so one window can be on several at once and an empty tag never
   disappears. ember pins mango to ten tags so the same ten keys land in the same
   ten places, but "the workspace list" is a niri idea with no mango counterpart,
-  and a *sticky* window is a mango idea (`isglobal`) that niri has to fake. When
+  and a *sticky* window is a mango idea (`is_global`) that niri has to fake. When
   precision matters, say **tag** for mango and **workspace** for niri; say
   *workspace* when you mean the thing the user switches.
 - **bar** — the rice's single status strip: workspaces, live readouts, clock,

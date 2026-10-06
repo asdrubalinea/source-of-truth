@@ -48,7 +48,7 @@ Identical unless the right column says otherwise.
 - **Scratchpads launch lazily.** The first Mod+T *starts* Telegram; under niri it
   was already running, parked, since login. So the first summon of the session is
   slow and the ones after are instant.
-- **The PiP is genuinely sticky** (`isglobal`), rather than being dragged onto
+- **The PiP is genuinely sticky** (`is_global`), rather than being dragged onto
   your current workspace by a daemon a moment after you switch.
 - **No marquee.** The portrait OLED's video band is niri-only. The top of that
   panel is ordinary tiling space under mango.
