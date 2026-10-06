@@ -201,9 +201,26 @@
     # Steel plugin support isn't a default cargo feature, so turn it on. It has
     # to be `cargoBuildFeatures` and not `buildFeatures`: buildRustPackage maps
     # the latter internally, so an overrideAttrs on it is ignored.
+    #
+    # The perl grammar's src/bsearch.c defines its own `bsearch`, which glibc
+    # 2.44 now shadows with a C23 const-preserving macro of the same name, so
+    # the definition fails to parse. #undef it right above the definition.
+    # Drop once tree-sitter-perl (or helix's pin of it) stops vendoring bsearch.
     helixSteelOverlay = final: prev: {
       helix =
-        (inputs.helix.packages.${final.stdenv.hostPlatform.system}.default).overrideAttrs
+        ((inputs.helix.packages.${final.stdenv.hostPlatform.system}.default).override {
+          grammarOverlays = [
+            (gfinal: gprev: {
+              perl = gprev.perl.overrideAttrs (old: {
+                postPatch =
+                  (old.postPatch or "")
+                  + ''
+                    sed -i 's/^void \*bsearch(/#undef bsearch\n&/' src/bsearch.c
+                  '';
+              });
+            })
+          ];
+        }).overrideAttrs
         (old: {
           cargoBuildFeatures = (old.cargoBuildFeatures or []) ++ ["steel"];
         });
