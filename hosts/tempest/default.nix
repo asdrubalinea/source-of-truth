@@ -75,6 +75,7 @@
       ../../hardware/framework.nix
       ../../modules/hardware/gpu-amd.nix
       ./system/backup-external.nix
+      ./system/remote-build.nix # offload builds to orchid; the VM has no key for it
 
       # secure-boot.nix (lanzaboote) is intentionally left disabled for the FIRST
       # install: it mkForce-disables systemd-boot and signs UKIs against keys in
