@@ -301,6 +301,15 @@
               );
           };
       })
+      # `pkgs.helium`: the helium-browser input wrapped for the profile that
+      # roams between tempest and orchid over syncthing (packages/helium.nix,
+      # docs/helium-sync.md). One derivation, so the keybinds, the .desktop
+      # entry and home.packages all launch through the same sync guard.
+      (final: prev: {
+        helium = final.callPackage ./packages/helium.nix {
+          helium-unwrapped = inputs.helium-browser.packages.${prev.stdenv.hostPlatform.system}.default;
+        };
+      })
       claude-code.overlays.default
       nix-cachyos-kernel.overlays.pinned
     ];

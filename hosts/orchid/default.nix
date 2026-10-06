@@ -42,7 +42,7 @@
       ../../services/grafana/default.nix
       # ../../services/borg-backup.nix
       # ../../services/caddy
-      # ../../services/syncthing.nix
+      ../../services/syncthing.nix # the Helium profile, roamed with tempest (docs/helium-sync.md)
 
       # --- Filesystem + boot layer: same shape as tempest (GPT + LUKS + LVM +
       #     swap + ZFS datasets + tmpfs root + impermanence). See disks/orchid.nix
