@@ -1,4 +1,4 @@
-{...}:
+{pkgs, ...}:
 # Machine policy for tempest: monitor identities and layout. Per-host facts
 # (panel serials, modes, positions), not part of the ember rice — a rice
 # describes "what the desktop is" independent of the machine. See "machine
@@ -85,7 +85,35 @@ let
       then "270"
       else "normal";
   };
+
+  # Lid → laptop panel, under mango. On AC or with an external attached, logind
+  # ignores the lid (hardware/framework.nix), and niri turns eDP-1 off itself —
+  # mango doesn't, and kanshi can't: it matches connected heads, and a shut
+  # panel is still connected. So the lid closing disables eDP-1 when something
+  # else is lit, or just sleeps it when it is the only screen (disabling the
+  # last output leaves mango with nowhere to put anything). Also runs as the
+  # `exec` of every profile that enables eDP-1, so a hotplug, a resume reload or
+  # a login with the lid already shut can't light it back up. Lid open is
+  # `kanshictl reload`: re-commits the profile, which re-enables / wakes it.
+  # ponytail: a mouse bump on a shut lid wakes it via swayidle's resume; harmless.
+  lidPanel = pkgs.writeShellScript "tempest-lid-panel" ''
+    [ -n "''${MANGO_INSTANCE_SIGNATURE:-}" ] || exit 0
+    case "$(< /proc/acpi/button/lid/LID0/state)" in *closed*) ;; *) exit 0 ;; esac
+    mmsg=${pkgs.mango}/bin/mmsg
+    others=$("$mmsg" get all-monitors \
+      | ${pkgs.jq}/bin/jq '[.monitors[] | select(.name != "eDP-1" and .width > 0)] | length')
+    if [ "''${others:-0}" -gt 0 ]; then
+      exec "$mmsg" dispatch disable_monitor,eDP-1
+    else
+      exec "$mmsg" dispatch sleep_monitor,eDP-1
+    fi
+  '';
 in {
+  wayland.windowManager.mango.settings.switchbind = [
+    "fold,spawn,${lidPanel}"
+    "unfold,spawn,${pkgs.kanshi}/bin/kanshictl reload"
+  ];
+
   # The QD-OLED carries the marquee (ADR 0011) *because* of how it is mounted —
   # the band exists for the portrait mount's high top edge. So it is derived from
   # oledMount rather than set independently, and standing the panel back up
@@ -143,6 +171,7 @@ in {
       {
         profile = {
           name = "lg-office";
+          exec = ["${lidPanel}"];
           outputs = [
             {
               criteria = "eDP-1";
@@ -165,6 +194,7 @@ in {
       {
         profile = {
           name = "portable-and-integrated";
+          exec = ["${lidPanel}"];
           outputs = [
             {
               criteria = "eDP-1";
@@ -192,6 +222,7 @@ in {
       {
         profile = {
           name = "mobile";
+          exec = ["${lidPanel}"];
           outputs = [
             {
               criteria = "eDP-1";
@@ -292,6 +323,7 @@ in {
       {
         profile = {
           name = "fallback";
+          exec = ["${lidPanel}"];
           outputs = [
             {
               criteria = "*";
