@@ -38,8 +38,12 @@
     nix-cachyos-kernel = {
       url = "github:xddxdd/nix-cachyos-kernel/release";
       # No `follows`: upstream's attic cache only holds paths built against its
-      # own nixpkgs pin. If a rebuild ever starts compiling a kernel locally,
-      # switch the overlay below to `overlays.pinned`.
+      # own nixpkgs pin, and the overlay below is `overlays.pinned` so the kernel
+      # (and its -dev, which orchid's ryzen-smu needs) comes from that cache.
+      # With `overlays.default` it was compiled against our nixpkgs and broke on
+      # 2026-10-06: lld -r produced an objtool-in.o with dangling section symbols.
+      # The ZFS kmod then comes from the pinned set too — keep its version equal
+      # to boot.zfs.package's userland after a bump.
     };
 
     # --- Desktop/UI Components ---
@@ -298,7 +302,7 @@
           };
       })
       claude-code.overlays.default
-      nix-cachyos-kernel.overlays.default
+      nix-cachyos-kernel.overlays.pinned
     ];
 
     nixpkgsConfig = {

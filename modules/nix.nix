@@ -31,7 +31,11 @@
             "https://hyprland.cachix.org"
             "https://cosmic.cachix.org/"
           ]
-        );
+        )
+        # orchid runs the same pinned CachyOS kernel as tempest; without this it
+        # compiles the kernel (and its -dev, for ryzen-smu) locally.
+        ++ lib.optional (config.networking.hostName == "orchid")
+        "https://attic.xuyh0120.win/lantian";
 
       # Corresponding public keys
       trusted-public-keys =
@@ -51,7 +55,9 @@
             "hyprland.cachix.org-1:a7pgxzMz7+chwVL3/pzj6jIBMioiJM7ypFP8PwtkuGc="
             "cosmic.cachix.org-1:Dya9IyXD4xdBehWjrkPv6rtxpmMdRel02smYzA85dPE="
           ]
-        );
+        )
+        ++ lib.optional (config.networking.hostName == "orchid")
+        "lantian:EeAUQ+W+6r7EtwnmYjeVwx5kOGEBpjlBfPlzGlTNvHc=";
 
       # Performance optimizations
       max-jobs = lib.mkDefault "auto";
