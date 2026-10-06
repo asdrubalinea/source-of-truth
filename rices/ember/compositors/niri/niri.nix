@@ -515,7 +515,7 @@ in
           "Mod+Shift+Down".action.move-window-down = {};
 
           # Browser
-          "Mod+Shift+B".action.spawn = ["${inputs.helium-browser.packages.x86_64-linux.default}/bin/helium"];
+          "Mod+Shift+B".action.spawn = ["${pkgs.helium}/bin/helium"];
 
           # Copy a video URL, play it in mpv instead of the browser's decoder.
           "Mod+Y".action.spawn = ["${playClipboard}"];

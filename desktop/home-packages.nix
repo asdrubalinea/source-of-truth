@@ -92,7 +92,7 @@ in {
     google-chrome
     tor-browser
     inputs.zen-browser.packages.x86_64-linux.default # Zen Browser
-    inputs.helium-browser.packages.x86_64-linux.default # Helium Browser
+    helium # Helium Browser; pkgs.helium is the sync-guarded wrap, see packages/helium.nix
 
     # --- Communication & productivity ---
     # IRC. Wayland-native (iced), SASL/SCRAM and TLS out of the box, no

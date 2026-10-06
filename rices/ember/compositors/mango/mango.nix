@@ -304,7 +304,7 @@ in {
             "SUPER,p,spawn,${pkgs.pavucontrol}/bin/pavucontrol"
             "SUPER,n,spawn,${pkgs.kdePackages.dolphin}/bin/dolphin"
             "SUPER,l,spawn,${pkgs.systemd}/bin/loginctl lock-session"
-            "SUPER+SHIFT,b,spawn,${inputs.helium-browser.packages.x86_64-linux.default}/bin/helium"
+            "SUPER+SHIFT,b,spawn,${pkgs.helium}/bin/helium"
             "SUPER,y,spawn,${playClipboard}"
             # Instrument panel — see ../../sitrep-hud.nix.
             "SUPER,i,spawn,${sitrepHud}"
