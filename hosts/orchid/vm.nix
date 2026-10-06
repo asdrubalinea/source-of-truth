@@ -132,6 +132,7 @@
   #   caddy     → /persist/caddy/env (Cloudflare DNS token; ACME would fail anyway)
   #   the bots  → /persist/{diapee-bot,auxologico-check}/env
   services.borg-backup.enable = lib.mkForce false;
+  services.syncthing.enable = lib.mkForce false; # would mint a device id and dial tempest as a stranger
   services.caddy.enable = lib.mkForce false;
   # services.diapee-bot.enable = lib.mkForce false;
   # services.auxologico-check.enable = lib.mkForce false;
