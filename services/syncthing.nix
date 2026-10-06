@@ -10,8 +10,8 @@
   # fill it in here, apply everywhere. A `null` entry simply isn't paired. The
   # IDs are public (they're what you'd read off the GUI to pair), not secrets.
   deviceIds = {
-    tempest = null;
-    orchid = null;
+    tempest = "QXCWUOD-WJAD3EL-XP4BYDZ-ITIUWTP-27CQLA6-37YC6BU-5NGSLJQ-BRFELQK";
+    orchid = "ICYTLBY-QCF6HUD-VQAPFBR-47KFPST-4F5CIG3-H5SY7I3-65XN2ID-CGFM7Q2";
   };
 
   peers = lib.filterAttrs (name: id: name != hostname && id != null) deviceIds;
