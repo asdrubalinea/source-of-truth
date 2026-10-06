@@ -99,18 +99,18 @@
       url = "github:nix-community/emacs-overlay";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    diapee-bot = {
-      url = "github:asdrubalinea/diapee-bot/main";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-    tribunale-scrape = {
-      url = "github:asdrubalinea/tribunale-scrape";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-    auxologico-check = {
-      url = "github:asdrubalinea/auxologico-check";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
+    # diapee-bot = {
+    #   url = "github:asdrubalinea/diapee-bot/main";
+    #   inputs.nixpkgs.follows = "nixpkgs";
+    # };
+    # tribunale-scrape = {
+    #   url = "github:asdrubalinea/tribunale-scrape";
+    #   inputs.nixpkgs.follows = "nixpkgs";
+    # };
+    # auxologico-check = {
+    #   url = "github:asdrubalinea/auxologico-check";
+    #   inputs.nixpkgs.follows = "nixpkgs";
+    # };
     flights = {
       url = "github:asdrubalinea/flights";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -130,13 +130,13 @@
       url = "github:phlx0/drift";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    lights = {
-      url = "github:asdrubalinea/lights";
-      # No flake of its own, just the package.nix sitting beside its Cargo.lock,
-      # which is all we need — see homes/tempest/lights.nix. HM-only, so
-      # update-home bumps it.
-      flake = false;
-    };
+    # lights = {
+    #   url = "github:asdrubalinea/lights";
+    #   # No flake of its own, just the package.nix sitting beside its Cargo.lock,
+    #   # which is all we need — see homes/tempest/lights.nix. HM-only, so
+    #   # update-home bumps it.
+    #   flake = false;
+    # };
     warp = {
       url = "github:warpdotdev/warp";
       # `warp-oss` from source instead of nixpkgs' unfree prebuilt: the OSS

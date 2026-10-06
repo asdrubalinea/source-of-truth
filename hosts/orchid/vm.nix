@@ -133,8 +133,8 @@
   #   the bots  → /persist/{diapee-bot,auxologico-check}/env
   services.borg-backup.enable = lib.mkForce false;
   services.caddy.enable = lib.mkForce false;
-  services.diapee-bot.enable = lib.mkForce false;
-  services.auxologico-check.enable = lib.mkForce false;
+  # services.diapee-bot.enable = lib.mkForce false;
+  # services.auxologico-check.enable = lib.mkForce false;
 
   # Pushes a vault snapshot to the mirrors over SSH as vwbackup@; no key here, and
   # the VM must never write to the real hosts anyway.
