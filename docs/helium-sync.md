@@ -46,7 +46,7 @@ so a fresh host has none until syncthing has run once.
 
 1. `apply` on both hosts. Each starts syncthing with the folder declared but
    no peers.
-2. On each host: `syncthing --device-id --home=/persist/syncthing-config`.
+2. On each host: `syncthing device-id --home=/persist/syncthing-config`.
 3. Put both IDs into `deviceIds` at the top of `services/syncthing.nix`,
    commit, `apply` on both. They pair themselves; no Accept in the GUI.
 4. The first sync must be one-directional: the receiving host's folder must

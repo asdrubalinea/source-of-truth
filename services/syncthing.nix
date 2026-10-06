@@ -6,7 +6,7 @@
   # Syncthing device IDs, one per host that imports this module. They are
   # derived from the device's TLS certificate, which syncthing generates on its
   # first start, so a freshly installed host has none until after its first
-  # `apply`. Read it with `syncthing --device-id --home=/persist/syncthing-config`,
+  # `apply`. Read it with `syncthing device-id --home=/persist/syncthing-config`,
   # fill it in here, apply everywhere. A `null` entry simply isn't paired. The
   # IDs are public (they're what you'd read off the GUI to pair), not secrets.
   deviceIds = {
