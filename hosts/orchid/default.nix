@@ -26,6 +26,7 @@
 
       # User accounts
       ./users/irene.nix
+      ./users/nixbench.nix # sandbox user for nix-bench (/persist/strata/nix-bench.md)
 
       # Shared hardware modules
       ../../hardware/bluetooth.nix
