@@ -69,6 +69,17 @@ in {
       default = "15s";
       description = "Prometheus scrape interval";
     };
+
+    dashboards = mkOption {
+      type = types.listOf types.path;
+      default = [./dashboards/laptop-overview.json];
+      description = ''
+        Dashboard JSON files to provision. The default is the laptop overview;
+        a host with different hardware (orchid: tower, discrete GPU, DIMM
+        sensors, no battery) lists its own file instead, so each host's Grafana
+        shows only panels its exporter actually feeds.
+      '';
+    };
   };
 
   config = mkIf cfg.enable {
@@ -128,11 +139,16 @@ in {
           }
         ];
 
-        # Bundled dashboards
+        # Bundled dashboards: only the files this host lists (see the
+        # `dashboards` option), linked into one directory for the provider.
         dashboards.settings.providers = [
           {
             name = "default";
-            options.path = ./dashboards;
+            options.path = pkgs.linkFarm "grafana-dashboards" (map (f: {
+                name = baseNameOf f;
+                path = f;
+              })
+              cfg.dashboards);
           }
         ];
       };

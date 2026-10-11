@@ -46,8 +46,14 @@ in {
   # Grafana + Prometheus (services/grafana). Full collector set at the module's
   # default 15s cadence — no battery to save here, and the history is wanted for
   # the hangs while the Curve Optimizer is still provisional. Grafana on
-  # 127.0.0.1:3333.
-  services.monitoring.enable = true;
+  # 127.0.0.1:3333; reach it from another host with `port-forward orchid 3333`.
+  # The dashboard is orchid's own (GPU junction/delta/fan duty, DIMM and NVMe
+  # temperatures, hang-history row); the module's default is tempest's laptop
+  # overview, which this host doesn't load.
+  services.monitoring = {
+    enable = true;
+    dashboards = [../../../services/grafana/dashboards/orchid-overview.json];
+  };
 
   # The G502's thumb button → super+e, as on tempest. 046d:c547 is the Lightspeed
   # receiver, so this follows the receiver to whichever machine it is plugged in.
