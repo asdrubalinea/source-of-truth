@@ -5,7 +5,11 @@
   ...
 }: let
   # 7800X3D per-core Curve Optimizer counts, cores 0-7; see curve-optimizer below.
-  co = [(-25) (-25) (-25) (-20) (-25) (-15) (-25) (-25)];
+  # Zeroed 2026-10-09: three unexplained resets/hangs since the 2026-10-01 tune
+  # (idle 10-01, IPI lockup 10-04, log-less death under Strata 10-07) and RAM and
+  # the GPU at stock have since passed the same loads. Stock until a clean soak;
+  # the previous values were -25 x6, core 3 -20, core 5 -15.
+  co = [0 0 0 0 0 0 0 0];
 in {
   nixpkgs.hostPlatform = lib.mkDefault "x86_64-linux";
 
@@ -47,6 +51,12 @@ in {
   # and a vkd3d title, each recovered only by mode1 reset), so -100 it is.
   # Against stock (330 W, 0 mV) at -150: -33 W, junction 100 -> 94 C, +4.9% FPS.
   # Junction runs ~31 C over edge either way — a mount/paste limit, not voltage.
+  # 2026-10-07: -100 isn't safe either. Strata's prompt reading (ROCm compute,
+  # not graphics) hung the gfx/MES queues three times in one morning at -100,
+  # each a mode1 reset with VRAM lost, and once returned "!!!!" as an answer;
+  # the same 100K-token sessions ran clean at 0 mV. So the offset is 0: no
+  # tested value survives every workload. The power cap stays — it never
+  # caused a hang, and 297 W keeps junction and PSU transients down.
   services.lact.settings = {
     version = 7;
     daemon = {
@@ -58,7 +68,7 @@ in {
     gpus."1002:7550-1458:2424-0000:03:00.0" = {
       fan_control_enabled = false;
       power_cap = 297.0;
-      voltage_offset = -100;
+      voltage_offset = 0;
     };
     current_profile = null;
     auto_switch_profiles = false;
