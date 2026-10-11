@@ -29,6 +29,12 @@
       # don't pay a link wake-up on the first access after going idle. Costs a
       # few watts at idle. The default was the BIOS's choice.
       "pcie_aspm.policy=performance"
+      # Keep the panic trace. The CachyOS kernel builds efi-pstore in but with
+      # CONFIG_EFI_VARS_PSTORE_DEFAULT_DISABLE=y, so /sys/fs/pstore had no
+      # backend at all ("(null)") — which is why the 2026-10-07 death and the
+      # 2026-10-09 oops left nothing behind. This registers the EFI variable
+      # store as the backend; kernel.panic_on_oops below is what writes to it.
+      "efi_pstore.pstore_disable=0"
     ];
     # Deliberately left alone: CPU mitigations, which stay on because ocelot
     # and cage rely on them for isolation; C-states (disabling them takes away
@@ -80,6 +86,12 @@
       systemd-boot = {
         enable = true;
         configurationLimit = 16;
+        # Memtest86+ as a boot-menu entry. The DIMMs run at EXPO 6000 and sat
+        # at 66 C when the box died log-lessly on 2026-10-07 (one ZFS checksum
+        # error eleven minutes earlier, with no disk error — corruption in the
+        # RAM path). Pick it from the menu at boot; it tests at whatever speed
+        # the BIOS has set, so it covers the EXPO profile as actually used.
+        memtest86.enable = true;
       };
       timeout = 5;
       efi = {
@@ -99,4 +111,19 @@
   # Alt+SysRq+S,U,B (sync -> remount-ro -> reboot) instead of a power cut —
   # cheap insurance for the ZFS pool. Default was 16 (sync only).
   boot.kernel.sysctl."kernel.sysrq" = 1;
+
+  # Reboot on a kernel oops instead of limping. 2026-10-09: a general protection
+  # fault in the slab allocator (corrupted freelist, inside a ZFS inode
+  # allocation) killed one task, which died holding a ZFS lock; the pool then
+  # wedged while the network stack kept running — tailscale served exit-node
+  # traffic for two hours, ssh logins hung on /home, and only a power cut got
+  # the box back. Running on after slab corruption is also the case that can
+  # write garbage to the pool. panic_on_oops turns the first fault into a
+  # panic; panic=10 reboots ten seconds later, long enough for efi-pstore to
+  # keep the trace (systemd-pstore archives it under /var/lib/systemd/pstore,
+  # persisted in system/persistence.nix). Not softlockup_panic: a soft lockup
+  # can be a long but legitimate kernel task, and with the oops already a
+  # panic the lockup that followed it on 10-09 cannot recur.
+  boot.kernel.sysctl."kernel.panic_on_oops" = 1;
+  boot.kernel.sysctl."kernel.panic" = 10;
 }
