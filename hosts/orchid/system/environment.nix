@@ -45,13 +45,6 @@
     # For VSCode remote / prebuilt language servers.
     nix-ld.enable = true;
 
-    # System-level rather than home-manager: the module also turns on 32-bit
-    # graphics (hardware.graphics.enable32Bit) and the controller udev rules.
-    steam = {
-      enable = true;
-      # remotePlay.openFirewall = true;
-      # dedicatedServer.openFirewall = true;
-      # localNetworkGameTransfers.openFirewall = true;
-    };
+    # Steam lives in ./gaming.nix.
   };
 }

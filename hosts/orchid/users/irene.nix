@@ -18,6 +18,8 @@
         "systemd-journal"
         # Capture packets without root (programs.wireshark, system/environment.nix).
         "wireshark"
+        # gamemoderun switches CPU governor without a polkit prompt (system/gaming.nix).
+        "gamemode"
       ];
       hashedPassword = (import ../../../passwords).password;
       shell = pkgs.fish;
