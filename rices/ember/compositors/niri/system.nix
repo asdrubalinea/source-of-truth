@@ -6,10 +6,10 @@
   programs.niri = {
     enable = true;
     # Must be set explicitly. niri-flake's module default is
-    # `(make-package-set pkgs).niri-stable`, which reaches past the
-    # niriPrebuiltOverlay aliases in flake.nix and compiles niri against our
-    # nixpkgs — a local Rust build that no cache can serve. pkgs.niri-unstable
-    # is the alias to niri-flake's own prebuilt output.
+    # `(make-package-set pkgs).niri-stable`, a second, different niri build.
+    # pkgs.niri-unstable is the one the rest of the layer uses — a local build
+    # against our nixpkgs, not niri-flake's prebuilt output, because only that
+    # can load our mesa (see niriPrebuiltOverlay in flake.nix).
     #
     # This is the compositor greetd launches (`niri-session` ships inside this
     # package), so every `niri msg` in the layer must come from the same

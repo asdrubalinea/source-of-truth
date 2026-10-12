@@ -60,9 +60,10 @@
       url = "github:sodiboo/niri-flake";
       # Pinned to niri-flake's OWN locked nixpkgs rev — not `follows`, not
       # unpinned. niri.cachix.org only holds packages built against that exact
-      # rev; anything else is a ~277 MB local Rust build (or an outright eval
-      # failure on the libdisplay-info_0_2 assert). Re-sync this whenever the
-      # niri input is bumped: read `nixpkgs` out of niri-flake's flake.lock.
+      # rev, and xwayland-satellite still comes from there. niri itself no
+      # longer does (it's a local build — see niriPrebuiltOverlay). Re-sync
+      # this whenever the niri input is bumped: read `nixpkgs` out of
+      # niri-flake's flake.lock.
       inputs.nixpkgs.url = "github:NixOS/nixpkgs/e72e4f299401a3689d4b3d5fc6496b11db7064eb";
     };
     mangowm = {
@@ -249,19 +250,28 @@
         ];
     };
 
-    # Use niri-flake's `packages` output, not the attrs its overlay defines:
-    # the overlay rebuilds against our pkgs, `packages` is what's in
-    # niri.cachix.org. Must be ordered after niri.overlays.niri so these win.
+    # xwayland-satellite comes from niri-flake's `packages` output (what's in
+    # niri.cachix.org), not the overlay's rebuild against our pkgs. Must be
+    # ordered after niri.overlays.niri so these win.
+    #
+    # niri itself can't: it dlopens mesa from /run/opengl-driver, which is built
+    # against OUR glibc, and a niri linked to niri-flake's older pin can't load
+    # it (2026-10-11: "version `GLIBC_2.43' not found", no outputs, black
+    # screen). So niri is the overlay's local build against our pkgs, which
+    # needs libdisplay-info 0.2.0 exactly (niri-flake asserts it) — nixpkgs
+    # dropped that attr, so it's rebuilt here from nixpkgs' versioned recipe.
     niriPrebuiltOverlay = final: _prev: let
       inherit (final.stdenv.hostPlatform) system;
     in {
       inherit
         (niri.packages.${system})
-        niri-stable
-        niri-unstable
         xwayland-satellite-stable
         xwayland-satellite-unstable
         ;
+      libdisplay-info_0_2 = final.callPackage (import "${final.path}/pkgs/by-name/li/libdisplay-info/generic.nix" {
+        version = "0.2.0";
+        hash = "sha256-6xmWBrPHghjok43eIDGeshpUEQTuwWLXNHg7CnBUt3Q=";
+      }) {};
     };
 
     overlays = [
