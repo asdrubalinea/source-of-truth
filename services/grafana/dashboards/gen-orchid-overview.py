@@ -48,6 +48,23 @@ stat("GPU Power",f'node_hwmon_power_average_watt{{chip="{GPU}"}}',18,3,unit="wat
 stat("Failed Units",'count(node_systemd_unit_state{state="failed"} == 1) or vector(0)',21,3,decimals=0,thresholds=[(1,"red")])
 y+=4
 
+# ── Wall power ──
+row("Wall Power — Tapo P110 (hosts/orchid/system/tapo-exporter.nix)")
+stat("Wall Power","tapo_power_watts",0,4,unit="watt",decimals=0,desc="Measured at the socket by the P110, polled every 5 s.")
+stat("Today","tapo_energy_today_kwh",4,4,unit="kwatth",decimals=2,desc="The plug's own counter since local midnight.")
+stat("This Month","tapo_energy_month_kwh",8,4,unit="kwatth",decimals=1,desc="The plug's own counter since the 1st.")
+stat("Over Dashboard Range","avg_over_time(tapo_power_watts[$__range]) * $__range_s / 3600 / 1000",12,4,unit="kwatth",decimals=2,
+     desc="Mean wall power over the selected time range × its length. Gaps where the plug didn't answer are left out of the mean, not counted as 0 W.")
+stat("Plug Up","tapo_up",16,4,thresholds=[(1,"green")],desc="1 while the plug answers and accepts the login. 0 with 'Authentication failed' in `journalctl -u tapo-exporter` means /persist/secrets/tapo/credentials is wrong.")
+stat("Plug Wi-Fi","tapo_wifi_rssi_dbm",20,4,unit="dBm",decimals=0)
+y+=4
+ts("Wall vs Measured Components",[tgt("tapo_power_watts","wall"),tgt(f'sum(node_hwmon_power_average_watt{{chip="{GPU}"}})',"GPU"),
+   tgt('sum(rate(node_rapl_package_joules_total[1m]))',"CPU package"),
+   tgt(f'sum(tapo_power_watts) - sum(node_hwmon_power_average_watt{{chip="{GPU}"}}) - sum(rate(node_rapl_package_joules_total[1m]))',"everything else")],0,16,unit="watt",min=0,
+   desc="'Everything else' is the wall reading minus what the GPU and CPU report: board, DIMMs, NVMe, fans, the iGPU, PSU conversion loss, and anything else on the same plug. It is what the Strata row's energy panel guesses as +40 W and /0.9.")
+ts("Energy Today",[tgt("tapo_energy_today_kwh","kWh since midnight")],16,8,unit="kwatth",min=0,fill=10)
+y+=8
+
 # ── Stability ──
 row("Stability (hang history)")
 stat("Booted at","node_boot_time_seconds * 1000",0,4,unit="dateTimeAsIso",desc="A step here is a reboot; an unexplained one is a hang/reset. Cross-check with `journalctl --list-boots`.")

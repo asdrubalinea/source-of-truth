@@ -20,6 +20,7 @@
       ./system/memory.nix
       ./system/llm.nix
       ./system/strata-exporter.nix
+      ./system/tapo-exporter.nix
       ./system/fan-control.nix
       ./system/gaming.nix
       ./system/gaming-vm.nix
