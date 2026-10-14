@@ -50,8 +50,12 @@ in {
   # The dashboard is orchid's own (GPU junction/delta/fan duty, DIMM and NVMe
   # temperatures, hang-history row); the module's default is tempest's laptop
   # overview, which this host doesn't load.
+  #
+  # History is kept forever (the module's default is 7 days): the full collector
+  # set plus the wall-power plug runs ~100 MB/week, ~5 GB/year, on a 1.4 TB pool.
   services.monitoring = {
     enable = true;
+    prometheusRetentionDays = null;
     dashboards = [../../../services/grafana/dashboards/orchid-overview.json];
   };
 

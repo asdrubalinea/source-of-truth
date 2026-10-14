@@ -59,9 +59,13 @@ in {
     };
 
     prometheusRetentionDays = mkOption {
-      type = types.int;
+      type = types.nullOr types.int;
       default = 7;
-      description = "Number of days to retain Prometheus data";
+      description = ''
+        Number of days to retain Prometheus data. null keeps everything:
+        Prometheus has no "forever" (an unset retention falls back to 15d), so
+        null passes 100y instead.
+      '';
     };
 
     scrapeInterval = mkOption {
@@ -160,7 +164,10 @@ in {
       port = 9901;
 
       # Power-efficient retention
-      retentionTime = "${toString cfg.prometheusRetentionDays}d";
+      retentionTime =
+        if cfg.prometheusRetentionDays == null
+        then "100y"
+        else "${toString cfg.prometheusRetentionDays}d";
 
       # Global configuration
       globalConfig = {
