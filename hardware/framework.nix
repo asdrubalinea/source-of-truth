@@ -8,9 +8,11 @@
   #
   # So rather than repair a half-restored resume, take the USB4 controllers out
   # of the suspend path entirely: unbind every Thunderbolt host controller (NHI)
-  # before suspend, rebind after. Replaces the old `tb-redock`, whose "surgical"
-  # deauth/reauth almost never worked (0/9 and 0/5 in recent boots) and which
-  # ended up doing this exact rebind on nearly every resume anyway. See ADR 0008.
+  # with a device attached before suspend, rebind after. Idle NHIs stay bound:
+  # an unbound one sits in D0 and blocks S0i3. Replaces the old `tb-redock`,
+  # whose "surgical" deauth/reauth almost never worked (0/9 and 0/5 in recent
+  # boots) and which ended up doing this exact rebind on nearly every resume
+  # anyway. See ADR 0008.
   #
   # No retry/verify on the rebind: a clean tear-down/bring-up is reliable and a
   # rare failure costs a replug, not a hang. The unbound NHIs are recorded in
@@ -35,6 +37,15 @@
     for d in "$drv"/0000:*; do
       [ -e "$d" ] || continue
       n=''${d##*/}
+      # Only tear down a domain that actually has a device behind its host
+      # router (`N-0/N-<route>`). The PCI core holds every *unbound* device in
+      # D0, so an unbound NHI vetoes S0i3 for the whole sleep — the "didn't
+      # reach deepest state" drain. An idle NHI left bound lets the thunderbolt
+      # driver suspend it, and there are no tunnels on it to hang on.
+      if ! ls -d "$d"/domain*/*-0/*-[1-9]* >/dev/null 2>&1; then
+        echo "$tag $n idle, left bound"
+        continue
+      fi
       echo "$n" >> /run/tb-nhi-unbound
       if echo "$n" > "$drv/unbind" 2>/dev/null; then
         echo "$tag unbound $n"
