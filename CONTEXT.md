@@ -83,8 +83,8 @@ modes fused into one complaint. The glossary keeps them apart.
   notifications, lockscreen, terminals, theming, idle handling, wallpaper —
   together with one or more compositors that can run underneath it. A rice
   defines *what the desktop is and how it behaves*; it is meant to be
-  independent of the machine it runs on. tempest's rice is **ember**; orchid's was
-  **estradiol**.
+  independent of the machine it runs on. tempest and orchid both run **ember**;
+  orchid ran **estradiol** before its 2026-08-22 rebuild.
   A rice is **not** named after its compositor. ember runs on either niri or
   mango and is recognisably the same desktop on both, which is the whole reason
   the word stopped meaning "the compositor plus its trimmings".
@@ -93,8 +93,8 @@ modes fused into one complaint. The glossary keeps them apart.
 - **compositor layer** — one compositor under a rice: the window manager itself
   plus the bindings, layout and window rules only its own config language can
   express (`rices/ember/compositors/<name>/`). A rice may carry several. They are
-  **not** alternatives you choose at rebuild time — on tempest both are installed
-  in one generation and the session is picked at the greeter, per login.
+  **not** alternatives you choose at rebuild time — on tempest and orchid both are
+  installed in one generation and the session is picked at the greeter, per login.
   The boundary is load-bearing in both directions. Because every enabled layer is
   evaluated in the same generation, no option may be *defined* by two of them; an
   option only one layer needs may live inside it (the **marquee** does), but

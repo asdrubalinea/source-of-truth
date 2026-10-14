@@ -1,7 +1,8 @@
 # One rice, two compositors: ember carries niri and mango side by side
 
 Status: accepted (2026-08-16). Amends
-[0004](0004-niri-rice-as-enable-module.md).
+[0004](0004-niri-rice-as-enable-module.md). Updated 2026-10-12: orchid
+adopted ember with both layers in its 2026-08-22 rebuild.
 
 ## Context
 
@@ -35,13 +36,15 @@ both of which stop being true the moment the choice is made at login.
 - `rices/ember/compositors/niri/` and `rices/ember/compositors/mango/` are
   compositor layers — window manager, bindings, layout, window rules.
 - Options: `rices.ember.enable` for the rice, `rices.ember.niri.enable` and
-  `rices.ember.mango.enable` for the layers. All three are true on tempest. The
+  `rices.ember.mango.enable` for the layers. All three are true on tempest and
+  orchid. The
   layer flags are **not** a selector; they mean "this session is installed".
 - The session is chosen at the greeter. tuigreet moved from
   `--cmd niri-session` to `--sessions … --remember-session`, listing whatever
   each layer contributed via `services.displayManager.sessionPackages`.
 - The soft-reboot autologin (ADR 0007) keeps exec'ing `niri-session`
-  unconditionally.
+  unconditionally. This is tempest-only: orchid has no autologin, so every
+  greetd start there is a plain greeter.
 - mango comes from its own flake (`github:mangowm/mango`), not from nixpkgs.
 - The two layers' window rules are maintained as two hand-written files.
 
@@ -98,7 +101,7 @@ What mango gives us for free, which the niri layer needs machinery for:
 
 What carried over untouched:
 
-- **kanshi**, and therefore all 271 lines of `homes/tempest/monitors.nix`. mango
+- **kanshi**, and therefore all of `homes/tempest/monitors.nix` (271 lines at the time). mango
   implements `wlr_output_manager_v1` (`wlr_output_manager_v1_create` in
   `src/mango.c`), which is the protocol kanshi drives. Machine policy needed no
   porting at all — the strongest evidence the rice/machine-policy boundary from
@@ -142,7 +145,8 @@ Costs and risks we are taking on:
    thing to re-check if something misbehaves.
 4. `rices/ember/swayidle.nix` references `pkgs.mango` unconditionally, so the
    compositor is in the closure of any host enabling the rice even with the mango
-   layer off. Only tempest enables ember, and it enables both layers.
+   layer off. Moot today: both hosts that enable ember (tempest and orchid)
+   enable both layers.
 5. The directory `rices/` now holds two rices of different shapes: estradiol
    (one compositor, unsplit) and ember (furniture plus layers). estradiol was
    deliberately not touched — it has an older problem of its own (per-host
