@@ -16,9 +16,6 @@
     # scratch on each boot (and any manual installs are simply lost).
     "/var/lib/flatpak"
     "/var/lib/tailscale"
-    "/var/lib/grafana"
-    "/var/lib/prometheus2"
-    "/var/lib/prometheus-node-exporter"
 
     # The read-only vault mirror's store (services/vaultwarden-mirror.nix).
     "/var/lib/vaultwarden"

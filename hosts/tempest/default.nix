@@ -39,7 +39,6 @@
       # Services
       ../../services/borg-backup.nix
       ../../services/syncthing.nix # the Helium profile, roamed with orchid (docs/helium-sync.md)
-      ../../services/grafana/default.nix
 
       # Desktop environment — the ember rice's NixOS half, then one file per
       # compositor layer. Both sessions are installed; which one runs is chosen at
