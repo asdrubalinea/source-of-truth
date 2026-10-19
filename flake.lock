@@ -1182,6 +1182,26 @@
         "type": "github"
       }
     },
+    "mitos": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1792348302,
+        "narHash": "sha256-7zpe3RnWLUcftt7PKXj+bDcYZzwn/JwfV33zlirmxYs=",
+        "owner": "mitos-editor",
+        "repo": "mitos",
+        "rev": "ced7b1bf8d94a889a3b5cd572a5579cd0b58b95b",
+        "type": "github"
+      },
+      "original": {
+        "owner": "mitos-editor",
+        "repo": "mitos",
+        "type": "github"
+      }
+    },
     "niri": {
       "inputs": {
         "niri-stable": "niri-stable",
@@ -1748,6 +1768,7 @@
         "lanzaboote": "lanzaboote",
         "llm-agents": "llm-agents",
         "mangowm": "mangowm",
+        "mitos": "mitos",
         "niri": "niri",
         "nix-cachyos-kernel": "nix-cachyos-kernel",
         "nix-flatpak": "nix-flatpak",

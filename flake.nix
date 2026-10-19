@@ -124,6 +124,12 @@
       url = "github:mattwparas/helix/steel-event-system";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    mitos = {
+      # Helix fork (binary `ms`). Consumed through its overlay, so it builds
+      # against our pkgs either way; no upstream cache, so `follows` is free.
+      url = "github:mitos-editor/mitos";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     claude-code.url = "github:sadjow/claude-code-nix";
     llm-agents = {
       url = "github:numtide/llm-agents.nix";
@@ -321,6 +327,9 @@
         };
       })
       claude-code.overlays.default
+      # `pkgs.mitos`. Unlike helix, its pinned tree-sitter-perl already renamed
+      # the vendored bsearch (tsp_bsearch), so no glibc 2.44 grammar patch.
+      inputs.mitos.overlays.default
       nix-cachyos-kernel.overlays.pinned
     ];
 

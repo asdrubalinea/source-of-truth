@@ -160,6 +160,7 @@ in {
     entr # run a command whenever the files fed to it change
     hyperfine # statistically sound command benchmarking
     just
+    mitos # helix fork, binary `ms`
     onefetch # repo summary (git)
     watchexec # entr, but with glob/ignore rules
     yek # serialize a repo into LLM-ready text

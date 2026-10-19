@@ -14,6 +14,7 @@
       nixpkgs-home \
       claude-code \
       llm-agents \
+      mitos \
       zen-browser \
       emacs-overlay \
       stylix \

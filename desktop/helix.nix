@@ -2,7 +2,8 @@
   # The theme is its own file — it is the one part of this config that is a
   # claim about *colour* rather than about behaviour, and it is generated from
   # whichever base16 palette the machine has rather than written down here.
-  imports = [./helix-theme.nix];
+  # ./mitos.nix rides along because it reuses that theme.
+  imports = [./helix-theme.nix ./mitos.nix];
 
   # Steel scheme config + cogs. These are code, so they're pointed at rather
   # than derived from Nix. recentf.scm is a local fork of mattwparas/helix-
