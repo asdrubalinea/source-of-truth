@@ -95,6 +95,7 @@ in {
     helium # Helium Browser; pkgs.helium is the sync-guarded wrap, see packages/helium.nix
 
     # --- Communication & productivity ---
+    (callPackage ../packages/chatgpt-linux.nix {}) # OpenAI's desktop app; nixpkgs' chatgpt is darwin-only
     # IRC. Wayland-native (iced), SASL/SCRAM and TLS out of the box, no
     # scripting layer to configure. Swap for `weechat` if the TUI is wanted.
     halloy
