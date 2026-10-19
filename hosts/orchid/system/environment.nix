@@ -13,7 +13,18 @@
     # Terminfo only (no wezterm build) so ssh from tempest, which runs
     # TERM=wezterm, gets a known terminal here.
     wezterm.terminfo
+    # Signal's polkit actions only (org.signalapp.enable-backups & co.):
+    # polkitd reads them from /run/current-system/sw/share/polkit-1, which a
+    # home-manager install never reaches, so enabling backups fails with
+    # "enable-backups action not registered". Just the policies, so there is
+    # no second Signal binary or .desktop entry beside the HM one.
+    (runCommand "signal-desktop-polkit" {} ''
+      mkdir -p $out/share
+      cp -r ${signal-desktop}/share/polkit-1 $out/share/
+    '')
   ];
+
+  security.polkit.enable = true;
 
   environment.variables = {
     EDITOR = "${pkgs.helix}/bin/hx";
