@@ -1,4 +1,8 @@
-{pkgs, ...}:
+{
+  lib,
+  pkgs,
+  ...
+}:
 # NixOS half of the niri compositor layer: the compositor package itself and the
 # `niri-session` wayland-session entry the greeter lists. Furniture that both
 # layers share (fonts, upower, PAM services) lives in ../../system.nix.
@@ -17,4 +21,10 @@
     # silently breaks the `--json` consumers. See ./niri.nix.
     package = pkgs.niri-unstable;
   };
+
+  # niri-flake's module ships the session's polkit agent (polkit-kde) but hangs
+  # it off `niri.service`, so under mango nothing answered polkit and every
+  # prompt failed outright (Signal: "An error occurred while requesting system
+  # authentication"). graphical-session.target is reached by both layers.
+  systemd.user.services.niri-flake-polkit.wantedBy = lib.mkForce ["graphical-session.target"];
 }
