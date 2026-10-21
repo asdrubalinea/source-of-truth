@@ -5,6 +5,13 @@
   # interface; it does not apply an undervolt, power limit, fan curve, or
   # overclock by itself.
   hardware.amdgpu.overdrive.enable = true;
+  # nixpkgs' default mask for overdrive, 0xfffd7fff, also clears GFXOFF (bit
+  # 15) and memory stutter mode (bit 17), the two features that let an idle
+  # GPU power-gate its shader core and put VRAM in self-refresh between
+  # scanouts. It does that to avoid flicker reported on some setups. This is
+  # the kernel's own default (0xfff7bfff) plus only the overdrive bit (14). If
+  # a panel flickers, go back to 0xfffd7fff.
+  hardware.amdgpu.overdrive.ppfeaturemask = "0xfff7ffff";
 
   # LACT daemon + GUI for GPU monitoring and configuration.
   services.lact.enable = true;
