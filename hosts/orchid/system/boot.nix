@@ -13,22 +13,26 @@
     # interactive session to protect. In-kernel EEVDF runs.
     kernelPackages = pkgs.cachyosKernels.linuxPackages-cachyos-lts-lto-zen4;
 
-    # Power: performance over idle watts, since this is a tower on mains power.
+    # Power: idle watts over the last microsecond of latency. Until 2026-10-21
+    # this block picked performance (EPP 0, ASPM off), and the box idled at
+    # ~84 W at the wall (Tapo) with the CPU package at ~30 W.
     kernelParams = [
       # Already the CachyOS default; pinned so it can't drift. Same as tempest.
       "amd_pstate=active"
       # amd-pstate-epp has no real governors, only two policies, and this picks
-      # the policy at driver init, so no cpupower unit is needed. "performance"
-      # forces EPP to 0 and raises the floor to nominal (4.2 GHz), so a core
-      # reaches boost without first ramping up. Idle cores still drop into
-      # C-states, which is what frees the thermal headroom for boost. The
-      # default was powersave + balance_performance. Runtime check:
+      # the policy at driver init, so no cpupower unit is needed. "powersave"
+      # is not min-pinning: with EPP balance_performance a loaded core still
+      # boosts to 5 GHz within a few ms. "performance" forced EPP 0 and raised
+      # the floor, which on Zen 4's one shared core rail keeps the voltage up
+      # for every awake core. Runtime check:
       # /sys/devices/system/cpu/cpu0/cpufreq/{scaling_governor,energy_performance_preference}.
-      "cpufreq.default_governor=performance"
-      # Turns off PCIe link power saving, so the NVMe drives and the 9070 XT
-      # don't pay a link wake-up on the first access after going idle. Costs a
-      # few watts at idle. The default was the BIOS's choice.
-      "pcie_aspm.policy=performance"
+      "cpufreq.default_governor=powersave"
+      # PCIe link power saving (L0s + L1) on every link that supports it: the
+      # two chipset dies, both NVMe drives, the 9070 XT, the NIC. A link
+      # wake-up costs microseconds. Not powersupersave (adds L1 substates):
+      # those save milliwatts per NVMe on a desktop, and the ZFS pool lives on
+      # those links. Was "performance" (all off); the BIOS's choice is unknown.
+      "pcie_aspm.policy=powersave"
       # Keep the panic trace. The CachyOS kernel builds efi-pstore in but with
       # CONFIG_EFI_VARS_PSTORE_DEFAULT_DISABLE=y, so /sys/fs/pstore had no
       # backend at all ("(null)") — which is why the 2026-10-07 death and the
