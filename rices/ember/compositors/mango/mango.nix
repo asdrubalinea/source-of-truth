@@ -308,6 +308,9 @@ in {
             "SUPER,y,spawn,${playClipboard}"
             # Instrument panel — see ../../sitrep-hud.nix.
             "SUPER,i,spawn,${sitrepHud}"
+            # Keyboard pointer — see ../../kbptr.nix.
+            "SUPER,k,spawn,${pkgs.wl-kbptr}/bin/wl-kbptr"
+            "SUPER+SHIFT,k,spawn,wl-kbptr-detect"
             "SUPER,g,spawn,${evenSplit}"
 
             # Format: appid,title,command — `none` for whichever field isn't

@@ -6,6 +6,7 @@
     ./kde.nix
     ./wezterm.nix
     ./tofi.nix
+    ./kbptr.nix
     ./flights.nix
     ./swayidle.nix
     ./noctalia.nix

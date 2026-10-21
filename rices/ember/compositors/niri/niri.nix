@@ -486,6 +486,10 @@ in
           # Instrument panel: a floating, transient `sitrep`. See
           # ../../sitrep-hud.nix for why this is a keybind and not a bar widget.
           "Mod+I".action.spawn = ["${sitrepHud}"];
+          # Keyboard pointer: tile grid then bisect, or click a detected target.
+          # See ../../kbptr.nix.
+          "Mod+K".action.spawn = ["${pkgs.wl-kbptr}/bin/wl-kbptr"];
+          "Mod+Shift+K".action.spawn = ["wl-kbptr-detect"];
 
           # Telegram scratchpad: summon/dismiss on the focused workspace.
           "Mod+T".action.spawn = ["${telegramScratchpad.toggle}"];
