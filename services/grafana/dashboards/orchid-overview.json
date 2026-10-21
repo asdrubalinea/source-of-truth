@@ -958,7 +958,7 @@
     {
       "id": 19,
       "type": "row",
-      "title": "Stability (hang history)",
+      "title": "Room \u2014 Govee H5075 (hosts/orchid/system/govee-exporter.nix)",
       "collapsed": false,
       "gridPos": {
         "x": 0,
@@ -971,7 +971,7 @@
     {
       "id": 20,
       "type": "stat",
-      "title": "Booted at",
+      "title": "Temperature",
       "datasource": {
         "type": "prometheus",
         "uid": "prometheus"
@@ -979,6 +979,558 @@
       "gridPos": {
         "x": 0,
         "y": 19,
+        "w": 4,
+        "h": 4
+      },
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "orange",
+                "value": 26
+              },
+              {
+                "color": "red",
+                "value": 30
+              }
+            ]
+          },
+          "unit": "celsius",
+          "decimals": 1
+        },
+        "overrides": []
+      },
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "textMode": "value"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "govee_temperature_celsius",
+          "legendFormat": "{{name}}",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 21,
+      "type": "stat",
+      "title": "Humidity",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "x": 4,
+        "y": 19,
+        "w": 4,
+        "h": 4
+      },
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "orange",
+                "value": 60
+              },
+              {
+                "color": "red",
+                "value": 70
+              }
+            ]
+          },
+          "unit": "percent",
+          "decimals": 0
+        },
+        "overrides": []
+      },
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "textMode": "value"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "govee_humidity_percent",
+          "legendFormat": "{{name}}",
+          "refId": "A"
+        }
+      ],
+      "description": "40-60 % is the comfortable band; above 60 % for long stretches is where mould starts."
+    },
+    {
+      "id": 22,
+      "type": "stat",
+      "title": "Dew Point",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "x": 8,
+        "y": 19,
+        "w": 3,
+        "h": 4
+      },
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "celsius",
+          "decimals": 1
+        },
+        "overrides": []
+      },
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "textMode": "value"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "govee_dew_point_celsius",
+          "legendFormat": "{{name}}",
+          "refId": "A"
+        }
+      ],
+      "description": "Derived by the exporter (Magnus formula). A wall or window colder than this gets condensation."
+    },
+    {
+      "id": 23,
+      "type": "stat",
+      "title": "Absolute Humidity",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "x": 11,
+        "y": 19,
+        "w": 3,
+        "h": 4
+      },
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "none",
+          "decimals": 1
+        },
+        "overrides": []
+      },
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "textMode": "value"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "govee_absolute_humidity_grams_per_cubic_meter",
+          "legendFormat": "{{name}}",
+          "refId": "A"
+        }
+      ],
+      "description": "Water vapour in g/m\u00b3, derived by the exporter. Unlike relative humidity it doesn't move with temperature, so it shows whether airing actually removed moisture."
+    },
+    {
+      "id": 24,
+      "type": "stat",
+      "title": "Battery",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "x": 14,
+        "y": 19,
+        "w": 4,
+        "h": 4
+      },
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "red",
+                "value": null
+              },
+              {
+                "color": "orange",
+                "value": 15
+              },
+              {
+                "color": "green",
+                "value": 30
+              }
+            ]
+          },
+          "unit": "percent",
+          "decimals": 0
+        },
+        "overrides": []
+      },
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "textMode": "value"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "govee_battery_percent",
+          "legendFormat": "{{name}}",
+          "refId": "A"
+        }
+      ],
+      "description": "As the thermometer reports it. Two AAA cells."
+    },
+    {
+      "id": 25,
+      "type": "stat",
+      "title": "Signal",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "x": 18,
+        "y": 19,
+        "w": 3,
+        "h": 4
+      },
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "dBm",
+          "decimals": 0
+        },
+        "overrides": []
+      },
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "textMode": "value"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "govee_rssi_dbm",
+          "legendFormat": "{{name}}",
+          "refId": "A"
+        }
+      ],
+      "description": "RSSI of the last advertisement orchid heard."
+    },
+    {
+      "id": 26,
+      "type": "stat",
+      "title": "Last Heard",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "x": 21,
+        "y": 19,
+        "w": 3,
+        "h": 4
+      },
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "orange",
+                "value": 120
+              },
+              {
+                "color": "red",
+                "value": 600
+              }
+            ]
+          },
+          "unit": "s",
+          "decimals": 0
+        },
+        "overrides": []
+      },
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "textMode": "value"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "time() - max(govee_last_seen_timestamp_seconds)",
+          "legendFormat": "",
+          "refId": "A"
+        }
+      ],
+      "description": "Seconds since any H5075 was heard. Past 10 min the readings drop out (stale, not frozen). No data at all means nothing has been heard since govee-exporter started: check `journalctl -u govee-exporter` that the thermometer is within range, and that the Govee phone app isn't connected to it (the H5075 stops advertising while it is)."
+    },
+    {
+      "id": 27,
+      "type": "timeseries",
+      "title": "Temperature",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 23,
+        "w": 12,
+        "h": 8
+      },
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "fillOpacity": 0,
+            "lineWidth": 1,
+            "showPoints": "never"
+          },
+          "unit": "celsius"
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "calcs": [
+            "min",
+            "max",
+            "mean",
+            "lastNotNull"
+          ]
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "govee_temperature_celsius",
+          "legendFormat": "{{name}}",
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "govee_dew_point_celsius",
+          "legendFormat": "{{name}} dew point",
+          "refId": "B"
+        }
+      ]
+    },
+    {
+      "id": 28,
+      "type": "timeseries",
+      "title": "Humidity",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "x": 12,
+        "y": 23,
+        "w": 12,
+        "h": 8
+      },
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "fillOpacity": 0,
+            "lineWidth": 1,
+            "showPoints": "never",
+            "thresholdsStyle": {
+              "mode": "line"
+            }
+          },
+          "unit": "percent",
+          "min": 0,
+          "max": 100,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "orange",
+                "value": 60
+              },
+              {
+                "color": "red",
+                "value": 70
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "calcs": [
+            "min",
+            "max",
+            "mean",
+            "lastNotNull"
+          ]
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "govee_humidity_percent",
+          "legendFormat": "{{name}} relative (%)",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 29,
+      "type": "row",
+      "title": "Stability (hang history)",
+      "collapsed": false,
+      "gridPos": {
+        "x": 0,
+        "y": 31,
+        "w": 24,
+        "h": 1
+      },
+      "panels": []
+    },
+    {
+      "id": 30,
+      "type": "stat",
+      "title": "Booted at",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 32,
         "w": 4,
         "h": 4
       },
@@ -1021,7 +1573,7 @@
       "description": "A step here is a reboot; an unexplained one is a hang/reset. Cross-check with `journalctl --list-boots`."
     },
     {
-      "id": 21,
+      "id": 31,
       "type": "stat",
       "title": "OOM Kills",
       "datasource": {
@@ -1030,7 +1582,7 @@
       },
       "gridPos": {
         "x": 4,
-        "y": 19,
+        "y": 32,
         "w": 3,
         "h": 4
       },
@@ -1076,7 +1628,7 @@
       ]
     },
     {
-      "id": 22,
+      "id": 32,
       "type": "stat",
       "title": "rpool Online",
       "datasource": {
@@ -1085,7 +1637,7 @@
       },
       "gridPos": {
         "x": 7,
-        "y": 19,
+        "y": 32,
         "w": 3,
         "h": 4
       },
@@ -1135,7 +1687,7 @@
       ]
     },
     {
-      "id": 23,
+      "id": 33,
       "type": "stat",
       "title": "System State",
       "datasource": {
@@ -1144,7 +1696,7 @@
       },
       "gridPos": {
         "x": 10,
-        "y": 19,
+        "y": 32,
         "w": 3,
         "h": 4
       },
@@ -1194,7 +1746,7 @@
       ]
     },
     {
-      "id": 24,
+      "id": 34,
       "type": "timeseries",
       "title": "Pressure Stall (PSI)",
       "datasource": {
@@ -1203,7 +1755,7 @@
       },
       "gridPos": {
         "x": 13,
-        "y": 19,
+        "y": 32,
         "w": 11,
         "h": 8
       },
@@ -1270,20 +1822,20 @@
       "description": "Share of wall time at least one task waited on the resource. Memory 'full' near 1 is swap death, the one software failure that looks like a hang."
     },
     {
-      "id": 25,
+      "id": 35,
       "type": "row",
       "title": "CPU \u2014 Ryzen 7 7800X3D",
       "collapsed": false,
       "gridPos": {
         "x": 0,
-        "y": 27,
+        "y": 40,
         "w": 24,
         "h": 1
       },
       "panels": []
     },
     {
-      "id": 26,
+      "id": 36,
       "type": "timeseries",
       "title": "CPU Temperatures",
       "datasource": {
@@ -1292,7 +1844,7 @@
       },
       "gridPos": {
         "x": 0,
-        "y": 28,
+        "y": 41,
         "w": 8,
         "h": 8
       },
@@ -1360,7 +1912,7 @@
       "description": "Tctl is the control temperature (throttle at 89); Tccd1 the die. Curve Optimizer is at zero since 2026-10-09 (hosts/orchid/hardware.nix)."
     },
     {
-      "id": 27,
+      "id": 37,
       "type": "timeseries",
       "title": "Per-Core Frequency",
       "datasource": {
@@ -1369,7 +1921,7 @@
       },
       "gridPos": {
         "x": 8,
-        "y": 28,
+        "y": 41,
         "w": 8,
         "h": 8
       },
@@ -1408,7 +1960,7 @@
       "description": "Governor is `performance` (floor 4.2 GHz); boost ~5.0-5.05 GHz single core."
     },
     {
-      "id": 28,
+      "id": 38,
       "type": "timeseries",
       "title": "Usage by Mode",
       "datasource": {
@@ -1417,7 +1969,7 @@
       },
       "gridPos": {
         "x": 16,
-        "y": 28,
+        "y": 41,
         "w": 8,
         "h": 8
       },
@@ -1460,7 +2012,7 @@
       ]
     },
     {
-      "id": 29,
+      "id": 39,
       "type": "timeseries",
       "title": "Per-Core Usage",
       "datasource": {
@@ -1469,7 +2021,7 @@
       },
       "gridPos": {
         "x": 0,
-        "y": 36,
+        "y": 49,
         "w": 12,
         "h": 8
       },
@@ -1509,7 +2061,7 @@
       ]
     },
     {
-      "id": 30,
+      "id": 40,
       "type": "timeseries",
       "title": "Load Average",
       "datasource": {
@@ -1518,7 +2070,7 @@
       },
       "gridPos": {
         "x": 12,
-        "y": 36,
+        "y": 49,
         "w": 6,
         "h": 8
       },
@@ -1591,7 +2143,7 @@
       "description": "16 threads."
     },
     {
-      "id": 31,
+      "id": 41,
       "type": "timeseries",
       "title": "Context Switches & Interrupts",
       "datasource": {
@@ -1600,7 +2152,7 @@
       },
       "gridPos": {
         "x": 18,
-        "y": 36,
+        "y": 49,
         "w": 6,
         "h": 8
       },
@@ -1647,20 +2199,20 @@
       ]
     },
     {
-      "id": 32,
+      "id": 42,
       "type": "row",
       "title": "GPU \u2014 RX 9070 XT (03:00.0)",
       "collapsed": false,
       "gridPos": {
         "x": 0,
-        "y": 44,
+        "y": 57,
         "w": 24,
         "h": 1
       },
       "panels": []
     },
     {
-      "id": 33,
+      "id": 43,
       "type": "timeseries",
       "title": "GPU Temperatures",
       "datasource": {
@@ -1669,7 +2221,7 @@
       },
       "gridPos": {
         "x": 0,
-        "y": 45,
+        "y": 58,
         "w": 8,
         "h": 8
       },
@@ -1746,7 +2298,7 @@
       "description": "Junction (hotspot) limit is 110 \u00b0C. Measured: ~24 \u00b0C over edge during steady generation, 30-33 \u00b0C for the seconds it draws its full cap."
     },
     {
-      "id": 34,
+      "id": 44,
       "type": "timeseries",
       "title": "Junction \u2212 Edge",
       "datasource": {
@@ -1755,7 +2307,7 @@
       },
       "gridPos": {
         "x": 8,
-        "y": 45,
+        "y": 58,
         "w": 8,
         "h": 8
       },
@@ -1814,7 +2366,7 @@
       "description": "A delta that is high at moderate power, or that climbs over weeks, is paste or mount. Short spikes during power bursts are thermal lag and normal."
     },
     {
-      "id": 35,
+      "id": 45,
       "type": "timeseries",
       "title": "Power & Cap",
       "datasource": {
@@ -1823,7 +2375,7 @@
       },
       "gridPos": {
         "x": 16,
-        "y": 45,
+        "y": 58,
         "w": 8,
         "h": 8
       },
@@ -1898,7 +2450,7 @@
       "description": "Cap is 297 W from LACT (hosts/orchid/hardware.nix); stock is 330 W. The cap is the only thermal lever: fans are already at 100 % under sustained load."
     },
     {
-      "id": 36,
+      "id": 46,
       "type": "timeseries",
       "title": "Fan Duty",
       "datasource": {
@@ -1907,7 +2459,7 @@
       },
       "gridPos": {
         "x": 0,
-        "y": 53,
+        "y": 66,
         "w": 8,
         "h": 8
       },
@@ -1948,7 +2500,7 @@
       "description": "The commanded PWM duty, not a measured speed: this card's tach reads 0 RPM under amdgpu (VBIOS 113-R907XTGOL-F60), so fan1_input is useless. Zero-RPM mode is on, so 0 at idle is expected."
     },
     {
-      "id": 37,
+      "id": 47,
       "type": "timeseries",
       "title": "GPU Clocks",
       "datasource": {
@@ -1957,7 +2509,7 @@
       },
       "gridPos": {
         "x": 8,
-        "y": 53,
+        "y": 66,
         "w": 8,
         "h": 8
       },
@@ -2005,7 +2557,7 @@
       "description": "MHz."
     },
     {
-      "id": 38,
+      "id": 48,
       "type": "timeseries",
       "title": "GPU Voltage",
       "datasource": {
@@ -2014,7 +2566,7 @@
       },
       "gridPos": {
         "x": 16,
-        "y": 53,
+        "y": 66,
         "w": 8,
         "h": 8
       },
@@ -2053,7 +2605,7 @@
       "description": "Offset is 0 mV since 2026-10-09: -100 mV hung the MES/gfx queues under Strata compute three times on 2026-10-07."
     },
     {
-      "id": 39,
+      "id": 49,
       "type": "timeseries",
       "title": "CPU Package Power (RAPL)",
       "datasource": {
@@ -2062,7 +2614,7 @@
       },
       "gridPos": {
         "x": 0,
-        "y": 61,
+        "y": 74,
         "w": 8,
         "h": 8
       },
@@ -2111,7 +2663,7 @@
       "description": "Zen 4's RAPL counters via node-exporter. The kernel makes energy_uj root-only, so hosts/orchid/system/strata-exporter.nix chmods it at boot; without that this panel is empty. The iGPU's hwmon has no power sensor on this kernel, so it is not used."
     },
     {
-      "id": 40,
+      "id": 50,
       "type": "timeseries",
       "title": "Energy per Generated Mtoken",
       "datasource": {
@@ -2120,7 +2672,7 @@
       },
       "gridPos": {
         "x": 8,
-        "y": 61,
+        "y": 74,
         "w": 8,
         "h": 8
       },
@@ -2160,20 +2712,20 @@
       "description": "(GPU W + CPU package W + 40 W for board, DIMMs, NVMe, fans) / 0.9 PSU efficiency, divided by Strata's wall-clock generation rate over the last minute. Wall clock includes prefill and the idle gaps between an agent's turns, so an agent session reads 3-4 kWh/Mtoken while pure generation is ~2 (IQ3_S) or ~1.8 (IQ2_XS). Only drawn while generating more than 5 t/s."
     },
     {
-      "id": 41,
+      "id": 51,
       "type": "row",
       "title": "Strata \u2014 LLM server (hosts/orchid/system/strata-exporter.nix)",
       "collapsed": false,
       "gridPos": {
         "x": 0,
-        "y": 69,
+        "y": 82,
         "w": 24,
         "h": 1
       },
       "panels": []
     },
     {
-      "id": 42,
+      "id": 52,
       "type": "stat",
       "title": "Model",
       "datasource": {
@@ -2182,7 +2734,7 @@
       },
       "gridPos": {
         "x": 0,
-        "y": 70,
+        "y": 83,
         "w": 6,
         "h": 4
       },
@@ -2224,7 +2776,7 @@
       "description": "From Strata's GET /metrics. Empty while the server is down."
     },
     {
-      "id": 43,
+      "id": 53,
       "type": "stat",
       "title": "Doing",
       "datasource": {
@@ -2233,7 +2785,7 @@
       },
       "gridPos": {
         "x": 6,
-        "y": 70,
+        "y": 83,
         "w": 4,
         "h": 4
       },
@@ -2275,7 +2827,7 @@
       "description": "idle, reading the prompt, thinking, writing a tool call or an answer."
     },
     {
-      "id": 44,
+      "id": 54,
       "type": "stat",
       "title": "Live t/s",
       "datasource": {
@@ -2284,7 +2836,7 @@
       },
       "gridPos": {
         "x": 10,
-        "y": 70,
+        "y": 83,
         "w": 4,
         "h": 4
       },
@@ -2328,7 +2880,7 @@
       "description": "Generation rate over the last ~2 s; 0 while idle."
     },
     {
-      "id": 45,
+      "id": 55,
       "type": "stat",
       "title": "Context",
       "datasource": {
@@ -2337,7 +2889,7 @@
       },
       "gridPos": {
         "x": 14,
-        "y": 70,
+        "y": 83,
         "w": 4,
         "h": 4
       },
@@ -2380,7 +2932,7 @@
       "description": "Tokens of context in the current request."
     },
     {
-      "id": 46,
+      "id": 56,
       "type": "stat",
       "title": "Experts in VRAM",
       "datasource": {
@@ -2389,7 +2941,7 @@
       },
       "gridPos": {
         "x": 18,
-        "y": 70,
+        "y": 83,
         "w": 3,
         "h": 4
       },
@@ -2432,7 +2984,7 @@
       "description": "More cached experts = faster generation. IQ3_S fits 4116 in 7.9 GB."
     },
     {
-      "id": 47,
+      "id": 57,
       "type": "stat",
       "title": "Up",
       "datasource": {
@@ -2441,7 +2993,7 @@
       },
       "gridPos": {
         "x": 21,
-        "y": 70,
+        "y": 83,
         "w": 3,
         "h": 4
       },
@@ -2487,7 +3039,7 @@
       "description": "1 while the server answers /metrics."
     },
     {
-      "id": 48,
+      "id": 58,
       "type": "timeseries",
       "title": "Generation Speed",
       "datasource": {
@@ -2496,7 +3048,7 @@
       },
       "gridPos": {
         "x": 0,
-        "y": 74,
+        "y": 87,
         "w": 8,
         "h": 8
       },
@@ -2554,7 +3106,7 @@
       "description": "tokens/s while generating. Live is a ~2 s window; request mean is since the request's first token; last request is the engine's own figure for the request that just finished. Draft-assisted file writes run ~85 t/s, thinking ~55-60 (IQ2_XS) or ~50 (IQ3_S)."
     },
     {
-      "id": 49,
+      "id": 59,
       "type": "timeseries",
       "title": "Throughput (1 m)",
       "datasource": {
@@ -2563,7 +3115,7 @@
       },
       "gridPos": {
         "x": 8,
-        "y": 74,
+        "y": 87,
         "w": 8,
         "h": 8
       },
@@ -2621,7 +3173,7 @@
       "description": "From the server's running totals, so they survive restarts of the scrape. Wall-clock includes idle gaps between turns; the other two are the engine's rates during the work itself."
     },
     {
-      "id": 50,
+      "id": 60,
       "type": "timeseries",
       "title": "Prefill Speed",
       "datasource": {
@@ -2630,7 +3182,7 @@
       },
       "gridPos": {
         "x": 16,
-        "y": 74,
+        "y": 87,
         "w": 8,
         "h": 8
       },
@@ -2679,7 +3231,7 @@
       "description": "New prompt tokens read per second. ~1200 t/s cold; far higher when most of the prompt is reused from the KV cache (short reads amortise badly, so small numbers on tiny turns are normal)."
     },
     {
-      "id": 51,
+      "id": 61,
       "type": "timeseries",
       "title": "Expert Cache & Draft",
       "datasource": {
@@ -2688,7 +3240,7 @@
       },
       "gridPos": {
         "x": 0,
-        "y": 82,
+        "y": 95,
         "w": 8,
         "h": 8
       },
@@ -2747,7 +3299,7 @@
       "description": "Per request. Hit rate is the share of expert lookups served from the VRAM cache; the rest stream from RAM over PCIe. Draft acceptance is the MTP layer's success rate \u2014 ~85 % on code, lower on prose."
     },
     {
-      "id": 52,
+      "id": 62,
       "type": "timeseries",
       "title": "Context & Reply Length",
       "datasource": {
@@ -2756,7 +3308,7 @@
       },
       "gridPos": {
         "x": 8,
-        "y": 82,
+        "y": 95,
         "w": 8,
         "h": 8
       },
@@ -2814,7 +3366,7 @@
       "description": "A reply that climbs to 16384 is one that hit the output cap (a thinking spiral)."
     },
     {
-      "id": 53,
+      "id": 63,
       "type": "timeseries",
       "title": "Requests & Tokens (rate)",
       "datasource": {
@@ -2823,7 +3375,7 @@
       },
       "gridPos": {
         "x": 16,
-        "y": 82,
+        "y": 95,
         "w": 8,
         "h": 8
       },
@@ -2872,20 +3424,20 @@
       "description": "5-minute rates from the server's totals."
     },
     {
-      "id": 54,
+      "id": 64,
       "type": "row",
       "title": "Memory \u2014 2\u00d732 GB DDR5-6000 (EXPO)",
       "collapsed": false,
       "gridPos": {
         "x": 0,
-        "y": 90,
+        "y": 103,
         "w": 24,
         "h": 1
       },
       "panels": []
     },
     {
-      "id": 55,
+      "id": 65,
       "type": "timeseries",
       "title": "DIMM Temperatures",
       "datasource": {
@@ -2894,7 +3446,7 @@
       },
       "gridPos": {
         "x": 0,
-        "y": 91,
+        "y": 104,
         "w": 8,
         "h": 8
       },
@@ -2953,7 +3505,7 @@
       "description": "spd5118 on-DIMM sensors. Reached 66 \u00b0C during the 2026-10-07 Strata run and 72 \u00b0C in a passing 1 h stressapptest on 2026-10-09; EXPO at 6000 is clean to there."
     },
     {
-      "id": 56,
+      "id": 66,
       "type": "timeseries",
       "title": "Memory Usage",
       "datasource": {
@@ -2962,7 +3514,7 @@
       },
       "gridPos": {
         "x": 8,
-        "y": 91,
+        "y": 104,
         "w": 8,
         "h": 8
       },
@@ -3031,7 +3583,7 @@
       ]
     },
     {
-      "id": 57,
+      "id": 67,
       "type": "timeseries",
       "title": "Swap",
       "datasource": {
@@ -3040,7 +3592,7 @@
       },
       "gridPos": {
         "x": 16,
-        "y": 91,
+        "y": 104,
         "w": 8,
         "h": 8
       },
@@ -3114,7 +3666,7 @@
       ]
     },
     {
-      "id": 58,
+      "id": 68,
       "type": "timeseries",
       "title": "ZFS ARC",
       "datasource": {
@@ -3123,7 +3675,7 @@
       },
       "gridPos": {
         "x": 0,
-        "y": 99,
+        "y": 112,
         "w": 8,
         "h": 8
       },
@@ -3181,7 +3733,7 @@
       "description": "zfs_arc_max is 16 GiB on the kernel command line."
     },
     {
-      "id": 59,
+      "id": 69,
       "type": "timeseries",
       "title": "ARC Hit Ratio",
       "datasource": {
@@ -3190,7 +3742,7 @@
       },
       "gridPos": {
         "x": 8,
-        "y": 99,
+        "y": 112,
         "w": 8,
         "h": 8
       },
@@ -3230,7 +3782,7 @@
       ]
     },
     {
-      "id": 60,
+      "id": 70,
       "type": "timeseries",
       "title": "Page Faults",
       "datasource": {
@@ -3239,7 +3791,7 @@
       },
       "gridPos": {
         "x": 16,
-        "y": 99,
+        "y": 112,
         "w": 8,
         "h": 8
       },
@@ -3286,20 +3838,20 @@
       ]
     },
     {
-      "id": 61,
+      "id": 71,
       "type": "row",
       "title": "Storage \u2014 NVMe + ZFS on LUKS",
       "collapsed": false,
       "gridPos": {
         "x": 0,
-        "y": 107,
+        "y": 120,
         "w": 24,
         "h": 1
       },
       "panels": []
     },
     {
-      "id": 62,
+      "id": 72,
       "type": "timeseries",
       "title": "NVMe Temperatures",
       "datasource": {
@@ -3308,7 +3860,7 @@
       },
       "gridPos": {
         "x": 0,
-        "y": 108,
+        "y": 121,
         "w": 8,
         "h": 8
       },
@@ -3375,7 +3927,7 @@
       ]
     },
     {
-      "id": 63,
+      "id": 73,
       "type": "timeseries",
       "title": "Disk Throughput",
       "datasource": {
@@ -3384,7 +3936,7 @@
       },
       "gridPos": {
         "x": 8,
-        "y": 108,
+        "y": 121,
         "w": 8,
         "h": 8
       },
@@ -3432,7 +3984,7 @@
       ]
     },
     {
-      "id": 64,
+      "id": 74,
       "type": "timeseries",
       "title": "Disk Utilization",
       "datasource": {
@@ -3441,7 +3993,7 @@
       },
       "gridPos": {
         "x": 16,
-        "y": 108,
+        "y": 121,
         "w": 8,
         "h": 8
       },
@@ -3481,7 +4033,7 @@
       ]
     },
     {
-      "id": 65,
+      "id": 75,
       "type": "bargauge",
       "title": "Filesystem Usage",
       "datasource": {
@@ -3490,7 +4042,7 @@
       },
       "gridPos": {
         "x": 0,
-        "y": 116,
+        "y": 129,
         "w": 12,
         "h": 8
       },
@@ -3541,7 +4093,7 @@
       ]
     },
     {
-      "id": 66,
+      "id": 76,
       "type": "timeseries",
       "title": "rpool Dataset I/O",
       "datasource": {
@@ -3550,7 +4102,7 @@
       },
       "gridPos": {
         "x": 12,
-        "y": 116,
+        "y": 129,
         "w": 12,
         "h": 8
       },
@@ -3598,20 +4150,20 @@
       ]
     },
     {
-      "id": 67,
+      "id": 77,
       "type": "row",
       "title": "Network",
       "collapsed": false,
       "gridPos": {
         "x": 0,
-        "y": 124,
+        "y": 137,
         "w": 24,
         "h": 1
       },
       "panels": []
     },
     {
-      "id": 68,
+      "id": 78,
       "type": "timeseries",
       "title": "Throughput",
       "datasource": {
@@ -3620,7 +4172,7 @@
       },
       "gridPos": {
         "x": 0,
-        "y": 125,
+        "y": 138,
         "w": 12,
         "h": 8
       },
@@ -3668,7 +4220,7 @@
       ]
     },
     {
-      "id": 69,
+      "id": 79,
       "type": "timeseries",
       "title": "Errors & Drops",
       "datasource": {
@@ -3677,7 +4229,7 @@
       },
       "gridPos": {
         "x": 12,
-        "y": 125,
+        "y": 138,
         "w": 6,
         "h": 8
       },
@@ -3725,7 +4277,7 @@
       ]
     },
     {
-      "id": 70,
+      "id": 80,
       "type": "timeseries",
       "title": "TCP",
       "datasource": {
@@ -3734,7 +4286,7 @@
       },
       "gridPos": {
         "x": 18,
-        "y": 125,
+        "y": 138,
         "w": 6,
         "h": 8
       },
@@ -3781,20 +4333,20 @@
       ]
     },
     {
-      "id": 71,
+      "id": 81,
       "type": "row",
       "title": "Services",
       "collapsed": false,
       "gridPos": {
         "x": 0,
-        "y": 133,
+        "y": 146,
         "w": 24,
         "h": 1
       },
       "panels": []
     },
     {
-      "id": 72,
+      "id": 82,
       "type": "bargauge",
       "title": "systemd Units by State",
       "datasource": {
@@ -3803,7 +4355,7 @@
       },
       "gridPos": {
         "x": 0,
-        "y": 134,
+        "y": 147,
         "w": 8,
         "h": 8
       },
@@ -3845,7 +4397,7 @@
       ]
     },
     {
-      "id": 73,
+      "id": 83,
       "type": "table",
       "title": "Failed Units",
       "datasource": {
@@ -3854,7 +4406,7 @@
       },
       "gridPos": {
         "x": 8,
-        "y": 134,
+        "y": 147,
         "w": 8,
         "h": 8
       },
@@ -3894,7 +4446,7 @@
       "options": {}
     },
     {
-      "id": 74,
+      "id": 84,
       "type": "timeseries",
       "title": "Processes",
       "datasource": {
@@ -3903,7 +4455,7 @@
       },
       "gridPos": {
         "x": 16,
-        "y": 134,
+        "y": 147,
         "w": 8,
         "h": 8
       },

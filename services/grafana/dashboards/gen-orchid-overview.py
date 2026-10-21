@@ -65,6 +65,26 @@ ts("Wall vs Measured Components",[tgt("tapo_power_watts","wall"),tgt(f'sum(node_
 ts("Energy Today",[tgt("tapo_energy_today_kwh","kWh since midnight")],16,8,unit="kwatth",min=0,fill=10)
 y+=8
 
+# ── Room ──
+row("Room — Govee H5075 (hosts/orchid/system/govee-exporter.nix)")
+stat("Temperature","govee_temperature_celsius",0,4,unit="celsius",decimals=1,legend="{{name}}",thresholds=[(26,"orange"),(30,"red")])
+stat("Humidity","govee_humidity_percent",4,4,unit="percent",decimals=0,legend="{{name}}",thresholds=[(60,"orange"),(70,"red")],
+     desc="40-60 % is the comfortable band; above 60 % for long stretches is where mould starts.")
+stat("Dew Point","govee_dew_point_celsius",8,3,unit="celsius",decimals=1,legend="{{name}}",
+     desc="Derived by the exporter (Magnus formula). A wall or window colder than this gets condensation.")
+stat("Absolute Humidity","govee_absolute_humidity_grams_per_cubic_meter",11,3,unit="none",decimals=1,legend="{{name}}",
+     desc="Water vapour in g/m³, derived by the exporter. Unlike relative humidity it doesn't move with temperature, so it shows whether airing actually removed moisture.")
+batt=stat("Battery","govee_battery_percent",14,4,unit="percent",decimals=0,legend="{{name}}",desc="As the thermometer reports it. Two AAA cells.")
+batt["fieldConfig"]["defaults"]["thresholds"]["steps"]=[{"color":"red","value":None},{"color":"orange","value":15},{"color":"green","value":30}]
+stat("Signal","govee_rssi_dbm",18,3,unit="dBm",decimals=0,legend="{{name}}",desc="RSSI of the last advertisement orchid heard.")
+stat("Last Heard","time() - max(govee_last_seen_timestamp_seconds)",21,3,unit="s",decimals=0,thresholds=[(120,"orange"),(600,"red")],
+     desc="Seconds since any H5075 was heard. Past 10 min the readings drop out (stale, not frozen). No data at all means nothing has been heard since govee-exporter started: check `journalctl -u govee-exporter` that the thermometer is within range, and that the Govee phone app isn't connected to it (the H5075 stops advertising while it is).")
+y+=4
+for p in [ts("Temperature",[tgt("govee_temperature_celsius","{{name}}"),tgt("govee_dew_point_celsius","{{name}} dew point")],0,12,unit="celsius"),
+          ts("Humidity",[tgt("govee_humidity_percent","{{name}} relative (%)")],12,12,unit="percent",min=0,max=100,thresholds=[(60,"orange"),(70,"red")])]:
+    p["options"]["legend"]={"displayMode":"table","placement":"bottom","calcs":["min","max","mean","lastNotNull"]}
+y+=8
+
 # ── Stability ──
 row("Stability (hang history)")
 stat("Booted at","node_boot_time_seconds * 1000",0,4,unit="dateTimeAsIso",desc="A step here is a reboot; an unexplained one is a hang/reset. Cross-check with `journalctl --list-boots`.")
