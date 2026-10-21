@@ -9,6 +9,9 @@
 # global shortcuts may misbehave); the wrapper selects it whenever the session
 # sets NIXOS_OZONE_WL, as both ember compositors do. Unset it for one launch
 # (`env -u NIXOS_OZONE_WL chatgpt`) to fall back to XWayland.
+#
+# The main binary is patched so Node's process.report can't kill it: see
+# installPhase.
 {
   lib,
   stdenv,
@@ -16,6 +19,7 @@
   dpkg,
   autoPatchelfHook,
   buildPackages,
+  python3,
   alsa-lib,
   at-spi2-atk,
   at-spi2-core,
@@ -66,6 +70,7 @@ stdenv.mkDerivation rec {
   nativeBuildInputs = [
     dpkg
     autoPatchelfHook
+    python3
     # The shell wrapper, not the default binary one: the Wayland flag below is a
     # ${VAR:+...} expansion that has to happen at launch.
     (buildPackages.wrapGAppsHook3.override {makeWrapper = buildPackages.makeShellWrapper;})
@@ -140,6 +145,41 @@ stdenv.mkDerivation rec {
       \( -name '*linux-arm*' -o -name '*-musl' -o -name 'android-*' \) -prune -exec rm -rf {} +
     find $out/lib/chatgpt/resources -name '*.musl.node' -delete
     rm $out/lib/chatgpt/libqt5_shim.so $out/lib/chatgpt/codex-launcher
+
+    # process.report.getReport() looks up gnu_get_libc_version with
+    # dlsym(RTLD_DEFAULT, ...) and calls the result. This build enforces
+    # control-flow integrity on indirect calls, and a pointer into libc fails
+    # the check, so the call traps (SIGILL) and kills the app. The bundled
+    # detect-libc only gets there when /usr/bin/ldd is missing, which on NixOS
+    # it always is, a few seconds into every launch. Renaming the .rodata
+    # copy of the string (not the .dynstr import Chromium links against) makes
+    # dlsym return NULL, and Node then skips the call; detect-libc falls back to
+    # `getconf GNU_LIBC_VERSION`. This runs before fixup on purpose: patchelf
+    # moves .dynstr, but leaves .rodata alone.
+    python3 - $out/lib/chatgpt/ChatGPT <<'EOF'
+    import struct, sys
+    path = sys.argv[1]
+    elf = bytearray(open(path, "rb").read())
+    shoff, = struct.unpack_from("<Q", elf, 0x28)
+    shentsize, shnum, shstrndx = struct.unpack_from("<HHH", elf, 0x3A)
+    def section(i):
+        return struct.unpack_from("<IIQQQQ", elf, shoff + i * shentsize)
+    strtab_off = section(shstrndx)[4]
+    for i in range(shnum):
+        name, _, _, _, off, size = section(i)
+        start = strtab_off + name
+        if elf[start : elf.index(b"\0", start)] == b".rodata":
+            break
+    else:
+        sys.exit("no .rodata section")
+    old, new = b"\0gnu_get_libc_version\0", b"\0nix_get_libc_version\0"
+    hits = elf.count(old, off, off + size)
+    if hits != 1:
+        sys.exit(f"expected one gnu_get_libc_version in .rodata, found {hits}")
+    at = elf.index(old, off, off + size)
+    elf[at : at + len(old)] = new
+    open(path, "wb").write(elf)
+    EOF
 
     install -Dm644 usr/share/pixmaps/chatgpt.png $out/share/icons/hicolor/1024x1024/apps/chatgpt.png
 
