@@ -78,6 +78,26 @@ in {
     longitude = -15.4363;
   };
 
+  # Park wlsunset while the panels are dark. It pushes a new gamma table every
+  # ~9s through dawn and dusk, and each push wakes the 9070 XT out of idle even
+  # with every output powered off: +30 W at the wall for the 40 min of each
+  # ramp, nobody at the desk for the morning one. Same 120s as the rice's
+  # panels-off timer; a list option, so this merges with the rice's timeouts.
+  # On start it applies the current temperature at once, so resume shows no
+  # step. An explicit stop doesn't trip the Restart=always below. --no-block
+  # because swayidle runs commands synchronously.
+  #
+  # Deliberately no idle suspend (the rice's timer is a no-op on AC): a
+  # suspended orchid drops off the tailnet, and nothing on the LAN is awake to
+  # send it a Wake-on-LAN packet.
+  services.swayidle.timeouts = [
+    {
+      timeout = 120;
+      command = "${pkgs.systemd}/bin/systemctl --user --no-block stop wlsunset.service";
+      resumeCommand = "${pkgs.systemd}/bin/systemctl --user --no-block start wlsunset.service";
+    }
+  ];
+
   # Keep the Wayland client services alive across a compositor restart: retry
   # forever, slowly, instead of burning systemd's 5 tries in half a second and
   # sitting dead. Same block as homes/tempest/default.nix, which has the full
