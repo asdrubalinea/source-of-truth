@@ -47,14 +47,42 @@ in {
     openFirewall = true;
   };
 
+  # Resolve `*.local` (e.g. the installer ISO at nixos.local). Lookup only:
+  # publishing stays off, so tempest doesn't announce itself on public wifi.
+  services.avahi = {
+    enable = true;
+    nssmdns4 = true;
+  };
+
   networking = {
     hostName = "tempest";
     hostId = "856ff057";
 
     networkmanager.enable = true;
 
+    # Share the wifi uplink over ethernet: `nmcli con up condividi` and the
+    # other end just needs plain DHCP (gets 10.42.0.x, NAT'd out via wifi).
+    # No interface-name, so it fits whatever USB/dock NIC is plugged in.
+    # autoconnect stays off: on a cable into a real LAN it would hand out
+    # DHCP leases to everyone there.
+    networkmanager.ensureProfiles.profiles.condividi = {
+      connection = {
+        id = "condividi";
+        type = "ethernet";
+        autoconnect = false;
+      };
+      ipv4.method = "shared";
+      ipv6.method = "ignore";
+    };
+
     firewall.allowedTCPPorts = [];
     firewall.allowedUDPPorts = [];
+    # The shared profile's dnsmasq (DHCP + DNS) must be reachable on the
+    # ethernet side. `en+` is every ethernet NIC; tempest has no onboard one.
+    firewall.interfaces."en+" = {
+      allowedUDPPorts = [53 67];
+      allowedTCPPorts = [53];
+    };
 
     extraHosts = lib.concatMapStringsSep "\n" (host: "127.0.0.1 ${host}") devHosts;
   };

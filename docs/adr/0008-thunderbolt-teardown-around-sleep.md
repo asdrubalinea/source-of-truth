@@ -192,3 +192,32 @@ by `restored to 8 modes`. If `replug 3/3` recurs without a `restored` line, the
 link truly can't carry the pinned mode in that topology and the pin in
 `homes/tempest/monitors.nix` has to come down for that profile. The
 `amd_pmc: Last suspend didn't reach deepest state` drain remains out of scope.
+
+## Update (2026-10-12): the teardown itself was the S0i3 blocker — idle NHIs now stay bound
+
+The "out of scope" drain above turned out to be caused by this ADR. Every suspend
+with `amd_pmc` diagnostics in the journal (July–October) logs `Last suspend didn't
+reach deepest state`, and every one of them ran the NHI unbind. The PCI core holds
+every **unbound** device in D0 ("Unbound PCI devices are always put in D0,
+regardless of runtime PM status" — `local_pci_probe`), so the unbind did not take
+the USB4 routers out of the suspend path. It pinned them **on** for the whole
+sleep and vetoed S0i3. Measured on a live system: the dock-less NHI `c3:00.5` sits
+in D3cold while bound and idle. Unbound, it would be in D0.
+
+The felt symptom was a closed-lid laptop that kept draining. logind only suspends
+on lid close on battery and undocked (`HandleLidSwitch{Docked,ExternalPower} =
+"ignore"`), and that is exactly the case where no NHI has anything behind it. So
+the teardown bought nothing there and cost hardware sleep entirely.
+
+**Decision:** `tb-sleep-down` unbinds an NHI only if its domain has a device
+behind the host router (`domainN/N-0/N-<route>`). An idle NHI is left bound, so
+the thunderbolt driver suspends it normally, and it has no tunnels to hang on.
+Docked suspends keep the full teardown, and with it the D0 veto. That is
+accepted, because a docked machine is on dock power. The journal logs `[tb-sleep]
+… idle, left bound` for each skipped controller.
+
+**Provisional:** confirm it with an undocked, lid-closed suspend on battery. Resume
+should *not* log `didn't reach deepest state`, and
+`/sys/power/suspend_stats/last_hw_sleep` should be non-zero. If the warning
+persists, the next suspect is the driverless ACP audio coprocessor (`c1:00.5`),
+which the same rule holds in D0.

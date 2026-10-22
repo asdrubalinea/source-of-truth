@@ -83,8 +83,8 @@ modes fused into one complaint. The glossary keeps them apart.
   notifications, lockscreen, terminals, theming, idle handling, wallpaper —
   together with one or more compositors that can run underneath it. A rice
   defines *what the desktop is and how it behaves*; it is meant to be
-  independent of the machine it runs on. tempest's rice is **ember**; orchid's was
-  **estradiol**.
+  independent of the machine it runs on. tempest and orchid both run **ember**;
+  orchid ran **estradiol** before its 2026-08-22 rebuild.
   A rice is **not** named after its compositor. ember runs on either niri or
   mango and is recognisably the same desktop on both, which is the whole reason
   the word stopped meaning "the compositor plus its trimmings".
@@ -93,8 +93,8 @@ modes fused into one complaint. The glossary keeps them apart.
 - **compositor layer** — one compositor under a rice: the window manager itself
   plus the bindings, layout and window rules only its own config language can
   express (`rices/ember/compositors/<name>/`). A rice may carry several. They are
-  **not** alternatives you choose at rebuild time — on tempest both are installed
-  in one generation and the session is picked at the greeter, per login.
+  **not** alternatives you choose at rebuild time — on tempest and orchid both are
+  installed in one generation and the session is picked at the greeter, per login.
   The boundary is load-bearing in both directions. Because every enabled layer is
   evaluated in the same generation, no option may be *defined* by two of them; an
   option only one layer needs may live inside it (the **marquee** does), but
@@ -135,7 +135,7 @@ modes fused into one complaint. The glossary keeps them apart.
   bitmask, so one window can be on several at once and an empty tag never
   disappears. ember pins mango to ten tags so the same ten keys land in the same
   ten places, but "the workspace list" is a niri idea with no mango counterpart,
-  and a *sticky* window is a mango idea (`isglobal`) that niri has to fake. When
+  and a *sticky* window is a mango idea (`is_global`) that niri has to fake. When
   precision matters, say **tag** for mango and **workspace** for niri; say
   *workspace* when you mean the thing the user switches.
 - **bar** — the rice's single status strip: workspaces, live readouts, clock,
@@ -147,6 +147,55 @@ modes fused into one complaint. The glossary keeps them apart.
   **waybar** is a module-less black rectangle that exists purely to reserve the
   **marquee** — a bar in name and process only, with nothing on it. "The bar"
   never means that one. Which units a bar readout watches is **machine policy**.
+  The bar's *edge treatment* — whether it floats with a margin or sits flush,
+  and whether its corners are square or rounded — is the desktop's edge
+  treatment: window corner rounding and the outer struts are both derived from
+  it, so a window's corner never disagrees with the corner it sits beside. It is
+  therefore the one value to change when the desktop's geometric register
+  changes, and the two derived ones follow rather than being set independently.
+- **body face** / **display face** — the rice's two typographic roles, split by
+  how the text is *used* rather than by what the text is. The **body face** is
+  what is read continuously: terminals, editor buffers, and every application's
+  own interface chrome. It must be unremarkable — character in a face read for
+  eight hours is fatigue. The **display face** is what is only ever *glanced*
+  at: the bar's readouts and clock, notification titles, the lockscreen. Strings
+  there are a handful of characters long and are never read as prose, so the
+  display face is allowed to be conspicuous, and is the one place the desktop
+  gets to have a voice.
+  _Flagged ambiguity_: the roles do **not** line up with the serif /
+  sans-serif / monospace slots that theming exposes. Those slots name letterform
+  classes; the roles name jobs. ember's body face occupies the *sans-serif* slot
+  as well as the monospace one — a deliberate consequence of the desktop having
+  no proportional text anywhere — so "the sans-serif font" in this repo means
+  "what non-terminal UI renders in", and is not a claim that it is proportional.
+  A display face is therefore never chosen by putting it in a slot; it is
+  pointed at the one surface that wants it.
+  _Avoid_: "the UI font" (ambiguous between the two), "the theme font".
+  A display face carries a **legible size range** — pixel-grid designs are crisp
+  at their design size and integer multiples and soft elsewhere — so it is only
+  ever placed on a surface whose text size is known and fixed. Which sizes a
+  given panel needs is **machine policy**.
+
+- **glance palette** / **read palette** — the two registers the rice's colours
+  are used in, split by how long the coloured thing is *looked at* — the same
+  split as **body face** / **display face**, applied to colour instead of type.
+  The **glance palette** is the scheme at full strength: all eight accents, as
+  the bar's readouts, window borders, notification titles and diagnostics use
+  them. The **read palette** is what a continuously-read surface gets: a handful
+  of accents over the foreground, everything else flattened to `base05` and
+  comments dropped to `base03`. One scheme, two intensities.
+  _Flagged ambiguity_: "tracking ember" does not mean "using all of ember". An
+  editor buffer on the read palette is still tracking the scheme — it is derived
+  from the same yaml, so it follows a palette change — it simply spends fewer of
+  its accents. A surface belongs to a register because of how it is *used*,
+  never because of what it is: a terminal and an editor buffer are read
+  surfaces, the bar is a glance surface, and all three are ember.
+  The tell for a register error is a colour that carries meaning elsewhere
+  appearing on a token that is merely common — an accent reserved for errors
+  landing on every struct field, say. That is not a palette fault; it is a
+  glance-register mapping applied to a read surface.
+  _Avoid_: "dimmed theme", "muted variant" (both imply a second scheme).
+
 - **scratchpad** — a window kept running but parked out of view, summoned by a
   keybind as a floating overlay onto whatever workspace is focused and
   dismissed with the same key. On tempest the canonical tenant is Telegram
@@ -233,3 +282,54 @@ _Avoid_: Calling mpv a media server
 >
 > **Domain expert:** None. mpv is the playback client and opens library files
 > directly.
+
+## Isolation (tempest)
+
+Two layers for running work away from the machine itself. They are not two
+strengths of the same thing — they bound different quantities and end in
+different ways.
+
+- **sandbox** — cage: a confined *process tree* on tempest's own kernel. The
+  home is empty, only the launch directory is writable, and the session ends
+  when you detach, leaving nothing behind. It bounds what a program can
+  *reach*; it does not bound what a program can do to the machine, and its own
+  documentation says so in as many words.
+  _Avoid_: "the VM", container.
+- **ocelot** — a virtual machine, one per project, that you enter and work
+  inside. It has its own kernel, so what runs in it cannot touch tempest's
+  system state; it runs its own container runtime, so the containers started in
+  it are *its* containers and appear in no listing on the host; and it outlives
+  your connection, so whatever you left running is still running when you come
+  back. The word is the species: each individual is named for the project
+  directory it belongs to, and `ocelot` is also the command that manages them.
+  _Avoid_: sandbox (that is cage), container, "the dev VM".
+- **the project** — the single host directory an ocelot works on, present
+  inside at the same path it has on tempest, so a path copied between the two
+  means the same file. An ocelot is *of* a project the way a **sandbox** session
+  is of a directory.
+- **blast radius** — what an ocelot is for, and the limit of the claim. It
+  bounds **mess**: a runaway build, a container that fills the disk, a daemon
+  that rewrites its own `/etc`, a toolchain that wants to own the machine.
+  It does **not** bound malice. Agent credentials are deliberately carried
+  inside so that the tools you use are already logged in, which means anything
+  running in an ocelot can read them — exactly as in a **sandbox**. Protection
+  from hostile code is a different request, and would mean a different set of
+  things crossing the boundary.
+  _Flagged ambiguity_: "isolated" has been used for both properties. An ocelot
+  is isolated from tempest's *state*, not from your *secrets*.
+- **stop** / **destroy** — the two ways an ocelot ends. Not degrees of one
+  action. **stop** ends the *machine*: it shuts down, and everything it
+  accumulated — container images, its home, its shell history — is there when it
+  next starts. **destroy** ends the *state*: that accumulation is deleted and
+  the next start is a machine that has never been used. destroy is what makes
+  **blast radius** a claim rather than a hope, because it is the guaranteed
+  route back to a known machine.
+  _Flagged ambiguity_: "kill the VM" has meant both. Say which.
+- **host clone** — the *other* virtual machine in this tree: `tempest-vm` and
+  `orchid-vm`, built by `./build-vm`, which reproduce a whole machine's disk
+  layout and configuration in order to test *the configuration*. A host clone
+  holds no project, mounts nothing of yours, and is discarded once it has
+  answered the question it was built for. An **ocelot** inverts every one of
+  those.
+  _Flagged ambiguity_: "the VM" is ambiguous in this repo and should not be
+  used unqualified.

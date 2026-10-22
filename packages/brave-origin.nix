@@ -61,11 +61,11 @@
   enableVulkan ? vulkanSupport,
 }: let
   pname = "brave-origin";
-  version = "1.95.65";
+  version = "1.99.14";
 
   src = fetchurl {
     url = "https://github.com/brave/brave-browser/releases/download/v${version}/brave-origin-nightly_${version}_amd64.deb";
-    hash = "sha256-3HGLK4iT0BLx3hH5sI0l2qJj5UrckUrXNdebbg1ughA=";
+    hash = "sha256-roJpOptt0N7YPd7oJ/Yu09nPHT5Ds2CJvMSO1e7jf2Y=";
   };
 
   inherit

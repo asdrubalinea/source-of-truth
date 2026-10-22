@@ -1,33 +1,26 @@
 {pkgs, ...}:
 # Soft-reboot session policy — tempest-specific, so it lives here rather than in
-# the portable niri rice (same rationale as monitors.nix; see ADR 0004).
+# the portable rice (same rationale as monitors.nix; ADR 0004).
 #
-# Goal: `systemctl soft-reboot` tears down ALL of userspace (niri included) but
-# keeps the kernel, then re-execs PID 1 and brings the default target back up —
-# a few seconds, no firmware/kernel/ZFS round-trip. After a soft-reboot greetd
-# autologins straight back into niri (hosts/tempest/system/session.nix gates the
-# autologin on systemd's SoftRebootsCount), so a soft-reboot lands you in the
-# desktop hands-free.
-#
-# A cold boot, by contrast, has no auth at all (TPM2 auto-unlocks LUKS), so the
-# same SoftRebootsCount gate drops it to the tuigreet TTY greeter and you log in
-# yourself. That cold-boot auth used to be a noctalia lockscreen driven from
-# here; it now lives entirely in the greetd config. See ADR 0007.
+# `systemctl soft-reboot` tears down ALL of userspace but keeps the kernel, then
+# re-execs PID 1 — a few seconds, no firmware/kernel/ZFS round-trip. greetd then
+# autologins straight back into niri, gated on SoftRebootsCount in
+# hosts/tempest/system/session.nix, so a soft-reboot is hands-free. A cold boot
+# has no auth at all (TPM2 auto-unlocks LUKS), so the same gate drops it to the
+# tuigreet TTY greeter instead. See ADR 0007.
 let
-  # The trigger. soft-reboot is a systemd-manager op (not a logind verb), so it
-  # needs privilege; doas is passwordless for wheel here (security.doas), and the
-  # setuid wrapper lives at /run/wrappers/bin/doas (the ${pkgs.doas} store path is
-  # NOT setuid and would silently fail to escalate).
+  # soft-reboot is a systemd-manager op, not a logind verb, so it needs
+  # privilege. doas is passwordless for wheel here, and the path MUST be the
+  # setuid wrapper — ${pkgs.doas} is not setuid and silently fails to escalate.
   niriSoftReboot = pkgs.writeShellScriptBin "niri-soft-reboot" ''
     exec /run/wrappers/bin/doas ${pkgs.systemd}/bin/systemctl soft-reboot
   '';
 in {
   home.packages = [niriSoftReboot];
 
-  # Merge into each compositor layer's settings (attrset/list merge across
-  # modules). The trigger is machine policy, so it is bound in both — the key
-  # does the same thing whichever session is running. `lib.mkIf` is unnecessary:
-  # an unenabled layer's whole config is gated, so a stray setting is inert.
+  # Merges into each compositor layer's settings, so the key does the same thing
+  # whichever session is running. No `lib.mkIf` needed: an unenabled layer's
+  # whole config is gated, so a stray setting is inert.
   programs.niri.settings = {
     binds."Mod+Shift+R".action.spawn = ["${niriSoftReboot}/bin/niri-soft-reboot"];
   };

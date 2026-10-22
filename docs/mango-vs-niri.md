@@ -20,6 +20,7 @@ Identical unless the right column says otherwise.
 | Mod+L | `loginctl lock-session` | same |
 | Mod+Shift+B | zen-beta | same |
 | Mod+Y | mpv on the clipboard URL | same |
+| Mod+K / Mod+Shift+K | wl-kbptr: tile+bisect / detected target + click | same |
 | Mod+T | Telegram scratchpad | same key, native scratchpad |
 | Mod+Shift+T | toggle scratchpad pile | `toggle_scratchpad` |
 | Mod+Q | close window | `killclient` |
@@ -36,7 +37,7 @@ Identical unless the right column says otherwise.
 | Mod+Shift+R | soft-reboot | same |
 | Mod+Shift+E | quit | `quit` |
 | Volume / media keys | pamixer, playerctl | same |
-| **Mod+G** | even split | **nothing** |
+| Mod+G | even split | `mango-even-split` script — `scroller_stack` + `set_proportion` |
 | **Mod+O** | audio-output switcher | **nothing** |
 | **Brightness keys** | backlight, or DDC/CI when clamshelled | **nothing** — use the Noctalia panel or `brightnessctl` |
 
@@ -48,7 +49,7 @@ Identical unless the right column says otherwise.
 - **Scratchpads launch lazily.** The first Mod+T *starts* Telegram; under niri it
   was already running, parked, since login. So the first summon of the session is
   slow and the ones after are instant.
-- **The PiP is genuinely sticky** (`isglobal`), rather than being dragged onto
+- **The PiP is genuinely sticky** (`is_global`), rather than being dragged onto
   your current workspace by a daemon a moment after you switch.
 - **No marquee.** The portrait OLED's video band is niri-only. The top of that
   panel is ordinary tiling space under mango.

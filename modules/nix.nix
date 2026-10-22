@@ -5,7 +5,7 @@
   ...
 }: {
   nix = {
-    package = pkgs.nixVersions.stable;
+    package = pkgs.lix;
     nixPath = ["nixpkgs=flake:nixpkgs"];
 
     settings = {
@@ -23,7 +23,6 @@
           if config.networking.hostName == "tempest"
           then [
             # "http://orchid.boreal-city.ts.net:8501/"
-            "https://attic.xuyh0120.win/lantian" # xddxdd/nix-cachyos-kernel's own attic; only holds paths built against its pinned nixpkgs, see flake.nix
             "https://noctalia.cachix.org" # prebuilt Noctalia v5 / Quickshell (needs noctalia input NOT following nixpkgs; see flake.nix)
             # "https://cache.garnix.io" # disabled: R2 backend unreachable from this network
           ]
@@ -32,6 +31,9 @@
             "https://cosmic.cachix.org/"
           ]
         );
+      # No CachyOS kernel cache: xddxdd's attic (lantian) was taken down after a
+      # server compromise (xddxdd/nix-cachyos-kernel#110) and its signing key is
+      # no longer trusted, so the kernel builds locally on every host.
 
       # Corresponding public keys
       trusted-public-keys =
@@ -43,7 +45,6 @@
           if config.networking.hostName == "tempest"
           then [
             "orchid:OonqQD3i5uEEi8h3zSxxp/uvVGR+Mum0/mbJohLJ09I="
-            "lantian:EeAUQ+W+6r7EtwnmYjeVwx5kOGEBpjlBfPlzGlTNvHc="
             "noctalia.cachix.org-1:pCOR47nnMEo5thcxNDtzWpOxNFQsBRglJzxWPp3dkU4="
             # "cache.garnix.io:CTFPyKSLcx5RMJKfLo5EEPUObbA78b0YQ2DTCJXqr9g="
           ]
@@ -52,6 +53,14 @@
             "cosmic.cachix.org-1:Dya9IyXD4xdBehWjrkPv6rtxpmMdRel02smYzA85dPE="
           ]
         );
+
+      # A dead substituter must not fail the build: fallback makes nix skip a
+      # cache whose narinfo query errors (and disable it for 60s) instead of
+      # aborting, and connect-timeout makes each attempt cost 5s, not curl's
+      # ~80s × 5 retries. Cost: a build that a down cache would have served
+      # compiles locally rather than erroring out.
+      fallback = true;
+      connect-timeout = 5;
 
       # Performance optimizations
       max-jobs = lib.mkDefault "auto";

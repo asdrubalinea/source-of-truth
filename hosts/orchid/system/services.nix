@@ -5,11 +5,6 @@
     then flake.nixosModules.default
     else flake.nixosModules.${system}.default;
 in {
-  imports = [
-    (getNixosModule inputs.diapee-bot)
-    (getNixosModule inputs.tribunale-scrape)
-    (getNixosModule inputs.auxologico-check)
-  ];
 
   # The Hetzner storage box that backs every borg job below. Declared here so a
   # fresh install can run its first backup without an interactive host-key
@@ -21,26 +16,6 @@ in {
     };
   };
 
-  services.borg-backup = {
-    enable = true;
-    jobs = {
-      vault = {
-        user = "irene";
-        repo = "ssh://u518612@u518612.your-storagebox.de:23/./backups/orchid-vault";
-        ssh_key_file = "/home/irene/.ssh/id_ed25519";
-        password_file = "/persist/borg-vault-backup/passphrase";
-        paths = ["/persist/Vault"];
-      };
-
-      home-irene = {
-        user = "irene";
-        repo = "ssh://u518612@u518612.your-storagebox.de:23/./backups/orchid-home-irene";
-        ssh_key_file = "/home/irene/.ssh/id_ed25519";
-        password_file = "/persist/borg-home-backup/passphrase";
-        paths = ["/home/irene"];
-      };
-    };
-  };
 
   services.tailscale = {
     enable = true;
@@ -58,120 +33,48 @@ in {
     };
   };
 
-  # The primary Vaultwarden. tempest and hydra run read-only mirrors of this one
-  # (services/vaultwarden-mirror.nix), fed by system/vaultwarden-export.nix.
-  # /var/lib/vaultwarden is bind-mounted from /persist (system/persistence.nix).
-  services.vaultwarden = {
+  # earlyoom: SIGTERM the biggest memory hog before the box livelocks. Same
+  # thresholds as tempest (hosts/tempest/system/services.nix has the reasoning,
+  # and system/memory.nix there the MemAvailable trap): decide on RAM alone, at
+  # <5% available — the 16 GiB swap LV is overflow, not a cushion to thrash into.
+  services.earlyoom = {
     enable = true;
-    dbBackend = "sqlite";
-    backupDir = "/persist/vaultwarden";
-    config = {
-      DOMAIN = "https://bitwarden.irene.foo";
-      SIGNUPS_ALLOWED = false; # account already enrolled; re-enable briefly to add users
-      ROCKET_ADDRESS = "127.0.0.1";
-      ROCKET_PORT = 8222;
-      ENABLE_WEBSOCKET = true;
-      SENDS_ALLOWED = true;
-      ROCKET_LOG = "critical";
-    };
+    freeMemThreshold = 5;
+    freeSwapThreshold = 100;
   };
 
-  services.github-runners = {
-    leksi = {
-      enable = false;
-      name = "leksi";
-      tokenFile = "/persist/secrets/github-runners/leksi";
-      url = "https://github.com/asdrubalinea/leksi";
-    };
-  };
-
-  services.ncps = {
+  # Grafana + Prometheus (services/grafana). Full collector set at the module's
+  # default 15s cadence — no battery to save here, and the history is wanted for
+  # the hangs while the Curve Optimizer is still provisional. Grafana on
+  # 127.0.0.1:3333; reach it from another host with `port-forward orchid 3333`.
+  # The dashboard is orchid's own (GPU junction/delta/fan duty, DIMM and NVMe
+  # temperatures, hang-history row); the module's default is tempest's laptop
+  # overview, which this host doesn't load.
+  #
+  # History is kept forever (the module's default is 7 days): the full collector
+  # set plus the wall-power plug runs ~100 MB/week, ~5 GB/year, on a 1.4 TB pool.
+  services.monitoring = {
     enable = true;
-    server = {
-      addr = ":8501";
-    };
-
-    logLevel = "trace";
-
-    cache = {
-      maxSize = "500G";
-      hostName = "orchid.boreal-city.ts";
-
-      # The store lives on its own ZFS dataset with a 560G quota
-      # (disks/orchid.nix), and maxSize is only enforced when the LRU cleaner
-      # actually runs — with no schedule set it never does, so the cache grew
-      # until something else broke. Nightly at 03:00.
-      lru.schedule = "0 3 * * *";
-
-      # NARs are downloaded here before being committed to the store. The
-      # default is /tmp, which on this host is the tmpfs root — i.e. RAM. The
-      # module creates the directory and grants the unit write access.
-      tempPath = "/var/lib/ncps/tmp";
-
-      upstream = {
-        urls = [
-          "https://cache.nixos.org/"
-          "https://hyprland.cachix.org"
-          "https://cosmic.cachix.org/"
-        ];
-        publicKeys = [
-          "cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY="
-          "hyprland.cachix.org-1:a7pgxzMz7+chwVL3/pzj6jIBMioiJM7ypFP8PwtkuGc="
-          "cosmic.cachix.org-1:Dya9IyXD4xdBehWjrkPv6rtxpmMdRel02smYzA85dPE="
-        ];
-      };
-    };
+    prometheusRetentionDays = null;
+    dashboards = [../../../services/grafana/dashboards/orchid-overview.json];
   };
 
-  services.diapee-bot = {
+  # The G502's thumb button → super+e, as on tempest. 046d:c547 is the Lightspeed
+  # receiver, so this follows the receiver to whichever machine it is plugged in.
+  services.keyd = {
     enable = true;
-
-    web = {
-      enable = true;
-      port = 3000;
-    };
-
-    environmentFile = "/persist/diapee-bot/env";
-    dataDir = "/persist/diapee-bot";
-
-    extraEnvironment = {
-      RUST_LOG = "info,diapee_bot=debug";
-      DIAPEEBOT_MODEL = "google/gemini-2.5-pro";
-      DIAPEEBOT_PRONOUNS = "she/her";
+    keyboards.g502 = {
+      ids = ["046d:c547"];
+      settings.main.C-up = "macro(super+e)";
     };
   };
 
-  services.tribunale-scrape = {
-    enable = false;
-    environmentFile = "/persist/tribunale-scrape/env";
-    dataDir = "/persist/tribunale-scrape";
-    extraEnvironment = {
-      RUST_LOG = "info";
-    };
-  };
+  # Mask Speech Dispatcher: GTK/Chromium apps pull in speechd via AT-SPI, and its
+  # socket-activated user units spawn the daemon plus every synthesizer in each
+  # session. Nothing here uses screen-reader TTS. See the tempest note.
+  systemd.user.services.speech-dispatcher.enable = false;
+  systemd.user.sockets.speech-dispatcher.enable = false;
 
-  services.auxologico-check = {
-    enable = true;
-    startDate = "20/02/2026";
-    environmentFile = "/persist/auxologico-check/env";
-    dataDir = "/persist/auxologico-check";
-  };
-
-  services.gitea = {
-    enable = true;
-    stateDir = "/persist/gitea";
-
-    settings.server = {
-      DOMAIN = "gitea.irene.foo";
-      ROOT_URL = "https://gitea.irene.foo/";
-      HTTP_ADDR = "127.0.0.1";
-      HTTP_PORT = 4001;
-    };
-  };
-
-  # Dropped with the desktop: services.flatpak (nothing graphical to run) and
-  # the commented-out services.ollama block (rocm, no GPU in this machine). The
-  # local `nix.gc` block that used to live here is gone too — it re-declared
   # nix.gc.automatic, which hosts/orchid/default.nix already sets alongside
   # programs.nh.clean.
 }

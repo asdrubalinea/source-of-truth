@@ -59,15 +59,30 @@ in {
     };
 
     prometheusRetentionDays = mkOption {
-      type = types.int;
+      type = types.nullOr types.int;
       default = 7;
-      description = "Number of days to retain Prometheus data";
+      description = ''
+        Number of days to retain Prometheus data. null keeps everything:
+        Prometheus has no "forever" (an unset retention falls back to 15d), so
+        null passes 100y instead.
+      '';
     };
 
     scrapeInterval = mkOption {
       type = types.str;
       default = "15s";
       description = "Prometheus scrape interval";
+    };
+
+    dashboards = mkOption {
+      type = types.listOf types.path;
+      default = [./dashboards/laptop-overview.json];
+      description = ''
+        Dashboard JSON files to provision. The default is the laptop overview;
+        a host with different hardware (orchid: tower, discrete GPU, DIMM
+        sensors, no battery) lists its own file instead, so each host's Grafana
+        shows only panels its exporter actually feeds.
+      '';
     };
   };
 
@@ -128,11 +143,16 @@ in {
           }
         ];
 
-        # Bundled dashboards
+        # Bundled dashboards: only the files this host lists (see the
+        # `dashboards` option), linked into one directory for the provider.
         dashboards.settings.providers = [
           {
             name = "default";
-            options.path = ./dashboards;
+            options.path = pkgs.linkFarm "grafana-dashboards" (map (f: {
+                name = baseNameOf f;
+                path = f;
+              })
+              cfg.dashboards);
           }
         ];
       };
@@ -144,7 +164,10 @@ in {
       port = 9901;
 
       # Power-efficient retention
-      retentionTime = "${toString cfg.prometheusRetentionDays}d";
+      retentionTime =
+        if cfg.prometheusRetentionDays == null
+        then "100y"
+        else "${toString cfg.prometheusRetentionDays}d";
 
       # Global configuration
       globalConfig = {

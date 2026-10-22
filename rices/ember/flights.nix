@@ -16,7 +16,7 @@
   imports = [inputs.flights.homeManagerModules.default];
 
   services.flights-server = {
-    enable = true;
-    web.enable = true;
+    enable = false;
+    web.enable = false;
   };
 }

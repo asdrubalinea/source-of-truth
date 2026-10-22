@@ -36,30 +36,14 @@
     };
     ucodenix.url = "github:e-tho/ucodenix";
     nix-cachyos-kernel = {
-      # PINNED, do not move to `release` until linux-cachyos-lts >= 6.18.44.
-      # 6.18.42 (rev 879f45ee, 2026-08-04) reproduces the niri redraw flicker
-      # with mesa 26.1.6 — see docs/amdgpu-6.18.42-redraw-flicker.md. 4f3c8ca0 is
-      # lts 6.18.40, the last version observed clean. The amdgpu fix is
-      # reported in 6.18.44 (niri-wm/niri#4433), which `release` has not
-      # published yet.
-      url = "github:xddxdd/nix-cachyos-kernel/4f3c8ca048091c5fbad5447c660133ac1a151ac7";
-      # Do NOT override nixpkgs — upstream's lantian attic cache only has
-      # store paths built against its pinned nixpkgs. Following ours forces
-      # a full local kernel rebuild on every change.
-      #
-      # Note this is necessary but not sufficient: we apply `overlays.default`
-      # below, which builds cachyosKernels against *our* nixpkgs, so the
-      # derivation hash differs from the one upstream's Hydra pushed.
-      # Measured 2026-08-09 for linux-cachyos-lts-lto-zen4-6.18.40: default →
-      # g2b5i1w3848vc4cy4psmc6359z0zjkcp, pinned →
-      # 03zf59q4mb1fgczynkf454x1lkbdy22a, and the attic serves a narinfo for
-      # both (a well-formed but absent hash 404s, so those hits are real).
-      # So there is no problem today — but it is luck, not a guarantee. If a
-      # rebuild ever starts compiling a ThinLTO kernel locally, the fix is
-      # `overlays.pinned`, which upstream recommends precisely for this. The
-      # tradeoff there: cachyosKernels (and with it zfs_cachyos and any
-      # extraModulePackages taken from that set) would come from upstream's
-      # nixpkgs revision rather than ours.
+      url = "github:xddxdd/nix-cachyos-kernel/release";
+      # No `follows`: upstream's attic cache only holds paths built against its
+      # own nixpkgs pin, and the overlay below is `overlays.pinned` so the kernel
+      # (and its -dev, which orchid's ryzen-smu needs) comes from that cache.
+      # With `overlays.default` it was compiled against our nixpkgs and broke on
+      # 2026-10-06: lld -r produced an objtool-in.o with dangling section symbols.
+      # The ZFS kmod then comes from the pinned set too — keep its version equal
+      # to boot.zfs.package's userland after a bump.
     };
 
     # --- Desktop/UI Components ---
@@ -74,57 +58,30 @@
     };
     niri = {
       url = "github:sodiboo/niri-flake";
-      # Do NOT `follows = "nixpkgs"`, and do NOT leave this unpinned either.
-      #
-      # niri.cachix.org (added to the substituters by niri.nixosModules.niri
-      # itself, which is why it isn't in modules/nix.nix) only holds
-      # `niri.packages.*` as built by upstream CI — i.e. against the exact
-      # nixpkgs in niri-flake's own flake.lock. Following our nixpkgs changes the
-      # derivation hash and turns niri into a ~277 MB local Rust build.
-      #
-      # Merely dropping the `follows` is not enough: nix then reuses whatever
-      # `github:NixOS/nixpkgs/nixos-unstable` node our lock already has, which
-      # runs ahead of CI. That breaks the build outright, because niri-flake's
-      # `make-niri` asserts `libdisplay-info_0_2.version == "0.2.0"` for both
-      # niri-stable and niri-unstable, and nixpkgs removed the
-      # libdisplay-info_0_2 alias on 2026-08-04.
-      #
-      # So pin it to niri-flake's own locked rev. Re-sync this whenever the niri
-      # input is bumped (read `nixpkgs` out of niri-flake's flake.lock); if it
-      # drifts you lose every cache hit, and if it drifts past a nixpkgs that
-      # dropped libdisplay-info_0_2 the build fails loudly rather than silently.
+      # Pinned to niri-flake's OWN locked nixpkgs rev — not `follows`, not
+      # unpinned. niri.cachix.org only holds packages built against that exact
+      # rev, and xwayland-satellite still comes from there. niri itself no
+      # longer does (it's a local build — see niriPrebuiltOverlay). Re-sync
+      # this whenever the niri input is bumped: read `nixpkgs` out of
+      # niri-flake's flake.lock.
       inputs.nixpkgs.url = "github:NixOS/nixpkgs/e72e4f299401a3689d4b3d5fc6496b11db7064eb";
     };
     mangowm = {
       url = "github:mangowm/mango";
-      # DO follow here, unlike niri above — the reasoning inverts. There is no
-      # upstream cache for mango either way, so `follows` costs nothing in build
-      # time and saves evaluating a second nixpkgs; it is also what mango's own
-      # install docs prescribe. mango is a small C build against wlroots +
-      # scenefx, not a 277 MB Rust one.
-      #
-      # This input carries both halves of the mango layer: nixosModules.mango
-      # (which replaces the thinner nixpkgs module) and hmModules.mango, which
-      # nixpkgs has no equivalent of at all. See ADR 0012.
+      # `follows` is right here, unlike niri: no upstream cache to miss either
+      # way, and it's a small C build. Carries nixosModules.mango + hmModules.mango
+      # (ADR 0012).
       inputs.nixpkgs.follows = "nixpkgs";
     };
     noctalia = {
       url = "github:noctalia-dev/noctalia-shell";
-      # Do NOT add `inputs.nixpkgs.follows = "nixpkgs"`. Noctalia's Cachix
-      # (noctalia.cachix.org, wired into modules/nix.nix on tempest) only has
-      # paths built against the flake's own pinned nixpkgs; following ours would
-      # invalidate every hit and force a full local Quickshell rebuild. See
-      # https://docs.noctalia.dev/v5/getting-started/nixos/#binary-cache
+      # No `follows`: noctalia.cachix.org only has paths built against its own
+      # nixpkgs pin, and the fallback is a full local Quickshell build.
     };
     stylix = {
       url = "github:danth/stylix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    #rose-pine-hyprcursor = {
-    #url = "github:ndom91/rose-pine-hyprcursor";
-    #inputs.nixpkgs.follows = "nixpkgs";
-    #inputs.hyprlang.follows = "hyprland/hyprlang";
-    #};
     nixos-cosmic.url = "github:lilyinstarlight/nixos-cosmic";
     anyrun = {
       url = "github:anyrun-org/anyrun";
@@ -139,22 +96,26 @@
       url = "github:0xc000022070/zen-browser-flake";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    helium-browser = {
+      url = "github:oxcl/nix-flake-helium-browser";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     emacs-overlay = {
       url = "github:nix-community/emacs-overlay";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    diapee-bot = {
-      url = "github:asdrubalinea/diapee-bot/main";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-    tribunale-scrape = {
-      url = "github:asdrubalinea/tribunale-scrape";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-    auxologico-check = {
-      url = "github:asdrubalinea/auxologico-check";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
+    # diapee-bot = {
+    #   url = "github:asdrubalinea/diapee-bot/main";
+    #   inputs.nixpkgs.follows = "nixpkgs";
+    # };
+    # tribunale-scrape = {
+    #   url = "github:asdrubalinea/tribunale-scrape";
+    #   inputs.nixpkgs.follows = "nixpkgs";
+    # };
+    # auxologico-check = {
+    #   url = "github:asdrubalinea/auxologico-check";
+    #   inputs.nixpkgs.follows = "nixpkgs";
+    # };
     flights = {
       url = "github:asdrubalinea/flights";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -163,70 +124,44 @@
       url = "github:mattwparas/helix/steel-event-system";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    mitos = {
+      # Helix fork (binary `ms`). Consumed through its overlay, so it builds
+      # against our pkgs either way; no upstream cache, so `follows` is free.
+      url = "github:mitos-editor/mitos";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     claude-code.url = "github:sadjow/claude-code-nix";
     llm-agents = {
       url = "github:numtide/llm-agents.nix";
-      # Numtide's AI-agent package set (ex nix-ai-tools); source for codex and
-      # rtk, both of which nixpkgs ships well behind upstream. HM-only, so
-      # update-home bumps it. Same reasoning as noctalia above:
-      # do NOT add `inputs.nixpkgs.follows = "nixpkgs"`. cache.numtide.com (wired
-      # into modules/nix.nix) only has paths built against the flake's own pinned
-      # nixpkgs-unstable, and codex is a full Rust + rusty_v8 build locally.
+      # codex/rtk et al, tracked closer than nixpkgs does. HM-only (update-home
+      # bumps it). No `follows` — same cache reasoning as noctalia; codex is a
+      # full Rust + rusty_v8 build otherwise.
     };
     drift = {
       url = "github:phlx0/drift";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    # lights = {
+    #   url = "github:asdrubalinea/lights";
+    #   # No flake of its own, just the package.nix sitting beside its Cargo.lock,
+    #   # which is all we need — see homes/tempest/lights.nix. HM-only, so
+    #   # update-home bumps it.
+    #   flake = false;
+    # };
     warp = {
       url = "github:warpdotdev/warp";
-      # Warp's client is AGPL/MIT open source and the repo ships its own flake,
-      # so build `warp-oss` from source rather than using nixpkgs' unfree
-      # prebuilt tarball. app/src/bin/oss.rs constructs the OSS ChannelState
-      # with `autoupdate_config: None`, so the "new version available but Warp
-      # is unable to perform the update" banner the prebuilt build raises on
-      # every launch cannot fire — no wrapper or pinned channel_versions.json
-      # needed. It also passes `telemetry_config: None` and
-      # `crash_reporting_config: None`, dropping the RudderStack and Sentry
-      # wiring the prebuilt build ships with.
-      #
-      # Upstream labels the flake experimental and Linux-only, and it's a large
-      # from-source Rust build with no published substituter — expect long
-      # rebuilds whenever this input moves.
-      #
-      # Same reasoning as noctalia and llm-agents below: do NOT add
-      # `inputs.nixpkgs.follows = "nixpkgs"`. It pins its own nixpkgs alongside
-      # crane and rust-overlay against rust-toolchain.toml, and that pin is the
-      # combination upstream actually builds against.
+      # `warp-oss` from source instead of nixpkgs' unfree prebuilt: the OSS
+      # binary passes autoupdate/telemetry/crash-reporting config as None, so
+      # there's no update nag and no RudderStack/Sentry. No `follows` — it pins
+      # nixpkgs + crane + rust-overlay against its own rust-toolchain.toml.
+      # No substituter, so expect a long rebuild whenever this moves.
     };
     openlogi = {
-      # PINNED to a specific rev, and not to a tag, because neither end of the
-      # range works:
-      #
-      #   - nixpkgs (every branch) is on 0.6.25, which predates 0.6.27's
-      #     "recognise Lightspeed receiver 046d:c547 (G915, G502 X)" (#574).
-      #     tempest's receiver is exactly that, so on 0.6.25 `detect()` skips it
-      #     and the mouse never appears — hence taking the input at all.
-      #   - v0.7.1, the newest tag, does not build: its outputHashes names
-      #     gpui-updater-0.0.6 while its Cargo.lock pins 0.0.7, and
-      #     importCargoLock rejects the stale key. Repaired the next day by
-      #     d5d3a7e5 "make Linux packaging first-class", which also added the
-      #     flake's nixosModules output.
-      #   - master (2026-08-19) panics at startup: that day's refactor wave built
-      #     a `tokio::time::interval` on GPUI's executor, where no Tokio reactor
-      #     exists (crates/openlogi-desktop/src/main.rs:468, from a2613f56
-      #     "stop scanning for cameras with no window open"). It fires as soon as
-      #     a camera is present, and tempest has a C920. That wave also renamed
-      #     openlogi-gui to openlogi-desktop.
-      #
-      # 822c6e41 is the last commit before that wave: repaired packaging, no
-      # camera timer, binary still `openlogi-gui`. Bump it deliberately, and
-      # check `openlogi list` plus a GUI launch afterwards.
-      #
-      # Like warp below, this is a from-source gpui/Rust build with no published
-      # substituter, so it rebuilds slowly whenever this rev moves. `follows` is
-      # correct here: upstream pins nothing but nixpkgs and there is no cache to
-      # miss. If a bump fails against our channel (rustc too old for the
-      # workspace), drop the `follows` to use upstream's own pin.
+      # Pinned to a rev, not a tag: nixpkgs' 0.6.25 can't see tempest's
+      # Lightspeed receiver, v0.7.1 doesn't build, and master panics at startup
+      # when a camera is present. 822c6e41 is the last good commit. Bump
+      # deliberately and check `openlogi list` + a GUI launch afterwards.
+      # From-source gpui build, no substituter — slow rebuilds.
       url = "github:AprilNEA/OpenLogi/822c6e4181f0118713473bcc524e6a7fbd51f5a4";
       inputs.nixpkgs.follows = "nixpkgs";
     };
@@ -274,33 +209,39 @@
       };
     };
 
-    # Steel plugin language is not a default cargo feature
-    # (helix-term: `default = ["git"]`), so enable it here. The fork's
-    # default.nix vendors deps via cargoLock + allowBuiltinFetchGit, so adding
-    # a build feature needs no hash change. Note: buildRustPackage reads the
-    # `cargoBuildFeatures` env var (mapped from its `buildFeatures` arg *inside*
-    # the function), so overriding `buildFeatures` here would be ignored — we
-    # must set `cargoBuildFeatures` directly via overrideAttrs.
+    # Steel plugin support isn't a default cargo feature, so turn it on. It has
+    # to be `cargoBuildFeatures` and not `buildFeatures`: buildRustPackage maps
+    # the latter internally, so an overrideAttrs on it is ignored.
+    #
+    # The perl grammar's src/bsearch.c defines its own `bsearch`, which glibc
+    # 2.44 now shadows with a C23 const-preserving macro of the same name, so
+    # the definition fails to parse. #undef it right above the definition.
+    # Drop once tree-sitter-perl (or helix's pin of it) stops vendoring bsearch.
     helixSteelOverlay = final: prev: {
       helix =
-        (inputs.helix.packages.${final.stdenv.hostPlatform.system}.default).overrideAttrs
+        ((inputs.helix.packages.${final.stdenv.hostPlatform.system}.default).override {
+          grammarOverlays = [
+            (gfinal: gprev: {
+              perl = gprev.perl.overrideAttrs (old: {
+                postPatch =
+                  (old.postPatch or "")
+                  + ''
+                    sed -i 's/^void \*bsearch(/#undef bsearch\n&/' src/bsearch.c
+                  '';
+              });
+            })
+          ];
+        }).overrideAttrs
         (old: {
           cargoBuildFeatures = (old.cargoBuildFeatures or []) ++ ["steel"];
         });
     };
 
-    # nixpkgs' python3Packages.pandas-stubs fails to build against pytest 9.1:
-    # pytest now warns (PytestRemovedIn10Warning) on the generators upstream
-    # passes to @parametrize, and pandas-stubs' `-W error` config makes that
-    # fatal during collection. It reaches this closure as a *check* input of
-    # pdfplumber, which markitdown propagates — see the python3 env in
-    # desktop/home-packages.nix — so the whole HM generation dies on a type-stub
-    # test suite. Same fix as the pending upstream PR: run those tests under
-    # pytest 9.0. Note doCheck = false is NOT an option here — pandas-stubs sets
-    # `pythonImportsCheck = [ "pandas" ]` and pandas comes in via
-    # nativeCheckInputs, so skipping checks starves the import check instead.
-    # Drop this overlay once https://github.com/NixOS/nixpkgs/pull/545267
-    # reaches nixos-unstable.
+    # pandas-stubs' test suite is fatal-on-warning and pytest 9.1 warns on it,
+    # which kills the whole HM generation (it arrives as a check input of
+    # pdfplumber ← markitdown). Run those tests under pytest 9.0, as the pending
+    # upstream fix does. `doCheck = false` does not work — it starves
+    # pythonImportsCheck instead. Drop once nixpkgs#545267 lands.
     pandasStubsOverlay = final: prev: {
       pythonPackagesExtensions =
         prev.pythonPackagesExtensions
@@ -315,26 +256,28 @@
         ];
     };
 
-    # Take the niri package set from niri-flake's `packages` output rather than
-    # the attrs its overlay defines. The two are not the same build:
-    # `overlays.niri = final: prev: make-package-set final` compiles against
-    # whatever pkgs it lands in (ours), while `packages` uses the flake's own
-    # nixpkgs — and only the latter is in niri.cachix.org. Ordered after
-    # niri.overlays.niri so these aliases win.
+    # xwayland-satellite comes from niri-flake's `packages` output (what's in
+    # niri.cachix.org), not the overlay's rebuild against our pkgs. Must be
+    # ordered after niri.overlays.niri so these win.
     #
-    # This also retires the libdisplay-info_0_2 backfill this overlay used to
-    # carry: nothing builds niri against our nixpkgs any more, so the alias
-    # unstable dropped is no longer needed. niri >= v25.11 wants 0.3 regardless.
+    # niri itself can't: it dlopens mesa from /run/opengl-driver, which is built
+    # against OUR glibc, and a niri linked to niri-flake's older pin can't load
+    # it (2026-10-11: "version `GLIBC_2.43' not found", no outputs, black
+    # screen). So niri is the overlay's local build against our pkgs, which
+    # needs libdisplay-info 0.2.0 exactly (niri-flake asserts it) — nixpkgs
+    # dropped that attr, so it's rebuilt here from nixpkgs' versioned recipe.
     niriPrebuiltOverlay = final: _prev: let
       inherit (final.stdenv.hostPlatform) system;
     in {
       inherit
         (niri.packages.${system})
-        niri-stable
-        niri-unstable
         xwayland-satellite-stable
         xwayland-satellite-unstable
         ;
+      libdisplay-info_0_2 = final.callPackage (import "${final.path}/pkgs/by-name/li/libdisplay-info/generic.nix" {
+        version = "0.2.0";
+        hash = "sha256-6xmWBrPHghjok43eIDGeshpUEQTuwWLXNHg7CnBUt3Q=";
+      }) {};
     };
 
     overlays = [
@@ -344,44 +287,23 @@
       emacs-overlay.overlay
       niri.overlays.niri
       niriPrebuiltOverlay
-      # Provides `pkgs.mango`. Needed because the compositor is referenced from
-      # three places that must agree on one derivation: the NixOS session
-      # (rices/ember/compositors/mango/system.nix), the HM config validator, and
-      # the `mmsg` call in rices/ember/swayidle.nix.
+      # `pkgs.mango`, so the session, the HM validator and swayidle's `mmsg`
+      # call all agree on one derivation.
       inputs.mangowm.overlays.default
-      # Local fix on top (unfixed upstream as of 2026-08-19): mango's
-      # output-management handler cleared only_sleep on EVERY head of EVERY
-      # client config — including heads the config leaves disabled, and
-      # including side-effect-free test passes. kanshi re-applies a profile
-      # whenever the head set changes (the bus-powered portable panel drops off
-      # the bus when slept and reconnects a second later), re-committing a
-      # slept monitor's CURRENT state — disabled — and the clear plus
-      # updatemons() then ejected the slept QD-OLED from the layout. mmsg
-      # reports width 0 for it, so the swayidle wake path
-      # (`select(.width > 0)`, rices/ember/swayidle.nix) could never wake it
-      # again: black panel until the compositor died. The patch clears
-      # only_sleep only on a real commit that enables the head.
+      # Unfixed upstream: mango cleared only_sleep on every head of every client
+      # config, so kanshi churn (the bus-powered panel dropping off on sleep)
+      # ejected the slept QD-OLED from the layout for good — black panel until
+      # the compositor died. Patch clears it only on a commit that enables the
+      # head. See docs/mango-vs-niri.md.
       (final: prev: {
         mango = prev.mango.overrideAttrs (old: {
           patches = (old.patches or []) ++ [./packages/patches/mango-outputmgr-keeps-only-sleep.patch];
         });
       })
-      # disko's VM builders (system.build.vmWithDisko, i.e. ./build-vm) call
-      # pkgs.vmTools.override with `kernel = pkgs.aggregateModules [...]` — a
-      # symlink tree of the kernel plus the out-of-tree ZFS modules. nixpkgs'
-      # vmTools has since grown a guard that throws when its `kernel` argument
-      # carries no `target` attribute, and aggregateModules produces none, so
-      # every disko VM eval dies with "the `kernel` argument (kernel-modules) has
-      # no `target` attribute, so the kernel image filename cannot be determined".
-      # disko upstream has not caught up (HEAD ff8702b4, 2026-06-11 — the rev this
-      # flake already locks), so the fix has to live here.
-      #
-      # Supply exactly what the guard asks for, and only when the caller hands
-      # over a targetless kernel: the bootable image's filename for this platform
-      # (bzImage on x86_64, Image on aarch64). Everything else about vmTools is
-      # untouched, and a caller passing a real kernel derivation still gets its own
-      # `target`. Delete this once disko passes kernelImage — or splits
-      # kernel/kernelModules — itself.
+      # ./build-vm fix: disko hands vmTools a targetless `aggregateModules`
+      # kernel, and nixpkgs' vmTools now throws on that. Supply the platform's
+      # kernel image filename, only for that case. Delete once disko passes
+      # kernelImage itself (still not fixed as of its locked HEAD).
       (final: prev: {
         vmTools =
           prev.vmTools
@@ -390,27 +312,64 @@
               prev.vmTools.override (
                 args
                 // nixpkgs.lib.optionalAttrs (args ? kernel && !(args.kernel ? target)) {
-                  # The platform's default kernel carries the right filename for
-                  # this architecture; the aggregate symlink tree does not.
                   kernelImage = final.linuxPackages.kernel.target;
                 }
               );
           };
       })
+      # `pkgs.helium`: the helium-browser input wrapped for the profile that
+      # roams between tempest and orchid over syncthing (packages/helium.nix,
+      # docs/helium-sync.md). One derivation, so the keybinds, the .desktop
+      # entry and home.packages all launch through the same sync guard.
+      (final: prev: {
+        helium = final.callPackage ./packages/helium.nix {
+          helium-unwrapped = inputs.helium-browser.packages.${prev.stdenv.hostPlatform.system}.default;
+        };
+      })
       claude-code.overlays.default
-      # `default` builds against our nixpkgs; `pinned` would use upstream's own
-      # revision to guarantee attic cache hits. See the input's comment above
-      # before changing this.
-      nix-cachyos-kernel.overlays.default
+      # `pkgs.mitos`. Unlike helix, its pinned tree-sitter-perl already renamed
+      # the vendored bsearch (tsp_bsearch), so no glibc 2.44 grammar patch.
+      inputs.mitos.overlays.default
+      nix-cachyos-kernel.overlays.pinned
+      # nixpkgs (2026-10-20) now signs modules with kmodigest and has every
+      # kernel ship a concatenated modules.cer, which aggregateModules copies
+      # unconditionally. The pinned CachyOS kernel is built against the cachyos
+      # input's own older nixpkgs, so it has no modules.cer and the system's
+      # -modules derivation dies on `cp: cannot stat .../modules.cer`. Nothing
+      # in NixOS reads modules.cer yet, so skip the merge when it is absent; a
+      # kernel that has one is untouched. Evaluation throws once the cachyos
+      # input's nixpkgs builds modules.cer itself (or once the aggregator text
+      # this patches changes), so a stale workaround can't linger silently.
+      (final: prev: let
+        cachyBuildsCerts =
+          nixpkgs.lib.hasInfix "modules.cer"
+          (builtins.readFile "${nix-cachyos-kernel.inputs.nixpkgs}/pkgs/os-specific/linux/kernel/build.nix");
+        from = ["cp --no-preserve=mode,ownership" "cat >> modules.cer"];
+      in {
+        aggregateModules = modules:
+          if cachyBuildsCerts
+          then throw "flake.nix: nix-cachyos-kernel's nixpkgs now builds modules.cer; delete the aggregateModules overlay"
+          else
+            (prev.aggregateModules modules).override {
+              buildEnv = args:
+                prev.buildEnv (args
+                  // {
+                    postBuild =
+                      if builtins.all (s: nixpkgs.lib.hasInfix s args.postBuild) from
+                      then
+                        builtins.replaceStrings from
+                        ["if test -e modules.cer; then cp --no-preserve=mode,ownership" "cat >> modules.cer; fi"]
+                        args.postBuild
+                      else throw "flake.nix: nixpkgs' aggregateModules changed; re-check or delete the modules.cer overlay";
+                  });
+            };
+      })
     ];
 
     nixpkgsConfig = {
       allowUnfree = true;
-      # rocmSupport = true;
-      # pnpm is pulled in transitively (build-time dep of a Node-based tool in
-      # the HM closure). nixpkgs marks old pnpm point releases insecure the
-      # moment a newer one lands; bump this string when the next flake update
-      # trips the same gate (error names the exact `pnpm-X.Y.Z`).
+      # Transitive dep; nixpkgs marks old pnpm point releases insecure as soon
+      # as a newer one lands. Bump when a flake update names a new pnpm-X.Y.Z.
       permittedInsecurePackages = ["pnpm-10.34.0"];
     };
 
@@ -422,10 +381,8 @@
         }
         // args);
 
-    # Same shape as mkPkgs but built from the independent nixpkgs-home input,
-    # so tempest's standalone home generation can be bumped without touching
-    # the system channel. The stable/trunk/custom overlays continue to pull
-    # from their own inputs, so `pkgs.stable.foo` still works.
+    # mkPkgs off the independent nixpkgs-home input, so tempest's HM generation
+    # can be bumped without touching the system channel.
     mkHomePkgs = args:
       import nixpkgs-home ({
           system = defaultSystem;
@@ -436,17 +393,11 @@
 
     lib = nixpkgs.lib;
 
-    # tempest is defined once and instantiated twice: the real Framework laptop
-    # (virtual = false) and an ephemeral QEMU clone (virtual = true). The
-    # `virtual` specialArg is consumed by ./hosts/tempest/default.nix, which
-    # conditionally imports the physical-machine layer (disko/zfs/impermanence/
-    # lanzaboote/framework hardware) only when false, and ./hosts/tempest/vm.nix
-    # only when true. Both share the exact same portable config — no duplicate
-    # host to maintain. Build the VM with the ./build-vm script (or directly:
-    # `nix build .#nixosConfigurations.tempest-vm.config.system.build.vmWithDisko`),
-    # then run ./result/bin/disko-vm. NOT `nixos-rebuild build-vm`: that builds
-    # the generic `system.build.vm`, which ignores the disko disk layout AND all
-    # of vm.nix's `disko.tests.extraConfig` tuning (RAM/cores/GPU/neededForBoot).
+    # One definition, two instances: the real laptop (virtual = false) and an
+    # ephemeral QEMU clone (true). hosts/tempest/default.nix reads the
+    # `virtual` specialArg to swap the physical-hardware layer for ./vm.nix.
+    # Build the clone with `./build-vm tempest`, never `nixos-rebuild build-vm`
+    # — that ignores the disko layout and vm.nix's tuning.
     mkTempest = virtual:
       lib.nixosSystem {
         specialArgs = {
@@ -468,12 +419,8 @@
         ];
       };
 
-    # Same trick for orchid: the real tower (virtual = false) and an ephemeral
-    # QEMU clone (virtual = true), from one host definition. ./hosts/orchid/
-    # default.nix consumes the `virtual` specialArg and imports ./vm.nix only when
-    # it is true; there is no physical-hardware layer to gate off, because orchid
-    # has no lanzaboote/ucodenix/nixos-hardware and its hardware.nix is inert in a
-    # guest. Build with `./build-vm orchid`, then run ./result/bin/disko-vm.
+    # Same trick for orchid. There's no physical layer to gate off here, so
+    # `virtual` only adds ./vm.nix's guest sizing. `./build-vm orchid`.
     mkOrchid = virtual:
       lib.nixosSystem {
         specialArgs = {
@@ -489,41 +436,65 @@
               overlays = overlays;
             };
           }
+          niri.nixosModules.niri
 
-          # No compositor module here: orchid runs headless for now. disko +
-          # impermanence + ./disks/orchid.nix are imported inside the host
-          # (hosts/orchid/default.nix), the same way tempest does it.
+          # disko + impermanence are imported inside the host, as tempest does it.
           ./hosts/orchid/default.nix
         ];
       };
   in {
-    # Expose the locked home-manager CLI so it can be bootstrapped without
-    # relying on whatever's in PATH — useful right after an `nh os switch` that
-    # tears down /etc/profiles/per-user/irene before the first standalone HM
-    # activation:
+    # The locked HM CLI, for bootstrapping when it isn't on PATH yet:
     #   nix run /persist/source-of-truth#home-manager -- switch \
     #     --flake '.#irene@tempest' -b backup
     packages.${defaultSystem}.home-manager =
       home-manager.packages.${defaultSystem}.default;
 
     nixosConfigurations = {
-      # Real tower.
+      # Real tower, and its ephemeral QEMU clone (see mkOrchid).
       orchid = mkOrchid false;
-
-      # Ephemeral QEMU clone of orchid — same config, guest-sized, with the
-      # credential-dependent units off. Build with `./build-vm orchid`, run
-      # ./result/bin/disko-vm. See mkOrchid above.
       orchid-vm = mkOrchid true;
 
-      # Real Framework laptop. Physical-machine modules (disko/impermanence/
-      # lanzaboote/framework/ucodenix + ./disks/tempest.nix) are imported inside
-      # ./hosts/tempest/default.nix, gated on the `virtual` specialArg.
+      # Real Framework laptop, and its ephemeral QEMU clone (see mkTempest).
       tempest = mkTempest false;
-
-      # Ephemeral QEMU clone of tempest — same config, none of the physical
-      # layer. Build with ./build-vm (→ system.build.vmWithDisko), run
-      # ./result/bin/disko-vm. See mkTempest above for why not `nixos-rebuild build-vm`.
       tempest-vm = mkTempest true;
+
+      # The per-project dev VM (docs/adr/0013). NOT a host clone: one image
+      # serves every ocelot, with project path / state disk / ssh port / name
+      # handed over at boot by scripts/ocelot.sh, the only thing that builds
+      # this. HM is a NixOS module here — a guest rebuilt every boot has no
+      # second activation step.
+      ocelot = lib.nixosSystem {
+        specialArgs = {
+          inherit inputs;
+          hostname = "ocelot";
+        };
+
+        modules = [
+          {
+            nixpkgs = {
+              hostPlatform = defaultSystem;
+              config = nixpkgsConfig;
+              overlays = overlays;
+            };
+          }
+          impermanence.nixosModules.impermanence
+          home-manager.nixosModules.home-manager
+          {
+            home-manager = {
+              useGlobalPkgs = true;
+              useUserPackages = true;
+              extraSpecialArgs = {
+                inherit inputs;
+                hostname = "ocelot";
+              };
+              users.irene.imports = [./homes/ocelot.nix];
+              backupFileExtension = "hm-bak";
+            };
+          }
+
+          ./hosts/ocelot/default.nix
+        ];
+      };
 
       hydra = lib.nixosSystem {
         specialArgs = {
@@ -546,10 +517,18 @@
         ];
       };
 
+      # Installer ISO; see hosts/installer and docs/orchid-install.md.
+      installer = lib.nixosSystem {
+        specialArgs = {inherit inputs;};
+        modules = [
+          {nixpkgs.hostPlatform = defaultSystem;}
+          ./hosts/installer/default.nix
+        ];
+      };
+
       # Raspberry Pi 3B+ (aarch64), headless. Built on tempest under binfmt
-      # emulation and flashed as an SD image — no installer, no disko. The
-      # boot/kernel stack (mainline generic sd-image, no nixos-hardware) is
-      # imported inside ./hosts/zephyr/default.nix. See docs/adr/0005.
+      # emulation and flashed as an SD image — no installer, no disko.
+      # See docs/adr/0005.
       zephyr = lib.nixosSystem {
         specialArgs = {
           inherit inputs;
@@ -558,9 +537,8 @@
 
         modules = [
           {
-            # Trimmed overlay set: the desktop overlays
-            # (niri/emacs/claude-code/cachyos) are irrelevant to a headless
-            # ARM base and several don't build cleanly cross-arch.
+            # Trimmed overlay set: the desktop overlays are irrelevant here and
+            # several don't build cleanly cross-arch.
             nixpkgs = {
               hostPlatform = "aarch64-linux";
               config = nixpkgsConfig;
@@ -582,10 +560,10 @@
         };
 
         modules = [
-          # No compositor/theming modules: orchid has no WM for now, so the
-          # hyprland + niri + stylix HM modules (and vscode-server, which
-          # homes/orchid.nix never enabled) are not wired in. Re-add them
-          # alongside the rice import in homes/orchid.nix.
+          # Same as irene@tempest: standalone HM needs niri's HM module wired
+          # explicitly. stylix is imported inside homes/orchid.nix.
+          niri.homeModules.config
+
           ./homes/orchid.nix
 
           {
@@ -606,11 +584,9 @@
         };
 
         modules = [
-          # hyprland + stylix HM modules are imported inside homes/tempest.
-          # niri.homeModules.config has to be added here because in the previous
-          # nixos-module form it was auto-wired by niri.nixosModules.niri; in
-          # standalone HM it has to be imported explicitly so programs.niri.*
-          # options exist.
+          # Needed explicitly under standalone HM (the NixOS module used to
+          # auto-wire it) so programs.niri.* options exist. stylix is imported
+          # inside homes/tempest.
           niri.homeModules.config
 
           ./homes/tempest

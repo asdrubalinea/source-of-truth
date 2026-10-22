@@ -7,6 +7,38 @@
 lib.mkIf config.rices.ember.enable {
   programs.wezterm = {
     enable = true;
+
+    # The tab bar's fills, unpicked. stylix's wezterm target gives every
+    # INACTIVE tab a solid base03 background (and the same to the new-tab
+    # button) — base03 is the comment colour, bright enough that four open tabs
+    # put a row of lit warm-grey blocks across the top of the window. That is
+    # both the loudest thing in the terminal and permanently lit content on an
+    # OLED, which is what principle 3 and ADR 0009 exist to prevent.
+    #
+    # Replaced with a tab bar that is text on the buffer's own ground: the
+    # active tab is `base05`, the inactive ones `base03` as FOREGROUND, and
+    # hovering lifts the text rather than filling the cell. Which tab is
+    # focused is then carried by value, on characters that were going to be
+    # drawn anyway. active_tab already matched and is left alone.
+    #
+    # Nix rather than the Lua below: extraConfig's returned table is merged
+    # SHALLOWLY over these settings (see home-manager's wezterm module), so
+    # setting `config.colors` there would replace stylix's whole `colors` table
+    # instead of this one leaf. `settings` is `attrsOf anything`, which merges
+    # per-attribute, so mkForce lands exactly where it is aimed.
+    settings.colors.tab_bar = with config.lib.stylix.colors.withHashtag; {
+      background = lib.mkForce base00;
+      inactive_tab_edge = lib.mkForce base00;
+      inactive_tab = lib.mkForce {
+        bg_color = base00;
+        fg_color = base03;
+      };
+      inactive_tab_hover = lib.mkForce {
+        bg_color = base00;
+        fg_color = base05;
+      };
+    };
+
     extraConfig = ''
       local wezterm = require 'wezterm'
       local config = wezterm.config_builder()
@@ -61,14 +93,47 @@ lib.mkIf config.rices.ember.enable {
       -- same list with nerd-fonts.symbols-only (installed in ./fonts.nix)
       -- wedged in the middle — extraConfig merges after stylix, so this wins.
       -- Family names come from stylix so the two can't drift apart.
-      config.font = wezterm.font_with_fallback {
-        "${config.stylix.fonts.monospace.name}",
-        "Symbols Nerd Font Mono",
-        "${config.stylix.fonts.emoji.name}",
+      local function face(weight, italic)
+        return wezterm.font_with_fallback {
+          { family = "${config.stylix.fonts.monospace.name}", weight = weight, italic = italic },
+          "Symbols Nerd Font Mono",
+          "${config.stylix.fonts.emoji.name}",
+        }
+      end
+      config.font = face("Regular", false)
+
+      -- The intensity ladder, pinned rather than inferred. Left alone, wezterm
+      -- answers SGR 2 (dim) and SGR 1 (bold) by asking fontconfig for a lighter
+      -- or heavier cut of the family. That was harmless while the body face
+      -- shipped two weights and is wrong now that it ships seven: JuliaMono gave
+      -- dim the *Light* cut and bold the *ExtraBold* one. Dim text is already
+      -- blended toward the ground, so drawing it in the thinnest cut in the
+      -- family stacks the two losses — and an agent TUI is mostly dim text.
+      -- Measured off a screenshot of this terminal: 3-11% of the ink on a dim
+      -- line reached full colour, against 56% on a bold one.
+      config.font_rules = {
+        { intensity = "Half", italic = false, font = face("Regular", false) },
+        { intensity = "Half", italic = true, font = face("Regular", true) },
+        { intensity = "Bold", italic = false, font = face("Bold", false) },
+        { intensity = "Bold", italic = true, font = face("Bold", true) },
       }
 
-      -- Cursor
-      config.default_cursor_style = "SteadyBar"
+      -- A readability floor, in WCAG terms, applied at draw time. Anything the
+      -- pane asks for that lands under 4.5:1 against the cell behind it gets
+      -- lifted until it clears — SGR 2 (dim), which wezterm renders by blending
+      -- the foreground toward the ground, and base03 comments, which sit at
+      -- 3.6:1 on a pure-black ground by design.
+      --
+      -- Deliberately here and not in the palette: ./ember-3400k-dark.yaml dims
+      -- base03 on purpose, and helix, emacs and the bar are all reading text on
+      -- surfaces that are not pure black, where it measures fine. This is the
+      -- terminal paying for base00 being 000000 (ADR 0009) rather than the whole
+      -- rice giving up the darkest ground it has.
+      config.text_min_contrast_ratio = 4.5
+
+      -- Cursor. Block, not bar — see ./kitty.nix for why. "Steady" is the
+      -- non-blinking half of the name and stays.
+      config.default_cursor_style = "SteadyBlock"
 
       -- Tabs.
       --
@@ -78,6 +143,10 @@ lib.mkIf config.rices.ember.enable {
       config.use_fancy_tab_bar = false
       config.hide_tab_bar_if_only_one_tab = true
       config.tab_max_width = 32
+      -- No "+" button. It is a permanently lit cell whose only function is
+      -- already on CTRL+SHIFT+T, and it was the last thing in the strip still
+      -- drawing a fill (see the tab_bar colours above).
+      config.show_new_tab_button_in_tab_bar = false
       -- Closing a tab lands on the last-used tab, not the right-hand neighbour.
       config.switch_to_last_active_tab_when_closing_tab = true
 
@@ -124,6 +193,13 @@ lib.mkIf config.rices.ember.enable {
         -- map to backward_kill_word.
         { key = "Backspace", mods = "CTRL", action = act.SendString "\x1b\x08" },
         { key = "Backspace", mods = "SUPER", action = act.SendString "\x1b\x08" },
+
+        -- Shift+Enter → newline instead of submit in claude-code / codex.
+        -- With enable_kitty_keyboard = false there is no CSI u to tell
+        -- Shift+Enter apart from Enter, so both TUIs see a bare CR and send
+        -- the message. ESC+CR is the meta-Enter sequence they already accept
+        -- as "insert newline", and tmux forwards it untouched.
+        { key = "Enter", mods = "SHIFT", action = act.SendString "\x1b\r" },
         -- Name the current tab (pins the title against shell OSC updates).
         {
           key = ",",
@@ -232,11 +308,21 @@ lib.mkIf config.rices.ember.enable {
       }
 
       -- Window
+      --
+      -- 12, not 4. Text that begins four pixels from a window edge reads as
+      -- cramped however good the face is, and the inset is the cheap half of
+      -- this look: it buys nothing but UNLIT pixels, which on this panel is a
+      -- saving rather than a cost (docs/adr/0009).
+      --
+      -- Padding is a rice-wide behavioural value, so the same 12 is in
+      -- ./kitty.nix, ./alacritty.nix and ./konsole.nix — changing one of the
+      -- four is a divergence, not a change
+      -- (docs/ember-visual-language.md, "A terminal").
       config.window_padding = {
-        left = 4,
-        right = 4,
-        top = 4,
-        bottom = 4,
+        left = 12,
+        right = 12,
+        top = 12,
+        bottom = 12,
       }
       -- No initial_cols/initial_rows: both compositors tile every window, so the
       -- requested grid is never honoured anyway — and under mango it is actively

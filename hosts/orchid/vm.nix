@@ -1,21 +1,15 @@
 # VM-only layer for the `orchid-vm` configuration (virtual = true).
 #
 # Same idea as hosts/tempest/vm.nix: disko's `vmWithDisko` formats a throwaway
-# virtual disk from disks/orchid.nix (GPT + LUKS + LVM + swap + ZFS
-# rpool/{nix,persist,persist/home,docker,ncps,reserved} + tmpfs root +
-# impermanence) and boots an ephemeral overlay on top. The host nix store is
-# shared in, so the layout is real but the build stays fast.
+# disk from disks/orchid.nix and boots an ephemeral overlay on top, with the
+# host store shared in.
 #
-# Build & run:
-#   ./build-vm orchid          # nix build .#nixosConfigurations.orchid-vm...vmWithDisko
-#   ./result/bin/disko-vm
+#   ./build-vm orchid   then   ./result/bin/disko-vm
 #
-# The initrd prompts for the LUKS passphrase on the console: there is no enrolled
-# TPM2 in the VM, and the test image is formatted with the password **disko**
-# (disko's non-interactive default; see disko lib/types/luks.nix).
-#
-# This is a console-only VM — orchid is headless, so there is no GPU/display
-# tuning here, unlike tempest's.
+# The initrd prompts for the LUKS passphrase on the console — no enrolled TPM2
+# here, and the test image's password is **disko**, disko's non-interactive
+# default. Console-only: the real host runs the ember desktop, but the clone
+# boots it to a VT nobody looks at, so no GPU/display tuning.
 {
   inputs,
   lib,
@@ -33,12 +27,10 @@
   # import the pool and run the services.
   disko.memSize = 4096;
 
-  # disks/orchid.nix creates the LVs in alphabetical order: `root` (95%FREE)
-  # before `swap` (fixed 16 GiB), so root claims 95% of the VG and swap has to fit
-  # in the remaining 5% — i.e. the disk must be ≳ 320 GiB or the format fails with
-  # "insufficient free space". 512G leaves ~9.6 GiB of headroom above swap. qcow2
-  # is sparse, so this is only a logical ceiling: the result image stays small.
-  # imageSize is used ONLY by the image builder; the real install is unaffected.
+  # Alphabetical LV order puts `root` (95%FREE) before `swap` (16 GiB), so swap
+  # must fit in the remaining 5% — the disk has to be ≳ 320 GiB or the format
+  # fails with "insufficient free space". qcow2 is sparse, so this is only a
+  # logical ceiling. Used ONLY by the image builder.
   disko.devices.disk.main.imageSize = "512G";
 
   # The QEMU/virtualisation options only exist inside the eval that disko extends
@@ -47,26 +39,32 @@
   disko.tests.extraConfig = {
     virtualisation.cores = 4;
 
-    # orchid is headless, so there is nothing to put in a QEMU window: run the
-    # guest on the serial console in the terminal that launched it (this also
-    # sets console=ttyS0 on the kernel cmdline, so the initrd's LUKS prompt and
-    # the boot log land on stdout). Ctrl-a x kills the VM.
+    # vhost-user-fs (the virtiofs shares carrying the host store) can only map
+    # guest RAM that lives in a shareable memory object. qemu-vm.nix wires the
+    # shares up unconditionally but gates the backend behind this option, which
+    # `mkEnableOption` defaults to *off* — so without it qemu dies at
+    # "Error starting vhost: 5", /sysroot/nix/store never mounts, and the initrd
+    # drops to an emergency shell. tempest/vm.nix and hosts/ocelot spell the
+    # same thing out by hand; here the option derives the size from memorySize
+    # instead, so it cannot drift out of sync with disko.memSize above.
+    virtualisation.qemu.enableSharedMemory = true;
+
+    # Console-only, so run on the serial console in the launching terminal — which
+    # also sets console=ttyS0, putting the initrd's LUKS prompt and the boot log
+    # on stdout. Ctrl-a x kills the VM.
     virtualisation.graphics = false;
 
-    # A software TPM, because the real tower has one and the config assumes it:
-    # LUKS is TPM2-unlocked there (docs/orchid-install.md phase 3), and
-    # systemd-creds — which libvirt's virt-secret-init-encryption.service uses —
-    # refuses to derive a key when there is no TPM2 AND its host key would live on
-    # a temporary file system, which is precisely a tmpfs root. Without this the
-    # VM fails that unit on every boot for a reason the real host does not have.
+    # A software TPM, because the config assumes the real tower's: systemd-creds
+    # (used by libvirt's virt-secret-init-encryption.service) refuses to derive a
+    # key with no TPM2 when its host key would live on a temporary filesystem —
+    # precisely a tmpfs root. Without this the VM fails that unit every boot for
+    # a reason the real host does not have.
     virtualisation.tpm.enable = true;
 
-    # impermanence requires every filesystem backing /persist to be
-    # neededForBoot. modules/impermanence-root.nix asserts that on
-    # `fileSystems.*`, but disko's VM re-emits the layout through
-    # `virtualisation.fileSystems` (qemu-vm.nix: `fileSystems = mkVMOverride
-    # virtualisation.fileSystems`), which drops the flag. Re-assert it here or the
-    # bind-mounts never come up in the initrd.
+    # impermanence needs every filesystem backing /persist to be neededForBoot.
+    # modules/impermanence-root.nix asserts that on `fileSystems.*`, but disko's
+    # VM re-emits the layout through `virtualisation.fileSystems`, which drops
+    # the flag — re-assert it or the bind-mounts never come up in the initrd.
     virtualisation.fileSystems = {
       "/persist".neededForBoot = true;
       "/persist/home".neededForBoot = true;
@@ -83,18 +81,23 @@
       inherit inputs;
       hostname = "orchid";
     };
-    users.irene.imports = [../../homes/orchid.nix];
+    users.irene = {
+      imports = [../../homes/orchid.nix];
+
+      # Same as tempest-vm: stylix's HM overlays trip HM's deprecation warning
+      # under useGlobalPkgs, and are ignored here anyway.
+      stylix.overlays.enable = false;
+    };
 
     # Don't abort activation if /etc/skel seeded a file HM also manages — back it
     # up instead, or the very first activation can fail on a collision.
     backupFileExtension = "hm-bak";
   };
 
-  # There is no interactive way into this VM: users/irene.nix takes both root's
-  # and irene's hash from ./passwords (git-crypt), which a throwaway test run has
-  # no business unlocking, and openssh only accepts keys. So have the guest print
-  # its own failure surface to the serial console once the boot has settled —
-  # which is the entire reason for booting it.
+  # There is no interactive way in: both hashes come from ./passwords
+  # (git-crypt), which a throwaway test run has no business unlocking, and
+  # openssh only accepts keys. So the guest prints its own failure surface to the
+  # serial console once the boot settles — the entire reason for booting it.
   systemd.services.vm-boot-report = {
     description = "Print failed units to the console after boot";
     wantedBy = ["multi-user.target"];
@@ -116,21 +119,23 @@
     '';
   };
 
-  # Same rule as tempest-vm: only override what CANNOT work in the VM and would
-  # otherwise just spam the journal with failed retries. Everything else from the
-  # shared layer (vaultwarden, gitea, ncps, syncthing, tailscale, sanoid, …) is
-  # left running on purpose — it works against the VM's real ZFS pool and is
-  # exactly the behaviour this clone exists to test.
+  # Same rule as tempest-vm: override only what CANNOT work here and would spam
+  # the journal with failed retries. Everything else from the shared layer is
+  # left running on purpose — it works against the VM's real ZFS pool, which is
+  # what this clone exists to test.
   services.smartd.enable = lib.mkForce false; # monitors /dev/nvme0n1, absent here
+  hardware.cpu.amd.ryzen-smu.enable = lib.mkForce false; # no Raphael SMU in QEMU; modprobe fails
+  systemd.services.win11-define.enable = lib.mkForce false; # no 9070 XT to pass; also keeps the virtio-win ISO out of the closure
 
   # Everything below needs a credential that only exists on the real host:
   #   borg      → /home/irene/.ssh/id_ed25519 + /persist/borg-*/passphrase
   #   caddy     → /persist/caddy/env (Cloudflare DNS token; ACME would fail anyway)
   #   the bots  → /persist/{diapee-bot,auxologico-check}/env
   services.borg-backup.enable = lib.mkForce false;
+  services.syncthing.enable = lib.mkForce false; # would mint a device id and dial tempest as a stranger
   services.caddy.enable = lib.mkForce false;
-  services.diapee-bot.enable = lib.mkForce false;
-  services.auxologico-check.enable = lib.mkForce false;
+  # services.diapee-bot.enable = lib.mkForce false;
+  # services.auxologico-check.enable = lib.mkForce false;
 
   # Pushes a vault snapshot to the mirrors over SSH as vwbackup@; no key here, and
   # the VM must never write to the real hosts anyway.

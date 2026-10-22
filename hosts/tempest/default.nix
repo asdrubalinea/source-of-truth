@@ -17,7 +17,7 @@
       ./system/session.nix
       ../../services/vaultwarden-mirror.nix
       ./system/virtualization.nix
-      ./system/firejail.nix
+      ../../modules/firejail.nix
       ./system/memory.nix
 
       # User accounts
@@ -28,7 +28,7 @@
       ../../hardware/audio.nix
       ../../hardware/openlogi.nix
       ../../hardware/rtl-sdr.nix
-      ../../hardware/sdrplay.nix
+      # ../../hardware/sdrplay.nix # disabled 2026-10-06 (sdrplay_apiService + soapysdrplay)
 
       # System modules
       ../../modules/nix.nix
@@ -38,7 +38,7 @@
 
       # Services
       ../../services/borg-backup.nix
-      ../../services/grafana/default.nix
+      ../../services/syncthing.nix # the Helium profile, roamed with orchid (docs/helium-sync.md)
 
       # Desktop environment — the ember rice's NixOS half, then one file per
       # compositor layer. Both sessions are installed; which one runs is chosen at
@@ -73,7 +73,9 @@
 
       ./hardware.nix
       ../../hardware/framework.nix
+      ../../modules/hardware/gpu-amd.nix
       ./system/backup-external.nix
+      ../../modules/orchid-builder.nix # offload builds to orchid; the VM has no key for it
 
       # secure-boot.nix (lanzaboote) is intentionally left disabled for the FIRST
       # install: it mkForce-disables systemd-boot and signs UKIs against keys in

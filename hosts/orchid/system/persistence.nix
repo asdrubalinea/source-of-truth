@@ -21,5 +21,15 @@
     "/var/lib/caddy"
 
     "/var/lib/libvirt"
+
+    # The monitoring stack (services/grafana): dashboards state and the
+    # Prometheus TSDB, which is the point — hang history must survive the reboot.
+    "/var/lib/grafana"
+    "/var/lib/prometheus2"
+    "/var/lib/prometheus-node-exporter"
+    # systemd-pstore moves the kernel's crash records out of the EFI variable
+    # store here at boot (system/boot.nix: efi_pstore + kernel.panic_on_oops).
+    # On a tmpfs root they would vanish with the next boot otherwise.
+    "/var/lib/systemd/pstore"
   ];
 }

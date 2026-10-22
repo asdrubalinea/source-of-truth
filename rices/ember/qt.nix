@@ -18,11 +18,10 @@ lib.mkIf config.rices.ember.enable (
       base0E
       ;
 
-    # A qtct ColorScheme is 22 QPalette roles, in the fixed order qt5ct/qt6ct
-    # expect (documented inline below). We derive them from the stylix base16
-    # palette (ember-3400k-dark, set in stylix.nix) so Qt apps rendered with the
-    # Fusion style match gtk/terminals/noctalia. This replaces the file Noctalia's
-    # "qt" runtime template used to write at ~/.config/qt{5,6}ct/colors/noctalia.conf.
+    # A qtct ColorScheme is 22 QPalette roles in a fixed order (listed below),
+    # derived here from the stylix base16 palette so Qt apps under the Fusion
+    # style match gtk/terminals/noctalia. Replaces the file Noctalia's old "qt"
+    # runtime template used to write.
     paletteRow = lib.concatStringsSep ", " [
       base05
       base01
@@ -70,21 +69,16 @@ lib.mkIf config.rices.ember.enable (
       style=Fusion
     '';
   in {
-    # Qt platform-theme plumbing for the ember rice.
+    # Qt platform-theme plumbing. NOT stylix's qt target: it is Kvantum-only,
+    # its autoEnable is gated on `nixosConfig != null` so it never applies under
+    # standalone HM, and Kvantum there trips home-manager#6565. qtct selects
+    # style=Fusion and reads the ColorScheme generated above instead.
     #
-    # We do NOT use stylix's qt target: it is Kvantum-only (warns on any other
-    # style) and its autoEnable is gated on `nixosConfig != null`, so it doesn't
-    # apply under standalone HM anyway — and Kvantum under standalone HM trips
-    # home-manager#6565. Instead qtct selects style=Fusion and reads the base16
-    # ColorScheme generated above.
-    #
-    # The rest of the stack:
-    #   - HM's qt module installs qt5ct/qt6ct and sets QT_QPA_PLATFORMTHEME in the
-    #     systemd user session.
-    #   - each compositor layer sets QT_QPA_PLATFORMTHEME (and drops QT_STYLE_OVERRIDE) in its
-    #     session env, so apps launched from key binds / the launcher pick it up.
-    #   - Icons: stylix.icons stays enabled (breeze-dark/breeze) for gtk.iconTheme;
-    #     qtct.conf's icon_theme wires the same set into Qt apps.
+    # The rest of the stack: HM's qt module installs qt5ct/qt6ct and sets
+    # QT_QPA_PLATFORMTHEME in the systemd user session; each compositor layer
+    # sets it again in its own session env, so apps launched from key binds pick
+    # it up; and stylix.icons stays enabled for gtk.iconTheme, with qtct.conf's
+    # icon_theme wiring the same set into Qt apps.
     qt = {
       enable = true;
       platformTheme.name = "qtct";

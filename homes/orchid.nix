@@ -1,5 +1,6 @@
 {
   pkgs,
+  lib,
   inputs,
   ...
 }: let
@@ -16,22 +17,97 @@
   );
 in {
   imports = [
-    # No WM for now, so no ../rices/estradiol (hyprland/waybar/stylix/kitty…)
-    # and no hyprland HM module. Both come back together.
+    # Desktop environment and theming — the ember rice, as on tempest
+    # (declares rices.ember.*; enabled below).
+    inputs.stylix.homeModules.stylix
+    ../rices/ember
+    ./orchid/monitors.nix # machine policy: monitor identity + mode (kanshi)
+
+    ../desktop/zed-editor
     ../desktop/helix.nix
+    ../desktop/flow.nix
+    ../desktop/mail
+    ../desktop/obsidian.nix
+    ../desktop/mimeapps.nix
+    ../desktop/telegram-sandbox.nix # needs firejail: modules/firejail.nix
+    ../desktop/hyfetch.nix
 
     # Applying and cleaning is `nh` (enabled in hosts/orchid/default.nix):
     # `nh os switch`, `nh home switch -b backup`, `nh clean all`.
     ../scripts/port-forward.nix
+    ../scripts/keep-awake.nix
+    ../scripts/claude-sandboxed.nix
+    ../scripts/cage.nix
+    # Needs rpool/vms first; see disks/orchid.nix.
+    ../scripts/ocelot.nix
+    ../scripts/sitrep.nix
+    ../scripts/due-cuffie.nix
 
     ../misc/fish.nix
     ../desktop/tmux.nix
     ../desktop/zellij.nix
 
     ../desktop/home-packages.nix
+    ../desktop/opencode.nix
+    ../desktop/ssh.nix
+    ../desktop/starship.nix
     ../desktop/yt-dlp.nix
-    # ../desktop/hn-tui.nix reads config.lib.stylix.colors to theme itself, and
-    # stylix is not wired in without a rice — it comes back with the WM.
+    ../desktop/hn-tui.nix
+  ];
+
+  # Both compositor layers, picked per login at the greeter — same as tempest
+  # (ADR 0012). The monitor layout is kanshi, in ./orchid/monitors.nix.
+  rices.ember = {
+    enable = true;
+    niri.enable = true;
+    mango.enable = true;
+  };
+
+  # Machine policy: a readable terminal size on THIS machine's panels — stylix's
+  # default 12 is too small here. Same seam as homes/tempest/default.nix (16).
+  stylix.fonts.sizes.terminal = 14;
+
+  # Machine policy: where this machine is. Stated twice — Noctalia geocodes a
+  # place name (rices/ember/noctalia.nix keeps it from geolocating by IP), and
+  # wlsunset below needs a lat/long.
+  programs.noctalia.settings.location.address = "Las Palmas, Spain";
+
+  services.wlsunset = {
+    enable = true;
+    latitude = 28.1235; # Las Palmas de Gran Canaria, Spain
+    longitude = -15.4363;
+  };
+
+  # Park wlsunset while the panels are dark. It pushes a new gamma table every
+  # ~9s through dawn and dusk, and each push wakes the 9070 XT out of idle even
+  # with every output powered off: +30 W at the wall for the 40 min of each
+  # ramp, nobody at the desk for the morning one. Same 120s as the rice's
+  # panels-off timer; a list option, so this merges with the rice's timeouts.
+  # On start it applies the current temperature at once, so resume shows no
+  # step. An explicit stop doesn't trip the Restart=always below. --no-block
+  # because swayidle runs commands synchronously.
+  #
+  # Deliberately no idle suspend (the rice's timer is a no-op on AC): a
+  # suspended orchid drops off the tailnet, and nothing on the LAN is awake to
+  # send it a Wake-on-LAN packet.
+  services.swayidle.timeouts = [
+    {
+      timeout = 120;
+      command = "${pkgs.systemd}/bin/systemctl --user --no-block stop wlsunset.service";
+      resumeCommand = "${pkgs.systemd}/bin/systemctl --user --no-block start wlsunset.service";
+    }
+  ];
+
+  # Keep the Wayland client services alive across a compositor restart: retry
+  # forever, slowly, instead of burning systemd's 5 tries in half a second and
+  # sitting dead. Same block as homes/tempest/default.nix, which has the full
+  # story — including why wlsunset alone also needs Restart forced.
+  systemd.user.services = lib.mkMerge [
+    (lib.genAttrs ["swayidle" "kanshi" "wlsunset" "noctalia" "wayland-pipewire-idle-inhibit"] (_: {
+      Unit.StartLimitIntervalSec = 0;
+      Service.RestartSec = 2;
+    }))
+    {wlsunset.Service.Restart = lib.mkForce "always";}
   ];
 
   # Let Home Manager install and manage itself.
@@ -45,6 +121,11 @@ in {
 
   home.sessionVariables = {
     EDITOR = "${pkgs.helix}/bin/hx";
+
+    # distrobox probes podman, then docker, and both are enabled on this host
+    # (system/virtualization.nix), so leave nothing to the probe: a broken
+    # podman then says so instead of quietly using the rootful daemon.
+    DBX_CONTAINER_MANAGER = "podman";
   };
 
   programs.emacs = {
@@ -71,12 +152,6 @@ in {
     enableFishIntegration = true;
   };
 
-  # Manage starship via HM (enableFishIntegration handles the fish hook) rather
-  # than a manual `starship init` in misc/fish.nix, which double-initialised it
-  # on hosts that also enabled programs.starship.
-  programs.starship.enable = true;
-
-  # Dropped with the desktop: ../desktop/warp.nix (GUI terminal, and a long
-  # from-source Rust build), programs.vscode's FHS wrapper, and
-  # services.gnome-keyring — there is no graphical session to unlock it.
+  # Not brought back with the desktop: ../desktop/warp.nix (GUI terminal, and a
+  # long from-source Rust build) and programs.vscode's FHS wrapper.
 }

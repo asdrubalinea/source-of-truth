@@ -7,8 +7,8 @@
 - `modules/`, `services/`, `hardware/`, and `desktop/` provide reusable Nix modules.
 - `disks/` contains Disko layouts; `packages/` contains custom package definitions.
 - `rices/` holds whole desktop environments — shell furniture, theming, fonts,
-  wallpaper, plus the compositor(s) that run under them. `ember` (tempest) and
-  `estradiol` (was orchid's; imported by nothing while orchid is headless). ember is one rice with two *compositor layers*,
+  wallpaper, plus the compositor(s) that run under them. `ember` (tempest and orchid)
+  and `estradiol` (was orchid's; imported by nothing). ember is one rice with two *compositor layers*,
   `rices/ember/compositors/{niri,mango}/`: both are installed and the session is
   picked at the greeter per login (ADR 0012). No waybar: tempest's shell is
   Noctalia, and the one remaining waybar process is the marquee's strut.
