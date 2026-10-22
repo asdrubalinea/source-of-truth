@@ -512,6 +512,22 @@
           }
           disko.nixosModules.disko
 
+          # HM as a NixOS module, as on ocelot: a headless server gets one
+          # activation (`nh os switch`), not tempest/orchid's two.
+          home-manager.nixosModules.home-manager
+          {
+            home-manager = {
+              useGlobalPkgs = true;
+              useUserPackages = true;
+              extraSpecialArgs = {
+                inherit inputs;
+                hostname = "hydra";
+              };
+              users.irene.imports = [./homes/hydra.nix];
+              backupFileExtension = "hm-bak";
+            };
+          }
+
           ./disks/hydra.nix
           ./hosts/hydra/default.nix
         ];

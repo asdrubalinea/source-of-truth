@@ -1,7 +1,7 @@
 # One-screen health readout; the script itself is scripts/sitrep.sh.
 #
 # Split out of scripts/sitrep.nix (a home-manager module) so headless hosts
-# without a home config — hydra, zephyr — can put it in
+# without a home config (zephyr), or that want root to have it (hydra), can put it in
 # environment.systemPackages instead.
 {
   writeShellApplication,
