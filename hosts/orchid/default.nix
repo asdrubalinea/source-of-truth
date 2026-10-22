@@ -12,6 +12,7 @@
       # System configuration
       ./system/boot.nix
       ./system/localization.nix
+      ./system/time.nix
       ./system/networking.nix
       ./system/environment.nix
       ./system/services.nix
