@@ -14,6 +14,7 @@
     ./users/irene.nix
 
     ../../modules/nix.nix
+    ../../modules/orchid-builder.nix # 4-vCPU guest; orchid does the compiling
     ../../modules/security.nix
     ../../services/caddy
   ];

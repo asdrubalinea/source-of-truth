@@ -1,21 +1,22 @@
-# Builds run on orchid, not on the laptop.
+# Builds run on orchid, not on the importing host (tempest, hydra).
 #
-# Every derivation tempest's daemon would build locally is shipped to orchid
-# over ssh instead, so `apply`, `nh home switch` and a plain `nix build` all
-# offload without any flag. Substitution is unaffected: tempest still pulls
-# from its own caches first, and only what no cache has gets built.
+# Every derivation this host's daemon would build locally is shipped to orchid
+# over ssh instead, so `apply`, `nh os switch`, `nh home switch` and a plain
+# `nix build` all offload without any flag. Substitution is unaffected: this
+# host still pulls from its own caches first, and only what no cache has gets
+# built.
 #
-# Reuses the ssh access the two hosts already have: irene's key (the shared
+# Reuses the ssh access both hosts already have: irene's key (the shared
 # `irene@orchid` one, authorized in hosts/orchid/users/irene.nix) and irene's
 # trusted-user status on orchid (modules/nix.nix). The daemon runs as root and
 # reads the key from irene's home; it is never copied anywhere.
 #
 # If orchid is off or unreachable, the build falls back to running here, so a
 # rebuild never fails just because the desktop is asleep. While orchid's slots
-# are busy, builds queue for it rather than spilling onto the laptop.
+# are busy, builds queue for it rather than spilling onto this host.
 #
-# ponytail: away from home this still goes over Tailscale, and copying a large
-# closure back can take longer than building it locally would. Pass
+# ponytail: tempest away from home still goes over Tailscale, and copying a
+# large closure back can take longer than building it locally would. Pass
 # `-- --option builders ""` to `nh os switch` for a one-off local build.
 {
   nix = {
@@ -36,13 +37,14 @@
         supportedFeatures = ["nixos-test" "benchmark" "big-parallel" "kvm"];
       }
     ];
-    # orchid fetches build inputs from its own substituters instead of tempest
-    # uploading them, which matters over Tailscale.
+    # orchid fetches build inputs from its own substituters instead of this
+    # host uploading them, which matters over Tailscale.
     settings.builders-use-substitutes = true;
   };
 
-  # The daemon connects as root, whose known_hosts is empty on the tmpfs root;
-  # without this the first build stalls on a host-key check and falls back local.
+  # The daemon connects as root, whose known_hosts is empty (on tempest's tmpfs
+  # root, every boot); without this the first build stalls on a host-key check
+  # and falls back local.
   programs.ssh.knownHosts.orchid = {
     hostNames = ["orchid" "orchid.boreal-city.ts.net"];
     publicKey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIDtM+7B7kVx9/QtqMSNwn57Yif3GHaNBEJDjVnUlcx1I";
