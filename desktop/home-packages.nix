@@ -100,7 +100,7 @@ in {
     # scripting layer to configure. Swap for `weechat` if the TUI is wanted.
     halloy
     keepassxc
-    mailspring-with-keyring
+    # mailspring-with-keyring
     # obsidian is installed by ../desktop/obsidian.nix, which also owns its config
     signal-desktop
     telegram-desktop
