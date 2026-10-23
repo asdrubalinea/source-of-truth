@@ -3,13 +3,11 @@
   Windows Setup answer file for the win11 VM (gaming-vm.nix). `win11-install`
   copies it onto a small CD as autounattend.xml, replacing @PASSWORD@ with
   /persist/secrets/win11/password, so the password never enters the store.
+  The same CD carries $WinPEDriver$ (viostor + NetKVM), which Setup loads by
+  itself and stages into the installed image; nothing here names a driver.
 
   CD drive letters are not fixed (the installer, virtio-win and this CD are
   D:/E:/F: in some order), so commands that need the virtio CD scan for it.
-
-  The guest tools installed at first logon bring viostor, which binds to the
-  probe disk as a boot-start driver; win11-install checks that through the
-  guest agent before it moves the system disk to virtio.
 -->
 <unattend xmlns="urn:schemas-microsoft-com:unattend" xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State">
   <settings pass="windowsPE">
@@ -23,10 +21,8 @@
       <UserLocale>en-US</UserLocale>
     </component>
     <component name="Microsoft-Windows-Setup" processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS">
-      <!-- No storage driver is loaded here, on purpose: win11-install puts the
-           system disk on SATA for the install (storahci is inbox), and the
-           only virtio disk is the 1 GiB probe for viostor, which must stay
-           invisible to Setup so that it can never become disk 0. -->
+      <!-- Disk 0 is the virtio system disk, the guest's only disk; Setup
+           sees it through viostor from $WinPEDriver$. -->
       <DiskConfiguration>
         <Disk wcm:action="add">
           <DiskID>0</DiskID>
@@ -118,26 +114,22 @@
     </component>
     <component name="Microsoft-Windows-Deployment" processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS">
       <RunSynchronous>
-        <!-- The virtio NIC driver, so the guest is on the network before OOBE. -->
-        <RunSynchronousCommand wcm:action="add">
-          <Order>1</Order>
-          <Path>cmd.exe /c "for %d in (D E F G H I J K L M N) do @if exist %d:\NetKVM\w11\amd64\netkvm.inf pnputil /add-driver %d:\NetKVM\w11\amd64\netkvm.inf /install"</Path>
-        </RunSynchronousCommand>
         <!-- Never insist on a network/Microsoft account in OOBE. -->
         <RunSynchronousCommand wcm:action="add">
-          <Order>2</Order>
+          <Order>1</Order>
           <Path>reg add HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\OOBE /v BypassNRO /t REG_DWORD /d 1 /f</Path>
         </RunSynchronousCommand>
         <!-- No automatic BitLocker: the key would hang off the swtpm state on
              the host, and losing that would lock the disk. -->
         <RunSynchronousCommand wcm:action="add">
-          <Order>3</Order>
+          <Order>2</Order>
           <Path>reg add HKLM\SYSTEM\CurrentControlSet\Control\BitLocker /v PreventDeviceEncryption /t REG_DWORD /d 1 /f</Path>
         </RunSynchronousCommand>
         <!-- Policy "Use hardware graphics adapters for all Remote Desktop
-             Services sessions": RDP renders on the 9070 XT. -->
+             Services sessions": RDP renders on the 9070 XT, once it is
+             passed through. -->
         <RunSynchronousCommand wcm:action="add">
-          <Order>4</Order>
+          <Order>3</Order>
           <Path>reg add "HKLM\SOFTWARE\Policies\Microsoft\Windows NT\Terminal Services" /v bEnumerateHWBeforeSW /t REG_DWORD /d 1 /f</Path>
         </RunSynchronousCommand>
       </RunSynchronous>
@@ -183,7 +175,8 @@
       </AutoLogon>
       <FirstLogonCommands>
         <!-- The rest of the virtio drivers (balloon, serial, rng, …) and the
-             QEMU guest agent. -->
+             QEMU guest agent, whose first answer tells win11-install the
+             install is done. -->
         <SynchronousCommand wcm:action="add">
           <Order>1</Order>
           <CommandLine>cmd.exe /c "for %d in (D E F G H I J K L M N) do @if exist %d:\virtio-win-guest-tools.exe start /wait %d:\virtio-win-guest-tools.exe /install /passive /norestart"</CommandLine>
@@ -196,6 +189,12 @@
         <SynchronousCommand wcm:action="add">
           <Order>3</Order>
           <CommandLine>powercfg /hibernate off</CommandLine>
+        </SynchronousCommand>
+        <!-- High performance: no core parking, no deep idle in the guest;
+             the host already idles behind it. -->
+        <SynchronousCommand wcm:action="add">
+          <Order>4</Order>
+          <CommandLine>powercfg /setactive SCHEME_MIN</CommandLine>
         </SynchronousCommand>
       </FirstLogonCommands>
     </component>

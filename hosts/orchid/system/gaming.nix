@@ -3,7 +3,8 @@
   # stack itself (hardware.graphics + enable32Bit, vulkan-tools) comes from
   # ../../../modules/hardware/gpu-amd.nix — RADV is Mesa's default AMD Vulkan
   # driver, so there is nothing to select. The win11 VM (./gaming-vm.nix) is
-  # the other way to play; it borrows the same card, so the two never overlap.
+  # the other way to play; with passthrough on it borrows the same card, so
+  # the two never overlap.
   #
   # Per-game launch options (Steam -> Properties -> General):
   #   mangohud gamemoderun %command%

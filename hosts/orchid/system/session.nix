@@ -8,8 +8,10 @@
   # Mod+Shift+R trigger, so `initial_session` is left unset and every greetd
   # start is a plain tuigreet) and no --battery readout.
   #
-  # The 9070 XT drives the desktop, so a running session holds its DRM node and
-  # the win11 hook (./gaming-vm.nix) refuses to start the VM. Log out first.
+  # The 9070 XT drives the desktop, so a running session holds its DRM node and,
+  # with passthrough on, the win11 hook (./gaming-vm.nix) refuses to start the
+  # VM. So the VM is started from here instead: ./gaming-vm.nix adds a
+  # "Windows 11" entry to the session list below.
 
   # Unlocks the login keyring from the greetd PAM session.
   security.pam.services.greetd.enableGnomeKeyring = true;
