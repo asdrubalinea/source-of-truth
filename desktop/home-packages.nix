@@ -162,7 +162,7 @@ in {
     pwgen
     qrencode # QR codes from the shell (wifi creds, TOTP URIs, links to phone)
     ssh-audit # audit an sshd's algorithms — pairs with services/ssh-secure.nix
-    # caido-desktop
+    caido-desktop
 
     # --- Games ---
     prismlauncher
