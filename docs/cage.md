@@ -248,6 +248,7 @@ a sandbox cannot reach a host session's socket at all.
 | `/nix` | ro-bind | Nix daemon socket access |
 | `/nix/store` | ro-bind | Nix store (read-only packages) |
 | `/etc` | ro-bind | System configuration |
+| `/run/systemd/resolve` | ro-bind-try (`--net` only) | `resolv.conf` target and nss-resolve socket under systemd-resolved |
 | `/bin` | ro-bind | `/bin/sh` (fish_completions and tools resolve it) |
 | `/usr/bin` | ro-bind | `/usr/bin/env` (shebangs like `#!/usr/bin/env` need it) |
 | `/run/current-system` | ro-bind | Active NixOS system |
