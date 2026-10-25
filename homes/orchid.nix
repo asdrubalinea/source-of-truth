@@ -42,6 +42,14 @@ in {
     ../scripts/ocelot.nix
     ../scripts/sitrep.nix
     ../scripts/due-cuffie.nix
+    # The PS5 Pro plays natively on the monitor; the monitor's analog out goes
+    # into the case's front mic jack, which the onboard ALC897 exposes as the
+    # only available input route of its analog-stereo profile — so no port to
+    # select. Mind "Front Mic Boost" (alsamixer) if a line-level signal clips.
+    (import ../scripts/ps5-audio.nix {
+      capture = "alsa_input.pci-0000_10_00.6.analog-stereo";
+      missing = "onboard analog input not found — is the alsa card profile off?";
+    })
 
     ../misc/fish.nix
     ../desktop/tmux.nix

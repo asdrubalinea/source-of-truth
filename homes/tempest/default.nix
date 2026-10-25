@@ -54,7 +54,13 @@ in {
     ../../scripts/cage.nix
     ../../scripts/ocelot.nix
     ../../scripts/keep-awake.nix
-    ../../scripts/ps5-audio.nix
+    # The PS5 Pro plays natively on the monitor; the monitor's analog out feeds
+    # the CalDigit dock's rear "Audio In" (a genuine stereo line-in, S16/S24 up
+    # to 96k). The AirPods' AAC buffer is the latency floor.
+    (import ../../scripts/ps5-audio.nix {
+      capture = "alsa_input.usb-CalDigit__Inc._CalDigit_Thunderbolt_3_Audio-00.analog-stereo";
+      missing = "dock line-in not found — is the CalDigit connected?";
+    })
     ../../scripts/due-cuffie.nix
     ../../scripts/sitrep.nix
 
