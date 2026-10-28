@@ -20,6 +20,8 @@
         "wireshark"
         # gamemoderun switches CPU governor without a polkit prompt (system/gaming.nix).
         "gamemode"
+        # Open /dev/ttyACM*/ttyUSB* (root:dialout 0660) without root, e.g. Web Serial in the browser.
+        "dialout"
       ];
       hashedPassword = (import ../../../passwords).password;
       shell = pkgs.fish;
