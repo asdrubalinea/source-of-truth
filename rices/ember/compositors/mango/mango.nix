@@ -253,7 +253,9 @@ in {
         scratchpad_color = colour "73" c.base0E;
         global_color = colour "73" c.base0D;
         overlay_color = colour "73" c.base0C;
-        maximized_screen_color = colour "73" c.base0B;
+        # Same as focus_color: a maximized window keeps the ordinary border
+        # instead of turning green.
+        maximized_screen_color = colour "73" c.base03;
         shadows_color = colour "ff" c.base00;
         split_color = colour "73" c.base0A;
         drop_color = colour "80" c.base0A;
