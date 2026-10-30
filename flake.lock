@@ -1106,6 +1106,22 @@
         "type": "github"
       }
     },
+    "lights": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1788695809,
+        "narHash": "sha256-58Q/dbAUVMXP4rboLAuHlz2YWqvGwCJubZx/S/MZBQ0=",
+        "owner": "asdrubalinea",
+        "repo": "lights",
+        "rev": "1c2027b8a487643039186c148bd1f3420cf38449",
+        "type": "github"
+      },
+      "original": {
+        "owner": "asdrubalinea",
+        "repo": "lights",
+        "type": "github"
+      }
+    },
     "llm-agents": {
       "inputs": {
         "bun2nix": "bun2nix",
@@ -1734,6 +1750,7 @@
         "hyprtasking": "hyprtasking",
         "impermanence": "impermanence",
         "lanzaboote": "lanzaboote",
+        "lights": "lights",
         "llm-agents": "llm-agents",
         "mangowm": "mangowm",
         "mitos": "mitos",

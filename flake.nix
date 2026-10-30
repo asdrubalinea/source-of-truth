@@ -141,13 +141,12 @@
       url = "github:phlx0/drift";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    # lights = {
-    #   url = "github:asdrubalinea/lights";
-    #   # No flake of its own, just the package.nix sitting beside its Cargo.lock,
-    #   # which is all we need — see homes/tempest/lights.nix. HM-only, so
-    #   # update-home bumps it.
-    #   flake = false;
-    # };
+    lights = {
+      url = "github:asdrubalinea/lights";
+      # No flake of its own, just the package.nix at its root, which is all we
+      # need — see homes/orchid/lights.nix. Bump with `nix flake update lights`.
+      flake = false;
+    };
     warp = {
       url = "github:warpdotdev/warp";
       # `warp-oss` from source instead of nixpkgs' unfree prebuilt: the OSS

@@ -22,6 +22,7 @@ in {
     inputs.stylix.homeModules.stylix
     ../rices/ember
     ./orchid/monitors.nix # machine policy: monitor identity + mode (kanshi)
+    ./orchid/lights.nix # machine policy: the desk strip sleeps with the monitors
 
     ../desktop/zed-editor
     ../desktop/helix.nix
