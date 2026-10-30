@@ -40,6 +40,7 @@ lib.mkIf config.rices.ember.enable {
       touch_scroll_multiplier = "1.0";
       # Both compositors tile and draw borders; no client-side titlebar.
       hide_window_decorations = true;
+      enable_audio_bell = false;
     };
     # Carried over from ./wezterm.nix: ALT+<digit> / ALT+Tab for tabs (Super
     # belongs to the compositor, bare CTRL+letters to tmux), and Ctrl/Super+
