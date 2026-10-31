@@ -65,5 +65,11 @@
 
   environment.systemPackages = with pkgs; [
     mangohud
+    # Proton outside Steam: `GAMEID=0 WINEPREFIX=~/Games/prefixes/<game> umu-run game.exe`.
+    umu-launcher
   ];
+
+  # umu-run's default Proton: the same GE-Proton Steam gets, from the store,
+  # instead of umu downloading its own copy (PROTONPATH=GE-Proton) into ~/.local.
+  environment.sessionVariables.PROTONPATH = "${pkgs.proton-ge-bin.steamcompattool}";
 }
