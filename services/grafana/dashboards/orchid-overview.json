@@ -4217,7 +4217,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "rate(node_disk_read_bytes_total{device=\"nvme0n1\"}[2m])",
+          "expr": "rate(node_disk_read_bytes_total{device=\"nvme1n1\"}[2m])",
           "legendFormat": "500 GB read",
           "refId": "A"
         },
@@ -4226,7 +4226,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "rate(node_disk_read_bytes_total{device=\"nvme1n1\"}[2m])",
+          "expr": "rate(node_disk_read_bytes_total{device=\"nvme0n1\"}[2m])",
           "legendFormat": "2 TB read",
           "refId": "B"
         },
@@ -4235,7 +4235,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "rate(node_disk_written_bytes_total{device=\"nvme0n1\"}[2m])",
+          "expr": "rate(node_disk_written_bytes_total{device=\"nvme1n1\"}[2m])",
           "legendFormat": "500 GB write",
           "refId": "C"
         },
@@ -4244,7 +4244,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "rate(node_disk_written_bytes_total{device=\"nvme1n1\"}[2m])",
+          "expr": "rate(node_disk_written_bytes_total{device=\"nvme0n1\"}[2m])",
           "legendFormat": "2 TB write",
           "refId": "D"
         }
@@ -4312,7 +4312,7 @@
             "uid": "prometheus"
           },
           "expr": "node_hwmon_temp_celsius{chip=\"nvme_nvme0\",sensor=\"temp1\"}",
-          "legendFormat": "500 GB SSD",
+          "legendFormat": "2 TB SSD",
           "refId": "A"
         },
         {
@@ -4321,7 +4321,7 @@
             "uid": "prometheus"
           },
           "expr": "node_hwmon_temp_celsius{chip=\"nvme_nvme1\",sensor=\"temp1\"}",
-          "legendFormat": "2 TB SSD",
+          "legendFormat": "500 GB SSD",
           "refId": "B"
         }
       ]
@@ -4373,7 +4373,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "rate(node_disk_io_time_seconds_total{device=\"nvme0n1\"}[2m])",
+          "expr": "rate(node_disk_io_time_seconds_total{device=\"nvme1n1\"}[2m])",
           "legendFormat": "500 GB",
           "refId": "A"
         },
@@ -4382,7 +4382,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "rate(node_disk_io_time_seconds_total{device=\"nvme1n1\"}[2m])",
+          "expr": "rate(node_disk_io_time_seconds_total{device=\"nvme0n1\"}[2m])",
           "legendFormat": "2 TB",
           "refId": "B"
         }
