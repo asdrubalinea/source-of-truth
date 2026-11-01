@@ -63,6 +63,14 @@
     gamemode.enable = true;
   };
 
+  # NTSYNC: Wine's NT sync primitives in the kernel, which GE-Proton uses over
+  # fsync whenever /dev/ntsync exists. The CachyOS kernel builds it as a module
+  # that nothing autoloads, and no udev rule in this system opens the node up.
+  boot.kernelModules = ["ntsync"];
+  services.udev.extraRules = ''
+    KERNEL=="ntsync", MODE="0666"
+  '';
+
   environment.systemPackages = with pkgs; [
     mangohud
     # Proton outside Steam: `GAMEID=0 WINEPREFIX=~/Games/prefixes/<game> umu-run game.exe`.
