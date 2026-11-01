@@ -36,6 +36,7 @@ exec bwrap \
   --tmpfs /run/user \
   --ro-bind /nix/store /nix/store \
   --ro-bind /etc /etc \
+  --ro-bind-try /run/systemd/resolve /run/systemd/resolve \
   --ro-bind /run/current-system /run/current-system \
   --ro-bind /run/wrappers /run/wrappers \
   --ro-bind-try /bin /bin \

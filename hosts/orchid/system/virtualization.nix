@@ -8,6 +8,13 @@
   # that never compiles for itself, as tempest does. See ADR 0005.
   boot.binfmt.emulatedSystems = ["aarch64-linux"];
 
+  # libvirtd-config is the oneshot that (re)links /var/lib/libvirt/hooks, but
+  # it exits inactive, so a switch never re-runs it: a removed hook (win11-gpu,
+  # system/gaming-vm.nix) stayed live until libvirtd's next restart. Kept
+  # active, a switch that changes it restarts it, and libvirtd with it
+  # (Requires= propagates restarts) — running guests survive that.
+  systemd.services.libvirtd-config.serviceConfig.RemainAfterExit = true;
+
   virtualisation = {
     libvirtd = {
       enable = true;

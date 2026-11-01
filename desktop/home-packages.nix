@@ -19,7 +19,7 @@
     commandLineArgs = "--password-store=gnome-libsecret";
   };
 in {
-  imports = [./cli-packages.nix];
+  imports = [./cli-packages.nix ./deluge.nix];
 
   home.packages = with pkgs; [
     # --- Hardware, firmware & power ---
@@ -50,6 +50,8 @@ in {
     # --- Networking & HTTP (GUI; the CLI ones are in ./cli-packages.nix) ---
     postman
     proxyman # HTTP(S) intercepting proxy / inspector
+    deluge # BitTorrent client (GTK, plugin-based)
+    # qbittorrent # BitTorrent client
     remmina # RDP/VNC/SPICE remote desktop client
     # yt-dlp comes from ./yt-dlp.nix — the plain package cannot download from
     # YouTube without a PO-token provider behind it.

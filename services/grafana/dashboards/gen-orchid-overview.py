@@ -1,6 +1,6 @@
 import json
 GPU='0000:02:00_0_0000:03:00_0'; CPU='pci0000:00_0000:00:18_3'; NCT='platform_nct6775_656'
-DIMMS=[('i2c_18_18_0051','DIMM 1'),('i2c_18_18_0053','DIMM 2')]; SSDS=[('nvme_nvme0','500 GB SSD'),('nvme_nvme1','2 TB SSD')]
+DIMMS=[('i2c_18_18_0051','DIMM 1'),('i2c_18_18_0053','DIMM 2')]; SSDS=[('nvme_nvme0','2 TB SSD'),('nvme_nvme1','500 GB SSD')]
 DS={"type":"prometheus","uid":"prometheus"}
 panels=[]; y=0; nid=[0]; dest=[panels]; collapsed_at=[None]
 def pid(): nid[0]+=1; return nid[0]
@@ -205,11 +205,11 @@ y+=8
 # ── Storage ──
 row("Storage — NVMe, ZFS on LUKS")
 bar("Filesystem Usage",[tgt('100 - (node_filesystem_avail_bytes{mountpoint=~"/persist|/nix|/boot|/persist/home|/var/lib/vms|/var/lib/docker"} / node_filesystem_size_bytes * 100)',"{{mountpoint}}")],0,8,thresholds=[(80,"orange"),(90,"red")])
-ts("Throughput",[tgt(f'rate(node_disk_read_bytes_total{{device="{d}"}}[2m])',f"{n} read") for d,n in [("nvme0n1","500 GB"),("nvme1n1","2 TB")]]
-   +[tgt(f'rate(node_disk_written_bytes_total{{device="{d}"}}[2m])',f"{n} write") for d,n in [("nvme0n1","500 GB"),("nvme1n1","2 TB")]],8,8,unit="Bps",min=0)
+ts("Throughput",[tgt(f'rate(node_disk_read_bytes_total{{device="{d}"}}[2m])',f"{n} read") for d,n in [("nvme1n1","500 GB"),("nvme0n1","2 TB")]]
+   +[tgt(f'rate(node_disk_written_bytes_total{{device="{d}"}}[2m])',f"{n} write") for d,n in [("nvme1n1","500 GB"),("nvme0n1","2 TB")]],8,8,unit="Bps",min=0)
 ts("Temperatures",[tgt(temp(c),n) for c,n in SSDS],16,8,unit="celsius",thresholds=[(80,"red")],fill=0)
 y+=8
-ts("Busy Time",[tgt('rate(node_disk_io_time_seconds_total{device="nvme0n1"}[2m])',"500 GB"),tgt('rate(node_disk_io_time_seconds_total{device="nvme1n1"}[2m])',"2 TB")],0,12,unit="percentunit",min=0,max=1,
+ts("Busy Time",[tgt('rate(node_disk_io_time_seconds_total{device="nvme1n1"}[2m])',"500 GB"),tgt('rate(node_disk_io_time_seconds_total{device="nvme0n1"}[2m])',"2 TB")],0,12,unit="percentunit",min=0,max=1,
    desc="Share of time each drive had I/O in flight. NVMe handles many requests at once, so 100 % here is not saturation, but sustained 100 % with high pressure-stall IO is.")
 ts("I/O by Dataset",[tgt('rate(node_zfs_zpool_dataset_nread{zpool="rpool"}[2m])',"read {{dataset}}"),tgt('rate(node_zfs_zpool_dataset_nwritten{zpool="rpool"}[2m])',"write {{dataset}}")],12,12,unit="Bps",min=0)
 y+=8

@@ -253,7 +253,9 @@ in {
         scratchpad_color = colour "73" c.base0E;
         global_color = colour "73" c.base0D;
         overlay_color = colour "73" c.base0C;
-        maximized_screen_color = colour "73" c.base0B;
+        # Same as focus_color: a maximized window keeps the ordinary border
+        # instead of turning green.
+        maximized_screen_color = colour "73" c.base03;
         shadows_color = colour "ff" c.base00;
         split_color = colour "73" c.base0A;
         drop_color = colour "80" c.base0A;
@@ -271,6 +273,10 @@ in {
         sloppy_focus = 1; # niri: input.focus-follows-mouse
         warp_cursor = 0; # niri does not warp the pointer on keyboard focus
         enable_hotarea = 0; # niri: gestures.hot-corners.enable = false
+        # An xdg-activation request (a link opened, a notification clicked, a
+        # chat pinging) would otherwise jump to the window's tag and steal
+        # focus; at 0 mango just marks it urgent (urgent_color border) instead.
+        focus_on_activate = 0;
 
         # --- Cursor ----------------------------------------------------------
         # DERIVED from stylix.cursor, the root both layers follow: it has to

@@ -58,11 +58,6 @@
     '';
 
     initrd = {
-      # systemd in the initrd: required for the disko-generated crypttab flow
-      # and for TPM2 auto-unlock via systemd-cryptenroll (see
-      # docs/orchid-install.md).
-      systemd.enable = true;
-
       availableKernelModules = [
         "nvme"
         "ahci"

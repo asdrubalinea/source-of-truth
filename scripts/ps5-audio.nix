@@ -1,17 +1,20 @@
-{pkgs, ...}: let
-  # The PS5 Pro plays natively on the monitor; the monitor's analog out feeds the
-  # CalDigit dock's rear "Audio In", and this loops that input into whatever sink
-  # is current (usually the AirPods). The dock's capture PCM is a genuine stereo
-  # line-in (2ch FL/FR, S16/S24 up to 96k), not a headset mic, so there is no
-  # port switching or channel remapping to do.
-  #
-  # Total latency is dominated by the AirPods' AAC buffer (~150-250ms), which no
-  # amount of graph tuning touches — so the loopback targets a relaxed 20ms
-  # rather than chasing a small quantum and risking xruns on a full-speed USB
-  # codec. Still lower than routing PS5 audio through a chiaki stream, which
-  # stacks Opus encode + network + jitter buffer on top of the same AAC tail.
-  capture = "alsa_input.usb-CalDigit__Inc._CalDigit_Thunderbolt_3_Audio-00.analog-stereo";
-
+# Loop a hardware line-in into whatever sink is current, so a console playing
+# natively on the monitor is heard on the headphones.
+#
+# Machine policy comes from the importing home: `capture` is the PipeWire
+# node.name of the input the monitor's analog out is plugged into, `missing`
+# is what to say when it is absent. Both of today's inputs are genuine stereo
+# captures (2ch FL/FR), so there is no port switching or channel remapping.
+#
+# Total latency is dominated by the headphones' Bluetooth codec buffer
+# (~150-250ms), which no amount of graph tuning touches — so the loopback
+# targets a relaxed 20ms rather than chasing a small quantum and risking
+# xruns. Still lower than routing PS5 audio through a chiaki stream, which
+# stacks Opus encode + network + jitter buffer on top of the same tail.
+{
+  capture,
+  missing,
+}: {pkgs, ...}: let
   ps5-audio = pkgs.writeScriptBin "ps5-audio" ''
     #!${pkgs.stdenv.shell}
     set -eu
@@ -31,11 +34,11 @@
         return 0
       fi
       if ! "$pw_dump" | grep -qF "$capture"; then
-        echo "ps5-audio: dock line-in not found — is the CalDigit connected?" >&2
+        echo "ps5-audio: ${missing}" >&2
         exit 1
       fi
       # No -P: pw-loopback then follows the default sink, so the route survives
-      # AirPods reconnects (whose node ids change) without hardcoding a MAC.
+      # headphone reconnects (whose node ids change) without hardcoding a MAC.
       # Override with PS5_AUDIO_SINK=<node.name> to pin a specific sink.
       set -- -n "$unit" -C "$capture" --latency 20
       if [ -n "''${PS5_AUDIO_SINK-}" ]; then

@@ -299,6 +299,16 @@ sandbox_cmd() {
   # its own netns, so the host X server and host loopback services stop being
   # reachable; pasta(1) then restores outbound traffic from the host side.
   case "$NET" in
+    net)
+      # /etc/resolv.conf is a symlink into /run/systemd/resolve since
+      # modules/dns.nix moved the hosts to systemd-resolved, and /run is not
+      # bound, so without this the link dangles and every lookup fails. The
+      # dir also holds the varlink socket nss-resolve prefers; binding it
+      # exposes nothing new, since this mode already shares host loopback.
+      # Only here: --isolate-net overrides resolv.conf below, and --nonet
+      # must stay offline.
+      bargs+=(--ro-bind-try /run/systemd/resolve /run/systemd/resolve)
+      ;;
     nonet)
       bargs+=(--unshare-net)
       ;;

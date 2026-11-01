@@ -23,7 +23,6 @@ in {
 
     ../../rices/ember # the ember rice (declares rices.ember.*; enabled below)
     ./monitors.nix # machine policy: monitor identities + layout (kanshi)
-    # ./lights.nix # machine policy: the desk strip follows the idle timers
     ./soft-reboot.nix # machine policy: Mod+Shift+R soft-reboot trigger (autologin gate lives in hosts/tempest/system/session.nix)
     # ./speakers.nix — built-in speaker DSP correction, off: leaks onto AirPods
 
@@ -54,7 +53,13 @@ in {
     ../../scripts/cage.nix
     ../../scripts/ocelot.nix
     ../../scripts/keep-awake.nix
-    ../../scripts/ps5-audio.nix
+    # The PS5 Pro plays natively on the monitor; the monitor's analog out feeds
+    # the CalDigit dock's rear "Audio In" (a genuine stereo line-in, S16/S24 up
+    # to 96k). The AirPods' AAC buffer is the latency floor.
+    (import ../../scripts/ps5-audio.nix {
+      capture = "alsa_input.usb-CalDigit__Inc._CalDigit_Thunderbolt_3_Audio-00.analog-stereo";
+      missing = "dock line-in not found — is the CalDigit connected?";
+    })
     ../../scripts/due-cuffie.nix
     ../../scripts/sitrep.nix
 

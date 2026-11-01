@@ -47,10 +47,6 @@
     kernelModules = ["kvm-amd" "i2c-dev"];
 
     initrd = {
-      systemd = {
-        enable = true;
-      };
-
       availableKernelModules = [
         "nvme" # NVMe SSD support
         "xhci_pci" # USB 3.0 support

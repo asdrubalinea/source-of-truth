@@ -8,6 +8,11 @@
 # - bin/helium is a guard script: it waits for the syncthing folder to settle
 #   before starting the browser, and after the browser quits it reports when the
 #   other host has received everything. The .desktop entry goes through it too.
+# - WebGPU: the .deb bundles its own libvulkan.so.1, which only searches the FHS
+#   ICD paths and so finds no driver on NixOS (chrome://gpu: "Extension not
+#   supported: VK_KHR_surface", sites: "WebGPU adapter unavailable"). Swapping
+#   in nixpkgs' loader, which knows /run/opengl-driver, plus `Vulkan` (which
+#   Dawn needs for its shared-image interop) gets a hardware adapter.
 {
   lib,
   symlinkJoin,
@@ -18,11 +23,22 @@
   procps,
   gnugrep,
   coreutils,
+  vulkan-loader,
   helium-unwrapped,
 }: let
-  helium = helium-unwrapped.override {
-    flags = ["--password-store=basic"];
-  };
+  helium =
+    (helium-unwrapped.override {
+      flags = [
+        "--password-store=basic"
+        "--enable-features=Vulkan"
+      ];
+    }).overrideAttrs (old: {
+      postInstall =
+        (old.postInstall or "")
+        + ''
+          ln -sf ${vulkan-loader}/lib/libvulkan.so.1 $out/opt/helium/libvulkan.so.1
+        '';
+    });
 
   guard = writeShellApplication {
     name = "helium";

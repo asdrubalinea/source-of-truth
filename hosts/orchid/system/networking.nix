@@ -20,6 +20,7 @@
     "workspace2tcb"
     "workspace5nrt"
     "workspace6nrt"
+    "workspace0prf"
   ];
 
   devHosts =

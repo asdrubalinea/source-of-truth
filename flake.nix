@@ -141,13 +141,12 @@
       url = "github:phlx0/drift";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    # lights = {
-    #   url = "github:asdrubalinea/lights";
-    #   # No flake of its own, just the package.nix sitting beside its Cargo.lock,
-    #   # which is all we need — see homes/tempest/lights.nix. HM-only, so
-    #   # update-home bumps it.
-    #   flake = false;
-    # };
+    lights = {
+      url = "github:asdrubalinea/lights";
+      # No flake of its own, just the package.nix at its root, which is all we
+      # need — see homes/orchid/lights.nix. Bump with `nix flake update lights`.
+      flake = false;
+    };
     warp = {
       url = "github:warpdotdev/warp";
       # `warp-oss` from source instead of nixpkgs' unfree prebuilt: the OSS
@@ -331,39 +330,6 @@
       # the vendored bsearch (tsp_bsearch), so no glibc 2.44 grammar patch.
       inputs.mitos.overlays.default
       nix-cachyos-kernel.overlays.pinned
-      # nixpkgs (2026-10-20) now signs modules with kmodigest and has every
-      # kernel ship a concatenated modules.cer, which aggregateModules copies
-      # unconditionally. The pinned CachyOS kernel is built against the cachyos
-      # input's own older nixpkgs, so it has no modules.cer and the system's
-      # -modules derivation dies on `cp: cannot stat .../modules.cer`. Nothing
-      # in NixOS reads modules.cer yet, so skip the merge when it is absent; a
-      # kernel that has one is untouched. Evaluation throws once the cachyos
-      # input's nixpkgs builds modules.cer itself (or once the aggregator text
-      # this patches changes), so a stale workaround can't linger silently.
-      (final: prev: let
-        cachyBuildsCerts =
-          nixpkgs.lib.hasInfix "modules.cer"
-          (builtins.readFile "${nix-cachyos-kernel.inputs.nixpkgs}/pkgs/os-specific/linux/kernel/build.nix");
-        from = ["cp --no-preserve=mode,ownership" "cat >> modules.cer"];
-      in {
-        aggregateModules = modules:
-          if cachyBuildsCerts
-          then throw "flake.nix: nix-cachyos-kernel's nixpkgs now builds modules.cer; delete the aggregateModules overlay"
-          else
-            (prev.aggregateModules modules).override {
-              buildEnv = args:
-                prev.buildEnv (args
-                  // {
-                    postBuild =
-                      if builtins.all (s: nixpkgs.lib.hasInfix s args.postBuild) from
-                      then
-                        builtins.replaceStrings from
-                        ["if test -e modules.cer; then cp --no-preserve=mode,ownership" "cat >> modules.cer; fi"]
-                        args.postBuild
-                      else throw "flake.nix: nixpkgs' aggregateModules changed; re-check or delete the modules.cer overlay";
-                  });
-            };
-      })
     ];
 
     nixpkgsConfig = {

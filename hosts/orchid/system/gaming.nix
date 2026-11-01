@@ -3,7 +3,8 @@
   # stack itself (hardware.graphics + enable32Bit, vulkan-tools) comes from
   # ../../../modules/hardware/gpu-amd.nix — RADV is Mesa's default AMD Vulkan
   # driver, so there is nothing to select. The win11 VM (./gaming-vm.nix) is
-  # the other way to play; it borrows the same card, so the two never overlap.
+  # the other way to play; with passthrough on it borrows the same card, so
+  # the two never overlap.
   #
   # Per-game launch options (Steam -> Properties -> General):
   #   mangohud gamemoderun %command%
@@ -62,7 +63,25 @@
     gamemode.enable = true;
   };
 
+  # NTSYNC: Wine's NT sync primitives in the kernel, which GE-Proton uses over
+  # fsync whenever /dev/ntsync exists. The CachyOS kernel builds it as a module
+  # that nothing autoloads, and no udev rule in this system opens the node up.
+  boot.kernelModules = ["ntsync"];
+  services.udev.extraRules = ''
+    KERNEL=="ntsync", MODE="0666"
+  '';
+
   environment.systemPackages = with pkgs; [
+    # Big Picture's "Switch to Desktop" runs this SteamOS command, which nothing
+    # here provides, so the button did nothing. Quitting Steam ends gamescope
+    # and the session with it, back to tuigreet to pick ember.
+    (writeShellScriptBin "steamos-session-select" "exec steam -shutdown")
     mangohud
+    # Proton outside Steam: `GAMEID=0 WINEPREFIX=~/Games/prefixes/<game> umu-run game.exe`.
+    umu-launcher
   ];
+
+  # umu-run's default Proton: the same GE-Proton Steam gets, from the store,
+  # instead of umu downloading its own copy (PROTONPATH=GE-Proton) into ~/.local.
+  environment.sessionVariables.PROTONPATH = "${pkgs.proton-ge-bin.steamcompattool}";
 }
