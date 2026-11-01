@@ -72,6 +72,10 @@
   '';
 
   environment.systemPackages = with pkgs; [
+    # Big Picture's "Switch to Desktop" runs this SteamOS command, which nothing
+    # here provides, so the button did nothing. Quitting Steam ends gamescope
+    # and the session with it, back to tuigreet to pick ember.
+    (writeShellScriptBin "steamos-session-select" "exec steam -shutdown")
     mangohud
     # Proton outside Steam: `GAMEID=0 WINEPREFIX=~/Games/prefixes/<game> umu-run game.exe`.
     umu-launcher
