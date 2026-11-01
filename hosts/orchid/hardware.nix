@@ -55,8 +55,10 @@ in {
   # not graphics) hung the gfx/MES queues three times in one morning at -100,
   # each a mode1 reset with VRAM lost, and once returned "!!!!" as an answer;
   # the same 100K-token sessions ran clean at 0 mV. So the offset is 0: no
-  # tested value survives every workload. The power cap stays — it never
-  # caused a hang, and 297 W keeps junction and PSU transients down.
+  # tested value survives every workload. The cap was 297 W (never caused a
+  # hang; kept junction and PSU transients down) until 2026-11-01, when it went
+  # back to the card's stock 330 W for gaming fps. If junction or hangs
+  # regress, 297 is the known-good value.
   services.lact.settings = {
     version = 7;
     daemon = {
@@ -67,7 +69,7 @@ in {
     apply_settings_timer = 5;
     gpus."1002:7550-1458:2424-0000:03:00.0" = {
       fan_control_enabled = false;
-      power_cap = 297.0;
+      power_cap = 330.0;
       voltage_offset = 0;
     };
     current_profile = null;
