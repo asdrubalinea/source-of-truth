@@ -41,6 +41,12 @@
           # another port means updating this.
           "--prefer-output DP-2"
         ];
+        # The module's two defaults, plus -steamos3: without it Steam logs
+        # "Initializing bluetooth manager: stub" and its Bluetooth page can't
+        # pair or connect anything (AirPods, which wait for the host to dial
+        # them, never came up). The flag also turns on SteamOS-only menus whose
+        # helpers (steamos-update & co.) don't exist here; those just fail.
+        steamArgs = ["-tenfoot" "-pipewire-dmabuf" "-steamos3"];
       };
 
       # remotePlay.openFirewall = true;
