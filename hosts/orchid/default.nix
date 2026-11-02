@@ -30,6 +30,7 @@
 
       # User accounts
       ./users/irene.nix
+      ./users/camilla.nix # plays on win11 (system/gaming-vm.nix)
       ./users/nixbench.nix # sandbox user for nix-bench (/persist/strata/nix-bench.md)
 
       # Shared hardware modules
