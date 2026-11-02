@@ -57,8 +57,9 @@ in {
   # the same 100K-token sessions ran clean at 0 mV. So the offset is 0: no
   # tested value survives every workload. The cap was 297 W (never caused a
   # hang; kept junction and PSU transients down) until 2026-11-01, when it went
-  # back to the card's stock 330 W for gaming fps. If junction or hangs
-  # regress, 297 is the known-good value.
+  # back to the card's stock 330 W for gaming fps. Back to 297 on 2026-11-02:
+  # the box hard-hung silently mid-Cyberpunk at 330 W with power1_average
+  # swinging 63..418 W every 15 s; testing whether PSU transients are the cause.
   services.lact.settings = {
     version = 7;
     daemon = {
@@ -69,7 +70,7 @@ in {
     apply_settings_timer = 5;
     gpus."1002:7550-1458:2424-0000:03:00.0" = {
       fan_control_enabled = false;
-      power_cap = 330.0;
+      power_cap = 297.0;
       voltage_offset = 0;
     };
     current_profile = null;
