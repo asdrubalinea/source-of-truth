@@ -125,4 +125,11 @@
   # panic the lockup that followed it on 10-09 cannot recur.
   boot.kernel.sysctl."kernel.panic_on_oops" = 1;
   boot.kernel.sysctl."kernel.panic" = 10;
+  # Panic on an NMI-watchdog hard lockup (a CPU deaf to interrupts for 10 s,
+  # never legitimate, unlike a soft lockup). The silent hangs of 2026-10-19,
+  # 10-22 and 11-01 (the last 15 min into win11 with the 9070 XT passed
+  # through) left no line in the journal or pstore: the watchdog's report is
+  # only printed, and the disk path was already gone. As a panic it lands in
+  # efi-pstore and the box reboots by itself instead of needing a power cut.
+  boot.kernel.sysctl."kernel.hardlockup_panic" = 1;
 }
