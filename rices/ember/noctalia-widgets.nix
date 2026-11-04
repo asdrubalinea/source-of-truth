@@ -19,14 +19,13 @@ in
       bar.default = {
         position = "top";
 
-        # Primary burn-in mitigation for the QD-OLED — a persistent bar is the
-        # worst static-content offender (ADR 0009). `reserve_space = false` is
-        # REQUIRED alongside it: the default true keeps the exclusive zone even
-        # while hidden, so windows stop below it and leave a dead wallpaper
-        # strip. `smart_auto_hide` is deliberately left alone; it would only add
-        # static bar-time.
-        auto_hide = true;
-        reserve_space = false;
+        # Always visible, by choice, despite the QD-OLED: a persistent bar is the
+        # worst static-content offender, and auto-hiding it was ADR 0009's
+        # primary burn-in mitigation. If burn-in shows, go back to
+        # `auto_hide = true` with `reserve_space = false` (a hidden bar that
+        # still reserves its exclusive zone leaves a dead wallpaper strip).
+        auto_hide = false;
+        reserve_space = true;
 
         # …and don't flash it on every workspace change (defaults to true). That
         # reveal exists to announce where a *relative* switch landed, but every

@@ -9,6 +9,8 @@ CalDigit Thunderbolt dock**, at **fractional scale 1.5** (logical 2560x1440)
 configured through kanshi (the `oled-desk` profile in `homes/tempest/monitors.nix`).
 It runs **SDR with VRR off**; burn-in is handled by auto-hiding the Noctalia bar,
 grayscale font AA, `ddcutil` brightness, and the existing idle→DPMS chain.
+(Amended 2026-11-04: the bar is now always visible, by choice; auto-hide is
+no longer part of the mitigation. See `rices/ember/noctalia-widgets.nix`.)
 
 ## Why these deviations (a future reader will want to "fix" them)
 
