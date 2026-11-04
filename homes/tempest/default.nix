@@ -50,6 +50,7 @@ in {
     ../../scripts/update-home.nix
     ../../scripts/port-forward.nix
     ../../scripts/claude-sandboxed.nix
+    ../../scripts/claude-notify.nix
     ../../scripts/cage.nix
     ../../scripts/ocelot.nix
     ../../scripts/keep-awake.nix

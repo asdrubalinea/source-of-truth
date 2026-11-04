@@ -524,6 +524,9 @@ in
           # Copy a video URL, play it in mpv instead of the browser's decoder.
           "Mod+Y".action.spawn = ["${playClipboard}"];
 
+          # Back to the terminal of the Claude session that notified last.
+          "Mod+C".action.spawn = ["claude-notify" "focus"];
+
           # Screenshots (using niri's built-in UI)
           "Mod+Shift+S".action.screenshot = {};
           "Mod+Shift+D".action.screenshot-screen = {};

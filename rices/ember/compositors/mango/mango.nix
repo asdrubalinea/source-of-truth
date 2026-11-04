@@ -312,6 +312,8 @@ in {
             "SUPER,l,spawn,${pkgs.systemd}/bin/loginctl lock-session"
             "SUPER+SHIFT,b,spawn,${pkgs.helium}/bin/helium"
             "SUPER,y,spawn,${playClipboard}"
+            # Back to the terminal of the Claude session that notified last.
+            "SUPER,c,spawn,claude-notify focus"
             # Instrument panel — see ../../sitrep-hud.nix.
             "SUPER,i,spawn,${sitrepHud}"
             # Keyboard pointer — see ../../kbptr.nix.

@@ -20,6 +20,7 @@ Identical unless the right column says otherwise.
 | Mod+L | `loginctl lock-session` | same |
 | Mod+Shift+B | zen-beta | same |
 | Mod+Y | mpv on the clipboard URL | same |
+| Mod+C | focus the kitty of the Claude session that notified last (`claude-notify focus`) | same |
 | Mod+K / Mod+Shift+K | wl-kbptr: tile+bisect / detected target + click | same |
 | Mod+T | Telegram scratchpad | same key, native scratchpad |
 | Mod+Shift+T | toggle scratchpad pile | `toggle_scratchpad` |

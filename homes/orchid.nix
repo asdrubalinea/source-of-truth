@@ -38,6 +38,7 @@ in {
     ../scripts/port-forward.nix
     ../scripts/keep-awake.nix
     ../scripts/claude-sandboxed.nix
+    ../scripts/claude-notify.nix
     ../scripts/cage.nix
     # Needs rpool/vms first; see disks/orchid.nix.
     ../scripts/ocelot.nix
