@@ -54,5 +54,11 @@ in {
     # commented enp4s0f0 block were both stale.
 
     extraHosts = lib.concatMapStringsSep "\n" (host: "127.0.0.1 ${host}") devHosts;
+
+    # The router advertises an IPv6 default route but no prefix, so v6 traffic
+    # left with tailscale's fd7a:: source and was dropped upstream: resolved's
+    # DoT to Quad9's v6 servers hung until a restart. Drop the RA instead; remove
+    # this if the ISP ever hands out a real v6 prefix.
+    dhcpcd.extraConfig = "noipv6rs";
   };
 }
