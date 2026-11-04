@@ -12,7 +12,9 @@
 #   ICD paths and so finds no driver on NixOS (chrome://gpu: "Extension not
 #   supported: VK_KHR_surface", sites: "WebGPU adapter unavailable"). Swapping
 #   in nixpkgs' loader, which knows /run/opengl-driver, plus `Vulkan` (which
-#   Dawn needs for its shared-image interop) gets a hardware adapter.
+#   Dawn needs for its shared-image interop) gets a hardware adapter. ANGLE
+#   must go to Vulkan too: with `Vulkan` alone the compositor is Vulkan but
+#   ANGLE stays GL, and decoded video frames render as a white box.
 {
   lib,
   symlinkJoin,
@@ -30,7 +32,8 @@
     (helium-unwrapped.override {
       flags = [
         "--password-store=basic"
-        "--enable-features=Vulkan"
+        "--use-angle=vulkan"
+        "--enable-features=Vulkan,VulkanFromANGLE,DefaultANGLEVulkan"
       ];
     }).overrideAttrs (old: {
       postInstall =
