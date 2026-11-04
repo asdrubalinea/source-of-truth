@@ -24,6 +24,22 @@
       # isn't double-launched.
       systemd.enable = true;
 
+      # Bar workspace pills read Q..P instead of 1..0: on the 40% board the
+      # number row is a layer over QWERTYUIOP, so the letter is the key pressed.
+      # Noctalia has no label-map option, hence the one-line source patch.
+      # Patch the flake input's build, not nixpkgs' `pkgs.noctalia`: that one
+      # lags behind and refuses the newer config_version the input already
+      # wrote to ~/.local/state/noctalia/settings.toml.
+      package = inputs.noctalia.packages.${pkgs.stdenv.hostPlatform.system}.default.overrideAttrs (old: {
+        postPatch =
+          (old.postPatch or "")
+          + ''
+            substituteInPlace src/shell/bar/widgets/workspaces_widget.cpp \
+              --replace-fail 'label = std::to_string(workspace.index);' \
+                'label = workspace.index <= 10 ? std::string(1, "QWERTYUIOP"[workspace.index - 1]) : std::to_string(workspace.index);'
+          '';
+      });
+
       # Colors come from stylix, which since danth/stylix#2364 maps the base16
       # scheme into noctalia's Material-3 tokens and owns every theme.* key
       # (source/mode/custom_palette/font_family/wallpaper.default.path). Nothing
