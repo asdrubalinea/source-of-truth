@@ -73,6 +73,13 @@ in {
     mango.enable = true;
   };
 
+  # Machine policy: a lone tiled window on orchid's monitor goes edge to edge
+  # with no gap and no border. mango only — niri can't match on window count.
+  wayland.windowManager.mango.settings = {
+    smart_gaps = lib.mkForce 1;
+    no_border_when_single = 1;
+  };
+
   # Machine policy: a readable terminal size on THIS machine's panels — stylix's
   # default 12 is too small here. Same seam as homes/tempest/default.nix (16).
   stylix.fonts.sizes.terminal = 14;
