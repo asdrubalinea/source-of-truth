@@ -88,6 +88,9 @@ in
         neovim.enable = false;
         vscode.enable = false;
         waybar.enable = false;
+        # rofi isn't used (tofi.nix is the launcher), and the target still sets
+        # the renamed `programs.rofi.font`, warning on every evaluation.
+        rofi.enable = false;
 
         # Terminals are themed by stylix directly. kitty's target appends a
         # store-root include, which is fine, but see kitty.nix for why
