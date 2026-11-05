@@ -91,6 +91,9 @@ in
         # rofi isn't used (tofi.nix is the launcher), and the target still sets
         # the renamed `programs.rofi.font`, warning on every evaluation.
         rofi.enable = false;
+        # Writes a v1 tui.json theme; OpenCode 2 reads neither. desktop/opencode.nix
+        # uses v2's terminal-palette `system` theme instead.
+        opencode.enable = false;
 
         # Terminals are themed by stylix directly. kitty's target appends a
         # store-root include, which is fine, but see kitty.nix for why

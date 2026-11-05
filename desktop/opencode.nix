@@ -1,7 +1,11 @@
 # opencode, pointed at orchid's llama-server (hosts/orchid/system/llm.nix) over
 # the tailnet. Imported by the tempest and orchid homes; the ocelot guest gets
 # the same file because scripts/ocelot.sh binds ~/.config/opencode into it.
-{...}: let
+{
+  pkgs,
+  inputs,
+  ...
+}: let
   # The .ts.net name, not plain `orchid`: that resolves to orchid's LAN
   # addresses, and llm.nix opens :8080 on tailscale0 only.
   baseURL = "http://orchid.boreal-city.ts.net:8080/v1";
@@ -12,11 +16,24 @@
 in {
   programs.opencode = {
     enable = true;
-    # Installed by desktop/cli-packages.nix (llm-agents tracks upstream closer
-    # than nixpkgs), which the ocelot guest shares; this module only writes the
-    # config.
-    package = null;
+    # OpenCode 2, the one in daily use. Also installed by desktop/cli-packages.nix
+    # (llm-agents tracks upstream closer than nixpkgs), which the ocelot guest
+    # shares; same store path, so no collision. Named here because HM picks
+    # tui.json (v1) or cli.json (v2) from its version.
+    package = inputs.llm-agents.packages.${pkgs.stdenv.hostPlatform.system}.opencode2;
 
+    # v2's custom-theme format (base/light/dark hues) isn't what stylix writes,
+    # so its opencode target is off (rices/ember/stylix.nix). `system` reads the
+    # terminal's palette, which stylix does theme.
+    cli.theme = {
+      name = "system";
+      mode = "dark";
+    };
+
+    # Still v1 keys (provider, agent, small_model, options). opencode2
+    # translates them losslessly — `opencode2 debug config` shows providers,
+    # agents.explore, agents.title and the no-think request body — and the 1.x
+    # `opencode` still installed reads the same file.
     settings = {
       provider.orchid = {
         npm = "@ai-sdk/openai-compatible";
