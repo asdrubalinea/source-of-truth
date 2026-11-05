@@ -1,9 +1,20 @@
 {
   lib,
   config,
+  pkgs,
   ...
 }: let
   cfg = config.rices.ember;
+  noctalia = lib.getExe config.programs.noctalia.package;
+
+  # Even ISO weeks top, odd weeks bottom: spreads the always-on bar's static
+  # wear over two strips of the QD-OLED instead of one. config-set writes the
+  # state-dir settings.toml override, which beats `position` below and survives
+  # restarts. shortcut: a 53-week year gives two odd weeks back to back.
+  barFlip = pkgs.writeShellScript "noctalia-bar-flip" ''
+    if (( 10#$(${pkgs.coreutils}/bin/date +%V) % 2 )); then pos=bottom; else pos=top; fi
+    exec ${noctalia} msg config-set bar.default.position "'$pos'"
+  '';
 in
   lib.mkIf cfg.enable {
     # Bar layout, merged into Noctalia's config.toml.
@@ -17,6 +28,7 @@ in
       # v5 supports multiple named bars; `order` lists the active ones.
       bar.order = ["default"];
       bar.default = {
+        # Baseline only — flipped weekly by noctalia-bar-flip below.
         position = "top";
 
         # Always visible, by choice, despite the QD-OLED: a persistent bar is the
@@ -113,5 +125,28 @@ in
         visualization = "none";
         show_value = true;
       };
+    };
+
+    # Fires Monday 00:00 (Persistent catches a week the machine slept through),
+    # and on every noctalia start, retrying until its IPC socket is up.
+    systemd.user.services.noctalia-bar-flip = {
+      Unit = {
+        Description = "Alternate the noctalia bar between top and bottom by week";
+        After = ["noctalia.service"];
+      };
+      Service = {
+        Type = "oneshot";
+        ExecStart = "${barFlip}";
+        Restart = "on-failure";
+        RestartSec = 2;
+      };
+      Install.WantedBy = ["noctalia.service"];
+    };
+    systemd.user.timers.noctalia-bar-flip = {
+      Timer = {
+        OnCalendar = "Mon *-*-* 00:00:00";
+        Persistent = true;
+      };
+      Install.WantedBy = ["timers.target"];
     };
   }
