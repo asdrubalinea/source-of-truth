@@ -60,6 +60,9 @@ in {
   # back to the card's stock 330 W for gaming fps. Back to 297 on 2026-11-02:
   # the box hard-hung silently mid-Cyberpunk at 330 W with power1_average
   # swinging 63..418 W every 15 s; testing whether PSU transients are the cause.
+  # Tried 231 W (the card's minimum) on 2026-11-05: still powered off mid-
+  # Cyberpunk ~47 min in, at ~350-400 W system draw, so the load is not the
+  # cause (the RM750e is suspected). Back to 297.
   services.lact.settings = {
     version = 7;
     daemon = {
