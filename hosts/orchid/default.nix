@@ -24,6 +24,7 @@
       ./system/tapo-exporter.nix
       ./system/govee-exporter.nix
       ./system/fan-control.nix
+      ./system/hw-alerts.nix
       ./system/gaming.nix
       ./system/gaming-vm.nix
       ./system/session.nix
