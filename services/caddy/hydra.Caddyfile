@@ -11,5 +11,6 @@
 
 hydra.irene.foo {
   import default hydra.irene.foo
+  encode zstd gzip
   reverse_proxy 127.0.0.1:8222
 }
