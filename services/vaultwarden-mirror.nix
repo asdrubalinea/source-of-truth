@@ -29,23 +29,35 @@ let
 
   label = lib.toUpper (lib.substring 0 1 hostname) + lib.substring 1 (-1) hostname;
 
-  syncSnapshot = ''
-    if [ ! -f ${cfg.sshKeyPath} ]; then
-      printf >&2 'Missing Vaultwarden mirror key at %s\n' '${cfg.sshKeyPath}'
-      exit 1
-    fi
+  appliedSum = "/var/lib/vaultwarden-mirror/applied.sha256";
 
-    chmod 0600 ${cfg.sshKeyPath}
+  # Pulling and applying are split so the refresh only stops vaultwarden when
+  # there is something new to apply. It used to stop it for the whole pull,
+  # every 5 minutes, so with orchid unreachable vaultwarden was down for the
+  # ~20s ssh timeout each cycle, which cut off in-flight web vault loads
+  # (the 7 MB SDK .wasm: "Response body loading was aborted").
+  snapshotFns = ''
+    # Succeeds only when a usable snapshot is in ${localIncoming}.
+    pull_snapshot() {
+      if [ ! -f ${cfg.sshKeyPath} ]; then
+        printf >&2 'Missing Vaultwarden mirror key at %s\n' '${cfg.sshKeyPath}'
+        exit 1
+      fi
 
-    rm -rf ${localIncoming}
-    mkdir -p ${localIncoming}
+      chmod 0600 ${cfg.sshKeyPath}
 
-    if ${pkgs.rsync}/bin/rsync -a --delete \
-      --chown=vaultwarden:vaultwarden \
-      --chmod=D0700,F0600 \
-      -e "${pkgs.openssh}/bin/ssh -T -i ${cfg.sshKeyPath} -o BatchMode=yes -o IdentitiesOnly=yes -o StrictHostKeyChecking=accept-new -o UserKnownHostsFile=${sshKnownHosts} -o GlobalKnownHostsFile=/dev/null -o LogLevel=ERROR -o ConnectTimeout=10" \
-      ${primaryUser}@${primaryHost}:${remoteSnapshot} \
-      ${localIncoming}/; then
+      rm -rf ${localIncoming}
+      mkdir -p ${localIncoming}
+
+      if ! ${pkgs.rsync}/bin/rsync -a --delete \
+        --chown=vaultwarden:vaultwarden \
+        --chmod=D0700,F0600 \
+        -e "${pkgs.openssh}/bin/ssh -T -i ${cfg.sshKeyPath} -o BatchMode=yes -o IdentitiesOnly=yes -o StrictHostKeyChecking=accept-new -o UserKnownHostsFile=${sshKnownHosts} -o GlobalKnownHostsFile=/dev/null -o LogLevel=ERROR -o ConnectTimeout=10" \
+        ${primaryUser}@${primaryHost}:${remoteSnapshot} \
+        ${localIncoming}/; then
+        printf >&2 'Warning: could not reach %s, using existing local data\n' '${primaryHost}'
+        return 1
+      fi
 
       # A successful rsync of an *empty* snapshot (e.g. orchid mid-rotation, or
       # an uninitialised primary) would otherwise --delete the live store. The
@@ -53,21 +65,32 @@ let
       # absence as an empty/partial pull and keep the existing data instead.
       if [ ! -e ${localIncoming}/db.sqlite3 ]; then
         printf >&2 'Refusing to apply snapshot from %s: no db.sqlite3 (empty/partial pull); keeping existing data\n' '${primaryHost}'
-      else
-        mkdir -p ${localData}
-
-        ${pkgs.rsync}/bin/rsync -a --delete \
-          --chown=vaultwarden:vaultwarden \
-          --chmod=D0700,F0600 \
-          ${localIncoming}/ \
-          ${localData}/
-
-        ${pkgs.coreutils}/bin/chown -R vaultwarden:vaultwarden ${localData}
-        ${pkgs.coreutils}/bin/chmod -R u=rwX,go= ${localData}
+        return 1
       fi
-    else
-      printf >&2 'Warning: could not reach %s, using existing local data\n' '${primaryHost}'
-    fi
+    }
+
+    snapshot_sum() {
+      (cd ${localIncoming} && find . -type f -print0 | sort -z | xargs -0 sha256sum | sha256sum)
+    }
+
+    snapshot_is_new() {
+      [ "$(snapshot_sum)" != "$(cat ${appliedSum} 2>/dev/null)" ]
+    }
+
+    apply_snapshot() {
+      mkdir -p ${localData}
+
+      ${pkgs.rsync}/bin/rsync -a --delete \
+        --chown=vaultwarden:vaultwarden \
+        --chmod=D0700,F0600 \
+        ${localIncoming}/ \
+        ${localData}/
+
+      ${pkgs.coreutils}/bin/chown -R vaultwarden:vaultwarden ${localData}
+      ${pkgs.coreutils}/bin/chmod -R u=rwX,go= ${localData}
+
+      snapshot_sum > ${appliedSum}
+    }
   '';
 in {
   options.services.vaultwarden-mirror = {
@@ -118,7 +141,10 @@ in {
 
       script = ''
         set -uo pipefail
-        ${syncSnapshot}
+        ${snapshotFns}
+        if pull_snapshot; then
+          apply_snapshot
+        fi
       '';
     };
 
@@ -141,6 +167,11 @@ in {
 
       script = ''
         set -euo pipefail
+        ${snapshotFns}
+
+        if ! pull_snapshot || ! snapshot_is_new; then
+          exit 0
+        fi
 
         restart_vaultwarden=0
         if ${pkgs.systemd}/bin/systemctl --quiet is-active vaultwarden.service; then
@@ -156,7 +187,7 @@ in {
 
         trap cleanup EXIT
 
-        ${syncSnapshot}
+        apply_snapshot
 
         trap - EXIT
         cleanup
