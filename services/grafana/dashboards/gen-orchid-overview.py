@@ -132,6 +132,9 @@ ts("Where the Watts Go",[tgt(GPU_W,"GPU"),tgt(CPU_W,"CPU package"),tgt(f'clamp_m
 ts("Energy per Day",[tgt("avg_over_time(tapo_power_watts[$__interval]) * 24 / 1000","kWh")],16,8,unit="kwatth",min=0,bars=True,timeFrom="30d",interval="1d",
    desc="Last 30 days, from the mean wall power of each day × 24 h. Each bar sits at the end of the day it covers.")
 y+=8
+ts("Wall Voltage",[tgt("max(tapo_voltage_volts)","voltage")],0,24,h=6,unit="volt",fill=0,calcs=["min","mean","max"],
+   desc="Mains voltage at the plug; the supply is allowed 230 V ± 10 % (207-253 V). The plug averages over its 5 s poll, so a sag shorter than that won't show. A dip at the moment of a power-off points at the wall; a flat line points at the PSU.")
+y+=6
 
 # ── Stability ──
 row("Stability")
