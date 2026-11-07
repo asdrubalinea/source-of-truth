@@ -1,7 +1,7 @@
 {pkgs, ...}: let
   # The Tapo P110 at the wall. Give it a DHCP reservation on the router: the
   # sandbox below only lets the exporter reach this one address.
-  plug = "192.168.1.37";
+  plug = "192.168.1.36";
   credentials = "/persist/secrets/tapo/credentials";
   python = pkgs.python3.withPackages (ps: [ps.python-kasa]);
 in {
