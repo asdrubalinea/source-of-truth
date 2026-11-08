@@ -24,7 +24,7 @@
 
     # chrony's drift file (the oscillator's measured frequency error, so a boot
     # starts already trimmed instead of re-learning it over the first hour),
-    # the RTC trim file, and the NTS cookies (system/time.nix).
+    # the RTC trim file, and the NTS cookies (modules/chrony.nix).
     {
       directory = "/var/lib/chrony";
       user = "chrony";

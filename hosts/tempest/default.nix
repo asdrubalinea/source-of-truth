@@ -34,6 +34,7 @@
       ../../modules/nix.nix
       ../../modules/security.nix
       ../../modules/dns.nix
+      ../../modules/chrony.nix
       ../../modules/zfs-on-luks.nix
       ../../modules/impermanence-root.nix
 

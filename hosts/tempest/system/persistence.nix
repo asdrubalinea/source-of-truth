@@ -19,6 +19,16 @@
 
     # The read-only vault mirror's store (services/vaultwarden-mirror.nix).
     "/var/lib/vaultwarden"
+
+    # chrony's drift file (the oscillator's measured frequency error, so a boot
+    # starts already trimmed instead of re-learning it over the first hour),
+    # the RTC trim file, and the NTS cookies (modules/chrony.nix).
+    {
+      directory = "/var/lib/chrony";
+      user = "chrony";
+      group = "chrony";
+      mode = "0750";
+    }
   ];
 
   # programs.fuse.userAllowOther = true;

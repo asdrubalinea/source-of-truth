@@ -12,7 +12,6 @@
       # System configuration
       ./system/boot.nix
       ./system/localization.nix
-      ./system/time.nix
       ./system/networking.nix
       ./system/environment.nix
       ./system/services.nix
@@ -44,6 +43,7 @@
       ../../modules/nix.nix
       ../../modules/security.nix
       ../../modules/dns.nix
+      ../../modules/chrony.nix
       ../../modules/zfs-on-luks.nix
       ../../modules/impermanence-root.nix
       ../../modules/firejail.nix
@@ -91,6 +91,12 @@
       extraArgs = "--keep 5 --keep-since 7d";
     };
   };
+
+  # Hold chrony's polling at 64 s instead of backing off to 17 min, so
+  # frequency wander (this box swings between idle and full-load LLM runs) is
+  # tracked closely. 64 s is still within public servers' usage terms. tempest
+  # keeps the default backoff: it is on battery and its load is steadier.
+  time.chronyMaxpoll = 6;
 
   # Mutually exclusive with programs.nh.clean; modules/nix.nix defaults it on.
   nix.gc.automatic = false;
