@@ -60,6 +60,15 @@ in {
 
     networkmanager.enable = true;
 
+    # The home router (MOVISTAR-WIFI6-9030) advertises an IPv6 default route
+    # but no prefix, so v6 left with tailscale's fd7a:: source and was dropped:
+    # the same bug orchid fixes with dhcpcd `noipv6rs`. Here the fix is on that
+    # one saved profile, not global, so v6 still works on other networks:
+    #   nmcli con modify MOVISTAR-WIFI6-9030 ipv6.method link-local
+    # Not declarative: the profile holds the PSK and lives in the persisted
+    # system-connections. Set 2026-11-08; revert to `auto` if the ISP ever
+    # hands out a real v6 prefix.
+
     # Share the wifi uplink over ethernet: `nmcli con up condividi` and the
     # other end just needs plain DHCP (gets 10.42.0.x, NAT'd out via wifi).
     # No interface-name, so it fits whatever USB/dock NIC is plugged in.
