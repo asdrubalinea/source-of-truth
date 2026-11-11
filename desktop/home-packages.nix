@@ -74,6 +74,12 @@ in {
     # Warp lives in desktop/warp.nix (package + declarative settings.toml),
     # imported by homes/orchid.nix. Commented out on tempest.
 
+    # --- Coding-agent GUI ---
+    # T3 Code (https://t3.codes): Electron front-end over the agent CLIs in
+    # ./cli-packages.nix, which it finds on PATH. llm-agents over nixpkgs'
+    # t3code for the same reason as codex: it tracks upstream closer.
+    inputs.llm-agents.packages.${pkgs.stdenv.hostPlatform.system}.t3code-desktop
+
     # --- Desktop integration ---
     appimage-run # run AppImages via Nix
     blueman
