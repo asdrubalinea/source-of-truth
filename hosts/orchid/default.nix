@@ -19,6 +19,7 @@
       ./system/virtualization.nix
       ./system/memory.nix
       ./system/llm.nix
+      ./system/t3code.nix
       ./system/strata-exporter.nix
       ./system/tapo-exporter.nix
       ./system/govee-exporter.nix

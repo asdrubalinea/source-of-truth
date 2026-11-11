@@ -23,6 +23,7 @@ in {
     ../rices/ember
     ./orchid/monitors.nix # machine policy: monitor identity + mode (kanshi)
     ./orchid/lights.nix # machine policy: the desk strip sleeps with the monitors
+    ./orchid/t3code.nix # T3 Code server for tempest's desktop app
 
     ../desktop/zed-editor
     ../desktop/helix.nix
