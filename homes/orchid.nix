@@ -24,6 +24,7 @@ in {
     ./orchid/monitors.nix # machine policy: monitor identity + mode (kanshi)
     ./orchid/lights.nix # machine policy: the desk strip sleeps with the monitors
     ./orchid/t3code.nix # T3 Code server for tempest's desktop app
+    ./orchid/web-wallpaper.nix # mango only: a web page as the wallpaper
 
     ../desktop/zed-editor
     ../desktop/helix.nix
