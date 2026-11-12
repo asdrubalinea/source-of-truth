@@ -32,26 +32,6 @@
     };
   };
 
-  # tempest as a second builder while orchid is offline. Appends to
-  # modules/orchid-builder.nix's list and reuses its key (tempest authorizes
-  # `irene@orchid` too); the lower speedFactor keeps orchid first once it's back.
-  nix.buildMachines = [
-    {
-      hostName = "tempest";
-      sshUser = "irene";
-      sshKey = "/home/irene/.ssh/id_ed25519";
-      protocol = "ssh-ng";
-      system = "x86_64-linux";
-      maxJobs = 4;
-      speedFactor = 2;
-      supportedFeatures = ["nixos-test" "benchmark" "big-parallel" "kvm"];
-    }
-  ];
-  programs.ssh.knownHosts.tempest = {
-    hostNames = ["tempest" "tempest.boreal-city.ts.net"];
-    publicKey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIPB7r8eXk0jHDOYGC+Gm7Mu9W50H89VwuIJ4h/C8bP7L";
-  };
-
   # Mutually exclusive with programs.nh.clean; modules/nix.nix defaults it on.
   nix.gc.automatic = false;
 
