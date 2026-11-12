@@ -18,6 +18,18 @@ in {
   # `t3 pair`, `t3 auth session list`, `t3 doctor` against the same ~/.t3.
   home.packages = [t3code];
 
+  # The desktop app (desktop/home-packages.nix) would otherwise claim ~/.t3,
+  # which the server below holds, and refuse to start. With its own home it
+  # pairs with that server like tempest's app does, so both see one env.
+  xdg.desktopEntries.t3code = {
+    name = "T3 Code (Beta)";
+    comment = "Control surface for coding agents";
+    exec = "env T3CODE_HOME=${config.home.homeDirectory}/.t3-desktop t3code-desktop %U";
+    icon = "t3code";
+    categories = ["Development"];
+    settings.StartupWMClass = "com.t3tools.T3Code";
+  };
+
   systemd.user.services.t3code = {
     Unit.Description = "T3 Code server";
     Service = {
