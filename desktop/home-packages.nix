@@ -94,7 +94,6 @@ in {
     wl-clipboard
 
     # --- Browsers ---
-    brave
     (callPackage ../packages/brave-origin.nix {})
     firefox
     google-chrome
