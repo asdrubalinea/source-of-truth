@@ -163,7 +163,10 @@ in {
     mitos # helix fork, binary `ms`
     onefetch # repo summary (git)
     watchexec # entr, but with glob/ignore rules
-    yek # serialize a repo into LLM-ready text
+    # serialize a repo into LLM-ready text.
+    # shortcut: nixpkgs' cargoSetupHook now forces system libgit2 (1.9.x), but yek's
+    # libgit2-sys 0.16 only accepts 1.7.x, so build the vendored copy; drop once yek bumps git2.
+    (yek.overrideAttrs {preBuild = "export LIBGIT2_NO_VENDOR=0";})
     # httptoolkit
 
     # --- Languages & runtimes ---
@@ -186,9 +189,13 @@ in {
         pygobject3
         pymupdf # fitz — fast render + text/image extraction
         pymupdf4llm # PDF pages -> Markdown tuned for LLM/RAG
-        pdfplumber # detailed char/word/table extraction (bundles pdfminer.six)
+        # Tests skipped on these two: their check inputs alone (pandas,
+        # jupyterlab, every markitdown extra -> speechrecognition -> whisper ->
+        # torch) are a multi-GiB tree that is never installed, and any broken
+        # suite in it on unstable fails the whole HM generation.
+        (pdfplumber.overridePythonAttrs {doCheck = false;}) # detailed char/word/table extraction (bundles pdfminer.six)
         pypdf # pure-python split/merge/crop/transform
-        markitdown # convert docs (incl. PDF) -> Markdown for LLMs
+        (markitdown.overridePythonAttrs {doCheck = false;}) # convert docs (incl. PDF) -> Markdown for LLMs
       ]))
     uv # Python package manager
 

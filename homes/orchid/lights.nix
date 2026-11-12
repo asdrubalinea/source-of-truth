@@ -14,7 +14,13 @@
   pkgs,
   ...
 }: let
-  lights = pkgs.callPackage "${inputs.lights}/package.nix" {};
+  # nixpkgs' cargoSetupHook now exports AWS_LC_SYS_USE_SYSTEM=1, so aws-lc-sys
+  # needs the system aws-lc that upstream's bare package.nix doesn't provide.
+  # Mirrors nixpkgs' own default-crate-overrides entry for aws-lc-sys >= 0.42.
+  lights = (pkgs.callPackage "${inputs.lights}/package.nix" {}).overrideAttrs (old: {
+    nativeBuildInputs = old.nativeBuildInputs or [] ++ [pkgs.pkg-config];
+    buildInputs = old.buildInputs or [] ++ [pkgs.aws-lc];
+  });
 
   # Absolute store path, as every swayidle command here must be. The bound is
   # the part the compositor-local commands don't need: the strip is a wifi

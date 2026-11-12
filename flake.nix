@@ -236,25 +236,6 @@
         });
     };
 
-    # pandas-stubs' test suite is fatal-on-warning and pytest 9.1 warns on it,
-    # which kills the whole HM generation (it arrives as a check input of
-    # pdfplumber ← markitdown). Run those tests under pytest 9.0, as the pending
-    # upstream fix does. `doCheck = false` does not work — it starves
-    # pythonImportsCheck instead. Drop once nixpkgs#545267 lands.
-    pandasStubsOverlay = final: prev: {
-      pythonPackagesExtensions =
-        prev.pythonPackagesExtensions
-        ++ [
-          (pyfinal: pyprev: {
-            pandas-stubs = pyprev.pandas-stubs.overridePythonAttrs (old: {
-              nativeCheckInputs =
-                (prev.lib.remove pyfinal.pytestCheckHook old.nativeCheckInputs)
-                ++ [pyfinal.pytest9_0CheckHook];
-            });
-          })
-        ];
-    };
-
     # xwayland-satellite comes from niri-flake's `packages` output (what's in
     # niri.cachix.org), not the overlay's rebuild against our pkgs. Must be
     # ordered after niri.overlays.niri so these win.
@@ -282,7 +263,6 @@
     overlays = [
       multiChannelOverlay
       helixSteelOverlay
-      pandasStubsOverlay
       emacs-overlay.overlay
       niri.overlays.niri
       niriPrebuiltOverlay
