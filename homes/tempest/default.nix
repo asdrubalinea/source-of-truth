@@ -37,6 +37,7 @@ in {
     ../../desktop/obsidian.nix
     ../../desktop/hn-tui.nix
     ../../desktop/home-packages.nix
+    ../../desktop/t3code.nix # theme + settings for the app in home-packages
     ../../desktop/opencode.nix
     ../../desktop/ssh.nix
     ../../desktop/starship.nix
