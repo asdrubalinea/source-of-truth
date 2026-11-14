@@ -3,6 +3,7 @@
 # Noctalia's static one. niri is untouched — the unit hangs off mango-session.target.
 let
   webWallpaper = pkgs.callPackage ../../packages/web-wallpaper.nix {};
+  viceCountdown = pkgs.callPackage ../../packages/vice-countdown.nix {};
 in {
   systemd.user.services.web-wallpaper = {
     Unit = {
@@ -11,7 +12,7 @@ in {
       After = ["mango-session.target"];
     };
     Service = {
-      ExecStart = "${webWallpaper}/bin/web-wallpaper https://vicountdown.com/en-eur/pages/timezones";
+      ExecStart = "${webWallpaper}/bin/web-wallpaper file://${viceCountdown}/index.html";
       Restart = "always";
       RestartSec = 2;
     };
