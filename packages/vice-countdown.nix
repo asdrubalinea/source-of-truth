@@ -44,6 +44,12 @@ in
     # Root-absolute asset paths resolve to / under file://.
     postPatch = ''
       substituteInPlace src/countdown.gleam --replace-fail '"/gtavi.svg"' '"gtavi.svg"'
+      # WebKit repaints the drop-shadows every frame while any animation runs (steps() too),
+      # pinning the 9070 XT's VRAM clock: 41 W idle vs 21 W without. The drift is OLED
+      # burn-in care; orchid's panels are IPS.
+      substituteInPlace assets/style.css \
+        --replace-fail 'animation: drift 600s ease-in-out infinite alternate;' "" \
+        --replace-fail 'animation: tick .5s cubic-bezier(.2, .9, .25, 1);' ""
     '';
 
     buildPhase = ''
