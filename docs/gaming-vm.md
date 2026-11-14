@@ -16,7 +16,7 @@ edited in virt-manager is lost: change the nix file instead.
 | GPU | `03:00.0` + `03:00.1`, handed over from amdgpu on start and given back on stop |
 | Firmware | OVMF with Secure Boot available (no Microsoft keys enrolled), swtpm TPM 2.0 |
 | Network | libvirt `default` NAT (`virbr0`, 192.168.122.0/24) |
-| USB | the chipset USB controller `0d:00.0` (Keychron Q4, Logitech receiver, TP-Link Bluetooth): the guest's while it runs |
+| USB | the chipset USB controller `1022:43f7`, `0e:00.0` today (KBDFans Agar Mini, Logitech receiver, TP-Link Bluetooth): the guest's while it runs |
 
 ## How the GPU moves
 
@@ -180,15 +180,18 @@ virsh -c qemu+ssh://irene@orchid/system domifaddr win11 --source arp
 ssh -L 3389:192.168.122.X:3389 orchid      # then RDP to localhost
 ```
 
-**Keyboard, mouse, Bluetooth.** The Keychron Q4, the Logitech receiver and the
+**Keyboard, mouse, Bluetooth.** The KBDFans Agar Mini, the Logitech receiver and the
 TP-Link UB500 Bluetooth adapter all sit on the chipset's USB controller
-(`0d:00.0`), and the whole controller is passed through (`usbDevs` in the nix
-file). Windows' own USB driver then talks to them, at the mouse's native
+(`1022:43f7`), and the whole controller is passed through (`usbDevs` in the nix
+file). `win11-define` finds its address by that ID at every boot: a card added
+or removed behind the chipset renumbers its buses, and the hard-coded
+`0d:00.0` this used to carry ended up pointing at the Ethernet controller,
+which Windows then got instead of the keyboard and mouse. Windows' own USB driver then talks to them, at the mouse's native
 polling rate, and anything plugged into those ports while Windows runs is
 Windows' too. The catch: the ports are fixed, not the devices. A keyboard
 moved to a port on another controller stays with the host. `lsusb -t` and
 `readlink -f /sys/bus/usb/devices/usbN` show which controller a port is on
-(`usb1`/`usb2` are `0d:00.0`). **While Windows runs, the host has no keyboard,
+(`usb1`/`usb2` are `0e:00.0` today). **While Windows runs, the host has no keyboard,
 mouse or Bluetooth.** If the guest hangs, ssh in from tempest and `virsh
 destroy win11`.
 

@@ -111,14 +111,19 @@
     </hostdev>
   '';
 
-  # The chipset's USB controller (0d:00.0), whole, on every start. The
-  # keyboard (Keychron Q4), the mouse's receiver (Logitech) and the Bluetooth
-  # adapter (TP-Link UB500) are on it, and nothing the host needs is. A PCI
+  # The chipset's USB controller (1022:43f7, 0e:00.0 today), whole, on every
+  # start. The keyboard (KBDFans Agar Mini), the mouse's receiver (Logitech)
+  # and the Bluetooth adapter (TP-Link UB500) are on it, and nothing the host
+  # needs is. Its address is looked up by ID when the domain is defined (the
+  # define service below), not written here: the chipset's buses renumber
+  # when a card behind it comes or goes, and a stale 0d:00.0 once handed the
+  # guest the Ethernet controller instead, leaving Windows with no keyboard
+  # or mouse and the host with no network. A PCI
   # hostdev rather than one USB hostdev per device: Windows' own xHCI driver
   # then polls the mouse at its native rate with no QEMU emulation in the
   # path, and whatever is plugged into those ports while the VM runs is the
   # guest's too. The catch is the same in reverse: a device moved to another
-  # port (another controller) stays with the host. The IOMMU group (24) only
+  # port (another controller) stays with the host. The IOMMU group (25 today) only
   # adds the chipset downstream port in front of it (05:0c.0), a bridge that
   # stays with the host; the controller has no FLR and is reset through that
   # port's secondary bus. While Windows is up the host has no keyboard, mouse
@@ -126,7 +131,7 @@
   # win11`).
   usbDevs = ''
     <hostdev mode='subsystem' type='pci' managed='yes'>
-      <source><address domain='0x0000' bus='0x0d' slot='0x00' function='0x0'/></source>
+      <source>@USB_ADDRESS@</source>
     </hostdev>
   '';
 
@@ -532,7 +537,13 @@ in {
     };
     path = [config.virtualisation.libvirtd.package];
     script = ''
-      virsh define ${domain}
+      usb=
+      for d in /sys/bus/pci/devices/*; do
+        [ "$(<"$d/vendor"):$(<"$d/device")" = 0x1022:0x43f7 ] && usb=''${d##*/}
+      done
+      [ -n "$usb" ] || { echo "no chipset USB controller (1022:43f7) found" >&2; exit 1; }
+      IFS=':.' read -r pdom pbus pslot pfn <<<"$usb"
+      virsh define <(sed "s|@USB_ADDRESS@|<address domain='0x$pdom' bus='0x$pbus' slot='0x$pslot' function='0x$pfn'/>|" ${domain})
       # The NAT network the guest sits on; RDP reaches it over tailscale
       # inside Windows, or `ssh -L 3389:<guest ip>:3389 orchid`.
       virsh net-autostart default
