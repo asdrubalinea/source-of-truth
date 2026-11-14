@@ -1,13 +1,18 @@
 # orchid crashes and power-offs (Oct–Nov 2026)
 
-**Status 2026-11-12: unresolved.** The RAM corruption of early October is fixed
-(fan-control). The power-offs continue after the PSU swap: the new RM850x died
-once, at 05:34 on 11-12, under CPU-only load, then survived a 3 h CPU + GPU
-crash test the same day. So the old RM750e was very likely behind the frequent
-game deaths, and a rarer fault remains. Leading suspect for it is the
-**motherboard**, then the **power cord / wall socket** (both shared with the old
-PSU), then the GPU. The case power button is now wired, so the next power-off
-can finally tell a PSU cut from a board shutdown (see *Next crash*).
+**Status 2026-11-12 23:50: first readable crash.** At 23:49:38, ~7 min into
+Cyberpunk on the RM850x's own cord (case horizontal), it powered off; turned on
+with the case button, the CPU logged reset reason **`0x00200a00`: "internal CPU
+thermal limit was tripped"** (bit 9, THERMTRIP; normal off is `0x00200800`). So
+the CPU itself cut power: not a PSU cut, not the cord or socket. Sensors 15 s
+before were unremarkable (Tctl 86–87, CPU 60 W, GPU 180–500 W swings, junction
+92, RAM 61.5, board 50), with no climb. A real THERMTRIP needs ~115 °C, so
+either a hot spot Tctl doesn't show (weak cooler / poor mount), a faulty CPU
+sensor, or a BIOS/AGESA or power-delivery glitch the CPU reads as over-temp.
+Suspects now: **CPU + cooler mount**, BIOS, motherboard. Earlier history: RAM
+corruption of early October fixed (fan-control); RM750e was thought behind the
+frequent game deaths, now doubtful: the RM850x died after ~17 min of real
+Cyberpunk, about the same rate (the 3 h survival was memtest, a steadier load); earlier power-offs had no readable reason.
 
 ## Hardware
 
@@ -149,6 +154,9 @@ nights → motherboard (warranty claim first).
 
 Done so far: game-level load survived 3 h (11-12 morning). 11-12 ~15:00: switched
 to the RM850x's own power cord (same wall socket), and the case now lies horizontal.
+Since then, to 11-12 22:48: ~4.3 heavy hours (4 h stress-ng + ~16 min), GPU never
+above 145 W, 0 crashes (21:00 and 21:03 restarts were clean shutdowns).
+23:08–23:17: first Cyberpunk on the new cord, ~10 min, GPU peak 385 W, no crash.
 
 ## Investigating a crash
 
@@ -178,6 +186,8 @@ to the RM850x's own power cord (same wall socket), and the case now lies horizon
 | 11-12 03:20 | overnight battery `~/overnight/overnight.sh` | RAM stressapptest 2 h **PASS**; died 14 min into the all-core phase (05:34) |
 | 11-12 10:35 | `~/crashtest/crashtest.sh`: stress-ng 15 threads + memtest_vulkan on the 9070 XT, 3 h | **survived 3 h** (RM850x, same cord and socket): GPU avg 296 W (max 370), Tctl 89–90, RAM 58, board 51; stress-ng 15/15 passed; VRAM 225,000 rounds, 0 errors; no kernel errors |
 | 11-12 15:06 | stress-ng all 16 threads at idle priority while working, 4 h (RM850x's own cord, same socket, case horizontal) | **survived 4 h**: 16/16 passed, no kernel errors |
+| 11-13 22:44 | same all-core stress-ng, 25 min, after repasting + retightening the Pure Rock Slim 3 and turning its fan to blow toward the rear exhaust (it had been blowing at the RAM) | **passed**, no kernel errors. Tctl 88.3 at 79.9 W vs 90.2 at 73.1 W before (room 27.9 vs 28.4): ~0.76 vs 0.85 °C/W over room, ~11 % better. The repaste alone (6 min, old orientation) was noise: 90.3 at 76.0 W. Still pinned at the ~89 °C limit, so the cooler stays undersized |
+| 11-13 23:14 | same stress-ng, 8 min, after setting BIOS Platform Thermal Throttle Limit = 80 °C | **passed**. Tctl holds 81.2 (max 81.5) at 72.2 W, vs 88.3 at 79.9 W without the limit: ~10 % less power for 7 °C less. Case fans 1660 vs 1980 rpm (fan-control's CPU line eases off below 88) |
 
 Horizontal vs vertical, same all-core load and fan speeds (avg of 11-12
 15:16–19:05 vs 11-11 23:59–00:21, room 28.3 vs 28.1): RAM 43.6 vs 50.6, SSD 40.7
@@ -238,3 +248,17 @@ not speed. After a swap, `fan-control.py`'s header mapping needs updating.
 
 - PSU shortlist page from 11-05: https://claude.ai/artifact/WijCN5f7GitSNujT6otXiM
 - Strata LLM trial (the phase 1 workload): `docs/strata-trial.md`, `/persist/strata/JOURNAL.md`
+
+## Case + cooler upgrade shortlist (Black Friday 2026, PcComponentes, prices 11-13)
+
+Constraints: ATX board, 44 mm RAM, 288 mm GPU, 160 mm PSU, six Arctic P12 Pro PST to reuse
+(front 3 / top 2 / rear 1), compact (≤ ~45 L), calima dust.
+
+| Combo | Case | Cooler | Price now | BF target |
+|---|---|---|---|---|
+| Best overall | Fractal Meshify 2 Compact Black Solid (39 L, 169 mm, filters front/top/bottom) | Noctua NH-U12A (158 mm, no RAM overhang) | 132 + 123 € | ≤ 115 + ≤ 105 € |
+| Best looking | Fractal North TG (glass side; mesh side + bracket limits cooler to 145 mm; top unfiltered) | be quiet! Dark Rock 5 (161 mm) | 136 + 69 € | ≤ 125 + ≤ 60 € |
+| Value | Fractal Pop 2 Air Black TG (44 L, 170 mm) | Arctic Freezer 36 (159 mm, RAM clearance tight) | 91 + 25–29 € | ≤ 80 + ≤ 25 € |
+
+Thermalright, Jonsbo, Lian Li are marketplace-only at PcComponentes (overpriced, may not ship
+to Canarias). AIO gains only ~2–5 °C on a 7800X3D; top air preferred.
