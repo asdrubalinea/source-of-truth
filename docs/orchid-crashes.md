@@ -262,3 +262,10 @@ Constraints: ATX board, 44 mm RAM, 288 mm GPU, 160 mm PSU, six Arctic P12 Pro PS
 
 Thermalright, Jonsbo, Lian Li are marketplace-only at PcComponentes (overpriced, may not ship
 to Canarias). AIO gains only ~2–5 °C on a 7800X3D; top air preferred.
+
+**Picked 11-14, for Zen 6 headroom** (both sold by PcComponentes, read 11-14):
+- Fractal North TG Charcoal Black, refurbished "como nuevo", 119 €, 3-year warranty:
+  https://www.pccomponentes.com/torre-pc-fractal-design-north-tg-atx-mid-tower-cristal-templado-usb-3-2-charcoal-black?refurbished=like-new
+- Arctic Liquid Freezer III Pro 360 (black, VRM fan), 84.99 €, 6-year warranty, AM5, radiator 38 mm
+  (front mount → GPU limit 355 − 38 = 317 mm ≥ 288): https://www.pccomponentes.com/refrigeracion-liquida-arctic-liquid-freezer-iii-pro-360mm-3-ventiladores-vrm-integrado
+- Big air ruled out: NH-D15 G2 needs its front fan raised for 44 mm RAM → ~180 mm > the North's 170 mm.
