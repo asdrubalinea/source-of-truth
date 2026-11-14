@@ -14,13 +14,7 @@
   pkgs,
   ...
 }: let
-  # nixpkgs' cargoSetupHook now exports AWS_LC_SYS_USE_SYSTEM=1, so aws-lc-sys
-  # needs the system aws-lc that upstream's bare package.nix doesn't provide.
-  # Mirrors nixpkgs' own default-crate-overrides entry for aws-lc-sys >= 0.42.
-  lights = (pkgs.callPackage "${inputs.lights}/package.nix" {}).overrideAttrs (old: {
-    nativeBuildInputs = old.nativeBuildInputs or [] ++ [pkgs.pkg-config];
-    buildInputs = old.buildInputs or [] ++ [pkgs.aws-lc];
-  });
+  lights = pkgs.callPackage "${inputs.lights}/package.nix" {};
 
   # Absolute store path, as every swayidle command here must be. The bound is
   # the part the compositor-local commands don't need: the strip is a wifi
@@ -33,14 +27,27 @@
 in {
   home.packages = [lights];
 
+  # The strip's default look: `vice static`, the Vice City sunset held as one
+  # frame. Not the animated `vice`: the strip flashes on every frame it is sent.
+  systemd.user.services.lights-vice-static = {
+    Unit = {
+      Description = "Vice City sunset on the desk light strip";
+      After = ["graphical-session.target"];
+    };
+    Service = {
+      Type = "oneshot";
+      ExecStart = "-${pkgs.coreutils}/bin/timeout 15 ${lights}/bin/vice static"; # `-`: a strip off at the wall is not a failed login
+    };
+    Install.WantedBy = ["graphical-session.target"];
+  };
+
   # The same 120s as the rice's panels-off timer, so the desk goes dark with the
-  # screens and comes back with them — as the lesbian flag, not `lights`' plain
-  # base effect. Takes `<binary> <arg>` because the package ships both.
+  # screens and comes back with them, back on the Vice City sunset.
   services.swayidle.timeouts = [
     {
       timeout = 120;
       command = lights-cmd 15 "lights off";
-      resumeCommand = lights-cmd 15 "flag lesbian";
+      resumeCommand = lights-cmd 15 "vice static";
     }
   ];
 
