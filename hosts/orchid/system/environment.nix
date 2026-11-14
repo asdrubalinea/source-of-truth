@@ -22,7 +22,14 @@
       mkdir -p $out/share
       cp -r ${signal-desktop}/share/polkit-1 $out/share/
     '')
+    # iPhone sideloading over USB: pair, sign (zsign) and install IPAs.
+    libimobiledevice
+    ideviceinstaller
+    zsign
   ];
+
+  # usbmuxd is the daemon libimobiledevice talks to the iPhone through.
+  services.usbmuxd.enable = true;
 
   security.polkit.enable = true;
 
