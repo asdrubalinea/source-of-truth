@@ -1109,11 +1109,11 @@
     "lights": {
       "flake": false,
       "locked": {
-        "lastModified": 1794611042,
-        "narHash": "sha256-j5dRy4dBB9KJtjLwQ5M8VIQStdXINrm+rGTAbXYtKSw=",
+        "lastModified": 1794859945,
+        "narHash": "sha256-8QDGcxd1fhwzAFH6mXQqQoY6KPHIM+eRQlTlmkYrA04=",
         "owner": "asdrubalinea",
         "repo": "lights",
-        "rev": "82e528570c32eccb0f7ce41c0faedab3e4b41ceb",
+        "rev": "19d4b4565f891f4073fc457c5613e0ad17d40661",
         "type": "github"
       },
       "original": {
