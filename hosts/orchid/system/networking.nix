@@ -10,6 +10,7 @@
     "sole24ore"
     "tak"
     "teams"
+    "bofrost"
   ];
 
   devWorkspaces = [
