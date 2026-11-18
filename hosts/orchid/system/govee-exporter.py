@@ -148,8 +148,15 @@ async def run(a):
     async with BleakScanner(seen, scanning_mode="passive", bluez=BlueZScannerArgs(or_patterns=[pattern])):
         print("listening for Govee advertisements (passive)", file=sys.stderr, flush=True)
         deadline = time.monotonic() + a.once if a.once else None
+        started = time.time()
         while True:
             await asyncio.sleep(a.interval)
+            # A passive monitor can go deaf without any error (adapter reset, bluetoothd
+            # losing it); exiting lets systemd restart us and register a fresh one.
+            last = max([d["seen"] for d in devices.values()], default=started)
+            if not a.once and time.time() - last > a.deaf:
+                print(f"nothing heard for {a.deaf:.0f} s, exiting to re-register the monitor", file=sys.stderr, flush=True)
+                return 1
             try:
                 write_atomic(path, render(devices, a.stale))
             except OSError as e:
@@ -164,6 +171,7 @@ def main():
     ap.add_argument("--dir", default="/var/lib/node-exporter-textfile")
     ap.add_argument("--interval", type=float, default=10.0, help="seconds between rewrites of govee.prom")
     ap.add_argument("--stale", type=float, default=600.0, help="drop a device's readings after this many silent seconds")
+    ap.add_argument("--deaf", type=float, default=300.0, help="exit (for systemd to restart) after this many seconds without hearing any device")
     ap.add_argument("--once", type=float, metavar="SECONDS", help="listen this long, print the file to stdout and exit (for testing)")
     return asyncio.run(run(ap.parse_args()))
 

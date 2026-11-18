@@ -13,15 +13,21 @@ in {
   # Every H5075 in range is published, labelled by MAC and advertised name, so a
   # second thermometer needs no change here. While the Govee phone app holds a
   # connection the H5075 stops advertising, and the readings go stale until the
-  # app lets go.
+  # app lets go. Whatever the cause, five silent minutes make the exporter exit
+  # and Restart=always bring it back with a fresh monitor.
   systemd.services.govee-exporter = {
     description = "Publish Govee H5075 readings for the node-exporter textfile collector";
-    wantedBy = ["multi-user.target"];
-    after = ["bluetooth.service"];
+    # Started by the adapter's own device unit too, so it comes back with it.
+    wantedBy = ["multi-user.target" "sys-subsystem-bluetooth-devices-hci0.device"];
+    after = ["bluetooth.service" "sys-subsystem-bluetooth-devices-hci0.device"];
     requires = ["bluetooth.service"];
     # A bluetoothd restart drops the advertisement monitor without telling the
     # client, which would leave the exporter listening to nothing.
     partOf = ["bluetooth.service"];
+    # So does the adapter leaving: the USB dongle drops off the bus while win11
+    # holds the controller, and on 2026-11-14 the exporter came back from that
+    # deaf, hearing only what other programs' active scans happened to turn up.
+    bindsTo = ["sys-subsystem-bluetooth-devices-hci0.device"];
     serviceConfig = {
       ExecStart = "${python}/bin/python3 ${./govee-exporter.py} --dir /var/lib/node-exporter-textfile";
       Restart = "always";
