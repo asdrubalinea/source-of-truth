@@ -236,7 +236,8 @@ in {
 
       # Chrome. The rule is the bar's (CONTEXT.md): nothing on screen by
       # default, everything summonable. ctrl-b and ctrl-j below are the summons
-      # for the docks, so the docks do not need buttons advertising them.
+      # for the docks. The one exception is the files and git dock buttons in
+      # the status bar, kept for mouse use.
       tab_bar = {
         show = true;
         show_nav_history_buttons = false;
@@ -246,9 +247,10 @@ in {
         file_icons = false;
         git_status = false;
       };
-      # The tab bar carries which-file-am-I-in, so the status strip has no job
-      # left. Off entirely rather than pruned button by button.
-      status_bar."experimental.show" = false;
+      # On for the files/git dock buttons. Explicitly true, not just deleted:
+      # settings.json is deep-merged, so a removed key would leave the old
+      # `false` on disk.
+      status_bar."experimental.show" = true;
       toolbar = {
         breadcrumbs = false;
         quick_actions = false;
@@ -283,7 +285,7 @@ in {
         dock = "left";
         indent_size = 20;
         auto_fold_dirs = true;
-        button = false;
+        button = true;
         git_status = true;
       };
       outline_panel = {
@@ -295,14 +297,13 @@ in {
         button = false;
       };
       notification_panel.button = false;
-      # Right, not left. `button` means "button in the status bar" for every
-      # panel, and the status bar is off — so two panels sharing the left dock
-      # have no switcher at all and the second one is simply unreachable. One
-      # tenant per dock: files left (ctrl-b), git right (ctrl-shift-g). The right
-      # dock is free because `disable_ai` retired the agent that used it.
+      # Right, not left: one tenant per dock, so each keeps a plain dock toggle —
+      # files left (ctrl-b), git right (ctrl-shift-g). The right dock is free
+      # because `disable_ai` retired the agent that used it. `button` means
+      # "button in the status bar".
       git_panel = {
         dock = "right";
-        button = false;
+        button = true;
       };
       terminal = {
         copy_on_select = true;
