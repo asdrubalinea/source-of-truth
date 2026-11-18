@@ -34,7 +34,8 @@ start is refused, the session shows why and returns to the greeter on Enter.
 `--remember-session` then offers Windows 11 first next time, so pick mango or
 niri again for the desktop.
 
-The session is `win11-session` (`gaming-vm.nix`). It starts the domain,
+The session is `win11-session` (`passthrough-vm.nix`, shared with the
+[BSD VMs](bsd-vms.md)). It starts the domain,
 retrying a few times in case the compositor you just left still has the card
 open, then waits until the domain is shut off. Over ssh from tempest,
 `virsh -c qemu+ssh://irene@orchid/system start win11` works the same way, as
@@ -44,9 +45,13 @@ The card is shared with the host, not reserved at boot. While the VM is off,
 amdgpu drives it and llama-cpp and LACT work as usual. On `virsh start win11`:
 
 1. The libvirt hook (`/var/lib/libvirt/hooks/qemu.d/win11-gpu`) stops
-   `llama-cpp` and `lactd`. It then refuses the start if any other process
-   still has the card's DRM nodes open, because unbinding amdgpu under a live
-   client can hang the kernel. Then it pins every host slice to CPUs 0 and
+   `llama-cpp` and `lactd`. It refuses the start if another guest (a
+   BSD VM) already has the card, or if any other process
+   still has the card's DRM nodes or its HDMI audio's ALSA nodes open, because
+   unbinding amdgpu under a live client can hang the kernel, and unbinding
+   snd_hda_intel waits forever for the last one to close. (The greeter entry
+   stops wireplumber, which always holds the audio, before it starts the VM,
+   and starts it again when the VM stops.) Then it pins every host slice to CPUs 0 and
    8, and trades the host's power saving for the guest's latency: every
    core's EPP to `performance`, PCIe ASPM off. The previous values are saved
    in `/run/win11-host-tuning` and put back when the guest stops.
@@ -227,7 +232,9 @@ default, a managed save, is impossible with a VFIO device).
   from `/sys/class/dmi/id`). If the board is ever replaced, update those values.
 - **Start refused, "is still open":** the hook found a process holding the card.
   It prints that process, so stop it and retry. If it is niri or mango, the
-  desktop is running on the card: log out to the greeter first.
+  desktop is running on the card: log out to the greeter first. If it is
+  wireplumber (a `virsh start` by hand, not from the greeter), run
+  `systemctl --user stop wireplumber` first and `start` it after the VM stops.
 - **Card gone from the host after the VM stops** (`lspci -k -s 03:00.0` shows no
   driver, or amdgpu errors in `dmesg`): RDNA reset trouble. A host reboot gets
   it back. If it keeps happening, switch to dedicating the card: add

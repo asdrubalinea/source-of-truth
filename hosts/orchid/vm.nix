@@ -126,6 +126,8 @@
   services.smartd.enable = lib.mkForce false; # monitors /dev/nvme0n1, absent here
   hardware.cpu.amd.ryzen-smu.enable = lib.mkForce false; # no Raphael SMU in QEMU; modprobe fails
   systemd.services.win11-define.enable = lib.mkForce false; # no 9070 XT to pass; also keeps the virtio-win ISO out of the closure
+  systemd.services.openbsd-define.enable = lib.mkForce false; # same: no 9070 XT to pass
+  systemd.services.freebsd-define.enable = lib.mkForce false;
 
   # Everything below needs a credential that only exists on the real host:
   #   borg      → /home/irene/.ssh/id_ed25519 + /persist/borg-*/passphrase
