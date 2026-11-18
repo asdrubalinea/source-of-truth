@@ -1,6 +1,10 @@
-# T3 Code's look and settings, for every T3 home on this machine: ~/.t3 (the
-# desktop app's own on tempest, the lingering server on orchid) and
-# ~/.t3-desktop (orchid's app, homes/orchid/t3code.nix).
+# T3 Code (https://t3.codes): the desktop app, its themes, settings and keys.
+# The app is an Electron front-end over the agent CLIs in ./cli-packages.nix,
+# which it finds on PATH. Orchid adds a server on top: homes/orchid/t3code.nix.
+#
+# Everything below the package applies to every T3 home on this machine: ~/.t3
+# (the desktop app's own on tempest, the lingering server on orchid) and
+# ~/.t3-desktop (orchid's app).
 #
 # T3 rewrites these files from its own UI and refuses a symlinked theme, so
 # nothing links into the store: activation copies the theme and merges the
@@ -13,6 +17,7 @@
 # the drawer's ground, cursor, selection and font, set below.
 {
   config,
+  inputs,
   lib,
   pkgs,
   ...
@@ -20,27 +25,52 @@
   c = config.lib.stylix.colors.withHashtag;
   fonts = config.stylix.fonts;
 
-  # Not "ember": that id is a reserved T3 built-in, and the loader skips it.
-  themeId = "ember-pink";
-  theme = builtins.toJSON {
-    version = 1;
-    name = "Ember Pink";
-    appearance = "dark";
-    # T3 derives every surface, the terminal's included, from these two and
-    # tints them toward the accent. Not the rice's pure-black base00: the plum
-    # ground is T3 Chat's dark canvas, and the accent is the rice's magenta.
-    canvas = "#1f1a24";
-    accent = c.base0E;
-    colors = {
-      # Near-white rather than the rice's cream, for contrast on the plum.
-      text = "#f9f8fb";
-      textMuted = "#e7d0dd";
-      error = c.base08;
-      warning = c.base0A;
-      terminalForeground = "#f9f8fb";
-      terminalCursor = c.base0E;
+  # One <id>.json per entry in T3's theme picker. T3 derives every surface it
+  # is not given, the terminal's included, from `canvas`, tinted toward
+  # `accent`. No id may be "ember": that is a reserved T3 built-in, and the
+  # loader skips it.
+  themes = {
+    # Not the rice's pure-black base00: the plum ground is T3 Chat's dark
+    # canvas, and the accent is the rice's magenta.
+    ember-pink = {
+      name = "Ember Pink";
+      canvas = "#1f1a24";
+      accent = c.base0E;
+      colors = {
+        # Near-white rather than the rice's cream, for contrast on the plum.
+        text = "#f9f8fb";
+        textMuted = "#e7d0dd";
+        error = c.base08;
+        warning = c.base0A;
+        terminalForeground = "#f9f8fb";
+        terminalCursor = c.base0E;
+      };
+    };
+    # The rice as it is everywhere else: black ground, cream text, the orange
+    # ember as accent. The one to pick on an OLED.
+    ember-3400k = {
+      name = "Ember 3400K";
+      canvas = c.base00;
+      accent = c.base09;
+      colors = {
+        text = c.base05;
+        textMuted = c.base04;
+        error = c.base08;
+        warning = c.base0A;
+        terminalBackground = c.base00;
+        terminalForeground = c.base05;
+        terminalCursor = c.base05;
+        terminalSelection = c.base03;
+      };
     };
   };
+  defaultTheme = "ember-pink";
+  themeJSON = id:
+    builtins.toJSON ({
+        version = 1;
+        appearance = "dark";
+      }
+      // themes.${id});
 
   server = {
     managed = {
@@ -48,8 +78,8 @@
       # theme. They reapply it only when the stamp changes, so the stamp is the
       # theme's hash: a palette change is pushed again, and otherwise a theme
       # picked by hand is left alone.
-      defaultTheme = themeId;
-      defaultThemeSetAt = builtins.hashString "sha256" theme;
+      inherit defaultTheme;
+      defaultThemeSetAt = builtins.hashString "sha256" (themeJSON defaultTheme);
     };
     defaults = {
       defaultModelSelection = {
@@ -126,8 +156,16 @@
     }
   ];
 
+  installThemes = lib.concatMapStrings (id: ''
+    run install -Dm644 ${pkgs.writeText "${id}.json" (themeJSON id)} "$ud/themes/${id}.json"
+  '') (lib.attrNames themes);
+
   arg = v: lib.escapeShellArg (builtins.toJSON v);
 in {
+  # llm-agents over nixpkgs' t3code for the same reason as codex: it tracks
+  # upstream closer.
+  home.packages = [inputs.llm-agents.packages.${pkgs.stdenv.hostPlatform.system}.t3code-desktop];
+
   # stylix's base16 fish script also sets the terminal ground (OSC 11) to the
   # rice's black, which would repaint T3's terminal over the theme. Every
   # terminal stylix themes already sets its own ground, so nothing loses it.
@@ -158,7 +196,7 @@ in {
     for t3home in "$HOME/.t3" "$HOME/.t3-desktop"; do
       ud=$t3home/userdata
       [ -d "$ud" ] || continue
-      run install -Dm644 ${pkgs.writeText "${themeId}.json" theme} "$ud/themes/${themeId}.json"
+      ${installThemes}
       run t3edit "$ud/settings.json" "$merge" ${arg server.defaults} ${arg server.managed}
       # Only where a desktop app already keeps its client settings, which
       # leaves orchid's server-only ~/.t3 without one.

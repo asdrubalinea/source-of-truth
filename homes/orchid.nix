@@ -60,7 +60,7 @@ in {
     ../desktop/zellij.nix
 
     ../desktop/home-packages.nix
-    ../desktop/t3code.nix # theme + settings for the app in home-packages
+    ../desktop/t3code.nix # the desktop app, themed from the rice
     ../desktop/opencode.nix
     ../desktop/ssh.nix
     ../desktop/starship.nix

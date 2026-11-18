@@ -1,4 +1,4 @@
-# T3 Code's server, so tempest's desktop app (desktop/home-packages.nix) can
+# T3 Code's server, so tempest's desktop app (desktop/t3code.nix) can
 # drive agents that run here. The firewall rule and linger that make it
 # reachable and start it at boot are in hosts/orchid/system/t3code.nix.
 #
@@ -18,7 +18,7 @@ in {
   # `t3 pair`, `t3 auth session list`, `t3 doctor` against the same ~/.t3.
   home.packages = [t3code];
 
-  # The desktop app (desktop/home-packages.nix) would otherwise claim ~/.t3,
+  # The desktop app (desktop/t3code.nix) would otherwise claim ~/.t3,
   # which the server below holds, and refuse to start. With its own home it
   # pairs with that server like tempest's app does, so both see one env.
   xdg.desktopEntries.t3code = {
