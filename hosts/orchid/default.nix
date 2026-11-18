@@ -28,6 +28,7 @@
       ./system/gaming.nix
       ./system/gaming-vm.nix
       ./system/bsd-vms.nix
+      ./system/win7-vm.nix
       ./system/session.nix
 
       # User accounts
