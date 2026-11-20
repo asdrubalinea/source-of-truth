@@ -11,6 +11,7 @@
     "tak"
     "teams"
     "bofrost"
+    "sales-league-cchbc"
   ];
 
   devWorkspaces = [
