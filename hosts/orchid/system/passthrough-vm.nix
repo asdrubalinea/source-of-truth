@@ -12,7 +12,7 @@
 }: rec {
   # The 9070 XT and its HDMI audio. Each is alone in its IOMMU group (14 and
   # 15), behind the card's own PCIe switch, so nothing else has to follow it
-  # into the guest. The card is also the boot VGA (the iGPU is 10:00.0, with
+  # into the guest. The card is also the boot VGA (the iGPU is 11:00.0, with
   # nothing plugged in), so the console and greeter run on it too: while the
   # guest has it, the host has no screen.
   gpu = "0000:03:00.0";
