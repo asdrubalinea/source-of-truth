@@ -154,4 +154,5 @@ in
     home.file."Pictures/Wallpapers/boeing-747.jpg".source = ./boeing-747.jpg;
     home.file."Pictures/Wallpapers/wallhaven_yqmelx.jpg".source = ./wallhaven_yqmelx.jpg;
     home.file."Pictures/Wallpapers/vintage-car-gta-6-3840x2160-26771.jpg".source = ./vintage-car-gta-6-3840x2160-26771.jpg;
+    home.file."Pictures/Wallpapers/Jason_Lucia_Lock_And_Load_landscape.jpg".source = ./Jason_Lucia_Lock_And_Load_landscape.jpg;
   }

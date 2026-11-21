@@ -24,7 +24,6 @@ in {
     ./orchid/monitors.nix # machine policy: monitor identity + mode (kanshi)
     ./orchid/lights.nix # machine policy: the desk strip sleeps with the monitors
     ./orchid/t3code.nix # T3 Code server for tempest's desktop app
-    ./orchid/web-wallpaper.nix # mango only: a web page as the wallpaper
 
     ../desktop/zed-editor
     ../desktop/helix.nix
@@ -86,6 +85,12 @@ in {
   # Machine policy: a readable terminal size on THIS machine's panels — stylix's
   # default 12 is too small here. Same seam as homes/tempest/default.nix (16).
   stylix.fonts.sizes.terminal = 14;
+
+  # Machine policy: orchid's wallpaper, under both compositors. mkOverride 40
+  # because the rice pins its OLED ground with mkForce (50). It is bright (mean
+  # gray 0.52), so it sits outside the oled/ rotation pool.
+  programs.noctalia.settings.wallpaper.default.path =
+    lib.mkOverride 40 "~/Pictures/Wallpapers/Jason_Lucia_Lock_And_Load_landscape.jpg";
 
   # Machine policy: where this machine is. Stated twice — Noctalia geocodes a
   # place name (rices/ember/noctalia.nix keeps it from geolocating by IP), and
