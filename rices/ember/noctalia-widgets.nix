@@ -76,8 +76,15 @@ in
         # separates the strip from the window now that no margin does.
         border_width = 1.0;
 
-        # 14 → 8: the old figure was sized for a card with margin around it.
-        padding = 8;
+        # 14 → 8 for the flush bar, then 12 with the spacing below: the
+        # readouts are bare text now, and bare text needs air to read as
+        # separate instruments rather than one run-on line.
+        padding = 12;
+        widget_spacing = 10;
+
+        # Two-tone readouts: glyphs in tan, values in cream. The glyph says
+        # which instrument, the number is what you came to read.
+        icon_color = "on_surface_variant";
 
         shadow = false;
         thickness = 32;
@@ -86,9 +93,32 @@ in
         # [widget.<name>] table uses the name as its type, so these resolve to
         # stock widgets at their defaults. The three pills in `start` override
         # the sysmon instances below. The system tray is intentionally omitted.
-        start = ["workspaces" "cpu" "ram" "temp"];
+        start = ["workspaces" "gap" "cpu" "ram" "temp"];
         center = ["clock"];
         end = ["notifications" "battery" "volume" "brightness" "control-center"];
+      };
+
+      # Bare letters, no pills: ten filled capsules were the loudest thing on
+      # the display and the only round shape left on a square desktop. In
+      # `minimal` the three colours below are the label colours. Focused is the
+      # ember (base09), the same orange as the focused window border, so "where
+      # am I" is one colour everywhere; stylix maps noctalia's primary to blue,
+      # hence the hex. Empty is drawn at 55% alpha by noctalia, so it needs a
+      # role bright enough to survive that — `outline` goes illegible.
+      widget.workspaces = {
+        style = "minimal";
+        focused_color = config.lib.stylix.colors.withHashtag.base09;
+        occupied_color = "on_surface";
+        empty_color = "on_surface_variant";
+        # Hover would recolour the letter to the theme's cyan `hover` role;
+        # the translucent hover overlay is cue enough.
+        change_color_on_hover = false;
+      };
+
+      # Sets the workspace row apart from the readouts.
+      widget.gap = {
+        type = "spacer";
+        length = 8;
       };
 
       # The three readouts that map to a built-in: v4 SystemMonitor → v5
